@@ -1,0 +1,652 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Payroll_ExpenseCategory)";
+</script>
+
+
+<script src="~/jslib/hr/transaction/ExpenseCategory.js"></script>
+<div ng-app="myApp" ng-controller="ExpenseCategoryController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header navheader p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link bluenav active" id="payheadgroup-tab" data-toggle="pill" href="#expenseGroup" role="tab" aria-controls="expenseGroup" aria-selected="true"> Expense Group</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheadcategory-tab" data-toggle="pill" href="#expenseCategory" role="tab" aria-controls="expenseCategory" aria-selected="false">Expense Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheading-tab" data-toggle="pill" href="#allowcategory" role="tab" aria-controls="allowcategory" aria-selected="false">Allow Expense Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheading-tab" data-toggle="pill" href="#ratesetup" role="tab" aria-controls="ratesetup" aria-selected="false">Expense Rate Setup</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="expenseGroup" role="tabpanel" aria-labelledby="expenseGroup-tab">
+                                <div id="EGSection" class=" py-2 mb-0">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ExpenseGroup">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ExpenseGroup">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.ExpenseGroup">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file ml-2">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#ExpenseGroup'" sheet-name="'ExpenseGroupList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#ExpenseGroup').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+
+                                                <a print-tbl table-id="'#ExpenseGroup'" href="#" class="btn btn-secondary btn-light btn-sm">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-add btn-success"
+                                                        id="add-EG"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add ExpenseGroup
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y mt-1 table-scroll">
+                                            <table id="ExpenseGroup"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">S.No.</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 150px">No Of Category</th>
+                                                        <th style="width: 250px">Description</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in ExpenseGroupList | filter:searchData.ExpenseGroup | itemsPerPage: perPage.ExpenseGroup" current-page="currentPages.ExpenseGroup" pagination-id="ExpenseGroupPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.NoOfCategory}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetExpenseGroupById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelExpenseGroup(cl,$index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="ExpenseGroupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+                                <div id="EGForm" class=" p-0">
+                                    <div class="row card-body p-2">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Name</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newExpenseGroup.Name" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">S.No.</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm" ng-model="newExpenseGroup.SNO" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">No. Of Category</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm" ng-model="newExpenseGroup.NoOfCategory" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newExpenseGroup.Description"
+                                                          rows="1"
+                                                          placeholder=""></textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info btn-add"
+                                                    id="EGback-btn"
+                                                    style="min-width: 90px" ng-click="ClearExpenseGroup()">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearExpenseGroup()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateExpenseGroup()">{{newExpenseGroup.Mode}}</button>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade" id="expenseCategory" role="tabpanel" aria-labelledby="expenseCategory-tab">
+                                <div id="ECSection" class=" py-2 mb-0">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ExpenseCategory">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ExpenseCategory">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.ExpenseCategory">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file ml-2">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#ExpenseCategory'" sheet-name="'ExpenseCategoryList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#ExpenseCategory').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <a print-tbl table-id="'#ExpenseCategory'" href="#" class="btn btn-secondary btn-light btn-sm">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success btn-add"
+                                                        id="add-expensecategory"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add ExpenseCategory
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll mt-1">
+                                            <table id="ExpenseCategory"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">S.No.</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 150px">ExpensesGroup</th>
+                                                        <th style="width: 250px">Description</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in ExpenseCategoryList | filter:searchData.ExpenseCategory | itemsPerPage: perPage.ExpenseCategory" current-page="currentPages.ExpenseCategory" pagination-id="ExpenseCategoryPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.GroupName}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetExpenseCategoryById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelExpenseCategory(cl,$index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="ExpenseCategoryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+                                <div id="ECForm" class="mb-0">
+                                    <div class="row card-body p-2">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Name</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newExpenseCategory.Name" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">S.No.</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm" ng-model="newExpenseCategory.SNO" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">GroupName</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newExpenseCategory.GroupNameId">
+                                                    <option ng-repeat="G in ExpGroupList" ng-value="G.TranId" ng-selected="G.TranId==newExpenseCategory.GroupNameId">{{G.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="custom-control custom-checkbox mt-4">
+                                                <input class="custom-control-input" type="checkbox" id="customCheckbox21" value="option21" ng-model="newExpenseCategory.CanEdit">
+                                                <label for="customCheckbox21" class="custom-control-label">
+                                                    Can Edit
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="custom-control custom-checkbox mt-4">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="isactive" value="option11" ng-model="newExpenseCategory.IsActive">
+                                                <label for="isactive"
+                                                       class="custom-control-label">
+                                                    Is Active
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newExpenseCategory.Description"
+                                                          rows="1"
+                                                          placeholder=""></textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info btn-add"
+                                                    id="ECback-btn"
+                                                    style="min-width: 90px" ng-click="ClearExpenseCategory()">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-default btn-add" style="min-width: 90px;" ng-click="ClearExpenseCategory()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-success btn-add" style="min-width: 90px;" ng-click="SaveUpdateExpenseCategory()">{{newExpenseCategory.Mode}}</button>
+                                        </span>
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+                            <div class="tab-pane fade" id="allowcategory" role="tabpanel" aria-labelledby="allowcategory-tab">
+                                <div class=" p-1 mb-0">
+                                    <div class="row mt-1">
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mr-2 mt-1">Branch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFilter.BranchId" style="width:100%">
+                                                    <option ng-value="0">**Select All**</option>
+                                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newFilter.BranchId">{{B.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mr-2 mt-1">Department</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFilter.DepartmentId" style="width:100%">
+                                                    <option ng-value="0">**Select All**</option>
+                                                    <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newFilter.DepartmentId">{{c.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label class="mr-2 mt-1">Category</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newFilter.CategoryId" style="width:100%">
+                                                    <option ng-value="0">**Select All**</option>
+                                                    <option ng-value="c.id" ng-repeat="c in CategoryList" ng-selected="c.id==newFilter.CategoryId">{{c.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <button class="btn btn-sm btn-default btn-add float-right" ng-click="GetExpenseCategoryForAllow()"><i class="fas fa-redo-alt mr-1"></i> Load</button>
+                                        </div>
+                                    </div>
+                                    <div class="p-0 mb-0">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AllowExpenseCategory">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AllowExpenseCategory">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.AllowExpenseCategory">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0"
+                                                                        type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file ml-2">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#AllowExpenseCategory'" sheet-name="'AllowExpenseCategoryList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#AllowExpenseCategory').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                    <a print-tbl table-id="'#AllowExpenseCategory'" href="#" class="btn btn-secondary btn-light btn-sm">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <button class="btn btn-sm btn-add btn-success mx-2" ng-click="SaveAllowExpenseCategory()"><i class="fas fa-save mr-1"></i> Save</button>
+                                                    <button class="btn btn-sm btn-add btn-danger"><i class="fas fa-trash-alt"></i> Delete</button>
+                                                </div>
+
+                                            </div>
+                                        </header>
+                                        <div class="table-scroll-x-y table-scroll mt-1" style="max-height: calc(100vh - 14rem);">
+                                            <table id="AllowExpenseCategory"
+                                                   class="main-table table inputtable table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #e9ecef !important">Code</th>
+                                                        <th class="text-center align-middle cstm-sticky" style="width: 80px; left: 70px; z-index: 3; background-color: #e9ecef !important">Enroll No</th>
+                                                        <th class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 3; background-color: #e9ecef !important">Name</th>
+                                                        <th class="text-center" style="width: 120px; z-index: 2; background-color: #e9ecef !important" ng-repeat="Ph in ActiveExpenseCategoryList">
+                                                            <label for="customCheckbox{{$index}}">{{Ph.Name}}</label>
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input class="custom-control-input" type="checkbox"
+                                                                       id="customCheckbox{{$index}}" ng-model="Ph.IsAllow" ng-change="CheckUnCheckAll(Ph)">
+                                                                <label for="customCheckbox{{$index}}" class="custom-control-label"></label>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in AllowExpenseCategoryList | filter:searchData.AllowExpenseCategory | itemsPerPage: perPage.AllowExpenseCategory" current-page="currentPages.AllowExpenseCategory" pagination-id="AllowExpenseCategoryPagination">
+                                                        <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 1; background-color: #fff !important">{{cl.EmployeeCode}}</td>
+                                                        <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 1; background-color: #fff !important">{{cl.EnrollNo}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 1; background-color: #fff !important">{{cl.EmployeeName}}</td>
+                                                        <td class="text-center" ng-repeat="Ph in cl.ExpenseCategoryColl">
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input class="custom-control-input" type="checkbox" id="customCheckbox{{cl.EmployeeId}}{{Ph.TranId}}" value="option11" ng-model="Ph.IsAllow">
+                                                                <label for="customCheckbox{{cl.EmployeeId}}{{Ph.TranId}}" class="custom-control-label">
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="AllowExpenseCategoryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade" id="ratesetup" role="tabpanel" aria-labelledby="ratesetup-tab">
+                                <div class="row mt-2">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Branch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newRateFilter.BranchId">
+                                                <option ng-value="0">**Select All**</option>
+                                                <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newRateFilter.BranchId">{{B.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Department</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newRateFilter.DepartmentId">
+                                                <option ng-value="0">**Select All**</option>
+                                                <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newRateFilter.DepartmentId">{{c.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Category</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newRateFilter.CategoryId">
+                                                <option ng-value="0">**Select All**</option>
+                                                <option ng-value="c.id" ng-repeat="c in CategoryList" ng-selected="c.id==newRateFilter.CategoryId">{{c.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Applicable From</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newExpenseRateSetup.ApplicableFrom" date-detail="newExpenseRateSetup.ApplicableFromDet">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button class="btn btn-sm btn-default btn-add mt-4" ng-click="GetEmloyeeForExpenseRateSetup()"><i class="fas fa-sync-alt"></i> Load</button>
+
+                                    </div>
+                                </div>
+                                <div class="p-0 mb-0">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ExpenseRateSetup">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ExpenseRateSetup">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.ExpenseRateSetup">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file ml-2">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#ExpenseRateSetup'" sheet-name="'ExpenseRateSetupList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#ExpenseRateSetup').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <a print-tbl table-id="'#ExpenseRateSetup'" href="#" class="btn btn-secondary btn-light btn-sm">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-add btn-success" ng-click="SaveExpenseRateSetup()"><i class="fas fa-save mr-1"></i> Save</button>
+                                                <button class="btn btn-sm btn-add btn-danger"><i class="fas fa-trash-alt"></i> Delete</button>
+                                            </div>
+
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y table-scroll mt-1" style="max-height: calc(100vh - 15.25rem);">
+                                        <table id="ExpenseRateSetup"
+                                               class="main-table table inputtable table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #e9ecef !important">Code</th>
+                                                    <th class="text-center align-middle cstm-sticky" style="width: 80px; left: 70px; z-index: 3; background-color: #e9ecef !important">Enroll No</th>
+                                                    <th class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 3; background-color: #e9ecef !important">Name</th>
+                                                    <th class="text-center" style="width: 120px; z-index: 2; background-color: #e9ecef !important" ng-repeat="Ph in ActiveExpenseCategoryList">
+                                                        <label>{{Ph.Name}}</label>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in ExpenseRateSetupList | filter:searchData.ExpenseRateSetup | itemsPerPage: perPage.ExpenseRateSetup" current-page="currentPages.ExpenseRateSetup" pagination-id="ExpenseRateSetupPagination">
+                                                    <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 1; background-color: #fff !important">{{cl.EmployeeCode}}</td>
+                                                    <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 1; background-color: #fff !important">{{cl.EnrollNo}}</td>
+                                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 1; background-color: #fff !important">{{cl.EmployeeName}}</td>
+                                                    <td class="text-center" ng-repeat="Ph in cl.ExpenseRateColl">
+                                                        <input class="form-control form-control-sm" type="number" ng-model="Ph.Amount">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="ExpenseRateSetupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+</div>
+
+

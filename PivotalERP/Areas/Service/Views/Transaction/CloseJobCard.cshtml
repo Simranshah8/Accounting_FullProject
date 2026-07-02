@@ -1,0 +1,473 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.JobCardClose)";
+</script>
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+<script src="~/jslib/service/transaction/CloseJobCard.js"></script>
+<div ng-app="myApp" ng-controller="CloseJobCard" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+                <div class="row" ng-hide="HideShow.CostClass==true && HideShow.Branch==true">
+                    <h3 class="card-title">Close JOB Card</h3>
+                    <div class="col-sm-4" ng-hide="HideShow.Branch==true">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-4 col-form-label">Branch<span style="color:red">*</span></label>
+                            <div class="col-sm-8">
+                                <select class="form-control  hideSideBar" style="width: 100%;" ng-model="beData.BranchId" ng-change="getVoucherNo()">
+                                    <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId" ng-selected="vt.BranchId == beData.BranchId">
+                                        {{vt.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4" ng-hide="HideShow.CostClass==true">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-4 col-form-label">For Year<span style="color:red">*</span></label>
+                            <div class="col-sm-8">
+                                <select class="form-control  hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="getVoucherNo()">
+                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                        {{cc.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="width:120px">Job No.</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.JobNo" ng-blur="getJobCardDetails()" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="width:150px">Mechanic</label>
+                            <input type="text" class="form-control form-control-sm" disabled ng-model="beData.Mechanic" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="min-width:90px">Entry Date</label>
+                            <input type="text" class="form-control form-control-sm float-right serial hideSideBar" date-picker ng-model="beData.EntryDateTime_TMP" date-detail="beData.EntryDateTimeDet" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group d-flex">
+                            <input type="time" class="form-control form-control-sm" ng-model="beData.EntryTime_TMP" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;" ng-click="ShowVehicleHistory(beData.VehicleEntryId)">
+                        <h5 class="mb-0">Vehicle Details</h5>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:120px!important">Engine No</label>
+                                    <input type="text" class="form-control form-control-sm" disabled ng-model="beData.EngineNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Ch.Srl.No.</label>
+                                    <input type="text" class="form-control form-control-sm" disabled ng-model="beData.ChassisNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Regd. No.</label>
+                                    <input type="text" class="form-control form-control-sm" disabled ng-model="beData.RegdNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Vin No.</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VinNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Model</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VehicleModelName" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Type</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VehicleTypeName" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Party</label>
+                                    <input type="text" class="form-control form-control-sm" disabled ng-model="beData.Party" />
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                        <h5 class="mb-0">Complain Inspection Details</h5>
+                    </div>
+                    <div class="p-2">
+                        <div class="table-scroll-x-y table-scroll mt-2" style="max-height: calc(100vh - 250px);">
+                            <datalist id="lstComplainType">
+                                <option data-ng-repeat="ttl in ComplainTypeList" value="{{ttl.Name}}">
+                            </datalist>
+                            <table id="maintable" class="table table-bordered table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th style="width:70px; z-index: 3; background-color: #ececec !important">S.No</th>
+                                        <th style="width:200px; z-index: 3; background-color: #ececec !important">Complain</th>
+                                        <th style="width:200px; z-index: 3; background-color: #ececec !important">Diagnosis</th>
+                                        <th style="width: 200px; z-index: 3; background-color: #ececec !important">Action Taken</th>
+                                        <th style="width: 80px; z-index: 3; background-color: #ececec !important">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="jc in beData.CompalinDetailsColl">
+                                        <td align="center">{{$index+1}}</td>
+                                        <td>
+                                            <input type="text" class="form-control-sm form-control" data-ng-model="jc.Complain" list="lstComplainType">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="jc.Diagnosis">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="jc.ActionTaken">
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <div>
+                                                <a class="p-1" ng-click="AddNewJobCardDet()">
+                                                    <i class="fas fa-plus text-secondary"></i>
+                                                </a>
+
+                                                <a class="p-1" ng-click="delNewJobCardDet($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="min-width:120px!important">Remarks<span style="color:red">*</span></label>
+                            <textarea class="form-control form-control-sm" id="exampleFormControlTextarea1" rows="1" ng-model="beData.Remarks"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="min-width:120px!important">Notes</label>
+                            <textarea class="form-control form-control-sm" id="exampleFormControlTextarea1" rows="3" ng-model="beData.CloseNotes"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="main-footer">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <button type="button" class="btn btn-default dynamic-uiux" data-toggle="modal" data-target="#documentAttachModal">
+                                Document Attach ({{ (beData.AttechFiles.length+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }} )
+                            </button>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="text-right control-btns">
+                                <button type="button" class="btn btn-default ml-1" ng-click="SearchData()">Search</button>
+                                <button type="button" class="btn btn-default ml-1" ng-click="Print()" ng-show="lastTranId>0 && lastVoucherId>0">Re-Print</button>
+                                <button type="button" class="btn btn-default btn" ng-click="ClearCloseJobCard()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateCloseJobCard()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Accept</button>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    @RenderPage("~/Global/_ReportTemplates.cshtml")
+
+    <!--  Search Voucher right button Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Search JobCard</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                <option ng-value="asp" ng-repeat="asp in TranSearchOptions">{{asp.text}}</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <form class="float-right">
+                                <div class="form-row align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                        <input type="text" ng-model="paginationOptions.pageSize" class="form-control input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Miti</th>
+                                    <th>Job No.</th>
+                                    <th>Engine No.</th>
+                                    <th>ChSrl No.</th>
+                                    <th>Regd. No.</th>
+                                    <th>Party</th>
+                                    @*<th>Address</th>*@
+                                    <th>Contact No.</th>
+                                    <th>Branch</th>
+                                    <th style="min-width:100px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                    <td align="center">{{sd.EntryDate |dateFormat}}</td>
+                                    <td align="center">{{sd.EntryMiti}}</td>
+                                    <td align="center">{{sd.JobCardNo}}</td>
+                                    <td>{{sd.EngineNo}}</td>
+                                    <td>{{sd.ChSrlNo}}</td>
+                                    <td>{{sd.RegdNo}}</td>
+                                    <td>{{sd.PartyName}}</td>
+                                    @*<td>{{sd.Address}}</td>*@
+                                    <td>{{sd.MobileNo}}</td>
+                                    <td>{{sd.Branch}}</td>
+                                    <td>
+                                        <a class="p-1" href="#" ng-click="GetTransactionById(sd)" ng-hide="ButtonED.IRD==true">
+                                            <i class="fas fa-edit text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="DelTransactionById(sd)" ng-hide="ButtonED.IRD==true">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId)">
+                                            <i class="fas fa-print text-primary"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade sales-invoice-page-modal document-attach-modal dynamic-uiux-modal modal-static-esc" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="timeline-item">
+                        <div class="add-more-than-one-form-block">
+                            <form>
+                                <article>
+                                    @*<div class="row">
+                                            <div class="col-sm-10">
+                                                <div class="row">
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Attach Document</label>
+                                                            <div class="form-group">
+                                                                <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="docDescription" placeholder="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="d-flex">
+                                                            <div>
+                                                                <label class="invisible d-block">for height</label>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>*@
+                                    <div class="col-sm-12">
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Attach Document</label>
+                                                    <div class="new-cstm-file-upload">
+                                                        <div class="drop-area" file-drop>
+                                                            <div class="icon"></div>
+                                                            <h3>Drag & Drop Files Here</h3>
+                                                            <p>or <span>click to browse</span></p>
+                                                            <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                            <div class="attached-list">
+                                                                <ul class="file-list"></ul>
+                                                                <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex flex-column h-100 justify-content-between">
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+
+                                                        <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div>
+                                                            <label class="invisible d-none">for height</label>
+                                                            <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </form>
+                        </div>
+                        <div class="pb-3">
+                            <div class="table-responsive">
+                                <table class="table table-hover border bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width: 20px">SN.</th>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col" style="width: 130px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ac in beData.DocumentColl">
+                                            <th scope="row">{{$index+1}}</th>
+
+                                            <td>{{ac.Name}}</td>
+                                            <td>{{ac.Description}}</td>
+                                            <td>
+                                                <div>
+                                                    <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                        <i class="fas fa-eye text-secondary"></i>
+                                                    </a>
+
+                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-add btn-outline-secondary" style="width:50px" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-2">
+                    <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                    <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer p-2">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @RenderPage("~/Views/Global/_EditTran.cshtml")
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>

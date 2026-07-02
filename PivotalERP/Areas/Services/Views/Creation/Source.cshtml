@@ -1,0 +1,202 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/service/ComplaintTicket/Source.js"></script>
+<div ng-app="myApp" ng-controller="SourceController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllSource()">
+    <div class="box-body">
+        <div class="pt-2"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Source</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Source">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Source">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Source">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                            </div>
+                                            <button print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                                    title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </button>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mb-3 mt-2">
+                                    <div class="">
+
+                                        <table cellpadding="12" class="table table-bordered  table-hover table-sm" id="datatable">
+                                            <tr style="background-color:#ececec!important">
+                                                <th style="text-align:center; width: 90px;">
+
+                                                    S.No
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='SourceId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+                                                <th ng-click="sort('Name')" style="text-align:left;width: 200px ">
+                                                    Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+
+                                                <th ng-click="sort('Code')" style="text-align: left; width: 120px;">
+
+                                                    Code
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Code'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+                                                <th style="text-align: center; width: 90px;">Action</th>
+
+                                            </tr>
+                                            <tr dir-paginate="beData in SourceColl|orderBy:sortKey:reverse|filter:searchData.Source|itemsPerPage:perPage.Source" current-page="currentPages.Source" pagination-id="SourcePagination">
+
+
+                                                <td style="text-align:center;margin:auto">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td style="text-align: left; margin: auto">
+                                                    {{beData.Name}}
+                                                </td>
+
+
+                                                <td style="text-align: left; margin: auto">
+                                                    {{beData.Code}}
+                                                </td>
+                                                <td class="project-actions text-center">
+                                                    <div class="btn-group-sm">
+                                                        <a href="#" class="btn btn-sm btn-info" ng-click="getSourceById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="#" class="btn btn-sm btn-danger" ng-click="deleteSource(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="SourcePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-5">
+                                                <div class="form-group">
+                                                    <label>Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Name">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>Code</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Code">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>S.No</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="beData.SNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Status</label>
+                                                    <div class="row">
+                                                        <div class="col-12">
+                                                            <div class="clearfix">
+                                                                <div class="icheck-primary d-inline">
+                                                                    <input type="radio" id="radioPrimary1" name="r1" checked="" ng-model="beData.Status" ng-value="true">
+                                                                    <label for="radioPrimary1">Active</label>
+                                                                </div>
+                                                                <div class="icheck-primary d-inline ml-3">
+                                                                    <input type="radio" id="radioPrimary2" name="r1" ng-model="beData.Status" ng-value="false">
+                                                                    <label for="radioPrimary2">De-Active</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Cancel</button>
+                                            @*<button type="button" class="btn btn-secondary" ng-click="AddSource()">Save & Close</button>*@
+                                            <button type="button" class="btn btn-primary" ng-click="AddSource()">Save</button>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+

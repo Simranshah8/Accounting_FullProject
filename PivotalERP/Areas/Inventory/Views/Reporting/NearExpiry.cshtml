@@ -1,0 +1,158 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table-sm td {
+        padding: 0.3rem !important;
+    }
+</style>
+
+<script src="~/jslib/inventory/reporting/NearExpiry.js"></script>
+<div ng-app="myApp" ng-controller="MStockController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+
+                    <div class="card-body p-2">
+                        <div class="">
+                            <header class="row">
+                                <div class="col-md-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.MStock">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.MStock">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search" ng-model="searchData.MStock"
+                                                       aria-label="Search">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group d-flex mb-0" ng-hide="GodownColl.length==1">
+                                        <label style="width:70px;" class="mt-1">Godown</label>
+                                        <select class="form-control form-control-sm select2" style="width: 90%; background-color: #fff" ng-model="newNearExpiry.GodownIdColl" data-placeholder="**Select Godown**" multiple>
+                                            <option ng-repeat="cc in GodownColl track by cc.GodownId" ng-value="cc.GodownId">
+                                                {{cc.Name}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <input type="number" class="form-control form-control-sm" ng-model="newNearExpiry.days">
+
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>Days</small></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button class="btn btn-success btn-sm load" type="button" ng-click="GetAllMedicineStock()">
+                                        <i class="fas fa-sync-alt"></i> Load
+                                    </button>
+                                </div>
+
+                                <div class="col-md-1 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#MeicineStock'" sheet-name="'MedicineStock'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#MeicineStock').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                        </div>
+                                        <a print-tbl table-id="'#MeicineStock'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                            </header>
+                            <div>
+                                <div class="table-scroll-x-y table-scroll">
+                                    <table id="MeicineStock"
+                                           class="main-table table table-sm table-bordered table-hover bg-white">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th class="text-center" style="width: 60px">S.No</th>
+                                                <th style="width: 250px">Name</th>
+                                                <th style="width: 100px">Code</th>
+                                                <th style="width: 120px">Batch</th>
+                                                <th style="width: 100px">Qty</th>
+                                                <th style="width: 100px">ExpiryDate</th>
+                                                <th style="width: 100px">Days</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in MStockColl| orderBy:sortKey:reverse | filter:searchData.MStock| itemsPerPage:perPage.MStock" current-page="currentPages.MStock" pagination-id="MStockPagination" title="{{cl.Title}}">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cl.ProductName}}</td>
+                                                <td>{{cl.ProductCode}}</td>
+                                                <td>{{cl.Batch}}</td>
+                                                <td align="right">{{cl.BalanceQty}} {{cl.Unit}}</td>
+                                                <td align="center" ng-style="{'background-color': cl.bgColor, 'color': cl.textColor}">{{cl.EXPDate}}</td>
+                                                <td align="center">{{cl.Days}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="MStockPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+	
+	@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+</div>

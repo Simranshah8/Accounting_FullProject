@@ -1,0 +1,281 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace Dynamic.BL.HR
+{
+
+	public class Employee
+	{
+
+		Dynamic.DA.HR.EmployeeDB db = null;
+
+		int _UserId = 0;
+
+		public Employee(int UserId, string hostName, string dbName)
+		{
+			this._UserId = UserId;
+			db = new Dynamic.DA.HR.EmployeeDB(hostName, dbName);
+		}
+		public ResponeValues SaveFormData(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidData(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdate(beData, isModify);
+			else
+				return isValid;
+		}
+		public Dynamic.BE.HR.EmployeeCollections GetAllEmployee(int EntityId)
+		{
+			return db.getAllEmployee(_UserId, EntityId);
+		}
+		public Dynamic.BE.HR.Employee GetEmployeeById(int EntityId, int EmployeeId)
+		{
+			return db.getEmployeeById(_UserId, EntityId, EmployeeId);
+		}
+		public Dynamic.BE.HR.Employee GetDocViewById(int EntityId, int EmployeeId)
+		{
+			return db.getDocViewById(_UserId, EntityId, EmployeeId);
+		}
+		public ResponeValues DeleteById(int EntityId, int EmployeeId)
+		{
+			return db.DeleteById(_UserId, EntityId, EmployeeId);
+		}
+		public ResponeValues IsValidData(ref Dynamic.BE.HR.Employee beData, bool IsModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			try
+			{
+				if (beData == null)
+				{
+					resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
+				}
+				else if (IsModify && beData.EmployeeId == 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Modify";
+				}
+				else if (!IsModify && beData.EmployeeId != 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Save";
+				}
+				else if (beData.CUserId == 0)
+				{
+					resVal.ResponseMSG = "Invalid User for CRUD";
+				}
+                else if (string.IsNullOrEmpty(beData.EmployeeCode))
+                {
+                    resVal.ResponseMSG = "Please ! Enter EmployeeCode ";
+                }
+                else if (string.IsNullOrEmpty(beData.FirstName))
+                {
+                    resVal.ResponseMSG = "Please ! Enter First Name ";
+                }
+                else if (string.IsNullOrEmpty(beData.LastName))
+                {
+                    resVal.ResponseMSG = "Please ! Enter Last Name ";
+                }
+                else if (beData.GenderId == 0 || beData.GenderId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Gender ";
+                }
+                else if (beData.ReligionId == 0 || beData.ReligionId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Religion ";
+                }
+                else if (beData.MaritalStatusId == 0 || beData.MaritalStatusId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Marital Status ";
+                }
+                else if (beData.NationalityId == 0 || beData.NationalityId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Nationality ";
+                }
+                else if (string.IsNullOrEmpty(beData.FatherName))
+                {
+                    resVal.ResponseMSG = "Please ! Enter Father Name ";
+                }
+                else if (string.IsNullOrEmpty(beData.PFullAddr))
+                {
+                    resVal.ResponseMSG = "Please ! Enter Permanent Full Address ";
+                }
+                //else if (beData.CompanyId == 0 || beData.CompanyId.HasValue == false)
+                //{
+                //    resVal.ResponseMSG = "Please ! Select Company ";
+                //}
+                else if (beData.BranchId == 0 || beData.BranchId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Branch ";
+                }
+                else if (beData.DepartmentId == 0 || beData.DepartmentId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Department ";
+                }
+                else if (beData.CategoryId == 0 || beData.CategoryId.HasValue == false)
+                {
+                    resVal.ResponseMSG = "Please ! Select Category ";
+                }
+                else
+				{
+					resVal.IsSuccess = true;
+					resVal.ResponseMSG = "Valid";
+				}
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			return resVal;
+		}
+		
+		//SectionWise UPdate
+		public ResponeValues SaveUpdateEmpDetail(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateEmpDetail(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateEmpAdd(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateEmpAdd(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateEmergency(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateEmergency(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateOffDet(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateOfficialDetail(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues UpdatePfSsfCit(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdatePfSsfCit(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateBankDetails(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateBankDetails(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateInsurance(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateInsurance(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateAccountDet(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateAccountDet(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateQualification(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateQualification(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateExperience(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateExperience(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateSupervisor(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateSupervisor(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues SaveUpdateDocumnet(Dynamic.BE.HR.Employee beData)
+		{
+			bool isModify = beData.EmployeeId > 0;
+			ResponeValues isValid = IsValidDataE(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdateDocumnet(beData, isModify);
+			else
+				return isValid;
+		}
+		public ResponeValues IsValidDataE(ref Dynamic.BE.HR.Employee beData, bool IsModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			try
+			{
+				if (beData == null)
+				{
+					resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
+				}
+				else if (IsModify && beData.EmployeeId == 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Modify";
+				}
+				else if (!IsModify && beData.EmployeeId != 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Save";
+				}
+				else if (beData.CUserId == 0)
+				{
+					resVal.ResponseMSG = "Invalid User for CRUD";
+				}
+				else
+				{
+					resVal.IsSuccess = true;
+					resVal.ResponseMSG = "Valid";
+				}
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			return resVal;
+		}
+	}
+
+}
+

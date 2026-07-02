@@ -1,0 +1,109 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace Dynamic.BL.HR
+{
+
+	public class EmployeeLeftType : Dynamic.BusinessLogic.Global.Common
+	{
+
+		Dynamic.DA.HR.EmployeeLeftTypeDB db = null;
+
+		int _UserId = 0;
+
+		public EmployeeLeftType(int UserId, string hostName, string dbName)
+		{
+			this._UserId = UserId;
+			db = new Dynamic.DA.HR.EmployeeLeftTypeDB(hostName, dbName);
+		}
+		public ResponeValues SaveFormData(Dynamic.BE.HR.EmployeeLeftType beData)
+		{
+			bool isModify = beData.EmpLeftTypeId > 0;
+			ResponeValues isValid = IsValidData(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdate(beData, isModify);
+			else
+				return isValid;
+		}
+		public Dynamic.BE.HR.EmployeeLeftTypeCollections GetAllEmployeeLeftType(int EntityId)
+		{
+			return db.getAllEmployeeLeftType(_UserId, EntityId);
+		}
+		public Dynamic.BE.HR.EmployeeLeftType GetEmployeeLeftTypeById(int EntityId, int EmpLeftTypeId)
+		{
+			return db.getEmployeeLeftTypeById(_UserId, EntityId, EmpLeftTypeId);
+		}
+		public ResponeValues DeleteById(int EntityId, int EmpLeftTypeId)
+		{
+			return db.DeleteById(_UserId, EntityId, EmpLeftTypeId);
+		}
+        public ResponeValues UpdateEmpLeftVerify(int EmpLeftTypeId, string VerifiedRemarks)
+        {
+            return db.UpdateEmpLeftVerify(_UserId, EmpLeftTypeId, VerifiedRemarks);
+        }
+        public ResponeValues UpdateEmpLeftApproved(int EmpLeftTypeId, string ApprovedRemarks)
+        {
+            return db.UpdateEmpLeftApproved(_UserId, EmpLeftTypeId, ApprovedRemarks);
+        }
+        public ResponeValues IsValidData(ref Dynamic.BE.HR.EmployeeLeftType beData, bool IsModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			try
+			{
+				if (beData == null)
+				{
+					resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
+				}
+				else if (IsModify && beData.EmpLeftTypeId == 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Modify";
+				}
+				else if (!IsModify && beData.EmpLeftTypeId != 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Save";
+				}
+				else if (beData.CUserId == 0)
+				{
+					resVal.ResponseMSG = "Invalid User for CRUD";
+				}
+				else if (beData.EmployeeId == 0 || beData.EmployeeId.HasValue == false)
+				{
+					resVal.ResponseMSG = "Please ! Select Employee ";
+				}
+				else if (beData.LeftTypeId == 0 || beData.LeftTypeId.HasValue == false)
+				{
+					resVal.ResponseMSG = "Please ! Select LeftType ";
+				}
+				else if (!beData.LeftDate.HasValue || beData.LeftDate.Value.Year < 1900)
+				{
+					resVal.ResponseMSG = "Please ! Enter Left Date";
+				}
+				else if (!beData.EffectiveDate.HasValue || beData.EffectiveDate.Value.Year < 1900)
+				{
+					resVal.ResponseMSG = "Please ! Enter Effective Date";
+				}
+				else if (string.IsNullOrEmpty(beData.Reason))
+				{
+					resVal.ResponseMSG = "Please ! Enter Reason";
+				}
+				else
+				{
+					resVal.IsSuccess = true;
+					resVal.ResponseMSG = "Valid";
+				}
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			return resVal;
+		}
+	}
+
+}
+

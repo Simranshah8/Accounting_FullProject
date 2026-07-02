@@ -1,0 +1,733 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var recVoucherType = "@ViewBag.recVoucherType";
+    var recEntityId = "@ViewBag.recEntityId";
+    var payVoucherType = "@ViewBag.payVoucherType";
+    var payEntityId = "@ViewBag.payEntityId";
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.PDCList)";
+</script>
+<script src="~/jslib/account/reporting/PostDatedCheque.js?v=3"></script>
+
+<div ng-app="myApp" ng-controller="PostDatedChequeCtrl" ng-class="{waiting: loadingstatus=='running'}">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <!-- Main content -->
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Add the required Contents of sidebar-->
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <!-- Page Content  -->
+                <div class="container-fluid">
+                    <div class="card">
+                        <div class="card-header header-corner-triangle border py-1">
+                            <h3 class="card-title mb-0">PDC</h3>
+                            <div class="row">
+
+                                <div class="col-sm-4">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">From:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newPDC.DateFrom_TMP" style="max-width:100px" date-detail="newPDC.DateFromDet" />
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">To:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newPDC.DateTo_TMP" style="max-width:100px" date-detail="newPDC.DateToDet" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" style="min-width:90px">Date FilterAs</label>
+                                        <select class="form-control form-control-sm select2 ml-2" style="width: 100%;" ng-model="newPDC.filterDateAs">
+                                            <option ng-value="cl.id" ng-repeat="cl in DateAsColl" ng-selected="cl.id==newPDC.filterDateAs">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" style="min-width: 90px">Report Type</label>
+                                        <select class="form-control form-control-sm select2 ml-2" style="width: 100%;" ng-model="newPDC.reportType" data-placeholder="**Select Group**">
+                                            <option ng-value="cl.id" ng-repeat="cl in ReportTypesColl" ng-selected="cl.id==newPDC.reportType">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1 text-right">
+                                    <button type="button" class="btn load btn-sm btn-primary px-1" ng-click="GetAllPostDatedCheque()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download mr-1"></i>Load</button>
+                                </div>
+
+                                @*<div class="col-sm-2">
+                                    <div class="form-group mb-0">
+                                        <a href="#" class="btn btn-primary load" style="float: right; max-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetAllPostDatedCheque()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>*@
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Find:</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control pr-0"
+                                                        id="exampleFormControlSelect1">
+                                                    <option>Contain</option>
+                                                    <option>Prefix</option>
+                                                </select>
+                                            </div>
+                                            <div class="input-group input-group-sm" style="width: 150px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Search By:</span>
+                                            </div>
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                    <option ng-value="asp" ng-repeat="asp in columnDefs">{{asp.headerName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm" style="width: 200px;">
+                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                    </form>
+                                </div>
+                            </header>
+                            <div id="datatable" style="height: calc(100vh - 10rem); width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                            <div id="myGridBottom" style="height: 50px;" class="ag-theme-alpine"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+
+
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-showDocument">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">{{SelectedPDC.LedgerName}}</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+                                                <th scope="col" style="width: 40%">Doc. Type</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="dcc in SelectedPDC.DocColl">
+                                                <th scope="row">{{$index+1}}</th>
+                                                <td>{{dcc.DocumentTypeName}}</td>
+                                                <td>{{dcc.Name}}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{{dcc.DocumentData || dcc.DocPath}}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." download="{{dcc.Name}}"><i class="fas fa-download"></i></a>
+                                                        <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Close</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-cancel">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Cancel PDC Of {{SelectedPDC.LedgerName}} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Cancel Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.CancelRemarks"></textarea>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CancelPDC()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-cleared">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Cleared PDC Of {{SelectedPDC.LedgerName}} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>On Date</label>
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">BS:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.ClearedDate_TMP" date-detail="SelectedPDC.ClearedDateDet" confirm-action="ChangeDate('ClearedDate',2)" title="{{SelectedPDC.ClearedDateDet.dateAD |dateFormat}}" date-style="2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">AD:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.ClearedDateAD_TMP" date-detail="SelectedPDC.ClearedDateADDet" confirm-action="ChangeDate('ClearedDate',1)" title="{{ SelectedPDC.ClearedDateADDet.dateBS }}" date-style="1">
+                                        </div>
+                                    </div>
+                                    @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.ClearedDate_TMP" date-detail="SelectedPDC.ClearedDateDet">*@
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Remarks</label>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.CancelRemarks"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Bank A/C</label>
+                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="SelectedPDC.BankLedgerId" ledgertype="8" fortransaction="true"
+                                            placeholder="** Select Bank Name **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="SelectedPDC.PartyLedger" side-bar-data="SelectedPDC.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="1"></select>
+                                </div>
+                                <div class="form-group col-md-6" ng-show="SelectedPDC.VoucherType==1">
+                                    <label>Voucher</label>
+                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="RecSelectedVoucher">
+                                        <option ng-repeat="vt in RecVoucherTypeColl track by vt.VoucherId" ng-value="vt">
+                                            {{vt.VoucherName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6" ng-show="SelectedPDC.VoucherType==2">
+                                    <label>Voucher</label>
+                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="PaySelectedVoucher">
+                                        <option ng-repeat="vt in PayVoucherTypeColl track by vt.VoucherId" ng-value="vt">
+                                            {{vt.VoucherName}}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6" ng-hide="CostClassColl.length==1">
+                                    <label>For Year</label>
+                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="SelectedCostClass">
+                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc">
+                                            {{cc.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="ClearPDC()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-bounce">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Bounce PDC Of {{SelectedPDC.LedgerName}} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>On Date</label>
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">BS:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BounceDate_TMP" date-detail="SelectedPDC.BounceDateDet" confirm-action="ChangeDate('BounceDate',2)" title="{{SelectedPDC.BounceDateDet.dateAD |dateFormat}}" date-style="2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">AD:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BounceDateAD_TMP" date-detail="SelectedPDC.BounceDateADDet" confirm-action="ChangeDate('BounceDate',1)" title="{{ SelectedPDC.BounceDateADDet.dateBS }}" date-style="1">
+                                        </div>
+                                    </div>
+                                    @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BounceDate_TMP" date-detail="SelectedPDC.BounceDateDet">*@
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Reason For Bounce</label>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.CancelRemarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Customer Remarks</label>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.CustomerRemarks"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="BouncePDC()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-blacklisting">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">BlackListing PDC Of {{SelectedPDC.LedgerName}} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>Status</label>
+                                    <select class="form-control form-control-sm select2 ml-2" style="width: 100%;" ng-model="SelectedPDC.BlackListingStatusId">
+                                        <option ng-value="cl.id" ng-repeat="cl in BlackListStatusColl" ng-selected="cl.id==SelectedPDC.BlackListingStatusId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>On Date</label>
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">BS:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BlackListingDate_TMP" date-detail="SelectedPDC.BlackListingDateDet" confirm-action="ChangeDate('BlackListingDate',2)" title="{{SelectedPDC.BlackListingDateDet.dateAD |dateFormat}}" date-style="2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">AD:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BlackListingDateAD_TMP" date-detail="SelectedPDC.BlackListingDateADDet" confirm-action="ChangeDate('BlackListingDate',1)" title="{{ SelectedPDC.BlackListingDateADDet.dateBS }}" date-style="1">
+                                        </div>
+                                    </div>
+                                    @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BlackListingDate_TMP" date-detail="SelectedPDC.BlackListingDateDet">*@
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Remarks</label>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.BlackListingRemarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>Next Followup Date</label>
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">BS:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BlackListingNextFollowupDate_TMP" date-detail="SelectedPDC.BlackListingNextFollowupDateDet" confirm-action="ChangeDate('BlackListingNextFollowupDate',2)" title="{{SelectedPDC.BlackListingNextFollowupDateDet.dateAD |dateFormat}}" date-style="2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">AD:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BlackListingNextFollowupDateAD_TMP" date-detail="SelectedPDC.BlackListingNextFollowupDateADDet" confirm-action="ChangeDate('BlackListingNextFollowupDate',1)" title="{{ SelectedPDC.BlackListingNextFollowupDateADDet.dateBS }}" date-style="1">
+                                        </div>
+                                    </div>
+                                    @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.BlackListingNextFollowupDate_TMP" date-detail="SelectedPDC.BlackListingNextFollowupDateDet">*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="BlackListingPDC()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-legalaction">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Legal Action PDC Of {{SelectedPDC.LedgerName}} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>Status</label>
+                                    <select class="form-control form-control-sm select2 ml-2" style="width: 100%;" ng-model="SelectedPDC.LegalStatusId">
+                                        <option ng-value="cl.id" ng-repeat="cl in LegalStatusColl" ng-selected="cl.id==SelectedPDC.LegalStatusId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>On Date</label>
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">BS:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.LegalDate_TMP" date-detail="SelectedPDC.LegalDateDet" confirm-action="ChangeDate('LegalDate',2)" title="{{SelectedPDC.LegalDateDet.dateAD |dateFormat}}" date-style="2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">AD:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.LegalDateAD_TMP" date-detail="SelectedPDC.LegalDateADDet" confirm-action="ChangeDate('LegalDate',1)" title="{{ SelectedPDC.LegalDateADDet.dateBS }}" date-style="1">
+                                        </div>
+                                    </div>
+                                    @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.LegalDate_TMP" date-detail="SelectedPDC.LegalDateDet">*@
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group col-md-12">
+                                    <label>Remarks</label>
+                                    <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.LegalRemarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group col-md-6">
+                                    <label>Next Followup Date</label>
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">BS:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.LegalNextFollowupDate_TMP" date-detail="SelectedPDC.LegalNextFollowupDateDet" confirm-action="ChangeDate('LegalNextFollowupDate',2)" title="{{SelectedPDC.LegalNextFollowupDateDet.dateAD |dateFormat}}" date-style="2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">AD:</span>
+                                            </div>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.LegalNextFollowupDateAD_TMP" date-detail="SelectedPDC.LegalNextFollowupDateADDet" confirm-action="ChangeDate('LegalNextFollowupDate',1)" title="{{ SelectedPDC.LegalNextFollowupDateADDet.dateBS }}" date-style="1">
+                                        </div>
+                                    </div>
+                                    @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.LegalNextFollowupDate_TMP" date-detail="SelectedPDC.LegalNextFollowupDateDet">*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="LegalActionPDC()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-2">
+                            <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                            <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                        </div>
+                        <div class="modal-footer p-2">
+                            <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="mdlPendingBills">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title"> Pending Bill Of : <b>{{SelectedPDC.LedgerName}}</b>  </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+
+                </div>
+                <div class="modal-body py-2">
+                    <div class="form-group d-flex">
+                        <label for="inputEmail3" style="min-width: 80px;">
+                            Amount
+                        </label>
+                        <div class="col-sm-3 col-md-3">
+                            
+                            <input type="text" number-input class="form-control form-control-sm" data-ng-model="SelectedPDC.TotalPaidAmt" ng-change="ChangeBillWiseAmt('totalPaidAmt')" onfocus="this.select();" autocomplete="off" positive="true" />
+                        </div>
+                        <label for="inputEmail3" style="min-width: 80px;">
+                            Cheque Amt.
+                        </label>
+                        <div class="col-sm-3 col-md-3">
+                            <label type="text" class="form-control form-control-sm">
+                                {{SelectedPDC.Amount |number:2}}
+                            </label>
+                        </div>
+                        <label for="inputEmail3" style="min-width: 80px;">
+                            Total Dues
+                        </label>
+                        <div class="col-sm-3 col-md-3">
+                            <label type="text" class="form-control form-control-sm">
+                                {{(SelectedPDC.BillRefColl | sumOfValue:'Amount') |number:2}}
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Cleared Remarks</label>
+                            <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedPDC.CancelRemarks"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                            <label>On Date</label>
+                            <div class="d-inline-block">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">BS:</span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.ClearedDate_TMP" date-detail="SelectedPDC.ClearedDateDet" confirm-action="ChangeDate('ClearedDate',2)" title="{{SelectedPDC.ClearedDateDet.dateAD |dateFormat}}" date-style="2">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">AD:</span>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.ClearedDateAD_TMP" date-detail="SelectedPDC.ClearedDateADDet" confirm-action="ChangeDate('ClearedDate',1)" title="{{ SelectedPDC.ClearedDateADDet.dateBS }}" date-style="1">
+                                </div>
+                            </div>
+                            @*<input type="text" class="form-control form-control-sm" date-picker ng-model="SelectedPDC.ClearedDate_TMP" date-detail="SelectedPDC.ClearedDateDet">*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label>Bank A/C</label>
+                            <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="SelectedPDC.BankLedgerId" ledgertype="8" fortransaction="true"
+                                    placeholder="** Select Bank Name **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="SelectedPDC.PartyLedger" side-bar-data="SelectedPDC.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="1"></select>
+                        </div>
+                        <div class="form-group col-md-6" ng-show="SelectedPDC.VoucherType==1">
+                            <label>Voucher</label>
+                            <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="RecSelectedVoucher">
+                                <option ng-repeat="vt in RecVoucherTypeColl track by vt.VoucherId" ng-value="vt">
+                                    {{vt.VoucherName}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6" ng-show="SelectedPDC.VoucherType==2">
+                            <label>Voucher</label>
+                            <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="PaySelectedVoucher">
+                                <option ng-repeat="vt in PayVoucherTypeColl track by vt.VoucherId" ng-value="vt">
+                                    {{vt.VoucherName}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6" ng-hide="CostClassColl.length==1">
+                            <label>For Year</label>
+                            <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="SelectedCostClass">
+                                <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc">
+                                    {{cc.Name}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-scroll-x-y table-scroll" style="height:300px !important; overflow-y:auto">
+                        <table id="main-table" class="main-table table-head-fixed table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="cstm-sticky" style="left:0px;width: 60px;z-index:3; background-color:#eee!important">S.No.</th>
+                                    <th class="cstm-sticky" style="left: 60px; width: 130px; z-index: 3;background-color:#eee!important">Invoice No.</th>
+                                    <th style="width: 120px; z-index: 2">Miti(Days)</th>
+                                    <th style="width: 150px; z-index: 2">Dues Amt.</th>
+                                    <th style="width: 150px; z-index: 2">Paid Amt.</th>
+                                    <th style="width: 160px; z-index: 2">Voucher</th>
+                                    <th style="width: 140px; z-index: 2">Branch</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="curItemA in SelectedPDC.BillRefColl | orderBy:sortKey:reverse | itemsPerPage:perPage.PendingBill" current-page="currentPages.PendingBill" pagination-id="PendingBillPagination">
+                                    <td align="center">
+                                        {{$index+1}}
+                                    </td>
+                                    <td class="cstm-sticky" style="left: 0px; width: 60px; z-index: 2;background-color:#fff!important">                                        
+                                        <input type="checkbox" ng-change="ChangeSelection(curItemA)" ng-model="curItemA.IsSelected" id="chkPVI{{$index}}"> <label for="chkPVI{{$index}}">  {{curItemA.InvoiceNo}}</label>
+                                    </td>
+                                    <td class="cstm-sticky" style="left: 60px; width: 130px; z-index: 2; background-color: #fff !important">
+                                        {{curItemA.VoucherDateBS}} ({{curItemA.Days}})
+                                    </td>
+                                    <td align="right">
+                                        {{curItemA.Amount |number:2}}
+                                    </td>
+                                    <td>
+                                        <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="curItemA.PaidAmt" ng-change="ChangeBillWiseAmt('paidAmt')" positive="true" />
+                                    </td>
+                                    <td>
+                                        {{curItemA.VoucherName}}
+                                    </td>
+                                    <td>
+                                        {{curItemA.Branch}}
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="PendingBillPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>                
+                <div class="modal-footer py-2">                    
+                    <button type="button" class=" btn load btn-primary px-1" style="min-width: 70px;" data-dismiss="modal" aria-label="Close" ng-click="ClearPDC()">Ok</button>
+                </div>
+
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+	
+	@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+</div>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

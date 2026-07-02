@@ -1,0 +1,252 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/hr/Master/UpdateEmployee.js"></script>
+<div ng-app="myApp" ng-controller="UpdateEmployeeController"  ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">Company</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newDet.CompanyRelationshipId" ng-change="GetEmployeeForUpdate()">
+                                        <option ng-value="c.TranId" ng-repeat="c in CompanyRelationshipList" ng-selected="c.id==newDet.CompanyRelationshipId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Branch</label>
+                                <select class="select2 form-control form-control-sm" data-placeholder="Select Source" style="width: 100%;" ng-model="newDet.BranchId" ng-change="GetEmployeeForUpdate()">
+                                    <option ng-value="0">**All**</option>
+                                    <option ng-value="brc.BranchId" ng-repeat="brc in BranchList" ng-selected="brc.BranchId==newDet.BranchId">{{brc.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <header class="row">
+                            <div class="col-md-8">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="paginationOptions.pageSize" ng-change="GetEmployeeForUpdate()">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.UpdateEmployee">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.UpdateEmployee">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-4 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#UpdateEmployee'" sheet-name="'UpdateEmployee'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#UpdateEmployee').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                    <a print-tbl table-id="'#UpdateEmployee'" class="btn btn-secondary btn-light btn-sm wait"
+                                       title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button class="btn btn-primary load btn-sm" ng-click="SaveUpdateEmployeeData()"> Update</button>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 15rem)!important; ">
+                            <table id="UpdateEmployee" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center align-middle cstm-sticky" style="background-color: #e9ecef !important; width: 130px; left: 0px; z-index: 3;">Emp. Code</th>
+                                        <th class="text-center align-middle cstm-sticky" style="background-color: #e9ecef !important; width: 150px; left: 130px; z-index: 3;" >First Name</th>
+                                        <th class="text-center align-middle cstm-sticky" style="background-color: #e9ecef !important; width: 150px; left: 280px; z-index: 3;" >Middle Name</th>
+                                        <th class="text-center align-middle cstm-sticky" style="background-color: #e9ecef !important; width: 140px; left: 430px; z-index: 3;">Last Name</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width: 130px; z-index: 2;">Enroll No</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Card No</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >DOB</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Date of Joining</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >EMIS ID</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Gender</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:150px; z-index: 2;" >Mobile No</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:250px; z-index: 2;" >Email</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:250px; z-index: 2;" >Address</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Nationality</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Pan No</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Marital Status</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:190px; z-index: 2;" >Department</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:200px; z-index: 2;" >Designation</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:150px; z-index: 2;" >Category</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:180px; z-index: 2;" >Level</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:180px; z-index: 2;" >Employee Group</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:130px; z-index: 2;" >Tax Rule As</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:165px; z-index: 2;" >Leave Applicable Date</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:230px; z-index: 2;">Salary Applicable From</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:230px; z-index: 2;" >Allow OT</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:230px; z-index: 2;">First Supervisor</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:230px; z-index: 2;" >Second Supervisor</th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width:230px; z-index: 2;" >Third Supervisor</th>
+                                        <th style="width: 70px; background-color: #e9ecef !important;" rowspan="2">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="E in UpdateEmployeeList | filter:searchData.UpdateEmployee |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                    @*<tr dir-paginate="E in UpdateEmployeeList |filter:searchData.UpdateEmployee | itemsPerPage: perPage.UpdateEmployee" current-page="currentPages.UpdateEmployee" pagination-id="UpdateEmployeePagination">*@
+                                        <td class="cstm-sticky" style="width: 130px; left: 0px; z-index: 2;background-color:#ffffff!important"><input type="text" class="form-control form-control-sm" ng-model="E.EmployeeCode" /></td>
+                                        <td class="cstm-sticky" style="width: 150px; left: 130px; z-index: 2; background-color: #ffffff !important"><input type="text" class="form-control form-control-sm" ng-model="E.FirstName" /></td>
+                                        <td class="cstm-sticky" style="width: 150px; left: 280px; z-index: 2; background-color: #ffffff !important"><input type="text" class="form-control form-control-sm" ng-model="E.MiddleName" /></td>
+                                        <td class="cstm-sticky" style="width: 140px; left: 430px; z-index: 2; background-color: #ffffff !important"><input type="text" class="form-control form-control-sm" ng-model="E.LastName" /></td>
+                                        <td><input type="text" class="form-control form-control-sm" ng-model="E.EnrollNumber" /></td>
+                                        <td><input type="number" class="form-control form-control-sm" ng-model="E.CardNo" /></td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="E.DOB_AD_TMP" date-detail="E.DOB_ADDet">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="E.DateOfJoining_TMP" date-detail="E.DateOfJoiningDet">
+                                        </td>
+
+                                        <td><input type="text" class="form-control form-control-sm" ng-model="E.EMSId" /></td>
+
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.Gender" style="width:100%">
+                                                <option ng-value="cl.text" ng-repeat="cl in GenderColl" ng-selected="cl.text==E.Gender">{{cl.text}}</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control form-control-sm" ng-model="E.OfficeContactNo" /></td>
+                                        <td><input type="text" class="form-control form-control-sm" ng-model="E.OfficeEmailId" /></td>
+                                        <td><input type="text" class="form-control form-control-sm" ng-model="E.TA_FullAddress" /></td>
+
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.Nationality" style="width:100%">
+                                                <option ng-value="cl.Name" ng-repeat="cl in NationalityList" ng-selected="cl.Name==E.Nationality">{{cl.Name}}</option>
+                                            </select>
+
+                                        </td>
+                                        <td><input type="text" class="form-control form-control-sm" ng-model="E.PanId" /></td>
+                                        <td>
+
+                                            <select class="form-control form-control-sm" ng-model="E.MaritalStatus" style="width:100%">
+                                                <option ng-value="cl.text" ng-repeat="cl in MaritalStatusList" ng-selected="cl.text==E.MaritalStatus">{{cl.text}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.DepartmentId">
+                                                <option ng-value="c.CostCenterDepartmentId" ng-repeat="c in DepartmentList" ng-selected="c.CostCenterDepartmentId==E.DepartmentId">{{c.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm " ng-model="E.DesignationId">
+                                                <option ng-value="tdc.DesignationId" ng-repeat="tdc in DesignationList" ng-selected="tdc.DesignationId==E.DesignationId"> {{tdc.Name}} </option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.CategoryId">
+                                                <option ng-value="c.CategoryId" ng-repeat="c in CategoryList" ng-selected="c.CategoryId==E.CategoryId">{{c.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.LevelId">
+                                                <option ng-value="c.LevelId" ng-repeat="c in LevelList" ng-selected="c.LevelId==E.LevelId">{{c.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm " ng-model="E.EmployeeGroupId" style="width: 100%;">
+                                                <option ng-value="D.EmployeeGroupId" ng-repeat="D in EmployeeGroupList" ng-selected="D.EmployeeGroupId==E.EmployeeGroupId"> {{D.Name}} </option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.TaxRuleAs" style="width:100%">
+                                                <option>**Select User**</option>
+                                                <option ng-value="cl.id" ng-repeat="cl in TaxRuleAsList" ng-selected="cl.id==E.TaxRuleAs">{{cl.text}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="E.LeaveApplicableDate_TMP" date-detail="E.LeaveApplicableDateDet">
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <select class="form-control form-control-sm" ng-model="E.SalaryApplicableYearId" style="width:120px">
+                                                    <option ng-value="A.id" ng-repeat="A in AcademicYearColl" ng-selected="A.id==E.SalaryApplicableYearId">{{A.text}}</option>
+                                                </select>
+                                                <select class="form-control form-control-sm" ng-model="E.SalaryApplicableMonthId" style="width:120px">
+                                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==E.SalaryApplicableMonthId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </td>
+
+                                        <td style="text-align:center;padding-top:9px;">
+                                            <input type="checkbox" ng-model="E.IsAllowOT" />
+                                        </td>
+
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.S_FirstLevelId" style="width:100%">
+                                                <option ng-value="cl.EmployeeId" ng-repeat="cl in EmployeeList" ng-selected="cl.EmployeeId==E.S_FirstLevelId">{{cl.Name}}</option>
+                                            </select>
+                                        </td>
+
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.S_SecondLevelId" style="width:100%">
+                                                <option ng-value="cl.EmployeeId" ng-repeat="cl in EmployeeList" ng-selected="cl.EmployeeId==E.S_SecondLevelId">{{cl.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" ng-model="E.S_ThirdLevelId" style="width:100%">
+                                                <option ng-value="cl.EmployeeId" ng-repeat="cl in EmployeeList" ng-selected="cl.EmployeeId==E.S_ThirdLevelId">{{cl.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="btn btn-sm btn-success" href="#" ng-click="SaveUpdateEmployeeWise(E)">
+                                                <i class="fas fa-save"></i>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- table end -->
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true" on-page-change="ReSearchData(newPageNumber)">
+                                </dir-pagination-controls>
+                                @*<dir-pagination-controls pagination-id="UpdateEmployeePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>*@
+                            </div>
+                        </footer>
+
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+

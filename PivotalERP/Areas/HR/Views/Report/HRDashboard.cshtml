@@ -1,0 +1,1718 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 3px 20px;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+    }
+
+        .calendar-header select {
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+            outline: none;
+        }
+
+    .date-strip {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 10px 0;
+        scrollbar-width: none;
+        background: #fafafa;
+    }
+
+        .date-strip::-webkit-scrollbar {
+            display: none;
+        }
+
+    .date-item {
+        flex: 0 0 auto;
+        text-align: center;
+        padding: 0 12px;
+        color: #555;
+        cursor: pointer;
+    }
+
+        .date-item.active {
+            color: #00a859;
+            font-weight: bold;
+        }
+
+        .date-item .day {
+            font-size: 12px;
+            color: #777;
+        }
+
+        .date-item .date {
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+    /* Event section */
+    .event-list {
+        padding: 0 20px;
+        background: #fff;
+    }
+
+    .event-item {
+        padding: 3px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+    .event-title {
+        font-weight: 600;
+        color: #333;
+        font-size: 13px;
+    }
+
+    .event-desc {
+        color: #555555;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+</style>
+<style>
+
+    /* Responsive stat cards */
+    .insidecard {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        color: black;
+        border-radius: 12px;
+        box-shadow: 0px 2px 4px 0px #0000001A;
+        transition: transform 0.2s ease-in-out;
+        height: 80px;
+    }
+
+        /* Hover effect */
+        .insidecard:hover {
+            transform: translateY(-4px);
+        }
+
+    /* Image circle box */
+    .imgcard {
+        height: 45px;
+        width: 45px;
+        border-radius: 15px;
+        margin-right: 10px;
+        background-color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+        .imgcard img {
+            width: 20px;
+            height: 20px;
+        }
+
+    /* Label & heading */
+    .insidecard label {
+        font-size: 14px;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .insidecard h5 {
+        font-size: 18px;
+        margin: 0;
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 767px) {
+        .insidecard {
+            width: 100%;
+            justify-content: flex-start;
+            height: auto;
+            padding: 10px;
+        }
+    }
+
+
+    /* Table container controls scrolling */
+    .table {
+        width: 100%;
+        overflow-x: auto; /* horizontal scroll hide */
+        overflow-y: auto;
+    }
+
+    .table-sm td {
+        padding: 0.5rem !important;
+    }
+
+    .table-sm th {
+        padding: 0.5rem !important;
+    }
+    /* Table styling */
+    .styled-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10px;
+        color: #333;
+    }
+
+        /* Header */
+        .styled-table thead {
+            background-color: #f5f5f5 !important;
+        }
+
+            .styled-table thead th {
+                text-align: left;
+                font-weight: 700;
+                padding: 10px !important;
+            }
+
+        .styled-table tbody td {
+            padding: 6px !important;
+            font-weight: 600;
+        }
+
+    .table .styled-table tbody tr:nth-child(odd) {
+        background-color: #f7f7f7 !important;
+    }
+
+    .table .styled-table tbody tr:nth-child(even) {
+        background-color: #f0f0f0 !important;
+    }
+
+    .card-tab-btn {
+        background-color: #c9ead9;
+        border-radius: 5px;
+        padding: 5px 10px; /* better padding for small screens */
+        min-width: 60px; /* ensures buttons don’t shrink too much */
+        border: none;
+        cursor: pointer;
+        flex: 1 1 auto; /* allows flexible width on smaller screens */
+        text-align: center;
+    }
+
+        .card-tab-btn:hover {
+            background-color: #2aae68;
+            color: white;
+        }
+
+    /* stack buttons vertically on very small screens */
+    @@media (max-width: 576px) {
+        .card-tab-btn {
+            width: 100%; /* full width on extra small screens */
+        }
+    }
+
+
+    /* Profile inside table */
+    .profile {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+        .profile img {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+    .profile-circle {
+        width: 25px;
+        height: 25px;
+        background-color: #27ae60;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 10px;
+    }
+</style>
+
+<style>
+
+    .date-strip::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .date-strip::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 4px;
+    }
+
+        .date-strip::-webkit-scrollbar-thumb:hover {
+            background: #999;
+        }
+
+    .date-item {
+        display: inline-block;
+        padding: 6px 4px !important;
+        min-width: 39px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: 0.2s;
+    }
+
+        .date-item.active {
+            background-color: #e6f4ff;
+            border: 1px solid #1f5d9e;
+        }
+
+        .date-item.selected {
+            border: 2px solid #00a859;
+            background-color: #f8fff8;
+        }
+
+        .date-item:hover {
+            background-color: #f0f8ff;
+        }
+
+    .event-item:hover {
+        background-color: #f3f3f3;
+    }
+
+    .img-circle {
+        border-radius: 50%;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0-rc"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.1.1/chart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+@*<link href="~/wwwroot/dist/css/mktdashboard.css" rel="stylesheet" />*@
+<script src="~/jslib/hr/Report/HRDashboard.js"></script>
+<div ng-app="myApp" ng-controller="HRDashbardController" ng-init="LoadData()">
+    <div class="content container-fluid" @*style="background-color:white!important;"*@>
+        <!--HRDashboard section-->
+        <div id="HRDasboard-section">
+            <div class="container-fluid p-2">
+                <div class="row g-3 justify-content-around" style=" margin-left: -27px; margin-right: -27px;">
+
+                    <!-- Total Employees -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="insidecard p-2" style="background-color: #e7f3ff;">
+                            <div class="imgcard">
+                                <img src="~/wwwroot/dynamic-erp/images/1.png" />
+                            </div>
+                            <div>
+                                <label>Total Employees</label>
+                                <h5>{{beData.TotalEmployee}}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New Joins -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="insidecard p-2" style="background-color: #e7fde5;">
+                            <div class="imgcard">
+                                <img src="~/wwwroot/dynamic-erp/images/2.png" />
+                            </div>
+                            <div>
+                                <label>New Joins</label>
+                                <h5>{{beData.NewJoins}}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expiring Contract -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="insidecard p-2" style="background-color: #d0f7ff;">
+                            <div class="imgcard">
+                                <img src="~/wwwroot/dynamic-erp/images/3.png" />
+                            </div>
+                            <div>
+                                <label>Expiring Contract</label>
+                                <h5>{{beData.ExpiringContract}}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branches -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="insidecard p-2" style="background-color: #e4fff1;">
+                            <div class="imgcard">
+                                <img src="~/wwwroot/dynamic-erp/images/4.png" />
+                            </div>
+                            <div>
+                                <label>Branches</label>
+                                <h5>{{beData.Branches}}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Departments -->
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <div class="insidecard p-2" style="background-color: #feeefb;">
+                            <div class="imgcard">
+                                <img src="~/wwwroot/dynamic-erp/images/5.png" />
+                            </div>
+                            <div>
+                                <label>Departments</label>
+                                <h5>{{beData.Departments}}</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="p-2 pb-0">
+                <div class="row">
+                    <!-- Gender Ratio -->
+                    <div class="col-md-4">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Gender Ratio</b></label>
+                            </div>
+                            <div class="card-body pt-0 pl-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="row">
+                                    <!-- Canvas -->
+                                    <div class="col-sm-8">
+                                        <canvas id="genderratio" style="height: 177px; width: 100%"></canvas>
+                                    </div>
+                                    <!-- Gender Stats -->
+                                    <div class="col-sm-4 pt-4">
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <div class="d-flex justify-content-between mb-2" ng-repeat="item in GenderRatioColl">
+                                                <span>{{item.Gender}}</span>
+                                                <span style="color: #92C960; font-weight: bold;">{{item.TotalEmployees}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="View-genderRatio" style="color: #00a859;" ng-click="GenderDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Marital Status -->
+                    <div class="col-md-4">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Marital Status</b></label>
+                            </div>
+                            <div class="card-body pt-0 pl-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <canvas id="maritalStatusChart" style="height:179px;width:100%"></canvas>
+                                    </div>
+                                    <div class="col-sm-4 pt-4">
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <div class="d-flex justify-content-between mb-2" ng-repeat="M in MaritalStatusSumColl">
+                                                <span>{{M.MaritalStatusName}}</span>
+                                                <span style="color: #92C960; font-weight: bold;">{{M.TotalEmployees}}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="View-MaritalStatus" style="color: #00a859;" ng-click="MaritalStatusDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Department Distribution -->
+                    <div class="col-md-4">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Department Distribution</b></label>
+                            </div>
+                            <div class="card-body pt-0 pl-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <canvas id="statusDistribution" style="height:179px;width:100%"></canvas>
+                                    </div>
+                                    <div class="col-md-4 pt-4">
+                                        <div class="d-flex flex-column justify-content-center">
+                                            @*<div class="d-flex justify-content-between mb-2" ng-repeat="M in StatusDistributionColl">
+                                                    <span>{{M.Department}}</span>
+                                                    <span style="color: #92C960; font-weight: bold;">{{M.TotalEmployees}}</span>
+                                                </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="View-StatusDistribution" style="color: #00a859;" ng-click="StatusDistributionDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-2 pb-0" @*style="background-color:white;"*@>
+                <div class="row">
+                    <!-- Leave Details -->
+                    <div class="col-md-4">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Leave Details</b></label>
+                            </div>
+                            <div class="card-body pt-0 " style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="row">
+                                    <div class="col-md-7">
+                                        <canvas id="LeaveDetails" style="height:202px;width:100%"></canvas>
+                                    </div>
+                                    <div class="col-md-5 d-flex flex-column justify-content-center" ng-repeat="L in LeaveDetailsColl">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Leave Request</span>
+                                            <span style="color: #92C960; font-weight: bold;">{{L.LeaveRequest}}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Not Approved Leave</span>
+                                            <span style="color:#92C960; font-weight:bold;">{{L.NotApproved}}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Approved Leave</span>
+                                            <span style="color: #92C960; font-weight: bold;">{{L.Approved}}</span>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Cancelled Leave</span>
+                                            <span style="color: #92C960; font-weight: bold;">{{L.Cancelled}}</span>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Rejected Leave</span>
+                                            <span style="color: #92C960; font-weight: bold;">{{L.Rejected}}</span>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="view-LeaveDetails" style="color: #00a859;">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transfers -->
+                    <div class="col-md-4">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Transfers</b></label>
+                            </div>
+                            <div class="card-body p-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="table">
+                                    <table class="styled-table">
+
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center;">S.No.</th>
+                                                <th>Name</th>
+                                                <th>Designation</th>
+                                                <th>Branch</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="T in TransferList track by $index">
+                                                <td style="text-align:center;">{{$index+1}}</td>
+                                                <td>
+                                                    <div class="profile">
+                                                        <div class="profile-circle">SG</div>
+                                                        <span>{{T.EmployeeName}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>{{T.Designation}}</td>
+                                                <td>{{T.Branch}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="view-Transfer" style="color: #00a859;" ng-click="TransferDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Retirement -->
+                    <div class="col-md-4">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Retirement</b></label>
+                            </div>
+                            <div class="card-body p-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="table">
+                                    <table class="styled-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center;">S.No.</th>
+                                                <th>Name</th>
+                                                <th>Branch</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="R in RetirementList track by $index">
+                                                <td style="text-align:center;">{{$index+1}}</td>
+                                                <td>
+                                                    <div class="profile">
+                                                        <div class="profile-circle">SG</div>
+                                                        <span>{{R.EmployeeName}}</span>
+                                                    </div>
+                                                </td>
+                                                <td>{{R.Branch}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="view-Retirement" style="color: #00a859;" ng-click="RetirementDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="p-2 pb-0" @*style="background-color:white;"*@>
+                <div class="row">
+                    <!-- Employees on Leave -->
+                    <div class="col-md-7">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-1 pl-4">
+                                <div class="row p-1">
+                                    <div class="col-md-7 col-sm-7 col-lg-7 mr-1">
+                                        <label><b>Employees on Leave</b></label>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1 col-lg-1 mr-4">
+                                        <button class="card-tab-btn">Today</button>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1 col-lg-1 mr-4">
+                                        <button class="card-tab-btn">Weekly</button>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1 col-lg-1 mr-3">
+                                        <button class="card-tab-btn">Monthly</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="table-scroll-x-y table" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                    <table class="styled-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center;">Date</th>
+                                                <th>Name</th>
+                                                <th>Type</th>
+                                                <th>Duration</th>
+                                                <th>Attachment</th>
+                                                <th>Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="LE in EmployeesonLeaveList">
+                                                <td style="text-align:center;">{{LE.EmpLeaveDate}}</td>
+                                                <td>
+                                                    <div class="profile">
+                                                        <div class="profile-circle"><img src="~/Attachments/Employee/image.png" /></div>
+                                                        <span>
+                                                            {{LE.EmployeeName}}<br />
+                                                            {{LE.Designation}}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>{{LE.LeaveType}}</td>
+                                                <td>{{LE.DurationDisplay}}</td>
+                                                <td>{{LE.Attachment}}</td>
+                                                <td>{{LE.Remarks}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                <a id="view-EmployeesLeave" style="color: #00a859;" ng-click="EmployeesLeaveDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Employee Leaves -->
+                    <div class="col-md-5">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-1 pl-4">
+                                <div class="row p-1">
+                                    <div class="col-md-5 col-sm-5 col-lg-5 mr-2">
+                                        <label><b>Employee leaves</b></label>
+                                    </div>
+                                    <div class="col-sm-2 col-md-2 col-lg-2 mr-1">
+                                        <button class="card-tab-btn">Today</button>
+                                    </div>
+                                    <div class="col-sm-2 col-md-2 col-lg-2 mr-1">
+                                        <button class="card-tab-btn">Weekly</button>
+                                    </div>
+                                    <div class="col-sm-2 col-md-2 col-lg-2 mr-1">
+                                        <button class="card-tab-btn">Monthly</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="EmployeeLeaves" style="max-height:230px;width:100%"></canvas>
+                            </div>
+                            <div class="card-footer p-1 text-right pr-3" style="color:green;">
+                                <label></label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="p-2 pb-0" @*style="background-color:white;"*@>
+                <div class="row">
+                    <!-- Attendance Report -->
+                    <div class="col-md-12">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-1 pl-4">
+                                <div class="row p-1">
+                                    <div class="col-md-9 col-sm-9 col-lg-9 mr-4">
+                                        <label><b>Attendance Report</b></label>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1 col-lg-1 p-0" style="margin-right:-15px;">
+                                        <button class="card-tab-btn">Today</button>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1 col-lg-1 p-0" style="margin-right:-15px;">
+                                        <button class="card-tab-btn">Weekly</button>
+                                    </div>
+                                    <div class="col-sm-1 col-md-1 col-lg-1 p-0" style="margin-right:-15px;">
+                                        <button class="card-tab-btn">Monthly</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="table-scroll-x-y table" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                    <table class="styled-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center;">Date</th>
+                                                <th>Employee Name</th>
+                                                <th>Department</th>
+                                                <th>Designation</th>
+                                                <th>Status</th>
+                                                <th>Time In</th>
+                                                <th>Time Out</th>
+                                                <th>Working Hours</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="At in AttendanceReportList">
+                                                <td style="text-align:center;">{{At.AttDate}}</td>
+                                                <td>
+                                                    <div class="profile">
+                                                        <div class="profile-circle"><img src="~/Attachments/Employee/image.png" /></div>
+                                                        <span>
+                                                            {{At.EmployeeName}}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>{{At.Department}}</td>
+                                                <td>{{At.Designation}}</td>
+                                                <td>{{At.Status}}</td>
+                                                <td>{{At.InTime}}</td>
+                                                <td>{{At.OutTime}}</td>
+                                                <td>{{At.WorkingHours}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer" style="text-align: right; ">
+                                @*<a id="view-EmployeesLeave" style="color: #00a859;" ng-click="EmployeesLeaveDetails()">View All<i class="fas fa-arrow-right" style="color: green;"></i></a>*@
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="p-2 pb-0" @*style="background-color:white;"*@>
+                <div class="row">
+                    <!-- 🔹 Department Wise Attendance -->
+                    <div class="col-md-6">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Department Wise Attendance</b></label>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="DepartmentWiseAtt" width="400" height="184"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 🔹 Latest Event (Dynamic Calendar) -->
+                    <div class="col-md-6">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4 d-flex justify-content-between align-items-center">
+                                <label><b>Latest Event</b></label>
+                                <div>
+                                    <i class="fas fa-chevron-left mx-2 cursor-pointer"
+                                       ng-click="nextPreviusMonth(-1)"></i>
+                                    <span>{{AcademicCalendar.CurMonth.MonthName}} {{AcademicCalendar.YearId}}</span>
+                                    <i class="fas fa-chevron-right mx-2 cursor-pointer"
+                                       ng-click="nextPreviusMonth(1)"></i>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <!-- Calendar Days Strip -->
+                                <div class="d-flex align-items-center justify-content-between border-bottom p-2">
+                                    <!-- Left scroll button -->
+                                    <i class="fas fa-chevron-left text-secondary mx-2 cursor-pointer"
+                                       ng-click="scrollDates(-1)"></i>
+
+                                    <!-- Scrollable ND Strip -->
+                                    <div id="dateStrip"
+                                         class="date-strip d-flex justify-content-start"
+                                         style="gap:8px;overflow-x:auto;white-space:nowrap;scroll-behavior:smooth;flex:1;">
+                                        <div class="date-item text-center"
+                                             ng-repeat="dd in AcademicCalendar.CurMonth.DataColl"
+                                             ng-click="ClickOnDay(dd)"
+                                             ng-class="{ 'active': dd.IsToday, 'selected': dd.IsSelected }"
+                                             ng-style="{ 'color': (dd.EventColl.length > 0 ? dd.EventColl[0].ColorCode : dd.WeekendColorCode) }">
+                                            <div class="day font-weight-bold">{{dd.DayName}}</div>
+                                            <div class="date" style="font-size:20px;">{{dd.ND}}</div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Right scroll button -->
+                                    <i class="fas fa-chevron-right text-secondary mx-2 cursor-pointer"
+                                       ng-click="scrollDates(1)"></i>
+                                </div>
+
+                                <!-- Event List -->
+                                <div class="event-list p-2" style="height:168px; overflow-y:auto;">
+                                    <div class="event-item mb-2 border-bottom pb-2"
+                                         ng-repeat="ec in AcademicCalendar.CurMonth.EventColl">
+                                        <div class="d-flex align-items-center">
+                                            <img ng-src="{{ec.ImagePath}}" alt="Event"
+                                                 class="img-circle mr-2" width="40" height="40"
+                                                 ng-click="ShowPersonalImg(ec)">
+                                            <div>
+                                                <div class="event-title font-weight-bold">{{ec.Name}}</div>
+                                                <div class="event-date text-muted small">{{ec.FromDate_BS}}</div>
+                                                <div class="event-desc text-secondary small">{{ec.Description}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- View All -->
+                                <div class="card-footer text-right p-2">
+                                    <a id="view-LatestEvent" style="color: #00a859;" ng-click="getNepaliCalendar()">View All <i class="fas fa-arrow-right text-success"></i></a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Employees List -->
+            <div class="p-2 pb-0" @*style="background-color:white;"*@>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-default" style="border-radius: 12px;">
+                            <div class="card-header p-2 pl-4">
+                                <label><b>Employees List</b></label>
+                            </div>
+                            <div class="card-body p-0" style="border-bottom: 1px solid #DCDCDC; border-bottom-left-radius: 12px; border-bottom-right-radius:12px;">
+                                <div class="table-scroll-x-y table" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                    <table class="styled-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center; width:51px; background-color: #e9ecef !important;">S.No.</th>
+                                                <th style="background-color: #e9ecef !important;">Employee Name</th>
+                                                <th style="background-color: #e9ecef !important;">Employee Type</th>
+                                                <th style="background-color: #e9ecef !important;">Email</th>
+                                                <th style="background-color: #e9ecef !important;">Contact No.</th>
+                                                <th style="background-color: #e9ecef !important;">Department</th>
+                                                <th style="background-color: #e9ecef !important;">Designation</th>
+                                                <th style="background-color: #e9ecef !important;">Joining Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="Emp in EmployeesData track by $index">
+                                                <td style="text-align:center;">{{$index+1}}</td>
+                                                <td>
+                                                    <div class="profile">
+                                                        <div class="profile-circle"><img src="~/Attachments/Employee/image.png" /></div>
+                                                        <span>
+                                                            {{Emp.EmployeeName}}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>{{Emp.EmployeeType}}</td>
+                                                <td>{{Emp.EmailId}}</td>
+                                                <td>{{Emp.ContactNo}}</td>
+                                                <td>{{Emp.Department}}</td>
+                                                <td>{{Emp.Designation}}</td>
+                                                <td>{{Emp.JoiningMitti}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--HRDashboard section End-->
+        <!--Gender Ratio form-->
+        <div id="genderratio-form">
+            <div class="card p-2 m-2">
+                <form class="form-inline clearfix mb-2">
+                    <div class="input-group input-group-sm mr-sm-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text cstm">Show</span>
+                        </div>
+
+                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.GenderRatio">
+                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.GenderRatio">{{pp.text}}</option>
+                        </select>
+
+                        <div class="input-group-append">
+                            <span class="input-group-text bg-white"><small>entries</small></span>
+                        </div>
+
+                        <div class="input-group input-group-sm table-search-filed ml-2">
+                            <input class="form-control form-control-navbar"
+                                   type="search"
+                                   placeholder="Search"
+                                   aria-label="Search"
+                                   ng-model="searchData.GenderRatio" />
+                            <div class="input-group-append">
+                                <button class="btn btn-default border-left-0" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+
+                <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                    <table id="Male" class="main-table table table-sm table-bordered bg-white">
+                        <thead>
+                            <tr>
+                                <th style="background-color: #e9ecef !important;">Male</th>
+                                <th style="background-color: #e9ecef !important;">Female</th>
+                                <th style="background-color: #e9ecef !important;">Others</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="row in GenderatioDisplayList | filter:searchData.GenderRatio | itemsPerPage: perPage.GenderRatio" current-page="currentPages.GenderRatio" pagination-id="GenderRatioPagination">
+                                @*<tr ng-repeat="row in GenderatioDisplayList">*@
+                                <td>{{row.Male}}</td>
+                                <td>{{row.Female}}</td>
+                                <td>{{row.Others}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <footer class="row align-items-center">
+                    <div class="col-md-12">
+                        <dir-pagination-controls pagination-id="GenderRatioPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                        </dir-pagination-controls>
+                    </div>
+                </footer>
+                <div class="p-2">
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-info text-center"
+                                id="back-to-genderRatio"
+                                style="min-width: 90px">
+                            Back To List
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--Marital Status form-->
+
+        <div id="MaritalStatus-form">
+            <div class="card p-2 m-2">
+                <header class="row">
+                    <div class="col-md-8">
+                        <div class="clearfix">
+                            <form class="form-inline">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text cstm">Show</span>
+                                    </div>
+                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.MaritalStatus">
+                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.MaritalStatus">{{pp.text}}</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm table-search-filed">
+                                    <input class="form-control form-control-navbar" type="search"
+                                           placeholder="Search" aria-label="Search" ng-model="searchData.MaritalStatus">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </header>
+                <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                    <table id="MaritalStatus" class="main-table table table-sm table-bordered bg-white">
+                        <thead>
+                            <tr>
+                                <th style="background-color: #e9ecef !important;">Single</th>
+                                <th style="background-color: #e9ecef !important;">Married</th>
+                                <th style="background-color: #e9ecef !important;">Unmarried</th>
+                                <th style="background-color: #e9ecef !important;">Widow</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            <tr dir-paginate="row in MaritalDisplayList | filter:searchData.MaritalStatus | itemsPerPage: perPage.MaritalStatus" current-page="currentPages.MaritalStatus" pagination-id="MaritalStatusPagination">
+                                <td>{{row.Single}}</td>
+                                <td>{{row.Married}}</td>
+                                <td>{{row.Unmarried}}</td>
+                                <td>{{row.Widow}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- table end -->
+                </div>
+                <footer class="row align-items-center">
+                    <div class="col-md-12">
+                        <dir-pagination-controls pagination-id="MaritalStatusPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                        </dir-pagination-controls>
+                    </div>
+                </footer>
+
+                <div class="p-2">
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-info text-center"
+                                id="back-to-MaritalStatus"
+                                style="min-width: 90px">
+                            Back To List
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--Status Distribution form-->
+        <div id="StatusDistribution-form">
+            <div class="card p-2 m-2">
+                <header class="row">
+                    <div class="col-md-8">
+                        <div class="clearfix">
+                            <form class="form-inline">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text cstm">Show</span>
+                                    </div>
+                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.StatusDistribution">
+                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.StatusDistribution">{{pp.text}}</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm table-search-filed">
+                                    <input class="form-control form-control-navbar" type="search"
+                                           placeholder="Search" aria-label="Search" ng-model="searchData.StatusDistribution">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </header>
+                <div @*class=" table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;"*@>
+                    <div ng-repeat="dept in DepartmentList track by dept.DepartmentId">
+                        <!-- Department Header -->
+                        <h5 style="position: sticky; top: 0; background-color: #e9ecef; padding: 5px; z-index: 10; margin: 5px; border-bottom: 1px solid #ccc; cursor: pointer;"
+                            ng-click="dept.isOpen = !dept.isOpen">
+                            {{dept.Department}} (Total: {{dept.Employees.length}})
+                            <span style="float: right">
+                                {{dept.isOpen ? '▼' : '►'}}
+                            </span>
+                        </h5>
+
+                        <!-- Employee Table -->
+                        <div class=" table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;" ng-show="dept.isOpen">
+                            <table id="StatusDistribution" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 51px; text-align: center; background-color: #e9ecef !important;">S.No</th>
+                                        <th style="background-color: #e9ecef !important;">Name</th>
+                                        <th style="background-color: #e9ecef !important;">Code</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @*<tr ng-repeat="emp in dept.Employees track by $index">*@
+                                    <tr dir-paginate="emp in dept.Employees | filter:searchData.StatusDistribution | itemsPerPage: perPage.StatusDistribution" current-page="currentPages.StatusDistribution" pagination-id="StatusDistributionPagination">
+                                        <td style="text-align:center">{{$index + 1}}</td>
+                                        <td>{{emp.EmployeeName}}</td>
+                                        <td>{{emp.EmployeeCode}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="StatusDistributionPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                    </div>
+
+                    <div class="p-2">
+                        <div class="text-center">
+                            <button type="button"
+                                    class="btn btn-sm btn-info text-center"
+                                    id="back-to-StatusDistribution"
+                                    style="min-width: 90px">
+                                Back To List
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!--Leave Details form-->
+        <div id="LeaveDetails-form">
+            <div class="card p-2 m-2">
+                <div class="row ">
+                    <div class="col-sm-4">
+                        <form class="form-inline clearfix mb-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text cstm">Show</span>
+                                </div>
+
+                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LeaveReqst">
+                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LeaveReqst">{{pp.text}}</option>
+                                </select>
+
+                                <div class="input-group-append">
+                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                </div>
+
+                                <div class="input-group input-group-sm table-search-filed ml-2">
+                                    <input class="form-control form-control-navbar"
+                                           type="search"
+                                           placeholder="Search"
+                                           aria-label="Search"
+                                           ng-model="searchData.LeaveReqst" />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <label><b>Leave Request</b></label>
+                        <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                            <table id="LeaveReqst" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width:51px; text-align:center">S.No</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:center;">1</td>
+                                        <td>Ram</td>
+                                        <td>ES-0075</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="LeaveReqstPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+
+                    </div>
+                    <div class="col-sm-4 ">
+                        <form class="form-inline clearfix mb-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text cstm">Show</span>
+                                </div>
+
+                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.RejectedLeave">
+                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.RejectedLeave">{{pp.text}}</option>
+                                </select>
+
+                                <div class="input-group-append">
+                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                </div>
+
+                                <div class="input-group input-group-sm table-search-filed ml-2">
+                                    <input class="form-control form-control-navbar"
+                                           type="search"
+                                           placeholder="Search"
+                                           aria-label="Search"
+                                           ng-model="searchData.RejectedLeave" />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <label><b>Rejected Leave</b></label>
+                        <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                            <table id="RejectedLeave" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width:51px; text-align:center">S.No</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:center;">1</td>
+                                        <td>Ram</td>
+                                        <td>ES-0075</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="RejectedLeavePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+
+                    </div>
+
+                    <div class="col-sm-4 ">
+                        <form class="form-inline clearfix mb-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text cstm">Show</span>
+                                </div>
+
+                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ApprovedLeave">
+                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ApprovedLeave">{{pp.text}}</option>
+                                </select>
+
+                                <div class="input-group-append">
+                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                </div>
+
+                                <div class="input-group input-group-sm table-search-filed ml-2">
+                                    <input class="form-control form-control-navbar"
+                                           type="search"
+                                           placeholder="Search"
+                                           aria-label="Search"
+                                           ng-model="searchData.ApprovedLeave" />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <label><b>Approved Leave</b></label>
+                        <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                            <table id="ApprovedLeave" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width:51px; text-align:center">S.No</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:center;">1</td>
+                                        <td>Ram</td>
+                                        <td>ES-0075</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="ApprovedLeavePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+
+                    </div>
+
+                    <div class="col-sm-4 mt-3">
+                        <form class="form-inline clearfix mb-2">
+                            <div class="input-group input-group-sm mr-sm-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text cstm">Show</span>
+                                </div>
+
+                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PendingLeave">
+                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PendingLeave">{{pp.text}}</option>
+                                </select>
+
+                                <div class="input-group-append">
+                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                </div>
+
+                                <div class="input-group input-group-sm table-search-filed ml-2">
+                                    <input class="form-control form-control-navbar"
+                                           type="search"
+                                           placeholder="Search"
+                                           aria-label="Search"
+                                           ng-model="searchData.PendingLeave" />
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <label><b>Pending Leave</b></label>
+                        <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                            <table id="PendingLeave" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width:51px; text-align:center">S.No</th>
+                                        <th>Name</th>
+                                        <th>Code</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:center;">1</td>
+                                        <td>Ram</td>
+                                        <td>ES-0075</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="PendingLeavePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+
+                    </div>
+                </div>
+                <div class="p-2">
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-info text-center"
+                                id="back-to-LeaveDetails"
+                                style="min-width: 90px">
+                            Back To List
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--Transfer form-->
+        <div id="Transfer-form">
+            <div class="card p-2 m-2">
+                <header class="row">
+                    <div class="col-md-8">
+                        <div class="clearfix">
+                            <form class="form-inline">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text cstm">Show</span>
+                                    </div>
+                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Transfers">
+                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Transfers">{{pp.text}}</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm table-search-filed">
+                                    <input class="form-control form-control-navbar" type="search"
+                                           placeholder="Search" aria-label="Search" ng-model="searchData.Transfers">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </header>
+                <div class="table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                    <table id="Transfers" class="main-table table table-sm table-bordered bg-white">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;width:51px;background-color: #e9ecef !important;">S.No.</th>
+                                <th style=" background-color: #e9ecef !important;">Name</th>
+                                <th style=" background-color: #e9ecef !important;">Designation</th>
+                                <th style="width:250px; background-color: #e9ecef !important;">Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*<tr ng-repeat="Tf in TransferList track by $index">*@
+                            <tr dir-paginate="Tf in TransferList | filter:searchData.Transfers | itemsPerPage: perPage.Transfers" current-page="currentPages.Transfers" pagination-id="TransfersPagination">
+
+                                <td style="text-align:center;">{{$index+1}}</td>
+                                <td>
+                                    <div class="profile">
+                                        <div class="profile-circle">SG</div>
+                                        <span>{{Tf.EmployeeName}}</span>
+                                    </div>
+                                </td>
+                                <td>{{Tf.Designation}}</td>
+                                <td>{{Tf.Branch}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="TransfersPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+                <div class="p-2">
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-info text-center"
+                                id="back-to-Transfer"
+                                style="min-width: 90px">
+                            Back To List
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--Retirement form-->
+        <div id="Retirement-form">
+            <div class="card p-2 m-2">
+                <header class="row">
+                    <div class="col-md-8">
+                        <div class="clearfix">
+                            <form class="form-inline">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text cstm">Show</span>
+                                    </div>
+                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Retirement">
+                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Retirement">{{pp.text}}</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm table-search-filed">
+                                    <input class="form-control form-control-navbar" type="search"
+                                           placeholder="Search" aria-label="Search" ng-model="searchData.Retirement">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </header>
+                <div class="table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                    <table id="Retirement" class="main-table table table-sm table-bordered bg-white">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 51px; background-color: #e9ecef !important;">S.No.</th>
+                                <th style=" background-color: #e9ecef !important;">Name</th>
+                                <th style=" background-color: #e9ecef !important;">Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*<tr ng-repeat="Rt in RetirementList track by $index">*@
+                            <tr dir-paginate="Rt in RetirementList | filter:searchData.Retirement | itemsPerPage: perPage.Retirement" current-page="currentPages.Retirement" pagination-id="RetirementPagination">
+
+                                <td style="text-align:center;">{{$index+1}}</td>
+                                <td>
+                                    <div class="profile">
+                                        <div class="profile-circle">SG</div>
+                                        <span>{{Rt.EmployeeName}}</span>
+                                    </div>
+                                </td>
+                                <td>{{Rt.Branch}}</td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="RetirementPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+                <div class="p-2">
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-info text-center"
+                                id="back-to-Retirement"
+                                style="min-width: 90px">
+                            Back To List
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--EmployeesLeave form-->
+        <div id="EmployeesLeave-form">
+            <div class="card p-2 m-2">
+                <header class="row">
+                    <div class="col-md-8">
+                        <div class="clearfix">
+                            <form class="form-inline">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text cstm">Show</span>
+                                    </div>
+                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeesonLeave">
+                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EmployeesonLeave">{{pp.text}}</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm table-search-filed">
+                                    <input class="form-control form-control-navbar" type="search"
+                                           placeholder="Search" aria-label="Search" ng-model="searchData.EmployeesonLeave">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </header>
+                <div class="table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                    <table id="EmployeesLeave" class="main-table table table-sm table-bordered bg-white">
+                        <thead>
+                            <tr>
+                                <th style=" text-align:center; width:70px; background-color: #e9ecef !important;">Date</th>
+                                <th style=" width: 260px; background-color: #e9ecef !important;">Name</th>
+                                <th style=" width: 115px; background-color: #e9ecef !important;">Type</th>
+                                <th style=" width: 100px; background-color: #e9ecef !important;">Duration</th>
+                                <th style=" width: 100px; background-color: #e9ecef !important;">Attachment</th>
+                                <th style=" width: 200px; background-color: #e9ecef !important;">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*<tr ng-repeat="Ep in EmployeesLeaveList">*@
+                            <tr dir-paginate="Ep in EmployeesLeaveList | filter:searchData.EmployeesonLeave | itemsPerPage: perPage.EmployeesonLeave" current-page="currentPages.EmployeesonLeave" pagination-id="EmployeesonLeavePagination">
+
+                                <td style="text-align:center;">{{Ep.EmpLeaveDate}}</td>
+                                <td>
+                                    <div class="profile">
+                                        <div class="profile-circle"><img src="~/Attachments/Employee/image.png" /></div>
+                                        <span>
+                                            {{Ep.EmployeeName}}<br />
+                                            {{Ep.Designation}}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>{{Ep.LeaveType}}</td>
+                                <td>{{Ep.DurationDisplay}}</td>
+                                <td>True</td>
+                                <td>{{Ep.Remarks}}</td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="EmployeesonLeavePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+                <div class="p-2">
+                    <div class="text-center">
+                        <button type="button"
+                                class="btn btn-sm btn-info text-center"
+                                id="back-to-EmployeesLeave"
+                                style="min-width: 90px">
+                            Back To List
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!--LatestEvent form-->
+        <div id="LatestEvent-form">
+
+            <div class="card p-2 m-2" style="border: 1px solid #ccc;">
+                <div class="card-header border-0 p-2">
+                    <h3 class="card-title"><b>All Events for the year {{AcademicCalendar.YearId}}</b></h3>
+                </div>
+                <header class="row">
+                    <div class="col-md-8">
+                        <div class="clearfix">
+                            <form class="form-inline">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text cstm">Show</span>
+                                    </div>
+                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LatestEvent">
+                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LatestEvent">{{pp.text}}</option>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                    </div>
+                                </div>
+                                <div class="input-group input-group-sm table-search-filed">
+                                    <input class="form-control form-control-navbar" type="search"
+                                           placeholder="Search" aria-label="Search" ng-model="searchData.LatestEvent">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-default border-left-0" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </header>
+                <div @*class="table-scroll-x-y"*@ style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                    <table class="table table-head-fixed table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 250px; z-index: 3; background-color: #e9f2ee!important">Event Name</th>
+                                <th style="width: 120px; z-index: 3; background-color: #e9f2ee !important ">Event Type</th>
+                                <th style="width: 250px; z-index: 3; background-color: #e9f2ee !important ">Description</th>
+                                <th style="width: 120px; z-index: 3; background-color: #e9f2ee !important ">Date From </th>
+                                <th style="width: 120px; z-index: 3; background-color: #e9f2ee !important ">Date To </th>
+                                <th style="width: 200px; z-index: 3; background-color: #e9f2ee !important ">Applied For Department</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*<tr ng-repeat="ec in AllEventList">*@
+                            <tr dir-paginate="ec in AllEventList | filter:searchData.LatestEvent | itemsPerPage: perPage.LatestEvent" current-page="currentPages.LatestEvent" pagination-id="LatestEventPagination">
+
+                                <td class="text-left p-1 align-middle">
+                                    <div class="row">
+                                        <div class="col-md-2"><img class="img-fluid" ng-src="{{ec.ImagePath}}" ng-click="ShowPersonalImg(ec)" style="max-height: 50px;"></div>
+                                        <div class="col-md-10"> {{ec.Name}}</div>
+                                    </div>
+                                </td>
+                                <td class="align-middle">{{ec.EventType}}</td>
+                                <td class="align-middle">{{ec.Description}}</td>
+                                <td class="align-middle">{{ec.FromDate_BS}}</td>
+                                <td class="align-middle">{{ec.ToDate_BS}}</td>
+                                <td class="align-middle">{{ec.ForClass}} </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <footer class="row align-items-center">
+                    <div class="col-md-12">
+                        <dir-pagination-controls pagination-id="LatestEventPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                        </dir-pagination-controls>
+                    </div>
+                </footer>
+            </div>
+
+            <div class="p-2">
+                <div class="text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-info text-center"
+                            id="back-to-LatestEvent"
+                            style="min-width: 90px">
+                        Back To List
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+

@@ -1,0 +1,238 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/appcms/EventType.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EventController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="table-listing">
+                    <!-- Second Tab Content -->
+                    <div class="card p-2">
+                        <header class="row mb-2">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EventType">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EventType">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.EventType">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            
+
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file">
+                                    <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-success"
+                                            id="open-form-btn"style="font-size:14px;">
+                                        <i class="fas fa-plus w-t"></i> Add EventType
+                                    </button>
+                                </div>
+                            </div>
+  
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y  table-scroll"style="max-height: calc(100vh - 100px);">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px">S.No.</th>
+                                            <th style="width: 250px">Title</th>
+                                            <th style="width: 350px">Description</th>
+                                            <th class="text-center" style="width: 70px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in EventTypeList | filter:searchData.EventType | itemsPerPage: perPage.EventType" current-page="currentPages.EventType" pagination-id="EventTypePagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.Name}}</td>
+                                            <td>{{cl.Description}}</td>
+                                            <td class="text-center">
+                                                <a class="p-1" href="#" ng-click="ShowPersonalImg(cl)">
+                                                    <i class="fas fa-eye text-secondary"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="GetEventTypeById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelEventTypeById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="EventTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="notice-form" class="card p-2">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="select-button pb-0">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="radioisactive" name="isactive" ng-value="1" ng-model="newEventType.EType">
+                                            <label class="form-check-label" for="radioisactive">Holiday</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" id="radioisactive1" name="isactive" ng-value="2" ng-model="newEventType.EType">
+                                            <label class="form-check-label" for="radioisactive1">Event</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label for="">Name</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newEventType.Name">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="">Color</label>
+                                        <input type="color"
+                                               class="form-control form-control-sm" ng-model="newEventType.ColorCode" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="newEventType.Description"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="" class="invisible">Photo</label>
+                            <div class="person-photo-attachment-wrap text-center">
+                                <div class="img-wrap mx-auto">
+                                    <img ng-src="{{newEventType.PhotoData || newEventType.ImagePath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                </div>
+                                <!-- Button trigger modal -->
+                                <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto"style="font-size:14px;">
+                                    <i class="fas fa-camera w-t"></i> Upload Image
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button"
+                                    class="btn btn-info"
+                                    id="back-to-list"
+                                    style="min-width: 90px">
+                                Back to List
+                            </button>
+                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="ClearEventType()">Reset</button>
+                            <button type="button" class="btn btn-success" style="min-width: 90px;" ng-click="SaveUpdateEventType()">{{newEventType.Mode}}</button>
+                        </span>
+                    </div>
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Image</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newEventType.Photo_TMP" @*after-selected="AddnewEventPhoto()"*@ fileread="newEventType.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newEventType.PhotoData || newEventType.ImagePath}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newEventType.Photo_TMP" @*after-selected="AddnewEventPhoto()"*@ fileread="newEventType.PhotoData" />
+                    <a ng-click="ClearEventTypePhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

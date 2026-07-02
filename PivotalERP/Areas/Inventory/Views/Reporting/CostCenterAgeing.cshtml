@@ -1,0 +1,243 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.PartyWiseAgeingReport)";
+</script>
+<script src="~/jslib/inventory/reporting/CostCenterAgeing.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="costcenterAgeingController">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">From:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="PartyAgeing.DateFrom_TMP" style="max-width:100px" date-detail="PartyAgeing.DateFromDet" />
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">To:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="PartyAgeing.DateTo_TMP" style="max-width:100px" date-detail="PartyAgeing.DateToDet" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1">Ledger</label>
+                                        <select class="form-control form-control-sm select2 serial" all-ledger ng-model="PartyAgeing.LedgerId" style="width:80%" id="cboLedger" ledgertype="1"
+                                                placeholder="** Select Ledger Name **" showdetails="false" confirm-action="getPartyAgeing()" ledger-detail="PartyAgeing.LedgerDetails" side-bar-data="PartyAgeing.partySideBarData">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" ng-show="BranchList.length>1">
+                                    <div class="form-group row">
+                                        <label for="inputEmail3" class="col-lg-3">Branch</label>
+                                        <div class="col-lg-9">
+                                            <select class="form-control form-control-sm hideSideBar" active-select2 style="width: 100%;" ng-model="PartyAgeing.BranchId" placeholder="*select branch*" multiple>
+                                                <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId">
+                                                    {{vt.Name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<div class="col-md-2" ng-show="BranchList.length>1">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-2 mt-1" for="chkBranch">BranchAgeing</label>
+                                        <input id="chkBranch" class="form-control form-control-sm" type="checkbox" ng-model="PartyAgeing.DepoAgeing" />
+                                    </div>
+                                </div>*@
+                                <div class="col-md-1 ">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary load" style="float: right; min-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="showAgeDialog()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Find:</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control pr-0"
+                                                        id="exampleFormControlSelect1">
+                                                    <option>Contain</option>
+                                                    <option>Prefix</option>
+                                                </select>
+                                            </div>
+                                            <div class="input-group input-group-sm" style="width: 150px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Search By:</span>
+                                            </div>
+                                            <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                      <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                    </form>
+
+                                </div>
+
+                            </header>
+                            <div id="datatable" style="height: calc(100vh - 12rem);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                            <div id="myGridBottom" style="height: 50px;" class="ag-theme-alpine"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Age Range Modal Starts-->
+    <div class="modal fade" id="modal-agerange">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Age Range</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class=" sales-main-table table-scroll">
+                        <table id="age-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">
+                                        Action
+                                    </th>
+                                    <th style="width: 80px;" ng-repeat="cl in AgeList">
+
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <a class="p-1" href="#" ng-click="AddAgeList($index)">
+                                            <i class="fas fa-plus text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="DelAgeList($index)">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+                                    </td>
+                                    <td ng-repeat="cl in AgeList">
+                                        <input type="number"
+                                               class="form-control form-control-sm"
+                                               placeholder="" ng-model="cl.Age" />
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Close</button>
+
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="getPartyAgeing()">Ok</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+    <!-- /.modal-content -->
+</div>

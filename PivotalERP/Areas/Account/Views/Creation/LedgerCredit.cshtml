@@ -1,0 +1,189 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+ 
+<script src="~/jslib/account/creation/LedgerCredit.js"></script>
+<div ng-app="myApp" ng-controller="LedgerCreditController" ng-init="LoadData()" ng-cloak>
+    <!-- Main content -->
+    <div class="container-fluid">
+        <div class="sale-page-wrap">
+            <div class="overflow-hidden">
+                @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+                @RenderPage("~/Views/Global/_LedgerDetails.cshtml")
+                <!-- Page Content  -->
+                <div class="content-wrapper-new">
+
+                    <div class="card p-2 mt-2">
+
+                        <div class="table-responsive">
+                            <div class="mt-1" style="height: calc(100vh - 230px);">
+                                <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th style="width: 50px">S.No.</th>
+                                            <th style="width: 200px">Particulars</th>
+                                            <th style="width: 150px">Limit Amt.</th>
+                                            <th style="width: 150px">Limit Days</th>
+                                            <th class="text-center align-middle" style="width: 70px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ledAllocation in beData.LedgerAllocationColl">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="ledAllocation.LedgerId" ledgertype="3" fortransaction="true"
+                                                        placeholder="** Select Party Name **" showdetails="true" confirm-action="ShowSideBar(ledAllocation)" ledger-detail="ledAllocation.LedgerDetails" side-bar-data="ledAllocation.ledgerSideBarData"></select>
+
+                                            </td>
+                                            <td><input type="text" number-input  style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="ledAllocation.CreditLimitAmount"></td>
+                                            <td><input type="number"    style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="ledAllocation.CreditLimitDays" integer="true"></td>
+                                            <td class="text-center">
+                                                <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInLedgerAllocation($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowLedgerAllocation($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Show Log Details" ng-click="ShowLog(ledAllocation)">
+                                                    <i class="fas fa-eye text-info"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <footer class="main-footer control-btns pt-0">
+            <div class="secondary-footer mb-2 mt-2">
+
+                <div class="row ">
+
+                    <div class="col-md-4 mt-2">
+
+                    </div>
+                    <div class="col-md-8 mt-2">
+                        <span class="d-block text-right">
+                            <button type="button" class="btn btn-primary" style="min-width: 90px;" ng-click="SaveLedgerCredit()">{{beData.Mode}}</button>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmCostCentersModel" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Log Of {{CurLog.LedgerDetails.Name}}</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row" style="margin-top: -10px">
+                            <div class="table-responsive">
+                                <div class="table-scroll-x-y mt-1" style="height: 300px">
+                                    <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th style="width: 50px">S.No.</th>
+                                                <th style="width: 200px">Old CR. Amt.</th>
+                                                <th style="width: 150px">Old CR. Days</th>
+                                                <th style="width: 200px">CR. Amt.</th>
+                                                <th style="width: 150px">CR. Days</th>
+                                                <th style="width: 150px">User</th>
+                                                <th style="width: 150px">Log DateTime</th>                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ll in CurLog.LogDataColl">
+                                                <td align="center">{{$index+1}}</td>
+                                                <td align="right"> {{ll.OldCreditLimitAmount |number:2}}</td>
+                                                <td align="center"> {{ll.OldCreditLimitDays}}</td>
+                                                <td align="right"> {{ll.CreditLimitAmount |number:2}}</td>
+                                                <td align="center"> {{ll.CreditLimitDays}}</td>
+                                                <td> {{ll.UserName}}</td>
+                                                <td> {{ll.LogDateTime}}</td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer" style="padding: 3px; margin-top: -10px; ">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal" style="min-width:90px">Ok</button>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+
+    $(function () {
+        $("#wrapper").toggleClass("toggled");
+        $("#sidebar-wrapper").css("overflow-y", "hidden");
+
+
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+            $("#sidebar-wrapper").css("overflow-y", "auto");
+        });
+
+
+    });
+
+</script>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+        };
+        fullHeight();
+
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>
+
+<script>
+
+    $(document).ready(function () {
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                //var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                //if (key == 13) {
+                //    e.preventDefault();
+                //    var inputs = $(this).closest('form').find(':input:visible');
+                //    inputs.eq(inputs.index(this) + 1).focus();
+                //}
+
+                var index = $('.serial').index(this) + 1;
+                $('.serial').eq(index).focus();
+            }
+        });
+    });
+</script>

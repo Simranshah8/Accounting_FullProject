@@ -1,0 +1,397 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/appcms/notice.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="NoticeController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="table-listing">
+
+                    <!-- Second Tab Content -->
+                    <div class="card p-2">
+                        <header class="row mb-2">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Notice">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Notice">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.Notice">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file">
+                                    <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn  btn-primary"
+                                            id="open-form-btn"style="font-size:14px;">
+                                        <i class="fas fa-plus w-t"></i> Add Notice
+                                    </button>
+                                </div>
+                            </div>
+ 
+                           
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 100px);">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60px">S.No.</th>
+                                            <th style="width: 250px">Title</th>
+                                            <th style="width: 300px">Description</th>
+                                            <th style="width: 150px">PublishOn</th>
+                                            <th style="width: 120px">Valid Upto</th>
+                                            <th style="width: 60px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in NoticeList | filter:searchData.Notice | itemsPerPage: perPage.Notice" current-page="currentPages.Notice" pagination-id="NoticePagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.HeadLine}}</td>
+                                            <td>{{cl.Description}}</td>
+                                            <td>{{cl.PublishOn_BS}}  {{cl.PublishTime | timeFormat}}</td>
+                                            <td>{{cl.ValidUpto_BS}}  @*{{cl.ValidUpto | timeFormat}}*@</td>
+                                            <td>
+                                                <a class="p-1" href="#" ng-click="ShowPersonalImg(cl)">
+                                                    <i class="fas fa-eye text-secondary"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="GetNoticeById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelNoticeById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="NoticePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div class="card p-2" id="notice-form">
+                    <!-- The time line -->
+                    <!-- timeline time label -->
+                    <!-- <div class="time-label">
+                      <span class="">Notice Information</span>
+                    </div> -->
+                    <!-- /.timeline-label -->
+                    <!-- timeline item -->
+                    <div>
+                        <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                        <div class="timeline-item">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="row">
+
+                                        <!-- select for others -->
+                                        <div class="col-md-12" id="meet-others">
+                                            <div class="form-group">
+                                                <label for="">Headline</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newNotice.HeadLine" />
+                                            </div>
+                                        </div>
+                                        <!-- fields after clicking radio button ends -->
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newNotice.Description"
+                                                          rows="1"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Notice Date</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newNotice.NoticeDate_TMP" date-detail="newNotice.NoticeDateDet" before-days="0" after-days="40">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Published on</label>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" date-picker ng-model="newNotice.PublishedOn_TMP" date-detail="newNotice.PublishedOnDet" before-days="0" after-days="40">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input type="time" class="form-control form-control-sm" ng-model="newNotice.PublishTime_TMP" />
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for=""> Valid Upto</label>
+                                                <div class="col-md-6">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newNotice.ValidUpto_TMP" date-detail="newNotice.ValidUptoDet" before-days="0" after-days="365">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Order No.</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newNotice.OrderNo" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- col-md-9 -->
+                                <div class="col-md-3">
+                                    <label for="" class="invisible">Photo</label>
+                                    <div class="person-photo-attachment-wrap text-center">
+                                        <div class="img-wrap mx-auto">
+                                            <img ng-src="{{newNotice.PhotoData || newNotice.ImagePath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                        </div>
+                                        <!-- Button trigger modal -->
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto"style="font-size:14px;">
+                                            <i class="fas fa-camera w-t"></i> Upload Photo
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END timeline item -->
+                    <!-- timeline time label -->
+                    <!-- /.timeline-label -->
+                    <!-- timeline item -->
+                    @*<div>
+                            <div class="timeline-item">
+                                <div class="pb-3 add-more-than-one-form-block">
+                                    <form>
+                                        <article>
+                                            <div class="row">
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>Type Of Document</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="docType">
+                                                            <option ng-value="dc" ng-repeat="dc in DocumentTypeList">{{dc.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label>Attach Document</label>
+                                                                <div class="form-group">
+                                                                    <input type="file" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <input type="text" class="form-control form-control-sm"
+                                                                       ng-model="docDescription"
+                                                                       placeholder="">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="d-flex">
+                                                                <div>
+                                                                    <label class="invisible d-block">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </form>
+                                </div>
+                                <div class="pb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                    <th scope="col" style="width: 40%">Document Type</th>
+                                                    <th scope="col">File Name</th>
+                                                    <th scope="col">Description</th>
+                                                    <th scope="col" style="width: 130px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="ac in newNotice.AttachmentColl">
+                                                    <th scope="row">{{$index+1}}</th>
+                                                    <td>
+                                                        <select class="form-control form-control-sm" ng-model="ac.DocumentTypeId" disabled>
+                                                            <option ng-value="dc.id" ng-repeat="dc in DocumentTypeList" ng-selected="dc.id==ac.DocumentTypeId">{{dc.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>{{ac.Name}}</td>
+                                                    <td>{{ac.Description}}</td>
+                                                    <td>
+                                                        <div>
+                                                            <a  class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                            <a ng-hide="ac.Path==null" class="p-1" href="#" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                <i class="fas fa-download  text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+                    <!-- END timeline item -->
+                    <!-- timeline time label -->
+                    <!-- /.timeline-label -->
+                    <div>
+                        <div class="timeline-item">
+                            <div class="pb-0 add-more-than-one-form-block">
+                                <form>
+                                    <article>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="">Content</label>
+                                                    <textarea class="textarea" placeholder="Place some text here"
+                                                              style="width: 100%; height: 220px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" @*html-editor*@ ng-model="newNotice.Content"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- timeline time label -->
+                    <div class="time-label">
+                        <span class="d-block border-0 p-1 text-center">
+                            <button type="button"
+                                    class="btn  btn-info"
+                                    id="back-to-list"
+                                    style="min-width: 90px">
+                                Back to List
+                            </button>
+                            <button type="button" class="btn  btn-default" style="min-width: 90px;" ng-click="ClearNotice()">Reset</button>
+                            <button type="button" class="btn  btn-success" style="min-width: 90px;" ng-click="SaveUpdateNotice()">{{newNotice.Mode}}</button>
+                        </span>
+                    </div>
+                    <!-- /.timeline-label -->
+
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*Photo upload Model*@
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newNotice.Photo_TMP" @*after-selected="AddNoticePhoto()"*@ fileread="newNotice.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newNotice.PhotoData || newNotice.ImagePath}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newNotice.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newNotice.PhotoData" />
+                    <a ng-click="ClearNoticePhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

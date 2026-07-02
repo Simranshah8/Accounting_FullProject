@@ -1,0 +1,252 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/inventory/creation/unit.js?v=20250701"></script>
+<div ng-app="myApp" ng-controller="Unit" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllUnit()" ng-cloak>
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Unit</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ProductUnit">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ProductUnit">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.ProductUnit">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllUnit()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'Unit'" report-name="'List Of Unit'" ignore-column="'6'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'Unit',ignoreColumn:'6' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Unit'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mb-3 mt-1">
+                                    <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center; width: 10%;">
+
+                                                    S.No
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='UnitId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+                                                <th ng-click="sort('Name')" style="text-align: left; width: 20%;">
+                                                    Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+                                                <th ng-click="sort('Alias')" style="text-align: left; width: 20%;">
+                                                    Alias
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Alias'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('NoOfDecimalPlaces')" style="text-align: left; width: 20%;">
+                                                    No. Of DecimalPlaces for Qty.
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='NoOfDecimalPlaces'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('RateNoOfDecimalPlaces')" style="text-align: left; width: 20%;">
+                                                    No. Of DecimalPlaces for Rate
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='NoOfDecimalPlaces'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('AmountNoOfDecimalPlaces')" style="text-align: left; width: 20%;">
+                                                    No. Of DecimalPlaces for Amt.
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='NoOfDecimalPlaces'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th style="text-align:center;" width="10%">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="newUnit in UnitColl|orderBy:sortKey:reverse|filter:searchData.ProductUnit|itemsPerPage:perPage.ProductUnit" current-page="currentPages.ProductUnit" pagination-id="ProductUnitPagination">
+
+
+                                                <td style="text-align:center;margin:auto">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td style="text-align: left; margin: auto">
+                                                    {{newUnit.Name}}
+                                                </td>
+
+                                                <td style="text-align: left; margin: auto">
+                                                    {{newUnit.Alias}}
+                                                </td>
+                                                <td style="margin:auto;text-align:center">
+                                                    {{newUnit.NoOfDecimalPlaces}}
+                                                </td>
+                                                <td style="margin:auto;text-align:center">
+                                                    {{newUnit.RateNoOfDecimalPlaces}}
+                                                </td>
+                                                <td style="margin:auto;text-align:center">
+                                                    {{newUnit.AmountNoOfDecimalPlaces}}
+                                                </td>
+                                                <td class="project-actions" style="text-align:center">
+                                                    <div class="btn-group-sm">
+                                                        <a href="#" class="btn btn-sm btn-info" ng-click="getUnitByIdd(newUnit)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="#" class="btn btn-sm btn-danger" ng-click="deleteUnit(newUnit,$index)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="ProductUnitPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="p-2">
+                                    <form>
+                                        @* <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>S.No.</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="newUnit.SNo" style="width:30%;">
+                                                </div>
+                                            </div>
+                                        </div>*@
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Name<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newUnit.Name" title="{{newUnit.UnitId>0 ? newUnit.UnitId : ''}}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Alias</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newUnit.Alias">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>No.of decimal Places for Qty.</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="newUnit.NoOfDecimalPlaces">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>No.of decimal Places for Rate</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="newUnit.RateNoOfDecimalPlaces">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>No.of decimal Places for Amount</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="newUnit.AmountNoOfDecimalPlaces">
+                                                </div>
+                                            </div>  
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Type of Unit</label>
+                                                    <select class="form-control form-control-sm serial" ng-model="beData.TypeOfUnit">
+                                                        <option ng-value="bt.id" ng-repeat="bt in TypeOfUnitColl" ng-selected="beData.TypeOfUnit==bt.id">{{bt.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Reset</button>
+                                            @*<button type="button" class="btn btn-secondary" ng-click="AddCostCategory()">Save & Close</button>*@
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateUnit()">Save</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+        @RenderPage("~/Views/Global/_IsValidMaster.cshtml")
+
+    </div>
+</div>
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

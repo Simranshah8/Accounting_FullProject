@@ -1,0 +1,175 @@
+﻿<link href="~/wwwroot/dynamic-erp/css/treeview.css" rel="stylesheet" />
+
+ 
+
+<div id="contextMenu" class="context-menu-rc" style="display: none">
+    <ul class="menuRC" style="list-style:none">
+        @*<li class="share"><a ng-click="IsValidTran()" class="clickcursor"><i class="fa fa-check" aria-hidden="true"></i> Is Valid Transaction</a></li>
+        <li ng-show="beData.TranId>0" class="share"><a ng-click="ShowTransactionRelation()" class="clickcursor"><i class="fa fa-project-diagram" aria-hidden="true"></i> Transaction Relation</a></li>*@
+        <li ng-show="newMaster.TranId>0" class="share"><a ng-click="ShowAuditLog()" class="clickcursor"><i class="fa fa-clock" aria-hidden="true"></i> Audit Log</a></li>
+    </ul>
+</div>
+
+
+
+<div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmMDLLedAllocation" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                <h6 class="modal-title" id="exampleModalCenterTitle">Journal Entry</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body gradient-bg">
+                <div class="row" style="margin-top: -10px">
+                    <div class="table-responsive">
+                        <div class="table-scroll-x-y mt-1" style="height: 450px">
+                            <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th style="width: 50px">S.No.</th>
+                                        <th style="width: 200px">Particular's</th>
+                                        <th style="width: 150px">Debit</th>
+                                        <th style="width: 150px">Credit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="vLA in ValidLedAllocationColl">
+                                        <td align="center">{{$index+1}}</td>
+                                        <td>
+                                            <select class="select2 serial form-control-sm" all-ledger ng-model="vLA.LedgerId" style="width:95%" ledgertype="1"
+                                                    placeholder="** Ledger Name **" showdetails="false" ledger-detail="vLA.PartyLedger" side-bar-data="vLA.partySideBarData" disabled></select>
+                                        </td>
+                                        <td align="right"><h5> {{vLA.DrAmount |formatNumberEmpty}}</h5></td>
+                                        <td align="right"><h5> {{vLA.CrAmount |formatNumberEmpty}}</h5></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td align="center" colspan="2">TOTAL :- </td>
+                                        <td align="right"><b><h5> {{(ValidLedAllocationColl  | sumOfValue:'DrAmount') |formatNumberEmpty}}</h5></b></td>
+                                        <td align="right"><b><h5>{{(ValidLedAllocationColl  | sumOfValue:'CrAmount') |formatNumberEmpty}}</h5> </b></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="padding: 3px; margin-top:2px; ">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal" style="min-width:90px">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmMDLTranRelation" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                <h6 class="modal-title" id="exampleModalCenterTitle">Transaction Relationship</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body gradient-bg">
+                <div class="row" style="margin-top: -10px">
+                    <div class="col-md-12 card p-2">
+                        <div class="text-center">
+                            <ul class="heirarchy vertical" style="max-width:auto">
+                                <li>
+                                    <div class="blue clickcursor" ng-click="getJobCardCallingRpt(0)" style="text-wrap:nowrap" title="SystemId: {{TranRelation.Parent.TranId}}">{{TranRelation.Parent.AutoManualNo}}<br />{{TranRelation.Parent.VoucherName}}<br />{{TranRelation.Parent.Branch}}</div>
+                                    <ul>
+                                        <li ng-repeat="tranR in TranRelation.ChieldColl">
+                                            <div class="green clickcursor" ng-click="getJobCardCallingRpt(22)" style="text-wrap:nowrap" title="SystemId: {{tranR.TranId}}">{{tranR.AutoManualNo}}<br/>{{tranR.VoucherName}}<br />{{tranR.Branch}}</div>
+                                        </li>                                                                     
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="padding: 3px; margin-top:2px; ">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal" style="min-width:90px">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmAuditHis" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                <h6 class="modal-title" id="exampleModalCenterTitle">Audit Log</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body gradient-bg">
+                <div class="row" style="margin-top: -10px">
+                    <div class="table-responsive">
+                        <div class="table-scroll-x-y mt-1" style="height: 450px">
+                            <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                <thead class="text-center">
+                                    <tr>
+                                        <th style="width: 50px">S.No.</th>
+                                        <th style="width: 200px">Action</th>
+                                        <th style="width: 150px">User</th>
+                                        <th style="width: 150px">IP Address</th>
+                                        <th style="width: 150px">Ref. No.</th>
+                                        <th style="width: 150px">Log Text</th>
+                                        <th style="width: 150px">DateTime</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="vAL in AuditLogColl">
+                                        <td align="center">{{vAL.SNo}}</td>
+                                        <td align="center">{{vAL.ActionName}}</td>
+                                        <td align="left">{{vAL.UserName}}</td>
+                                        <td align="left">{{vAL.MacAddress}}</td>
+                                        <td align="left">{{vAL.AutoManualNo}}</td>
+                                        <td align="left">{{vAL.LogText}}</td>
+                                        <td align="left">{{vAL.LogDate}}</td>
+                                    </tr>
+                                </tbody>
+                                 
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="padding: 3px; margin-top:2px; ">
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal" style="min-width:90px">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.onclick = hideMenu;
+    document.oncontextmenu = rightClick;
+
+    function hideMenu() {
+        document.getElementById("contextMenu")
+            .style.display = "none"
+    }
+
+    function rightClick(e) {
+        e.preventDefault();
+
+        if (document.getElementById("contextMenu").style.display == "block") {
+            hideMenu();
+        } else {
+            var menu = document.getElementById("contextMenu")
+            menu.style.display = 'block';
+            menu.style.left = e.pageX + "px";
+            menu.style.top = e.pageY + "px";
+        }
+    }
+</script>

@@ -1,0 +1,162 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/inventory/creation/ProductInOutType.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="ProductInOutTypeController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid p-0">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">ProductInOut Type</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ProductInOutType">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.ProductInOutType">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllProductInOutType()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'ProductInOutType'" report-name="'List Of Product Brand'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'ProductInOutType',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'LedgerChannel'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="search-toolbar mb-3 mt-2">
+                                <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center; width: 60px;">S.N</th>
+                                            <th style="text-align: center; width: 120px;">Name</th>
+                                            <th style="text-align: center;width: 20% ;">Code</th>
+                                            <th style="text-align: center; width: 60px;" class="no-print">Action</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="beData in ProductInOutTypeColl | filter:searchData.ProductInOutType| itemsPerPage:perPage.ProductInOutType"
+                                            current-page="currentPages.ProductInOutType" pagination-id="ProductInOutTypePagination">
+                                            <td style="text-align: center">{{$index+1}}</td>
+                                            <td>{{beData.Name}}</td>
+                                            <td>{{beData.Code}}</td>
+                                            <td class="project-actions no-print" style="text-align:center">
+                                                <div class="btn-group-sm">
+                                                    <a href="#" class="btn btn-info" ng-click="GetProductInOutTypeById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                    <a href="#" class="btn btn-danger" ng-click="deleteProductInOutType(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="ProductInOutTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Name<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="formData.Name">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <label>Code<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="formData.Code">
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <label class="invisible d-block">IsActive?</label>
+                                            <label>
+                                                <input type="checkbox"
+                                                       ng-model="formData.IsActive"
+                                                       ng-true-value="true"
+                                                       ng-false-value="false">
+
+                                                Is Active?
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateProductInOutType()"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

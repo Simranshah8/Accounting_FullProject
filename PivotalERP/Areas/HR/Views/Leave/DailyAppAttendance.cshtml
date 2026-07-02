@@ -1,0 +1,200 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto;
+    }
+</style>
+<script src="~/jslib/hr/attendance/DailyAppAttendance.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="dailyAppAttendanceController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">For Date:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newDailyAttendance.ForDate_TMP" style="max-width:130px" date-detail="newDailyAttendance.ForDateDet" />
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary load" style="float: right; " data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetDailyAttendance()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchData.Attendance">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-target="#itemAllocationForModal" title="Filter">
+                                            <i class="fas fa-filter"></i>
+                                        </a>
+                                    </form>
+
+                                </div>
+
+                            </header>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-scroll-x-y mb-1" style="height: calc(100vh - 7rem)!important">
+                                        <table id="datatable" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="cstm-sticky" style="left:0px; width: 90px;z-index:4;background-color:#ececec!important">Date</th>
+                                                    <th class="cstm-sticky" style="left: 90px; width: 200px; z-index: 4; background-color: #ececec !important ">Full Name</th>
+                                                    <th style="width: 180px; background-color: #ececec !important ">Roles</th>
+                                                    <th style="width: 110px; background-color: #ececec !important ">Phone Number</th>
+                                                    <th style="width: 85px; background-color: #ececec !important ">Check In</th>
+                                                    <th style="width: 90px; background-color: #ececec !important ">Check Out</th>
+                                                    <th style="width: 160px; background-color: #ececec !important ">In Location</th>
+                                                    <th style="width: 160px; background-color: #ececec !important ">Out Location</th>
+                                                    <th style="width: 260px; background-color: #ececec !important ">Agendas</th>
+                                                    <th style="width: 110px; background-color: #ececec !important ">Check In Image</th>
+                                                    <th style="width: 120px; background-color: #ececec !important ">Check Out Image</th>
+                                                    <th style="width: 120px; background-color: #ececec !important ">Working(H)</th>
+                                                    <th style="width: 120px; background-color: #ececec !important ">Visit(H)</th>
+                                                    <th style="width: 160px; background-color: #ececec !important ">Distributor</th>
+                                                    <th style="width: 160px; background-color: #ececec !important ">Route</th>
+                                                    <th style="width: 160px; background-color: #ececec !important ">Parent</th>
+                                                    <th style="width: 85px; background-color: #ececec !important ">Start Time</th>
+                                                    <th style="width: 90px; background-color: #ececec !important ">End Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="att in AttendanceColl | filter:searchData.Attendance">
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">{{att.ForMiti}}</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">{{att.Name}}</td>
+                                                    <td class="align-middle">{{att.Level}}</td>
+                                                    <td class="align-middle">{{att.Mobile}}</td>
+                                                    <td class="align-middle">{{att.InTime}}</td>
+                                                    <td class="align-middle">{{att.OutTime}}</td>
+                                                    <td class="align-middle"><a href="https://maps.google.com/maps?q={{att.In_Lat}},{{att.In_Lng}}&hl=es;z=14&amp;"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">{{att.InLocation}} </span> </a></td>
+                                                    <td class="align-middle"><a href="https://maps.google.com/maps?q={{att.Out_Lat}},{{att.Out_Lng}}&hl=es;z=14&amp;"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">{{att.OutLocation}} </span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a>  {{att.InRemark}} {{att.OutRemark}}  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img ng-show="att.InImage.length>0" src="{{base_url+att.InImage}}" style="height:50px;width:45px;" ng-click="ShowPersonalImg(att.InImage)" />
+                                                        @*<img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />*@
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img ng-show="att.OutImage.length>0" src="{{base_url+att.OutImage}}" style="height:50px;width:45px;" ng-click="ShowPersonalImg(att.OutImage)" />
+                                                    </td>
+                                                    <td class="align-middle">{{att.WorkingHour}}</td>
+                                                    <td class="align-middle">{{att.VisitHour}}</td>
+                                                    <td class="align-middle">{{att.DealerName}}</td>
+                                                    <td class="align-middle">{{att.RouteName}}</td>
+                                                    <td class="align-middle">{{att.ParentName}}</td>
+                                                    <td class="align-middle">{{att.StartTime}}</td>
+                                                    <td class="align-middle">{{att.EndTime}}</td>
+
+                                                </tr>
+
+                                            </tbody>
+                                            <tfoot style="position: -webkit-sticky; position: sticky; bottom: 0; background: #ececec; color: #000000; z-index: 4; ">
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky py-2" style="left:0px;z-index:4; width: 90px;background-color:#ececec!important">Total</td>
+                                                    <td class="align-middle cstm-sticky py-2" style="left: 90px; z-index: 4; width: 200px; background-color: #ececec !important"></td>
+                                                    <td class=" py-2">{{Summary.Total}}</td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2">{{Summary.TotalIn}}</td>
+                                                    <td class=" py-2">{{Summary.TotalOut}}</td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2">{{Summary.TotalS}}</td>
+                                                    <td class=" py-2">{{Summary.TotalE}}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.FileData || viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.FileData || viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

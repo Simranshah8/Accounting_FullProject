@@ -1,0 +1,219 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/service/Creation/JobType.js"></script>
+<div ng-app="myApp" ng-controller="JobTypeController" ng-init="LoadData()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="tab-content">
+                            <div id="JobType-section">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.JobType">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.JobType">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.JobType">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#JobType'" sheet-name="'JobTypeDetails'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                            </div>
+                                            <a print-tbl table-id="'#EmployeeProfile'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary load"
+                                                    id="add-JobType-details" style="min-width: 110px;" ng-click="ClearJobType()">
+                                                <i class="fas fa-plus w-t"></i> Add New JobType
+                                            </button>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mb-3">
+                                    <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center; width: 60px; ">
+                                                    S.No
+                                                </th>
+                                                <th style="width: 200px; ">
+                                                    Job Type
+                                                </th>
+                                                <th style="width: 150px; ">
+                                                    Description
+                                                </th>
+                                               
+                                                <th style="text-align: center; width: 80px;">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="C in JobTypeList | filter:searchData.JobType | itemsPerPage: perPage.JobType" current-page="currentPages.JobType" pagination-id="JobTypePagination">
+                                                <td style="text-align:center;margin:auto">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{C.JobTypeName}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{C.Description}}
+                                                </td>
+                                               
+                                                <td class="project-actions" style="text-align:center; color:#fff;">
+                                                    <div class="btn-group-sm">
+                                                        <a class="btn btn-info" ng-click="getJobTypeById(C, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-danger" ng-click="DelJobTypeById(C)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="JobTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div id="JobType-form">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group">
+                                                <label>Order No</label>
+                                                <input type="number" class="form-control form-control-sm" style="width:100%" ng-model="newDet.OrderNo">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Job Type</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.JobTypeName">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-8">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.Description"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-2">
+                                            <div class="form-group clearfix">
+                                                <label for="" class="invisible d-block">label for height</label>
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="checkboxPrimary1" ng-model="newDet.IsWarranty">
+                                                    <label for="checkboxPrimary1">Warranty</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-2">
+                                            <div class="form-group clearfix">
+                                                <label for="" class="invisible d-block">label for height</label>
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="checkboxPrimary11" ng-model="newDet.IsFreeService">
+                                                    <label for="checkboxPrimary11">Free Service</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <div class="form-group clearfix">
+                                                <label for="" class="invisible d-block">label for height</label>
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="chkIsBillType" ng-model="newDet.IsBillType">
+                                                    <label for="chkIsBillType">Is Bill Type</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Ledger (Bill to Customer)</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newDet.LedgerId" id="cboSalesLedger" @*style="width:95%"*@ ledgertype="3"
+                                                        placeholder="** Select Sales Name **" showdetails="false" confirm-action="PartySelectionChange(beData)" ledger-detail="newDet.SalesLedgerInfo" side-bar-data="newDet.partySideBarData"></select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        @*<button type="button" class="btn btn-default" ng-click="ClearJobType()">Cancel</button>*@
+                                        <button type="button" class="btn btn-secondary" id="back-to-JobType-list">Back to List</button>
+
+                                        <button type="button" class="btn btn-primary" ng-click="SaveJobType()">{{newDet.Mode}}</button>
+                                    </div>
+
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+</div>
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

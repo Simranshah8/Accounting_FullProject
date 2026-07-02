@@ -1,0 +1,163 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/Setup/IRDDetails.js?v=3"></script>
+<div ng-app="myApp" ng-controller="IRDDetails" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+
+
+    <div class="container-fluid">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="card">
+                <div class="card-header header-corner-triangle">
+                    <h3 class="card-title">IRD Details</h3>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>For Branch</label>
+                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="IRDDetails.BranchId" ng-change="getIRDDetailsForBranch()">
+                                        <option ng-repeat="cc in BranchList track by cc.BranchId" ng-value="cc.BranchId" ng-selected="cc.CostClassId == IRDDetails.BranchId">
+                                            {{cc.Name}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="">API</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" ng-model="IRDDetails.API" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>UserName</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" ng-model="IRDDetails.UserName" />
+                                </div>
+                            </div>
+                             
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">Password</label>
+                                    <input type="password"
+                                           class="form-control form-control-sm" ng-model="IRDDetails.Password" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">API Password</label>
+                                    <input type="password"
+                                           class="form-control form-control-sm" ng-model="IRDDetails.APIPwd" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">API User</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" ng-model="IRDDetails.APIUserName" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">FYear</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" ng-model="IRDDetails.FYear" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <footer class="main-footer">
+                        <div class="text-right control-btns">
+                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Cancel</button>
+                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateIRDDetails()">Save</button>
+                            <button type="button" class="btn btn-default" ng-click="CallPendingDataSynsIRD()">Pending Data Synchronize </button>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+
+            <div class="p-1"></div>
+            <div class="card">
+                <div class="card-header header-corner-triangle">
+                    <h3 class="card-title">Data Synchronize To IRD</h3>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="row">
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+
+                                    <label for="">Voucher</label>
+                                    <select class="form-control form-control-sm select2 ml-2" ng-model="irdData.VoucherType" style="width:75%;">
+                                        <option ng-value="14">Sales Invoice</option>
+                                        <option ng-value="16">Sales Return</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>From Date</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="irdData.StartDate_TMP" date-detail="irdData.StartDateDet">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>To Date</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="irdData.EndDate_TMP" date-detail="irdData.EndDateDet">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">From Voucher No</label>
+                                    <input type="number"
+                                           class="form-control form-control-sm" ng-model="irdData.FromVoucherNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">To Voucher No</label>
+                                    <input type="number"
+                                           class="form-control form-control-sm" ng-model="irdData.ToVoucherNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group mt-4">
+                                    <button type="button" class="btn btn-default" ng-click="CallPendingDataSynsIRD()">Synchronize </button>
+                                </div>
+                            </div>
+                        </div>
+                    
+                    </form>
+                    <footer class="main-footer">
+                        <div class="text-right control-btns">
+                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Cancel</button>
+                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateIRDDetails()">Save</button>
+                            
+                        </div>
+                    </footer>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+</div>

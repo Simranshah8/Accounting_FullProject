@@ -1,0 +1,174 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_EmployeeWiseWeekend)";
+</script>
+
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/hr/Transaction/EmployeeWiseWeekend.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EmployeeWiseWeekendController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="card p-2">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label>For Year</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.YearId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="A.id" ng-repeat="A in YearList" ng-selected="A.id==newFilter.YearId">{{A.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label for="">For Month</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.MonthId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFilter.MonthId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Branch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.BranchId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newFilter.BranchId">{{B.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.DepartmentId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.CostCenterDepartmentId" ng-repeat="c in DepartmentList" ng-selected="c.CostCenterDepartmentId==newFilter.DepartmentId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn load btn-outline-secondary mt-4 btn-add float-right" ng-click="GetEmployeeWiseWeekend()"><i class="fas fa-redo-alt"></i> Load</button>
+                        </div>
+                    </div>
+                    <header class="row">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeeWiseWeekend">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EmployeeWiseWeekend">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search" placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.EmployeeWiseWeekend">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file ml-2">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#EmployeeWiseWeekend'" sheet-name="'EmployeeWiseWeekendList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#EmployeeWiseWeekend').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+
+                                <button class="btn load btn-add btn-primary" ng-click="SaveEmployeeWiseWeekend()"><i class="fas fa-save mr-1"></i>Save</button>
+                                <button class="btn load btn-add btn-danger" ng-click="DeleteEmployeeWiseWeekend()"><i class="far fa-trash-alt"></i> Delete</button>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="table-scroll-x-y table-scroll pb-2" style="max-height: calc(100vh - 13rem);">
+                        <table id="EmployeeWiseWeekend"
+                               class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle cstm-sticky" rowspan="2" style="width: 70px; left: 0; z-index: 4; background-color: #e9ecef !important" ng-click="sortEmpData('EmployeeCode')">Code</th>
+                                    <th class="text-center align-middle cstm-sticky" rowspan="2" style="width: 80px; left: 70px; z-index: 4; background-color: #e9ecef !important" ng-click="sortEmpData('EnrollNo')">Enroll No</th>
+                                    <th class="align-middle cstm-sticky" rowspan="2" style="width: 200px; left: 150px; z-index: 4; background-color: #e9ecef !important" ng-click="sortEmpData('EmployeeName')">Name</th>
+
+                                    <td class="text-center align-middle" ng-repeat="day in [].constructor(EmployeeWiseWeekendList[0].TotalDays) track by $index" style="width: 110px; z-index: 3; background-color: #e9ecef !important">
+                                        Day {{$index+1}}
+                                        <div class="icheck-primary ml-2">
+                                            <input type="checkbox" id="chkUseSSL{{cl.EmployeeId}}-Day{{$index + 1}}"
+                                                   ng-model="AllCheckedForDay[$index]"
+                                                   ng-click="CheckUnCheckAll($index + 1)">
+                                            <label for="chkUseSSL{{cl.EmployeeId}}-Day{{$index + 1}}"></label>
+                                        </div>
+                                    </td>
+
+                                    <th class="align-middle cstm-sticky" rowspan="2" style="width: 80px; left: 150px; z-index: 4; background-color: #e9ecef !important">P.Day</th>
+                                    <th class="align-middle cstm-sticky" rowspan="2" style="width: 80px; left: 150px; z-index: 4; background-color: #e9ecef !important">A.Day</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="cl in EmployeeWiseWeekendList  |orderBy:sortKeySS:reverseSS | filter:searchData.EmployeeWiseWeekend | itemsPerPage: perPage.EmployeeWiseWeekend" current-page="currentPages.EmployeeWiseWeekend" pagination-id="EmployeeWiseWeekendPagination">
+                                    <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 2; background-color: #fff!important">{{cl.EmployeeCode}}</td>
+                                    <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 2; background-color: #fff !important">{{cl.EnrollNumber}}</td>
+                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 2; background-color: #fff !important">{{cl.Name}}</td>
+                                    <td class="text-center" ng-repeat="day in [].constructor(EmployeeWiseWeekendList[0].TotalDays) track by $index">
+                                        <div class="icheck-primary ml-2">
+                                            <input type="checkbox" id="chkUseSSL{{cl.EmployeeId}}-Day{{$index + 1}}" ng-model="cl['Day'+($index + 1)]" ng-change="updateDayCounts(cl)">
+                                            <label for="chkUseSSL{{cl.EmployeeId}}-Day{{$index + 1}}"></label>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 2; background-color: #fff !important">{{cl.PDay}}</td>
+                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 2; background-color: #fff !important">{{cl.ADay}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="EmployeeWiseWeekendPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

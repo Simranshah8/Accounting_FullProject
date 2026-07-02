@@ -1,0 +1,160 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .ag-ltr .ag-header-cell-resize {
+        right: 0px !important;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Payroll_PeriodSalarySheet)";
+</script>
+
+<script src="~/jslib/hr/Report/PeriodSalarySheet.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PeriodSalarySheetController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-0 mb-0">
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="">Company</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.CompanyRelationshipId" style="width: 100%;">
+                                        <option ng-value="">**Select All**</option>
+                                        <option ng-repeat="tdc in CompanyRelationshipList" ng-value="tdc.TranId" ng-selected="tdc.TranId==newPeriodSalary.CompanyRelationshipId"> {{tdc.Name}} </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 d-flex">
+                                <div class="col-md-6 pl-0">
+                                    <div class="form-group ">
+                                        <label>From Year </label>
+                                        <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.FromYearId" style="width:100%;">
+                                            <option ng-value="A.id" ng-repeat="A in YearList" ng-selected="A.id==newPeriodSalary.FromYearId">{{A.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pr-0">
+                                    <div class="form-group">
+                                        <label>From Month</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.FromMonthId"style="width:100%;">
+                                            <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newPeriodSalary.FromMonthId">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-md-3 d-flex">
+                                <div class="col-md-6 pl-0">
+                                    <div class="form-group ">
+                                        <label>To Year </label>
+                                        <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.ToYearId" style="width:100%;">
+                                            <option ng-value="A.id" ng-repeat="A in YearList" ng-selected="A.id==newPeriodSalary.ToYearId">{{A.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pr-0">
+                                    <div class="form-group">
+                                        <label>To Month</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.ToMonthId" style="width:100%;">
+                                            <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newPeriodSalary.ToMonthId">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <div class="form-group mb-0">
+                                    <label for="">For Employee</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.ForEmployeeId">
+                                        <option value="">**Select All**</option>
+                                        <option ng-value="cl.id" ng-repeat="cl in ForEmployeeColl" ng-selected="cl.id==newPeriodSalary.ForEmployeeId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Branch</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.BranchId" style="width:100%">
+                                        <option ng-value="">**Select All**</option>
+                                        <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newPeriodSalary.BranchId">{{B.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Department</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.DepartmentId" style="width:100%">
+                                        <option ng-value="">**Select All**</option>
+                                        <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newPeriodSalary.DepartmentId">{{c.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPeriodSalary.CategoryId" style="width:100%">
+                                        <option ng-value="">**Select All**</option>
+                                        <option ng-value="c.CategoryId" ng-repeat="c in CategoryList" ng-selected="c.CategoryId==newPeriodSalary.CategoryId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mt-4">
+                                <form class="d-flex float-right">
+                                    <div class="input-group input-group-sm" style="min-width: 67px;">
+                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                    </div>
+
+                                    <div class="dropdown dnld-file mx-1" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download py-1"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                Excel
+                                            </a>
+                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                     class="img-fluid exports-icon">
+                                                CSV
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-secondary load" style="width:100px" ng-click="GetPeriodSalarySheet()"><i class="fas fa-redo-alt pr-1"></i>Load</button>
+                                </form>
+                            </div>
+
+                        </div>
+
+                        <div id="phg-section" class="">
+                          
+                            <div class="">
+                                <div id="datatable" style="height: calc(100vh - 9rem); width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                @*<div id="myGridBottom" style="height: 115px;" class="ag-theme-alpine"></div>*@
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

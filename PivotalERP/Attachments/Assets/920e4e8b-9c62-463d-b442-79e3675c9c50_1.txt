@@ -1,0 +1,22 @@
+ALTER procedure [dbo].[usp_GetHodListDepartmentWise]
+(
+@UserId int,
+@EntityId int=null,
+@DepartmentId INT = NULL
+)
+AS
+BEGIN
+SET NOCOUNT ON ;
+EXEC sp_set_session_context @key=N'UserId', @value=@UserId;
+
+declare @Qry nvarchar(max)='';
+declare @Where nvarchar(200)=' where  1=1 ';
+
+if isnull(@DepartmentId,0)>0
+	set @Where=@Where+' and TR.DepartmentId='+cast(@DepartmentId as varchar);
+
+set @Qry='select TR.EmployeeId,E.Name,E.EmployeeCode,TR.TranId as HODId from tbl_HeadOfDepartment(nolock) TR
+left Join V_Employee(nolock) E on E.EmployeeId = TR.EmployeeId'; 
+execute(@Qry+@Where);
+END;
+

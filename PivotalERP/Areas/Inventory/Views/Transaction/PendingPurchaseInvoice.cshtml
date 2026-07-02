@@ -1,0 +1,564 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.PendingSalesOrder)";
+    var VoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.SalesInvoice)";
+	 var DefaultKeyValues = "@ViewBag.DefaultKeyValues";
+</script>
+
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table th, .table td {
+        padding: 0.25rem !important;
+    }
+</style>
+<script src="~/jslib/inventory/transaction/PendingPurchaseInvoice.js?v=20240801"></script>
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="trnPendingPurchaseInvoiceCntrl">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Add the required Contents of sidebar-->
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <section class="">
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card p-2">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.DateFrom_TMP" style="max-width:100px" date-detail="dayBook.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.DateTo_TMP" style="max-width:100px" date-detail="dayBook.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="comDet.Maintain==3">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>Billing Type</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control form-control-sm select2" ng-model="dayBook.PaymentTermsId" data-placeholder="*BillingType*">
+                                                            <option ng-value="0">All</option>
+                                                            <option ng-value="cl.id" ng-repeat="cl in PaymentTermColl">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="BranchList.length>1">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>Branch</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control form-control-sm select2" ng-model="dayBook.BranchId" data-placeholder="*Select Branch*">
+                                                            <option ng-value="cl.id" ng-repeat="cl in BranchList" ng-selected="cl.id==newDayBook.BranchId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <div class="form-group">
+                                                    <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 80px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetPendingSO()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 ">
+                                        <header class="row">
+                                            <div class="col-md-5 col-sm-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Find:</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control pr-0"
+                                                                    id="exampleFormControlSelect1">
+                                                                <option>Contain</option>
+                                                                <option>Prefix</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchData.PendingOrder">
+
+                                                            <div class="input-group-append">
+                                                                <button type="submit" class="btn btn-default">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7 col-sm-7 text-right">
+                                                <form class="form-inline  float-right">
+
+                                                    <div class="dropdown dnld-file ml-2">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       title="Print" ng-click="Print()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </form>
+
+                                            </div>
+
+                                        </header>
+
+                                        <div class="row">
+                                            <!--Table Added Starts-->
+                                            <div class="table-scroll-x-y mb-0" style="height: calc(100vh - 7rem)!important; width: 100%;">
+                                                <table id="datatable" class="table table-bordered table-head-fixed fold-table">
+                                                    <thead style="background-color: #EDEDFD;">
+                                                        <tr>
+                                                            <th style="width:170px;background-color:#ececec!important">Miti</th>
+                                                            <th style="width: 100px;background-color:#ececec!important">Invoice No</th>
+                                                            <th style="width: 250px;background-color:#ececec!important">Party</th>
+                                                            <th style="width: 200px;background-color:#ececec!important">Address</th>
+                                                            @*<th style="width: 150px;background-color:#ececec!important">Route</th>
+        <th style="width: 180px;background-color:#ececec!important">Salesman</th>*@
+                                                            <th style="width: 180px;background-color:#ececec!important" colspan="3">Sub D.</th>
+                                                            <th style="width: 100px;background-color:#ececec!important">Amount</th>
+                                                            <th style="width: 100px;background-color:#ececec!important">Remarks</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="view" fold-table ng-repeat-start="pv in PendingVoucherColl" ng-click="RecalculateAdditioncalCost(pv,null,'main',-1)">
+                                                            <td class="text-center px-1"><input type="checkbox" ng-change="ChangeRefTranSelected($index,pv)" ng-model="pv.IsSelected" id="chkIA{{$index}}"> <label for="chkIA{{$index}}">{{pv.InvoiceDate |dateFormat}} ({{pv.ItemDetailsColl.length}})</label>  </td>
+                                                            <td>{{pv.InvoiceNo}}</td>
+                                                            <td> <label for="chkIA{{$index}}"> {{pv.PartyName}}</label></td>
+                                                            <td>{{pv.Address}}</td>
+                                                            @*<td>{{pv.RouteName}}</td>
+                                                            <td>{{pv.Salesman}}</td>*@
+                                                            <td colspan="3">{{pv.Branch}}</td>
+                                                            <td align="right">{{pv.TotalAmount |number:2}}</td>
+                                                            <td>{{pv.Narration}}</td>
+                                                        </tr>
+
+                                                        <tr class="fold" ng-repeat-end>
+                                                            <td></td>
+                                                            <td colspan="6" class="p-0">
+                                                                <div class="fold-content">
+                                                                    <div class="table-responsive mb-0">
+                                                                        <table class="table mb-0 fold-table">
+                                                                            <thead style="background-color: #EDEDFD;">
+                                                                                <tr>
+                                                                                    <th class="py-0" style="width: 60px; text-align: center">S.No.</th>
+                                                                                    <th class="py-0" style="width: 300px">Product</th>
+                                                                                    <th class="py-0" style="width: 80px">Code</th>
+                                                                                    <th class="py-0" style="width: 70px;text-align:center">Qty.</th>
+                                                                                    <th class="py-0" style="width: 80px; text-align: center">Rate</th>
+                                                                                    <th class="py-0" style="width: 90px; text-align: center">Amount</th>
+                                                                                    <th class="py-0" style="width: 170px; text-align: center">Remarks</th>
+                                                                                    <th style="text-align:center;width: 100px;">Action</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <tr ng-repeat="itemDet in pv.ItemDetailsColl">
+                                                                                    <td class="text-center">{{$index+1}}</td>
+                                                                                    <td>{{itemDet.ProductName}}</td>
+                                                                                    <td>{{itemDet.ProductCode}}</td>
+                                                                                    <td align="center">{{itemDet.InvoiceQty |number:2}} {{ itemDet.Unit }}</td>
+                                                                                    <td align="right">{{itemDet.Rate |number:2}}</td>
+                                                                                    <td align="right">{{(itemDet.Amount) | number:2}}</td>
+
+                                                                                    <td align="center"><button type="button" class="btn btn-sm btn-success" style="padding:3px;">{{itemDet.StockRemark}}({{itemDet.BalQty |number:2}})</button></td>
+                                                                                    <!--In case of green make btn class btn-success. In case of red make class btn-danger. In case of orange make button class btn-warning-->
+                                                                                    <td class="project-actions text-center" style="text-align:center">
+                                                                                        <div class="btn-group-sm">
+                                                                                            @*<a href="#" class="btn btn-info btn-sm"><i class="fas fa-pencil-alt"></i></a>*@
+                                                                                            <a href="#" class="btn btn-danger btn-sm"><i class="fas fa-ban"></i></a>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="text-right" colspan="3"><b>SUB-TOTAL</b></td>
+                                                                                    <td align="center">
+                                                                                        <b>{{(pv.ItemDetailsColl  | sumOfValue:'InvoiceQty') |number:2}}</b>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                    </td>
+                                                                                    <td align="right">
+                                                                                        <b>{{(pv.ItemDetailsColl  | sumOfValue:'Amount') |number:2}}</b>
+                                                                                    </td>
+
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                </tr>
+                                                                                <tr ng-repeat="adc in pv.AditionalChargeColl">
+                                                                                    <td class="text-right" colspan="3"><b>{{adc.LedgerName}}</b></td>
+                                                                                    <td></td>
+                                                                                    <td>
+                                                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="Rate" onfocus="this.select();" ng-change="RecalculateAdditioncalCost(pv,adc,'rate',$index)" noofdecimal="itemDet.RateDecimal" ng-model="adc.Rate" ng-readonly="adc.CanEdit==false || adc.ReadOnlyQty==true">
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="Rate" onfocus="this.select();" ng-change="RecalculateAdditioncalCost(pv,adc,'amt',$index)" noofdecimal="itemDet.RateDecimal" ng-model="adc.Amount" ng-readonly="adc.CanEdit==false || adc.ReadOnlyQty==true">
+                                                                                    </td>
+
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="text-right" colspan="3"><b>GRAND-TOTAL</b></td>
+                                                                                    <td>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                    </td>
+                                                                                    <td align="right">
+                                                                                        <b>{{(pv.InvoiceAmount) |number:2}}</b>
+                                                                                    </td>
+                                                                                    <td align="center"><a href="#" class="btn btn-info btn-sm" ng-click="MakeSalesInvoice(pv,$index)">Post Now</a></td>
+
+                                                                                    <td align="center"> <a href="#" class="btn btn-danger btn-sm" ng-click="CancelModal(pv,$index)">Cancel Invoice</a></td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+
+
+
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            @*<div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="PendingOrderPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>*@
+
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+                        <!-- /.row -->
+                    </div>
+                    <!--/. container-fluid -->
+                </section>
+                <!-- /.content -->
+            </div>
+            <!-- Add ReportTemplates Modal Dailog -->
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-cancel">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Cancel {{SelectedVoucher.PartyName}} {{ SelectedVoucher.OrderNo }} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Cancel Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedVoucher.CancelRemarks"></textarea>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CancelVoucher()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-post">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Post {{SelectedVoucherP.VoucherName}} {{ SelectedVoucherP.AutoManualNo }} </h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label>Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedVoucherP.VerifyRemarks"></textarea>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="PostVoucher()">Post</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+            <!--Modal for USer Collection Report Starts-->
+            <div class="modal fade sales-invoice-page-modal document-attach-modal" id="CollectionReport" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">User Collection Report</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body gradient-bg">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchData.UserColl">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                        </div>
+                                        <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        @*<a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-target="#itemAllocationForModal" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>*@
+                                    </form>
+
+                                </div>
+
+                            </header>
+                            <div class="table-scroll-x-y" style="height:354px!important;">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th rowspan="2" class="text-center align-middle" style="width: 150px; background-color: #ececec !important">Username</th>
+                                            <th colspan="2" scope="colgroup" class="text-center" style="width: 180px; background-color: #ececec !important">Sales</th>
+                                            <th colspan="2" scope="colgroup" class="text-center" style="width: 180px; background-color: #ececec !important">Sales Return</th>
+                                            <th rowspan="2" class="text-center align-middle" style="width: 95px; background-color: #ececec !important">Cash Deposit</th>
+                                            <th rowspan="2" class="text-center align-middle" style="width: 95px; background-color: #ececec !important">Cash Refund</th>
+                                            <th rowspan="2" class="text-center align-middle" style="width: 150px; background-color: #ececec !important">Net Sales (Cash)<br />(Sales-Sales Return)</th>
+                                            <th rowspan="2" class="text-center align-middle" style="width: 150px; background-color: #ececec !important">Net Cash Collection<br />(Deposit-Refund)</th>
+                                            <th rowspan="2" class="text-center align-middle" style="width: 110px; background-color: #ececec !important">Net Cash<br />(Available)</th>
+                                        </tr>
+                                        <tr>
+                                            <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Cash</th>
+                                            <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Credit</th>
+                                            <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Cash</th>
+                                            <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Credit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="uc in UserWiseColl | filter:searchData.UserColl">
+                                            <th class="align-middle cstm-sticky">{{uc.User}}</th>
+                                            <td style="text-align:right">{{uc.SalesCash |number:2}}</td>
+                                            <td style="text-align:right">{{uc.SalesCredit |number:2}}</td>
+                                            <td style="text-align:right">{{uc.ReturnCash |number:2}}</td>
+                                            <td style="text-align:right">{{uc.ReturnCredit |number:2}}</td>
+                                            <td style="text-align:right">{{uc.Receipt |number:2}}</td>
+                                            <td style="text-align:right">{{uc.Payment |number:2}}</td>
+                                            <td style="text-align:right">{{uc.NetSales |number:2}}</td>
+                                            <td style="text-align:right">{{uc.NetCash |number:2}}</td>
+                                            <td style="text-align:right">{{uc.NetCashBal |number:2}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="align-middle cstm-sticky">TOTAL : -> </th>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'SalesCash') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'SalesCredit') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'ReturnCash') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'ReturnCredit') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'Receipt') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'Payment') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'NetSales') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'NetCash') |number:2}}</td>
+                                            <td style="text-align:right">{{(UserWiseColl | sumOfValue:'NetCashBal') |number:2}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- end modal body -->
+                        @*<div class="modal-footer py-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Ok</button>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-showDocument">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">{{SelectedTran.VoucherName}}-{{SelectedTran.AutoManualNo}}</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+                                                <th scope="col" style="width:150px">Name</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="dcc in SelectedTran.DocumentColl">
+                                                <th scope="row">{{$index+1}}</th>
+                                                <td>{{dcc.Name}}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{{dcc.DocumentData || dcc.DocPath}}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." download="{{dcc.Name}}"><i class="fas fa-download"></i></a>
+                                                        <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Close</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+
+
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-0">
+                            <img ng-src="{{viewImg.FileData || viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                        </div>
+                        <div class="modal-footer">
+                            <div><a href="{{viewImg.FileData || viewImg.ContentPath}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

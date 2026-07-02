@@ -1,0 +1,215 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/Setup/DealerUser.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AllUserCtrl" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                   
+                        <div class="card p-2">
+                            <header class="row">
+                                <div class="col-md-6">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0"
+                                                        ng-model="perPage.UserName">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.UserName">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.UserName">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- end col-md-8 -->
+                                <div class="col-md-6 text-right">
+                                    <div class="dropdown dnld-file">
+                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download" style="font-size:14px"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+
+                                        </div>
+                                        <a print-tbl table-id="'#main-table'" class="btn btn-default btn-sm wait">
+                                            <i class="fas fa-print" style="font-size: 14px"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-sm" ng-click="SendSMSToStudentUser()">
+                                            <i class="fas fa-sms" style="font-size: 14px"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-sm" ng-click="SendNotificationToStudentUser()">
+                                            <i class="fas fa-bell" style="font-size: 14px"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-sm" ng-click="SendNotificationToForceLogOut()">
+                                            <i class="fas fa-check" style="font-size: 14px"></i>
+                                        </a>
+                                    </div>
+
+
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y table-scroll mt-1" style="max-height: calc(100vh - 11rem);">
+                                <table id="datatable" class="table table-bordered table-hover table-sm">
+                                    <thead>
+                                        <tr style="font-weight:bold">
+                                            <th class="text-center" style="width: 60px; background-color: #e8e8e8 !important;">
+                                                S.No
+                                            </th>
+                                            <th style="width: 120px; background-color: #e8e8e8 !important;">
+                                                User
+                                            </th>
+                                            <th style="width: 100px; background-color: #e8e8e8 !important;">
+                                                Pwd
+                                            </th>
+                                            <th style="width: 200px; background-color: #e8e8e8 !important;">
+                                                Name
+                                            </th>
+                                            <th style="width: 130px; background-color: #e8e8e8 !important;">
+                                                Address
+                                            </th>
+                                            <th style="width: 150px; background-color: #e8e8e8 !important;">
+                                                Email
+                                            </th>
+                                            <th style="width: 110px; background-color: #e8e8e8 !important;">
+                                                ContactNo
+                                            </th>
+                                            <th style="width: 110px; background-color: #e8e8e8 !important;">
+                                                Type Of User
+                                            </th>
+                                            <th style="width: 110px; background-color: #e8e8e8 !important;">
+                                                Status
+                                            </th>
+                                            <th class="text-center" style="width: 130px; background-color: #e8e8e8 !important;z-index:3">
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="du in AllUserColl | orderBy:sortKey:reverse | filter:searchData.UserName | itemsPerPage:perPage.UserName" current-page="currentPages.UserName" pagination-id="DealerUserPagination">
+                                            <td class="text-center">
+                                                {{$index+1}}
+                                            </td>
+                                            <td>
+                                                {{du.UserName}}
+                                            </td>
+
+                                            <td>
+                                                {{du.Pwd}}
+                                            </td>
+                                            <td>
+                                                {{du.Name}}
+                                            </td>
+                                            <td>
+                                                {{du.Address}}
+                                            </td>
+                                            <td>
+                                                {{du.Email}}
+                                            </td>
+                                            <td>
+                                                {{du.ContactNo}}
+                                            </td>
+                                            <td>
+                                                {{du.TypeOfUser}}
+                                            </td>
+                                            <td>
+                                                {{du.IsActive}}
+                                            </td>
+
+                                            <td>
+                                                <a href="#" class="btn btn-info" title="Reset Password" ng-click="ShowPwdReset(du)"><i class="fa fa-key"></i></a>
+                                            </td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="DealerUserPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                </div>
+                            </footer>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <!--Password Reset Modal Starts-->
+    <div class="modal fade" id="frmPwdReset">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Password Reset For {{ CurAgentUser.Name }}- {{CurAgentUser.UserName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-2">
+                    <div class="form-group">
+                        <label for="">User</label>
+                        <input type="text"
+                               class="form-control form-control-sm" ng-model="CurAgentUser.UserName" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="">New Password</label>
+                        <input type="password"
+                               class="form-control form-control-sm" ng-model="CurAgentUser.NewPassword" />
+                    </div>
+                    <div class="form-group">
+                        <label for="">Confirm Password</label>
+                        <input type="password" class="form-control form-control-sm" ng-model="CurAgentUser.ConfirmPassword" />
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateResetPassword()">Update</button>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+
+</div>

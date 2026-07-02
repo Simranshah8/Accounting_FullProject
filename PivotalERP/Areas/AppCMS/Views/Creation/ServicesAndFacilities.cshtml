@@ -1,0 +1,416 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/AppCMS/ServicesAndFacilities.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ServicesAndFacilitiesController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="p-1"></div>
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                                   aria-controls="home" aria-selected="true">Services & Facilities</a>
+                            </li>
+                           
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link" id="fee-tab" data-toggle="tab" href="#fee" role="tab" aria-controls="fee"
+                                   aria-selected="false">Feedback/Suggestions</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="myTabContent">
+                            <!-- Services & Facilitiest Tab Starts -->
+                            <div class="tab-pane fade show active main-section" id="home" role="tabpanel"
+                                 aria-labelledby="home-tab">
+                                <div id="sf-table-listing">
+                                    <!-- Second Tab Content -->
+                                    <div>
+                                        <header class="row mb-2">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ServicesFacilities">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ServicesFacilities">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.ServicesFacilities">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file">
+                                                    <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                    </div>
+                                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-primary" id="add-sf" style="font-size:14px;">
+                                                        <i class="fas fa-plus w-t"></i> Add Services & Facilities
+                                                    </button>
+                                                </div>
+                                            </div>
+
+
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 100px);">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px">Order No.</th>
+                                                            <th style="width: 250px">Title</th>
+                                                            <th style="width: 350px">Description</th>
+                                                            <th style="width: 70px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in ServicesFacilitiesList | filter:searchData.ServicesFacilities | itemsPerPage: perPage.ServicesFacilities" current-page="currentPages.ServicesFacilities" pagination-id="ServicesFacilitiesPagination">
+                                                            <td>{{cl.OrderNo}}</td>
+                                                            <td>{{cl.Title}}</td>
+                                                            <td>{{cl.Description}}</td>
+                                                            <td>
+                                                                <a class="p-1" ng-click="ShowPersonalImg(cl)">
+                                                                    <i class="fas fa-eye text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="GetServicesFacilitiesById(cl)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="DelServicesAndFacilities(cl)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ServicesFacilitiesPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                                <!-- form area starts -->
+                                <div id="sf-form">
+
+                                    <div class="timeline-item">
+                                        <div class="row">
+                                            <div class="col-md-9">
+                                                <div class="row">
+                                                    <!-- select for others -->
+                                                    <div class="col-md-9">
+                                                        <div class="form-group">
+                                                            <label for="">Title</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newServicesFacilities.Title" />
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Order No.</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newServicesFacilities.OrderNo" />
+                                                        </div>
+                                                    </div>
+                                                    <!-- fields after clicking radio button ends -->
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <textarea class="form-control form-control-sm" rows="1" ng-model="newServicesFacilities.Description"></textarea>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label for="">Content</label>
+                                                            <textarea class="textarea" placeholder="Place some text here"
+                                                                      style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" ng-model="newServicesFacilities.Content" html-editor></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label for="" class="invisible">Photo</label>
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <div class="img-wrap mx-auto" style="width:100%;">
+                                                        <img ng-src="{{newServicesFacilities.PhotoData || newServicesFacilities.ImagePath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                                    </div>
+                                                    <!-- Button trigger modal -->
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto" style="font-size:14px;">
+                                                        <i class="fas fa-camera w-t"></i> Upload Image
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn  btn-info" id="back-to-sf-list"
+                                                        style="min-width: 90px">
+                                                    Back to List
+                                                </button>
+                                                <button type="button" class="btn  btn-default" style="min-width: 90px;" ng-click="ClearServicesFacilities()">Reset</button>
+                                                <button type="button" class="btn  btn-success" style="min-width: 90px;" ng-click="SaveUpdateServicesFacilities()">{{newServicesFacilities.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- form area ends -->
+
+                            </div>
+                            <!-- Services & Facilities Tab Ends -->
+                         
+                            <!-- Feedback/Suggestions Starts -->
+                            <div class="tab-pane fade main-section" id="fee" role="tabpanel" aria-labelledby="fee-tab">
+                                <div id="feedback-table-listing" style="margin-top: -10px;">
+                                    <div>
+                                        <header class="row mb-2">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Feedback">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Feedback">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search"
+                                                                   aria-label="Search" ng-model="searchData.Feedback">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 text-right">
+                                                <div class="dropdown dnld-file">
+                                                    <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                    </div>
+                                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </div>
+                                            </div>
+                                        </header>
+                                        <div>
+                                            <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 100px);">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 80px">S.No.</th>
+                                                            <th style="width: 110px">Date</th>
+                                                            <th style="width: 150px">Feedback By</th>
+                                                            <th style="width: 120px">Contact No</th>
+                                                            <th style="width: 150px">Email</th>
+                                                            <th style="width: 250px">Message</th>
+                                                            <th style="width: 70px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in FeedbackList | filter:searchData.Feedback | itemsPerPage: perPage.Feedback" current-page="currentPages.Feedback" pagination-id="FeedbackPagination">
+                                                            <td>{{clOrderNo}}</td>
+                                                            <td>{{cl.PostDateTime}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.ContactNo}}</td>
+                                                            <td>{{cl.Email}}</td>
+                                                            <td>{{cl.Feedback}}</td>
+                                                            <td>
+                                                                <button class="btn btn-sm py-0 btn-secondary" ng-click="ShowResponeDialog(cl)">Reply</button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="FeedbackPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- Feedback/Suggestions Tab Starts -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- /.row -->
+            </div>
+        
+    </section>
+    <!-- /.content -->
+    <!-- Reply Modal starts -->
+    <div class="modal fade" id="replyFeedback">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Reply Feedback</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control form-control-sm" rows="3" placeholder="" ng-model="currentFeedback.Response"></textarea>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="UpdateFeedback()">Reply</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+    </div>
+    <!-- Reply Modal Ends -->
+    <!-- Services and Facilities Photo Upload Design Modal -->
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newServicesFacilities.Photo_TMP" @*after-selected="AddServicesFacilitiesPhoto()"*@ fileread="newServicesFacilities.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newServicesFacilities.PhotoData  || newServicesFacilities.ImagePath}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm" style="font-size:14px;">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newServicesFacilities.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newServicesFacilities.PhotoData" />
+                    <a ng-click="ClearServicesFacilitiesPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAuthorImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" target="_blank" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Academic Programs Photo Upload Design Modal -->
+    <div class="modal fade" id="updateAcadImage" tabindex="-1" aria-labelledby="updateAcadImageLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateAcadImageLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newAcademicPrograms.PhotoAcadImage_TMP" @*after-selected="AddAboutUsPhoto()"*@ fileread="newAcademicPrograms.PhotoDataAcadImage">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newAcademicPrograms.PhotoDataAcadImage || newAcademicPrograms.ImagePath}}" class="img-fluid" id="imgAcadImage">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-fileAcadImage" type="button" class="btn btn-secondary btn-light btn-sm" style="font-size:14px;">Upload Image</label>
+                    <input id="choose-fileAcadImage" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newAcademicPrograms.PhotoAcadImage_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newAcademicPrograms.PhotoDataAcadImage" />
+                    <a ng-click="ClearAcademicProgramsPhotoAcadImage()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddAboutUsImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

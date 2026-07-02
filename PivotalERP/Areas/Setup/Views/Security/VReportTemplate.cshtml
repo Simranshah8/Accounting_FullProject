@@ -1,0 +1,413 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<link href="~/Scripts/jqueryFileTree.css" rel="stylesheet" />
+<script src="~/Scripts/jqueryFileTree.js"></script>
+<script src="~/jslib/Setup/VReportTemplate.js"></script>
+<div ng-app="myApp" ng-controller="vreportTemplatesCntrl" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllReportTemplates()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Report Template</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div class="row">
+                                     
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                @*<button class="btn btn-success btn-sm ml-3" type="button" ng-click="GetAllReportTemplates()" style="min-width:40px;"><i class="fa fa-download"></i></button>*@
+                                                <div class="btn btn-sm  btn-primary btn-file">
+                                                    <i class="fa fa-image"></i> Upload Files
+                                                    <input type="file" name="file" onchange="angular.element(this).scope().uploadFiles(this)" multiple />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>                                   
+                                </div>
+                                <header class="row mb-1">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.RptTemplate">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.RptTemplate">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.RptTemplate">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                            <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>`
+                                        </div>
+
+
+                                    </div>
+
+                                </header>
+                                <div class="table-scroll-x-y table-scroll">
+
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white" style="max-height: calc(100vh - 220px)!important;">
+                                        <thead>
+                                            <tr>
+                                                <th ng-click="sort('SNo')" style="width: 80px; text-align:center">
+                                                    S.No.
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='SNo'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Entity')" style="width: 130px; text-align: center">
+                                                    Voucher
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Entity'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Name')" style="width: 160px; text-align: center">
+                                                    Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Description')" style="width: 250px; text-align: center">
+                                                    Description
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Description'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Path')" style="width: 170px; text-align: center">
+                                                    Voucher Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Path'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('IsDefault')" style="width: 90px; text-align: center">
+                                                    IsDefault
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='IsDefault'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('ForEmail')" style="width: 90px; text-align: center">
+                                                    For Email
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='ForEmail'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('IsActive')" style="width: 90px; text-align: center">
+                                                    Is Active
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='IsActive'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th style="width: 90px; text-align: center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="beData in DataColl | filter:searchData.RptTemplate | itemsPerPage: perPage.RptTemplate" current-page="currentPages.RptTemplate" pagination-id="classPagination">
+                                                <td align="center">
+                                                    {{beData.SNo}}
+                                                </td>
+                                                <td>
+                                                    {{beData.VoucherType}}
+                                                </td>
+                                                <td>
+                                                    <a download="{{beData.ReportName}}.zip" href="~/Setup/Security/DownloadAllReportTemplates?fpath={{beData.Path}}">{{beData.ReportName}} </a>
+                                                </td>
+                                                <td>
+                                                    {{beData.Description}}
+                                                </td>
+                                                <td>
+                                                    <a download="{{beData.FileName}}" href="~/Setup/Security/DownloadReportTemplates?fpath={{beData.Path}}">{{ beData.VoucherName}} </a>
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" class="icheckbox_square-blue ml-2" ng-model="beData.IsDefault">
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" class="icheckbox_square-blue ml-2" ng-model="beData.ForEmail">
+                                                </td>
+                                                <td>
+                                                    <input type="checkbox" class="icheckbox_square-blue ml-2" ng-model="beData.IsActive">
+                                                </td>
+                                                <td>
+                                                    <a class="p-1" href="#" ng-click="updateReportTemplates(beData)">
+                                                        <i class="fas fa-upload text-info"></i>
+                                                    </a>
+                                                    <a class="p-1" href="#" ng-click="deleteReportTemplate(beData)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <!-- table end -->
+                                </div>
+
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="classPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtName" class="col-sm-4" style="text-align: left; vertical-align: middle; ">Voucher</label>
+
+                                                <select ng-model="beData.EntityId" class="form-control form-control-sm select2">
+                                                    <option ng-repeat="cl in VoucherColl track by cl.VoucherId" value="{{cl.VoucherId}}" ng-selected="cl.VoucherId==beData.EntityId">
+                                                        {{cl.VoucherName}} - {{cl.VoucherType}}
+                                                    </option>
+                                                </select>
+
+                                            </div>
+                                        </div> 
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="txtName">Name</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.ReportName" id="txtReportName" />
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label for="txtName">Path</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.Path" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group mt-4">
+                                                <label>
+                                                    Is Default
+                                                    <input type="checkbox" class="icheckbox_square-blue ml-2" ng-model="beData.IsDefault">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="input-group mt-4">
+                                                <button class="btn btn-success btn-sm" type="button" data-toggle="modal" data-target="#addReportFilePath"><i class="fas fa-file-invoice"></i></button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="txtName">Description</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.Description" />
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+
+                                        <button type="button" class="btn btn-default" style="min-width: 90px">Reset</button>
+                                        <button type="button" class="btn btn-primary" style="min-width: 90px" id="btnSave" ng-click="AddNewReportTemplate()">Accept</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+                <!-- Add Report Path Modal -->
+                <div class="modal fade" id="addReportFilePath" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Select Report Files</h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="example">
+                                            <div id="fileTreeDemo_2" class="demo"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn btn-sm btn-primary py-2" id="btnCancel" data-dismiss="modal" ng-click="SelectedFileClick()">Accept</button>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- End Add User Modal -->
+                <!-- Add uploadRptFiles Path Modal -->
+                <div class="modal fade" id="uploadRptFiles" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Upload Report Files</h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <!-- User List -->
+                                    <div>
+                                        <div class="box-body">
+                                            <table class="table table-bordered table-striped table-hover table-responsive">
+                                                <tr>
+                                                    <th ng-click="sort('SNo')" style="width: 80px; text-align:center">
+                                                        S.No.
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='SNo'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th ng-click="sort('Entity')" style="width: 320px; text-align:center">
+                                                        Name
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='Entity'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th style="width: 70px; text-align:center">Action</th>
+                                                </tr>
+                                                <tr ng-repeat="beData in files">
+                                                    <td align="center">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td>
+                                                        {{beData.name}}
+                                                    </td>
+                                                    <td style="white-space:nowrap">
+                                                        <a class="p-1" href="#" ng-click="deleteUploadFiles($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <!-- End User List -->
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <div class="form-group">
+                                                <label for="txtName" style="vertical-align: middle; " ng-click="GetFolderAndFiles('Report')"><i class="text-default fa fa-folder"></i>  Report ( {{currentPath}} )</></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="control-label">
+                                                Folder Name <span id="ErrName" style="color:red;"></span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><i class="fa fa-folder text-default" style="font-size:20px;"></i></span>
+                                                <input type="text" class="form-control form-control-sm ml-2" ng-model="beData.FolderName" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="control-label">
+                                            &ensp; <span id="ErrName" style="color:red;"></span>
+                                        </label>
+                                        <div class="input-group">
+                                            <button class="btn btn-secondary" type="button" ng-click="MakeNewFolder()"><i class="fas fa-file-alt "></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-10">
+                                        <ul>
+                                            <li ng-repeat="cl in FileFoldersList">
+                                                <a href="#" ng-click="GetFolderAndFiles(cl.Path)">
+
+                                                    <i ng-class="(cl.IsFolder==true) ? 'fa fa-folder' : 'fa fa-file' "></i> <span>{{cl.Name}}</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="time-label">
+                                <span class="d-block border-0 p-3 text-center">
+                                    <button type="button" class="btn  btn-primary" id="btnCancel" data-dismiss="modal" ng-click="uploadFilesToServer()" style="min-width:70px;">Upload</button>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- End Add User Modal -->
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+
+
+
+
+</div>
+
+<script src="~/Scripts/jqueryFileTree.js"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $('#fileTreeDemo_2').fileTree({ root: '~/Report/', script: '../../web/jqueryFileTree.aspx', folderEvent: 'click', expandSpeed: 750, collapseSpeed: 750, multiFolder: false }, function (file) {
+            selectedFilePath = file;
+        }, function (dir) {
+            selectedFolderPath = dir;
+        });
+
+    });
+</script>
+

@@ -1,0 +1,107 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/setup/security.js"></script>
+<style>
+    .third-level-scroll-only {
+        height: 100px !important;
+        overflow: unset;
+    }
+</style>
+<div ng-app="myApp" ng-controller="sapapiLogCtrl" ng-class="{waiting: loadingstatus=='running'}">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <!-- Main content -->
+    <div class="content  third-level-scroll-only">
+        <!-- Page Content  -->
+        <div class="container-fluid" style="width:100%;">
+            <div class="card overflow-hidden">
+                <div class="card-header header-corner-triangle border p-2">
+                    <form action="" class="mb-0">
+                        <div class="row">
+                            <div class="col-sm-2">
+                                <label>SAP API REQUEST &amp; RESPONSE LOG:</label>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="d-inline-block">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">From:</span>
+                                        </div>
+                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="DateFrom_TMP" style="max-width:100px" date-detail="DateFromDet" />
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">To:</span>
+                                        </div>
+                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="DateTo_TMP" style="max-width:100px" date-detail="DateToDet" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-group">
+                                    <a href="#" class="btn btn-primary btn-sm load" style="float: right; max-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetData()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download mr-2"></i>Load</a>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="d-inline-block">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Voucher:</span>
+                                        </div>
+                                        <select class="form-control form-control-sm select2" " style="max-width:200px" ng-model="newSAP.VoucherTypeId" data-placeholder="** Select Voucher **">
+                                            <option ng-value="cl.id" ng-repeat="cl in VoucherTypeList">{{cl.text}}</option>
+                                        </select>
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">Branch:</span>
+                                        </div>
+                                        <select class="form-control form-control-sm select2" " style="max-width:200px" ng-model="newSAP.BranchId" data-placeholder="** Select Branch **">
+                                            <option ng-value="0" selected>**all branch**</option>
+                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchList">{{cl.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-group">
+                                    <a href="#" class="btn btn-primary btn-sm load" style="float: right; max-width: 100px" data-toggle="Push Data To SAP" data-placement="top" title="Push Data To SAP" data-original-title="Push Data To SAP" ng-click="PushDataToSAP()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download mr-2"></i>Push Data</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-12">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+    <footer class="main-footer control-btns py-2">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group row">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <label>Find :</label>
+                        </div>
+                        <input type="text" name="table_search" class="form-control text-dark input-sm" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+
+            </div>
+            <div class="col-sm-6 text-right">
+                <button type="button" class="btn-secondary btn-sm load" style="width:80px"><i class="fas fa-print" ng-disabled="loadingstatus=='running'"></i>Print</button>
+                <button type="button" class="btn-primary btn-sm load" ng-click="onBtExport()" style="width:80px"><i class="fas fa-file-export" ng-disabled="loadingstatus=='running'"></i>Export</button>
+            </div>
+        </div>
+    </footer>
+
+</div>

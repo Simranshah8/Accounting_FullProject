@@ -1,0 +1,218 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .person-photo-attachment-wrap .img-wrap {
+        background-color: #fff;
+        border: 1px solid #bbb;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        width: 100px;
+        height: 100px;
+    }
+</style>
+<script src="~/jslib/Setup/securityconsole.js?v=202209161"></script>
+
+<div ng-app="myApp" ng-controller="entityButtoneDisEnbController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="container-fluid">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="card">
+                <div class="card-header header-corner-triangle">
+                    <h3 class="card-title">Security Console</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                               
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Email Id </label>
+                                        <input type="email" class="form-control form-control-sm" ng-model="searchData.EmailId" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">OTP</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="searchData.OTP" maxlength="10" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button type="button" class="btn  btn-success" style="min-width: 90px;" ng-click="GenerateOTP()">Send OTP</button>
+                                    <button type="button"
+                                            class="btn btn-md btn-primary"
+                                            style="min-width: 90px; padding-top: 3px; padding-bottom: 3px;" ng-click="SaveUpdateEntityBtnDisabled()">
+                                        <i class="fas fa-database w-t"></i>Update Data
+                                    </button>
+
+                                </div>
+                                <div class="col-md-3">
+                                    <form class="form-inline float-right">
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search"
+                                                   placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.AllowEntity" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div>
+
+                                    <div class="table-responsive">
+                                        <div class="table-scroll-x-y table-scroll mt-1" style="height: calc(100vh - 175px);">
+                                            <table id="maintable" class="table table-bordered table-hover table-sm">
+                                                <thead class=" text-nowrap">
+                                                    <tr>
+                                                        <th class="align-middle cstm-sticky" style="width: 130px; left: 0; z-index: 3; background-color: #ececec !important">S.No.</th>
+                                                        <th class="align-middle cstm-sticky" style="width: 180px; left: 130px; z-index: 3; background-color: #ececec !important">Entity</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">
+                                                            <div class="justify-content-center d-flex">
+                                                                Add
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newAllowEntity.Accept" ng-change="CheckAllAdd()">
+                                                            </div>
+
+                                                        </th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">
+                                                            <div class="justify-content-center d-flex">
+                                                                Modify
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newAllowEntity.Modify" ng-change="CheckAllModify()">
+                                                            </div>
+
+                                                        </th>
+
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">
+                                                            <div class="justify-content-center d-flex">
+                                                                Delete
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newAllowEntity.Delete" ng-change="CheckAllDelete()">
+                                                            </div>
+
+                                                        </th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">
+                                                            <div class="justify-content-center d-flex">
+                                                                IRD
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newAllowEntity.IRD" ng-change="CheckAllPrint()">
+                                                            </div>
+
+                                                        </th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">
+                                                            <div class="justify-content-center d-flex">
+                                                                Hidden
+                                                                &nbsp;
+
+                                                                <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newAllowEntity.Hidden" ng-change="CheckAllExport()">
+                                                            </div>
+
+                                                        </th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="el in EntityColl |filter:searchData.AllowEntity | itemsPerPage:perPage.AllowEntity" current-page="currentPages.AllowEntity" pagination-id="AllowEntityPagination">
+                                              
+                                                        <td class="align-middle cstm-sticky" style="width: 130px; left: 0; z-index: 2; background-color: #fff">{{$index+1}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 180px; left: 130px; z-index: 2; background-color: #fff">{{el.text}}</td>
+
+                                                        <td class="text-center">
+                                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-sms-3-{{$index}}"
+                                                                       value="" ng-model="el.Accept" />
+
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-sms-3-{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-sms-4-{{$index}}"
+                                                                       value="" ng-model="el.Modify" />
+
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-sms-4-{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-sms-5-{{$index}}"
+                                                                       value="" ng-model="el.Delete" />
+
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-sms-5-{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-sms-6-{{$index}}"
+                                                                       value="" ng-model="el.IRD" />
+
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-sms-6-{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="custom-control custom-checkbox checkbox-lg">
+                                                                <input type="checkbox"
+                                                                       class="custom-control-input"
+                                                                       id="checkbox-sms-7-{{$index}}"
+                                                                       value="" ng-model="el.Hidden" />
+
+                                                                <label class="custom-control-label"
+                                                                       for="checkbox-sms-7-{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="AllowEntityPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- table end -->
+                            </div>
+                             
+
+                        </div> 
+                    </div>
+                     
+                </div>
+
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+</div>

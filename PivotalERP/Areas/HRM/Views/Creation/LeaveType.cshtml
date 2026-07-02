@@ -1,0 +1,252 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/Attendance/LeaveType.js"></script>
+<div ng-app="myApp" ng-controller="LeaveTypeController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Add Leave Type</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body px-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LeaveType">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LeaveType">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search" ng-model="searchData.LeaveType"
+                                                           aria-label="Search">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                  <div class="col-md-5 text-right">
+                                      <div class="dropdown dnld-file"
+                                           data-placement="top" title="Download File">
+                                          <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                  id="dropdownMenuButton" data-toggle="dropdown"
+                                                  aria-haspopup="true" aria-expanded="false">
+                                              <i class="fas fa-download"></i>
+                                          </button>
+                                          <div class="dropdown-menu dropdown-menu-right"
+                                               aria-labelledby="dropdownMenuButton">
+                                              <span class="dropdown-item">Choose an option:</span>
+                                              <a class="dropdown-item wait" export-excel table-id="'#LeaveType'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                              <a class="dropdown-item wait" onClick="$('#LeaveType').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                              <a class="dropdown-item wait" onClick="$('#LeaveType').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                              <a class="dropdown-item wait" onClick="$('#LeaveType').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                              <a class="dropdown-item wait" onClick="$('#LeaveType').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                          </div>
+
+
+                                          <a print-tbl table-id="'#LeaveType'" class="btn btn-secondary btn-light btn-sm"title="Print">
+                                              <i class="fas fa-print"></i>
+                                          </a>
+                                          @*<button type="button" class="btn py-1  btn-primary" id="add-leaveType"
+                                                  style="min-width: 90px;font-size:12px">
+                                              <i class="fas fa-plus w-t"></i> Add LeaveType
+                                          </button>*@
+                                      </div>
+                                    </div>
+                                </header>
+                                <div>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="LeaveType"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th style="width: 70px">S.No</th>
+                                                    <th style="width: 170px">Name</th>
+                                                    <th style="width: 90px">Code</th>
+                                                    <th style="width: 130px">Applicable For</th>
+                                                    <th style="width: 130px">Include Weekly Off</th>
+                                                    <th style="width: 120px">Include Holiday</th>
+                                                    <th style="width: 120px">Paid Leave</th>
+                                                    <th style="width: 130px">Carried Forward</th>
+                                                    <th style="width: 150px">Remarks</th>
+                                                    <th style="width: 80px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in LeaveTypeList | filter:searchData.LeaveType | itemsPerPage: perPage.LeaveType" current-page="currentPages.LeaveType" pagination-id="LeaveTypePagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{cl.Name}}</td>
+                                                    <td>{{cl.Code}}</td>
+                                                    <td>{{cl.ApplicableForId}}</td>
+                                                    <td>{{cl.IncludeWeeklyOff}}</td>
+                                                    <td>{{cl.IncludeHoliday}}</td>
+                                                    <td>{{cl.PaidLeave}}</td>
+                                                    <td>{{cl.CarriedForward}}</td>
+                                                    <td>{{cl.Remarks}}</td>
+                                                    <td>
+                                                        <a class="p-1" href="#" ng-click="GetLeaveTypeById(cl)" data-toggle="tooltip"
+                                                           data-placement="top" title="Edit">
+                                                            <i class="fas fa-edit text-info"></i>
+                                                        </a>
+                                                        <a class="p-1" href="#" ng-click="DelLeaveTypeById(cl)" data-toggle="tooltip"
+                                                           data-placement="top" title="Delete">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- table end -->
+                                </div>
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="LeaveTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="p-2">
+                                    <div class="row">
+                                        <div class="col-sm-6 col-md-6">
+                                            <div class="form-group">
+                                                <label for="name">Name</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newLeaveType.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <div class="form-group">
+                                                <label for="name">Code</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newLeaveType.Code" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Applicable For</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newLeaveType.ApplicableForId">
+                                                    <option ng-value="ap.id" ng-repeat="ap in ApplicableForList">{{ap.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <div class="form-group">
+                                                <label for="name">S.No.</label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newLeaveType.SNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-md-3">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox1" ng-model="newLeaveType.IncludeWeeklyOff">
+                                                <label for="customCheckbox1"
+                                                       class="custom-control-label">
+                                                    Include Weekly Off
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-md-3">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox2" ng-model="newLeaveType.IncludeHoliday">
+                                                <label for="customCheckbox2"
+                                                       class="custom-control-label">
+                                                    Include Holiday
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-md-3">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox3" ng-model="newLeaveType.PaidLeave">
+                                                <label for="customCheckbox3"
+                                                       class="custom-control-label">
+                                                    Paid Leave
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 col-md-3">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox4" ng-model="newLeaveType.CarriedForward">
+                                                <label for="customCheckbox4"
+                                                       class="custom-control-label">
+                                                    Carried Forward
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12 col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="newLeaveType.Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn  btn-default" style="min-width: 90px;" ng-click="ClearLeaveType()">Reset</button>
+                                        <button type="button" class="btn  btn-primary" style="min-width: 90px;" ng-click="SaveUpdateLeaveType()">{{newLeaveType.Mode}}</button>
+                                    </div>
+
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+</div>
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+

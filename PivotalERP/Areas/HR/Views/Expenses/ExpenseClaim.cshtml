@@ -1,0 +1,304 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table th, .table td {
+        padding: 0.35rem;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+
+<script src="~/jslib/hr/expenses/ExpenseClaim.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ExpenseClaimController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-2 card-primary card-outline card-outline-tabs">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-sm-8 col-md-8">
+                                    <div class="form-group">
+                                        <label for="">Employee</label>
+                                        <div class="input-group-prepend">
+                                            <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1;" ng-model="newExpenseClaim.SelectEmployee">
+                                                <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newLeaveEntry.EmployeeSearchBy">
+                                                    {{ss.text}}
+                                                </option>
+                                            </select>
+                                            <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newExpenseClaim.UserId" confirm-action="GetLeaveTypeByEmployee()" employee-detail="newExpenseClaim.EmployeeDetails" side-bar-data="newExpenseClaim.EmpSideBarData" search-by="newExpenseClaim.EmployeeSearchBy">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">From Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newExpenseClaim.DateFrom_TMP" date-detail="newExpenseClaim.DateFromDet" confirm-action="ChangeNoOfDays()">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">To Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newExpenseClaim.DateTo_TMP" date-detail="newExpenseClaim.DateToDet" confirm-action="ChangeNoOfDays()">
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <label for="">Expense Title</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newExpenseClaim.ExpenseTitle">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Expense Type</label>
+                                        <select class="form-control form-control-sm form-select select2" style="width: 100%" ng-model="newExpenseClaim.ExpenseTypeId">
+                                            <option ng-repeat="B in ExpenseTypeColl" ng-value="B.id" ng-selected="B.id==newExpenseClaim.ExpenseTypeId">{{B.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="newExpenseClaim.ExpenseTypeId == 1">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="">
+                                            Destination From
+                                        </label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newExpenseClaim.DestinationFrom">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="">
+                                            Destination To
+                                        </label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newExpenseClaim.DestinationTo">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="">Distance Travelled(KM)</label>
+                                        <input type="number" class="form-control form-control-sm" ng-model="newExpenseClaim.DistanceTravelled">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Purpose of Visit</label>
+                                        <textarea class="form-control form-control-sm" cols="30" rows="1" ng-model="newExpenseClaim.PurposeOfVisit"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card my-2">
+                                <div class="">
+                                    <div class="table-scroll-x-y table-scroll" style="height:auto!important;max-height:calc(100vh - 18rem);">
+                                        <table class="table table-bordered table-head-fixed">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                                    <th style="width: 110px; background-color: #ececec !important">Date</th>
+                                                    @*<th style="width: 190px; ">Expense Type</th>*@
+                                                    <th style="width: 200px; background-color: #ececec !important ">Expense Category</th>
+                                                    <th style="width: 80px; background-color: #ececec !important ">Qty.</th>
+                                                    <th style="width: 110px; background-color: #ececec !important">Rate</th>
+                                                    <th style="width: 150px; background-color: #ececec !important">Amount</th>
+                                                    <th style="width: 200px; background-color: #ececec !important">Description</th>
+                                                    <th style="width: 110px; background-color: #ececec !important;z-index:3">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="P in newExpenseClaim.DetailsColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="P.ExpenseDate_TMP" date-detail="P.ExpenseDateDet">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm form-select select2" ng-model="P.ExpenseCategoryId">
+                                                            <option ng-value="0">**Select All**</option>
+                                                            <option ng-repeat="B in ExpenseCategoryList" ng-value="B.TranId" ng-selected="B.TranId==P.ExpenseCategoryId">{{B.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" class="form-control form-control-sm" ng-model="P.Quantity" ng-change="calculateExpense(P, 'qty')"/></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="P.Rate" ng-change="calculateExpense(P, 'rate')" /></td>
+                                                    <td><input type="number" class="form-control form-control-sm" ng-model="P.Amount" ng-change="calculateExpense(P, 'amount')" /></td>
+                                                    <td><textarea class="form-control form-control-sm" cols="30" rows="1" ng-model="P.Description"></textarea></td>
+                                                    <td>
+                                                        <a class="p-1" href="#">
+                                                            <img ng-src="{{ (P.ReciptImageData ? P.ReciptImageData : (P.ReciptImage && P.ReciptImage.length>0 ? P.ReciptImageData : DefaultPhoto))}}" style="max-height:45px;max-width:40px;" id="imglogo1" />
+                                                            <label for="choose-file{{$index+1}}"> <i class="fas fa-camera tablecamera text-info"></i></label>
+                                                            <input id="choose-file{{$index+1}}" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="P.ReciptImage_TMP" fileread="P.ReciptImageData" />
+                                                        </a>
+                                                        <a class="p-1" style="cursor:pointer" ng-click="AddExpenseEntryColl($index)">
+                                                            <i class="fas fa-plus text-info"></i>
+                                                        </a>
+                                                        <a class="p-1" style="cursor:pointer" ng-click="DelExpenseEntryColl($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <footer class="main-footer control-btns py-2">
+                        <div class="secondary-footer">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <input type="text" list="lstNarration" class="form-control hideSideBar" name="" id="" rows="3" placeholder="Reason" ng-model="newExpenseClaim.Reason">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentAttachModal">
+                                    Document Attach ({{ (newExpenseClaim.AttechFiles.length+(newExpenseClaim.DocumentColl ? newExpenseClaim.DocumentColl.length : 0)) }} )
+                                </button>
+                            </div>
+                            <div class="col-sm-8">
+                                <form class="form-inline justify-content-end">
+                                    <button type="button" class="btn btn-outline-danger ml-1" ng-click="ClearExpenseClaim()">Reset</button>
+                                    <button type="button" class="btn btn-primary ml-1" ng-click="SaveUpdateExpenseClaim()">{{newExpenseClaim.Mode}}</button>
+                                </form>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!--/. container-fluid -->
+        </div>
+    </div>
+
+    <div class="modal fade sales-invoice-page-modal document-attach-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="timeline-item">
+                        <div class="add-more-than-one-form-block">
+                            <form>
+                                <article>
+                                    <div class="row">
+                                        @*UIUX code update: grid from col-sm-10 to col-sm-12*@
+                                        <div class="col-sm-12">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Attach Document</label>
+
+                                                        <div class="new-cstm-file-upload">
+                                                            <div class="drop-area" file-drop>
+                                                                <div class="icon"></div>
+                                                                <h3>Drag & Drop Files Here</h3>
+                                                                <p>or <span>click to browse</span></p>
+                                                                <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                <div class="attached-list">
+                                                                    <ul class="file-list"></ul>
+                                                                    <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex flex-column h-100 justify-content-between">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div>
+                                                                <label class="invisible d-none">for height</label>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </form>
+                        </div>
+                        <div class="pb-3">
+                            <div class="table-responsive">
+                                <table class="table table-hover border bg-white  dynamic-uiux-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width: 20px">SN.</th>
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col" style="width: 130px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ac in newExpenseClaim.DocumentColl">
+                                            <th scope="row">{{$index+1}}</th>
+
+                                            <td>{{ac.Name}}</td>
+                                            <td>{{ac.Description}}</td>
+                                            <td>
+                                                <div>
+                                                    <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                        <i class="fas fa-eye text-secondary"></i>
+                                                    </a>
+
+                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-add btn-outline-secondary dynamic-uiux-sm-btn" style="width:50px" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--New Modal Adde by Suresh Starts on 31 Shrawan 2080-->
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-2">
+                    <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                    <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer p-2">
+                    <div><a href="{{viewImg.ContentPath}}" download class="btn btn-primary btn-sm dynamic-uiux-sm-btn">Download</a></div>
+                    <button class="btn btn-secondary btn-sm dynamic-uiux-sm-btn" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Ends-->
+
+    <script src="~/wwwroot/dist/js/cstmjs.js"></script>
+</div>

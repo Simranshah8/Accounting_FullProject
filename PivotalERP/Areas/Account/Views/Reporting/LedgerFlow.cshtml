@@ -1,0 +1,167 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.LedgerFlow)";
+</script>
+<script src="~/jslib/account/reporting/LedgerFlow.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LedgerFlow" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">From:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="LedgerFlow.DateFrom_TMP" style="max-width:100px" date-detail="LedgerFlow.DateFromDet" />
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">To:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="LedgerFlow.DateTo_TMP" style="max-width:100px" date-detail="LedgerFlow.DateToDet" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-5">
+                                    <div class="form-group d-flex mb-0">
+                                        <label class="mt-1 mr-2" style="width:129px;">Select Ledger</label>
+                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="LedgerFlow.LedgerId" id="cboLedger" @*style="width:95%"*@ ledgertype="1"
+                                                placeholder="* Select Ledger Name *" showdetails="true" confirm-action="GetLedgerVoucher()" ledger-detail="LedgerFlow.LedgerDetails" side-bar-data="LedgerFlow.partySideBarData"></select>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary load" style="float: right; min-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetLedgerFlow()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Find:</span>
+                                                </div>
+                                                <select class="form-control pr-0"
+                                                        id="exampleFormControlSelect1">
+                                                    <option>Contain</option>
+                                                    <option>Prefix</option>
+                                                </select>
+                                            </div>
+                                            <div class="input-group input-group-sm" style="width: 150px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Search By:</span>
+                                            </div>
+                                            <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                <option ng-value="cl.field" ng-repeat="cl in columnDefs">{{cl.headerName}}</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-default">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                   <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                    </form>
+                                </div>
+                            </header>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="datatable" style="height: calc(100vh - 14rem);width:100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                    <div id="myGridBottom" style="height: 115px;" class="ag-theme-alpine"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>  
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+	@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+	
+</div>

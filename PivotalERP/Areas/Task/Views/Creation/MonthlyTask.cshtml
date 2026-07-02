@@ -1,0 +1,220 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y table thead th {
+        background-color: rgb(225 243 255) !important;
+        padding:0.3rem!important;
+    }
+
+    .text-sm {
+        font-size: 12px !important;
+    }
+
+    .btn-add-file {
+        padding: 25px 25px;
+        border: 2px dashed #127dc2;
+    }
+
+    .fa-plus-circle {
+        color: #127dc2;
+        font-size: 20px;
+    }
+
+    .description {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%; /* Adjust the max-width as needed */
+    }
+
+        .description:hover {
+            white-space: normal;
+            overflow: visible;
+            z-index: 9999;
+            position: absolute;
+            background-color: aliceblue;
+            font-size: 16px !important;
+            font-weight: 800 !important;
+        }
+    table th, table td {
+        padding: 0.3rem !important
+    }
+</style>
+<link href="~/wwwroot/dist/css/Support.css" rel="stylesheet" />
+<script src="~/jslib/Task/MonthlyTask.js"></script>
+<div ng-app="myApp" ng-controller="monthlyTaskController" ng-init="LoadData()">
+    <div class="container-fluid">
+        <div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card p-2 mb-0">
+                        <div id="tablelist">
+                            <div class="">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group d-flex mb-1">
+                                            <label class="mr-2">Year</label>
+                                            <select class="form-control form-select form-control-sm" ng-model="newFilter.YearId" style="width: 100%;" data-placeholder="** Select Year **">
+                                                <option ng-repeat="E in YearColl" ng-value="E.id">{{E.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group d-flex mb-1">
+                                            <label class="mr-2">Month</label>
+                                            <select class="form-control form-select form-control-sm" ng-model="newFilter.MonthId" style="width: 100%;" data-placeholder="** Select Year **">
+                                                <option ng-repeat="E in MonthColl" ng-value="E.id">{{E.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-8">
+                                        <div class="form-inline float-right">
+                                            <div class="form-inline">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-select form-control border-left-0 border-right-0" ng-model="perPage.Monthly">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Monthly">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search"
+                                                               placeholder="Search" aria-label="Search" ng-model="searchData.Monthly" style="width:270px">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+
+                                                <button type="button" class="btn btn-sm btn-primary load mx-2" ng-click="GetTaskSummary()" style="width:70px;"><i class="fas fa-redo mr-2"></i>Load</button>
+
+                                                <a href="#" class="btn btn-default " data-toggle="tooltip" data-placement="top" title="Send Email">
+                                                    <span data-toggle="modal" data-target="#Emailmodal"><i class="fas fa-envelope"></i></span>
+                                                </a>
+                                                <a href="#" class="btn btn-default  mx-2" data-toggle="tooltip" data-placement="top" title="Send SMS">
+                                                    <span data-toggle="modal" data-target="#Smsmodal"><i class="fas fa-sms"></i></span>
+                                                </a>
+                                                <a href="#" class="btn btn-default " data-toggle="tooltip" data-placement="top" title="Send Notification">
+                                                    <span data-toggle="modal" data-target="#Notificationmodal"> <i class="fas fa-bell"></i></span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="table-scroll-x-y  table-scroll mt-2" style="height:auto!important;max-height:calc(100vh - 6rem)!important;">
+                                <table class="table table-bordered table-head-fixed ">
+                                    <thead class=" ">
+                                        <tr>
+                                            <th class="cstm-sticky" style="width: 50px;left:0;z-index:4">S.No</th>
+                                            <th class="cstm-sticky" style="width: 110px;left:50px;z-index:4">Code</th>
+                                            <th class="cstm-sticky" style="width: 240px;left:160px;z-index:4">Name</th>
+
+
+                                            <th class="text-center" style="width: 60px; z-index: 3" ng-repeat="d in dayRange" ng-hide="Total.TotalDays<d"> {{d}}</th>
+                                            <!--Edited the column Name and added task related columns-->
+                                            <th style="width: 160px; z-index: 3">Performance Ratio</th>
+                                            <th style="width: 100px; z-index: 3">Total Task</th>
+                                            <th style="width: 55px; z-index: 3">Open</th>
+                                            <th style="width: 55px; z-index: 3">Hold</th>
+                                            <th style="width: 100px; z-index: 3">InProgress</th>                                         
+                                            <th style="width: 70px; z-index: 3">Closed</th>
+                                            <th style="width: 90px; z-index: 3">Approved</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr dir-paginate="D in DataColl | filter:searchData.Monthly | itemsPerPage: perPage.Monthly" current-page="currentPages.Monthly" pagination-id="CustomerDuesPagination">
+
+                                            <td class="align-middle cstm-sticky text-center" style="width: 50px;left:0;  z-index: 2; background-color: #ffffff !important">
+                                                {{$index+1}}
+                                            </td>
+                                            <td class="align-middle cstm-sticky" style="left:50px;z-index:2;background-color: #ffffff !important">
+                                                {{D.Code}}
+                                            </td>
+                                            <td class="align-middle cstm-sticky" style="left:160px;z-index:2;background-color:#ffffff!important">
+
+                                                <label class="mb-0">  {{D.Name}}</label><br />
+                                                <label class="mb-0">({{D.Designation}})</label>
+                                            </td>
+
+                                            <td ng-click="OpenDetailModal(D,r)" ng-repeat="r in dayRange" ng-hide="D.TotalDays<r" class="align-middle" style="background-color:{{D['Day'+r] !='P' ? '#c87878' : '#78c878'}}"><label class="mb-0">{{D['Day'+r+'Task'].length > 40 ? D['Day'+r+'Task'].slice(0, 40) + '...' : D['Day'+r+'Task']}}</label></td>
+
+                                            <td class="align-middle" style="text-align:center"><b>{{D.TotalP}} / {{D.TotalDays}}</b> </td>
+                                            <td class="align-middle" style="text-align:center">{{D.TotalTask}}</td>
+                                            <td class="align-middle" style="text-align:center">{{D.Open}}</td>                                            
+                                            <td class="align-middle" style="text-align:center">{{D.OnHold}}</td>
+                                            <td class="align-middle" style="text-align:center">{{D.InProgress}}</td>
+                                            <td class="align-middle" style="text-align:center">{{D.Closed}}</td>
+                                            <td class="align-middle" style="text-align:center">{{D.Approved}}</td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot style="position: -webkit-sticky; position: sticky; bottom: 0; background: #f0f2f5; color: #000000; z-index: 4; ">
+                                        <tr>
+                                            <td colspan="3" class="text-center cstm-sticky" style="left:0;z-index:3;background-color:#ffffff!important"><b>Total</b></td>
+
+                                            <td class="text-center" style="z-index:1" ng-repeat="d in dayRange" ng-hide="Total.TotalDays<d"><b>{{Total['Day'+d]}}</b></td>
+
+                                            <td class="text-center" style="z-index:1"><b> </b></td>
+                                            <td class="text-center" style="z-index:1"><b>{{Total.TotalTask}}</b></td>
+                                            <td class="text-center" style="z-index:1"><b>{{Total.Open}}</b></td>
+                                            <td class="text-center" style="z-index:1"><b>{{Total.OnHold}}</b></td>
+                                            <td class="text-center" style="z-index:1"><b>{{Total.InProgress}}</b></td>                                            
+                                            <td class="text-center" style="z-index:1"><b>{{Total.Closed}}</b></td>
+                                            <td class="text-center" style="z-index:1"><b>{{Total.Approved}}</b></td>
+
+                                            <td colspan="6" style="z-index:1"></td>
+                                        </tr>
+                                    </tfoot>
+
+                                </table>
+                            </div>
+                            <dir-pagination-controls pagination-id="CustomerDuesPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--Modal Added for task Detail Starts-->
+            <div class="modal fade" id="display-task-modal">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h6 class="modal-title text-primary"><b>Task of : {{CurDay.Name}} ({{CurDay.Code}}) </b> </h6>
+                            <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-3"><u><b>For Date : {{CurDay.YearId}}-{{CurDay.MonthId}}-{{CurDay.DayId}}</b></u></p>
+                            <div class="row">                            
+                                <p ng-repeat="dc in DayTaskColl" ng-bind-html="dc.Description |unsafe"></p>
+                            </div>
+                           
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!--Ends-->
+
+        </div>
+    </div>
+</div>
+
+

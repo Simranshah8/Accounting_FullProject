@@ -1,0 +1,244 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/AssetsManagement/AssetType.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="AssetTypeController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Assets Type</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AssetType">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.AssetType">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllAssetType()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AssetType'" report-name="'List of Asset Type'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'AssetType',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'Asset Type'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="mt-2  table-scroll-x-y table-container flex-grow-1" style="max-height:calc(100vh - 6rem) !important;">
+                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                    <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                        <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                            <thead class="text-left">
+                                                <tr>
+                                                    <th class="cstm-sticky text-center" style="width: 15px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                    <th style="width:100px;">Name</th>
+                                                    <th style="width:60px;">Code</th>
+                                                    <th style="width:80px;">Parent</th>
+                                                    <th class="text-left align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 30px;">
+                                                        <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                            <option value="" disabled selected>Action</option>
+                                                            <option value="save">Save Layout</option>
+                                                            <option value="reset">Reset Layout</option>
+                                                        </select>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="beData in AssetTypeList | filter:searchData.AssetType| itemsPerPage:perPage.AssetType" current-page="currentPages.AssetType" pagination-id="AssetTypePagination">
+                                                    <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                    <td>{{beData.TypeName}}</td>
+                                                    <td>{{beData.TypeCode}}</td>
+                                                    <td>{{beData.TypeParentName}}</td>
+                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 30px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info" ng-click="GetAssetTypeById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-danger" ng-click="deleteAssetType(beData, $index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="AssetTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newAssetType.TypeName">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Code <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newAssetType.TypeCode">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Parent</label>
+                                                <select class="form-control form-control-sm" ng-model="newAssetType.TypeParentId">
+                                                    <option ng-repeat=" i in TypeParentList" ng-value="i.AssetTypeId" ng-selected="i.AssetTypeId == newAssetType.TypeParent">{{i.TypeName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table-scroll-x-y table-scroll pb-3" style="height: auto !important; max-height: calc(100vh - 8rem) !important; margin-bottom:50px; ">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                            <thead style="background: #e6f5fb;">
+                                                <tr>
+                                                    <th class="cstm-sticky text-center" style="width: 60px; left: 0; background-color: #e6f5fb !important; z-index: 4">S.No.</th>
+                                                    <th class="cstm-sticky" style="width: 80px; left: 60px; background-color: #e6f5fb !important; z-index: 4 ">Alter</th>
+                                                    <th class="cstm-sticky" style="width: 250px; left: 140px; background-color: #e6f5fb !important; z-index: 4 ">Name</th>
+                                                    <th style="width: 160px; z-index: 3; background-color: #e6f5fb !important;">Label</th>
+                                                    <th style="width: 120px; z-index: 3; background-color: #e6f5fb !important;">Data Type</th>
+                                                    <th style="width: 140px; z-index: 3; background-color: #e6f5fb !important;">Default Value</th>
+                                                    <th style="width: 100px; z-index: 3; background-color: #e6f5fb !important;" class="text-center">IsMandatory</th>
+                                                    <th style="width: 200px; z-index: 3; background-color: #e6f5fb !important;">SelectOptions</th>
+                                                    <th style="width: 300px; z-index: 3; background-color: #e6f5fb !important;">Source</th>
+                                                    <th style="width: 150px; z-index: 3; background-color: #e6f5fb !important;">Formula</th>
+                                                    <th style="width: 80px; z-index: 3; background-color: #e6f5fb !important;">Width</th>
+                                                    <th style="width: 180px; z-index: 3; background-color: #e6f5fb !important;">Reference</th>
+                                                    <th style="width: 150px; z-index: 3; background-color: #e6f5fb !important;">Text Col</th>
+                                                    <th class="align-middle text-center" style="width: 80px; z-index: 2; background-color: #e6f5fb !important;">Action</th>
+                                                </tr>
+
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="EAC in newAssetType.VoucherUDFCol">
+                                                    <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">
+                                                        <input type="number" class="form-control form-control-sm" ng-model="EAC.SNo" />
+                                                    </td>
+                                                    <td class="cstm-sticky" style="width: 60px; left: 60px; background-color: #ffffff !important; z-index: 3 ">
+                                                        <input type="checkbox" class="form-control form-control-sm" ng-model="EAC.CanAlter" ng-show="EAC.FieldId>0" />
+                                                    </td>
+                                                    <td class="cstm-sticky" style="width: 60px; left: 140px; background-color: #ffffff !important; z-index: 3 "> <input type="text" class="form-control form-control-sm" ng-model="EAC.Name" ng-disabled="EAC.FieldId>0" /></td>
+                                                    <td> <input type="text" class="form-control form-control-sm" ng-model="EAC.Label" /></td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm" active-select2 ng-model="EAC.FieldType" ng-disabled="(EAC.CanAlter ? false : (EAC.FieldId>0 ? true : false)) ">
+                                                            <option ng-repeat="dt in DataTypeColl" ng-value="dt.id" ng-selected="dt.id==EAC.FieldType">{{dt.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td> <input type="text" class="form-control form-control-sm" ng-model="EAC.DefaultValue" /></td>
+                                                    <td class="text-center">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" class="custom-control-input" id="customCheckboxCHE3{{$index}}" ng-model="EAC.IsMandatory" />
+                                                            <label for="customCheckboxCHE3{{$index}}" class="custom-control-label"> </label>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <textarea class="textarea form-control form-control-sm" rows="1" ng-model="EAC.DropDownList"></textarea>
+                                                    </td>
+                                                    <td> <input type="text" class="form-control form-control-sm" ng-model="EAC.Source" /></td>
+                                                    <td> <input type="text" class="form-control form-control-sm" ng-model="EAC.Formula" /></td>
+                                                    <td> <input type="number" class="form-control form-control-sm" ng-model="EAC.ColWidth" /></td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" active-select2 ng-model="EAC.SelectedRefTable">
+                                                            <option ng-repeat="dt in PkTablesColl" ng-value="dt" ng-selected="dt.Table==EAC.SelectedRefTable.TableName">{{dt.Table}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td> <input type="text" class="form-control form-control-sm" ng-model="EAC.TextColumn" /></td>
+                                                    <td style="text-align:center;">
+                                                        <a class="p-1" ng-click="AddCurItemUdf($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delCurItemUdf($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </form>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateAssetType()"><span class="glyphicon glyphicon-save"></span>{{newAssetType.Mode}}</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

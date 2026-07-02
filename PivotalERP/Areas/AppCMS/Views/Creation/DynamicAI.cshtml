@@ -1,0 +1,239 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/setup/DynamicAI.js"></script>
+<style>
+
+    /* Slightly rounded dropdown */
+    .rounded-select {
+        height: 36px; /* fixed height */
+        border-radius: 16px; /* adjust number for more/less rounding */
+        border: 1px solid #dee2e6; /* same as normal inputs */
+        @* padding:0 12px 0 18px; /* comfortable padding */*@
+        font-size: 14px; /* match your form style */
+        background-color: #fff; /* white background */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        cursor: pointer;
+
+        display: flex;
+        align-items: center; /* vertical centering */
+        justify-content: center; /* horizontal centering */
+        text-align: center; /* fallback for text */
+        padding: 0 12px; /* left/right spacing */
+    }
+
+
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    #ActionDiv, .container-fluid, .card, .card-body {
+        height: 100%;
+    }
+
+    .container-fluid {
+        padding-left: 10px !important;
+        padding-right: 0 !important;
+    }
+
+
+    .chat-box {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 30px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        position: relative;
+    }
+
+    .chat-textarea {
+        border: none;
+        resize: none;
+        width: 100%;
+        min-height: 38px;
+        max-height: 120px;
+        overflow-y: hidden;
+        font-size: 16px;
+        line-height: 1.5;
+        box-shadow: none;
+        box-sizing: border-box;
+        padding-right: 50px; /* space for floating send button */
+    }
+
+        .chat-textarea:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+
+    /* Circular black send button */
+    .send-btn {
+        background-color: #007bff;
+        color: #fff;
+        border-radius: 50%;
+        border: none;
+        width: 36px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        transition: background 0.2s, transform 0.1s;
+    }
+
+        .send-btn:hover {
+            background-color: #007bff;
+            transform: translateY(-2px);
+        }
+
+        .send-btn i {
+            font-size: 16px;
+        }
+
+    .chat-textarea {
+        padding-right: 10px; /* enough for send button */
+    }
+
+    .chat-messages {
+        flex-grow: 1;
+
+        padding-bottom: 10px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+    }
+
+        .chat-messages div {
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            background-color: #f1f1f1;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
+
+    .message-actions button {
+        margin-left: 6px;
+    }
+
+
+</style>
+<div ng-app="myApp" ng-controller="DynamicAIController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+
+    <div class="container-fluid d-flex flex-column h-100 ">
+        <div class="card d-flex flex-column flex-grow-1">
+            <div class="card-body d-flex flex-column flex-grow-1 p-2">
+                <div class="chat-messages mb-2">
+                    <div ng-repeat="result in queryResults track by $index">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <h5 class="mb-1">
+                                    {{$index + 1}}. Query Result of {{result.qry}}
+                                    <small>({{ result.time | date:'medium' }})</small>
+                                </h5>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-placement="top" title="Download File">
+
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AssetsInward'" report-name="'List of AssetsInward '" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'AssetsInward',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                    <a print-tbl report-name="'AssetsInward '" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                       title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <json-table data="result.data"></json-table>
+
+                        <hr>
+                    </div>
+
+                    @*<footer class="main-footer control-btns pt-0">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="card-tools">
+                                        <div class="input-group">
+                                            <select class="form-control  border-right-0 pr-0" ng-model="newFilter.queryType" style="max-width: 300px!important;">
+                                                <option ng-value="pp.id" ng-repeat="pp in QueryTypes" ng-selected="pp.id==newFilter.queryType">{{pp.text}}</option>
+                                            </select>
+                                            <textarea rows="2" ng-model="newFilter.qry" class="form-control input-sm" placeholder="Search">
+                                                        </textarea>
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default" ng-click="getSearchResult()"><i class="fas fa-search"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </footer>*@
+                </div>
+                <div class="row w-100 align-items-end">
+                    <div class="col-3">
+                        <div class="form-group mb-0">
+                            <select class="form-control form-control-sm rounded-select pl-0" ng-model="newFilter.queryType">
+                                <option ng-value="pp.id" ng-repeat="pp in QueryTypes" ng-selected="pp.id==newFilter.queryType">{{pp.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-9">
+                        <div class="chat-box d-flex align-items-center">
+                            <textarea id="chatInput" class="chat-textarea flex-grow-1" rows="1" placeholder="Search" ng-model="newFilter.qry" ng-keypress="($event.which === 13 && !$event.shiftKey) && getSearchResult()"></textarea>
+                            @*<button class="btn btn-light me-4"> <i class="fas fa-microphone"></i> </button>*@
+
+                            <button class="btn btn-light me-4"
+                                    @*ng-class="{'btn-danger': isRecording}"
+                                        ng-click="startRecording()"*@>
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button id="sendBtn" class="send-btn ms-2" ng-click="getSearchResult()"> <i class="fas fa-arrow-up"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>                    <!-- /.card -->
+</div>
+<script src="~/Scripts/jqueryFileTree.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const textarea = document.getElementById("chatInput");
+        const maxHeight = 120;
+
+        if (!textarea) return;
+
+        textarea.addEventListener("input", function () {
+            this.style.height = "auto";
+            this.style.height = Math.min(this.scrollHeight, maxHeight) + "px";
+            this.style.overflowY = this.scrollHeight > maxHeight ? "auto" : "hidden";
+        });
+    });
+</script>
+

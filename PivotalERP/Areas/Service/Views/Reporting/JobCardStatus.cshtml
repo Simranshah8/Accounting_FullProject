@@ -1,0 +1,531 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/service/reporting/JobHistory.js"></script>
+<div ng-app="myApp" ng-controller="JobHistoryController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-2" style="min-height:570px">
+                    <div class="row ml-3">
+                        <div class="col-md-3" ng-show="BranchList.length>1">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="min-width: 110px;">Branch</label>
+                                <select class="form-control select2 hideSideBar" style="width: 100%;" ng-model="beData.BranchId" ng-change="GetJobHistory()">
+                                    <option ng-repeat="cc in BranchList track by cc.BranchId" ng-value="cc.BranchId" ng-selected="cc.BranchId == beData.BranchId">
+                                        {{cc.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3" ng-show="CostClassColl.length>1">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="min-width: 110px;">For Year</label>
+                                <select class="form-control select2 hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="GetJobHistory()">
+                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                        {{cc.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="min-width: 110px;">Job No.</label>
+                                <input type="text" class="form-control form-control-sm ml-2" ng-model="beData.JobNo" ng-blur="GetJobHistory()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="min-width: 110px;">Party Name</label>
+                                <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Party" disabled />
+
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group d-flex">
+                                <label class="mt-1" style="min-width: 100px;">Contact No</label>
+                                <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.MobileNo1" disabled />
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                            <h5 class="mb-0" style="font-size: 16px;">Job Detail</h5>
+                        </div>
+                        <div class="card-body py-2">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Regd No</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.RegdNo" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Engine No</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.EngineNo" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Vin No</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.VinNo" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Vehicle Type</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.VehicleType" />
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Model</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Model" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Chassis Serial No</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.ChSrlNo" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Job Open date</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.EntryDateBS" />
+                                    </div>
+                                </div> 
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Running KM</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.RunningKM" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Running HR</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.RunningHR" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Job Card Type</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.JobCardType" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Est. DateTime</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.EstimatedTime" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Est. Cost</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.EstimatedCost" />
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Site Location</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.SiteLocation" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group d-flex">
+                                        <label style="min-width: 120px;">Complain</label>
+                                        <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.Complain" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*For Complain Inspection table start*@
+
+                    <div class="card" ng-show="JobHis.Job.InspectionCOll.length>0">
+                        <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                            <h5 class="mb-0" style="font-size: 16px;">Complain Inspection</h5>
+                        </div>
+
+                        <div class="card-body py-1">
+                            <div class="row">
+                                <div class="table-scroll-x-y table-scroll mb-1" @*style="max-height: calc(100vh - 100px);"*@ style="height: 270px !important; overflow: auto !important;">
+                                    <table id="maintable" class="table table-bordered  table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 40px;">S.No.</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 300px;">Group</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 110px;">Inspection Type</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 150px;">Description</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 75px;">Start Date</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 75px;">End Date</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 100px;">Mechanic</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 100px;">JobCard Type</th>
+                                                <th class="cstm-sticky pr-3" style="width: 70px; right: 0; z-index: 3; background-color: #ececec !important; width: 90px;">Qty.</th>
+                                                <th class="cstm-sticky pr-3" style="width: 70px; right: 0; z-index: 3; background-color: #ececec !important; width: 110px;">Rate</th>
+                                                <th class="cstm-sticky pr-3" style="width: 70px; right: 0; z-index: 3; background-color: #ececec !important; width: 110px;">Amount</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr ng-repeat="ci in JobHis.Job.InspectionCOll">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{ci.InspectionGroup}}</td>
+                                                <td>{{ci.InspectionType}}</td>
+                                                <td>{{ci.Description}}</td>
+
+
+                                                <td>
+                                                    <p class="mb-0">{{ci.StartTime |dateFormat}}</p>
+                                                    <p class="mb-0">{{ci.StartTime |timeFormat}}</p>
+
+                                                </td>
+                                                <td>
+                                                    <p class="mb-0">{{ci.EndTime |dateFormat}}</p>
+                                                    <p class="mb-0">{{ci.EndTime |timeFormat}}</p>
+
+
+                                                </td>
+                                                <td>{{ci.Mechanic}}</td>
+                                                <td>{{ci.JobCardType}}</td>
+                                                <td class="text-right cstm-sticky pr-3" style="right: 0; background-color: white;">{{ci.Qty |number:2}}</td>
+                                                <td class="text-right cstm-sticky pr-3" style="right: 0; background-color: white;">{{ci.LabourCharge |number:2}}</td>
+                                                <td class="text-right cstm-sticky pr-3" style="right: 0; background-color: white;">{{ci.Amount |number:2}}</td>
+                                            </tr> 
+
+                                        </tbody>
+                                        <tfoot style="position: sticky; bottom: 0; z-index: 1; text-align: right;">
+                                            <tr>
+
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; border-left: none; color: black;">
+                                                    Total
+                                                </th>
+                                                <th colspan="8" class="cstm-sticky pr-3" style="right:0; width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.InspectionCOll ) | sumOfValue:'Qty') |number:2}}
+                                                </th>
+                                                <th class="cstm-sticky pr-3" style="right:0; width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    
+                                                </th>
+                                                <th  class="cstm-sticky pr-3" style="right:0; width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.InspectionCOll ) | sumOfValue:'Amount') |number:2}}
+                                                </th>
+
+                                            </tr>
+                                        </tfoot>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*For Complain Inspection table end*@
+
+                    @*For spare parts demand table start*@
+
+                    <div class="card" ng-show="JobHis.Job.PartsColl.length>0">
+                        <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                            <h5 class="mb-0" style="font-size: 16px;">Spare Parts Demand </h5>
+                        </div>
+                        <div class="card-body py-1">
+                            <div class="row">
+                                <div class="table-scroll-x-y table-scroll mb-1" @*style="max-height: calc(100vh - 100px);"*@ style="height: 305px !important; overflow: auto !important;">
+                                    <table id="maintable" class="table table-bordered table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th style="z-index: 3; background-color: #ececec !important; width: 17px;">S.No.</th>
+                                                <th style="z-index: 3; background-color: #ececec !important; width: 30px;">Date</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 120px;">Product Name</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 30px;">Demand Qty</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 25px;">Unit</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 25px;">Rate</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 25px;">Amount</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 100px;">Remarks</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 100px;">JobCard Type</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr ng-repeat="pd in JobHis.Job.PartsColl">
+                                                <td class="text-center"> {{$index+1}}</td>
+                                                <td>{{pd.DemandMiti}}</td>
+                                                <td>{{pd.Code}}-{{pd.Name}}</td>
+                                                <td class="text-right">{{pd.DemandQty}}</td>
+                                                <td class="text-right">{{pd.Unit}}</td>
+                                                <td class="text-right">{{pd.Rate}}</td>
+                                                <td class="text-right">{{pd.DemandAmt}}</td>
+                                                <td class="pr-3">{{pd.Remarks}}</td>
+                                                <td class="pr-3">{{pd.JobCardType}}</td>
+                                            </tr>                                           
+
+                                        </tbody>
+                                        <tfoot style="position: sticky; bottom: 0; z-index: 1; text-align: right;">
+                                            <tr>
+
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; border-left: none; color: black;">
+                                                    Total
+                                                </th>
+
+
+                                                <th colspan="3" style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | sumOfValue:'DemandQty') |number:2}}
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | sumOfValue:'DemandAmt') |number:2}}
+                                                </th>
+
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+
+                                            </tr>
+                                        </tfoot>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*For spare parts demand table end*@
+
+                    @*for Spare parts Issue start here*@
+
+
+                    <div class="card" ng-show="(JobHis.Job.PartsColl | filter: greaterThan('Qty', 0)).length>0">
+                        <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                            <h5 class="mb-0" style="font-size: 16px;">Spare Parts Issue</h5>
+                        </div>
+                        <div class="card-body py-1">
+                            <div class="row">
+                                <div class="table-scroll-x-y table-scroll mb-1" @*style="max-height: calc(100vh - 100px);"*@ style="height: 305px !important; overflow: auto !important;">
+                                    <table id="maintable" class="table table-bordered  table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 20px;">S.No.</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 35px;">Date</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 120px;">Product Name</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 50px;">Alternate Product</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 35px;">Demand Qty</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 30px;">Issued Qty</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 20px;">Rate</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 28px;">Amount</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 100px;">Remarks</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr ng-repeat="pd in JobHis.Job.PartsColl | filter: greaterThan('Qty', 0)">
+                                                <td class="text-center"> {{$index+1}}</td>
+                                                <td>{{pd.IssueMiti}}</td>
+                                                <td>{{pd.Code}}-{{pd.Name}}</td>
+                                                <td>{{pd.ALP_Code}}-{{pd.ALP_Name}}</td>
+                                                <td class="text-right">{{pd.DemandQty}}</td>
+                                                <td class="text-right">{{pd.Qty}}</td>                                                
+                                                <td class="text-right">{{pd.Rate}}</td>
+                                                <td class="text-right">{{pd.Amount}}</td>
+                                                <td class="pr-3">{{pd.Remarks}}</td>
+                                            </tr> 
+
+                                        </tbody>
+                                        <tfoot style="position: sticky; bottom: 0; z-index: 1; text-align: right;">
+                                            <tr>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; border-left: none; color: black;">
+                                                    Total
+                                                </th>
+
+
+                                                <th colspan="4" style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | filter: greaterThan('Qty', 0) | sumOfValue:'DemandQty') |number:2}}
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | filter: greaterThan('Qty', 0) | sumOfValue:'Qty') |number:2}}
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | filter: greaterThan('Qty', 0) | sumOfValue:'Amount') |number:2}}
+                                                </th>
+
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*for Spare parts Issue end here*@
+
+
+                    @*for spare parts Return start*@
+                    <div class="card" ng-show="(JobHis.Job.PartsColl | filter: greaterThan('ReturnQty', 0)).length>0">
+                        <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                            <h5 class="mb-0" style="font-size: 16px;">spare parts Return</h5>
+                        </div>
+                        <div class="card-body py-1">
+                            <div class="row">
+                                <div class="table-scroll-x-y table-scroll mb-1" @*style="max-height: calc(100vh - 100px);"*@ style="height: 305px !important; overflow: auto !important;">
+                                    <table id="maintable" class="table table-bordered  table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 20px;">S.No.</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 32px;">Date</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 120px;">Product Name</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 60px;">Alternate Product</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 35px;">Demand Qty</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 38px;">Returned Qty</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 20px;">Rate</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 25px;">Amount</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 100px;">Remarks</th>
+
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr ng-repeat="pd in JobHis.Job.PartsColl | filter: greaterThan('ReturnQty', 0)">
+                                                <td class="text-center"> {{$index+1}}</td>
+                                                <td>{{pd.IssueMiti}}</td>
+                                                <td>{{pd.Code}}-{{pd.Name}}</td>
+                                                <td>{{pd.ALP_Code}}-{{pd.ALP_Name}}</td>
+                                                <td class="text-right">{{pd.DemandQty}}</td>
+                                                <td class="text-right">{{pd.ReturnQty}}</td>
+                                                <td class="text-right">{{pd.Rate}}</td>
+                                                <td class="text-right">{{pd.ReturnAmt}}</td>
+                                                <td class="pr-3">{{pd.Remarks}}</td>
+                                            </tr>
+                                             
+                                        </tbody>
+                                        <tfoot style="position: sticky; bottom: 0; z-index: 1; text-align: right;">
+                                            <tr>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; border-left: none; color: black;">
+                                                    Total
+                                                </th>
+
+
+                                                <th colspan="4" style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl  ) | filter: greaterThan('ReturnQty', 0) | sumOfValue:'DemandQty') |number:2}}
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | filter: greaterThan('ReturnQty', 0) | sumOfValue:'ReturnQty') |number:2}}
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+                                                    {{((JobHis.Job.PartsColl ) | filter: greaterThan('ReturnQty', 0) | sumOfValue:'ReturnAmt') |number:2}}
+                                                </th>
+
+                                                <th style="width: 100px; z-index: 3; background-color: #ececec !important; color: black;">
+
+                                                </th>
+                                            </tr>
+                                        </tfoot>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @*for spare parts Return End*@
+
+
+                    @*for Job Card Closed start*@
+                    <div class="card">
+                        <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;">
+                            <h5 class="mb-0" style="font-size: 16px;">Job Card Closed </h5>
+                        </div>
+                        <div class="card mt-2 mx-3">
+
+                            <div class="card-body py-2">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="form-group d-flex">
+                                            <label style="min-width: 120px;">Closed Remarks</label>
+                                            <textarea type="text" rows="3" class="form-control form-control-sm" readonly ng-model="JobHis.Job.CloseRemarks"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group d-flex">
+                                            <label style="min-width: 100px;">Closed Date</label>
+                                            <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.ClosedDateTime" />
+                                        </div>
+                                        <div class="form-group d-flex">
+                                            <label style="min-width: 100px;">Closed By</label>
+                                            <input type="text" class="form-control form-control-sm" readonly ng-model="JobHis.Job.ClosedBy" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body py-1">
+                            <div class="row">
+                                <div class="table-scroll-x-y table-scroll mb-1" @*style="max-height: calc(100vh - 100px);"*@ style="height: 305px !important; overflow: auto !important;">
+                                    <table id="maintable" class="table table-bordered  table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 20px;">S.No.</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 200px;">Complaint</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 80px;">Diagnosis</th>
+                                                <th style=" z-index: 3; background-color: #ececec !important; width: 120px;">Action Taken</th>
+
+
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr ng-repeat="cc in JobHis.Job.ComplainColl">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{cc.Complain}}</td>
+
+                                                <td>{{cc.Diagnosis}}</td>
+                                                <td class="pr-3">{{cc.ActionTaken}}</td>  
+                                            </tr>  
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*for Job Card Closed End*@
+
+                </div>
+
+
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

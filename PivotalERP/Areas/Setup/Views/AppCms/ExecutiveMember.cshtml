@@ -1,0 +1,257 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/appcms/ExecutiveMember.js"></script>
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ExecutiveMemberController" ng-init="LoadData()">
+    <section class="iframe-content-starts-here">
+        <div class="container-fluid">
+            <div class="tab-content" id="table-listing">
+                <!-- Second Tab Content -->
+                <div class="card p-2">
+                    <header class="row mb-2">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ExecutiveMember">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ExecutiveMember">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search"
+                                               placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.ExecutiveMember" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- end col-md-8 -->
+
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file">
+                                <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                </div>
+                                <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-primary"
+                                        id="open-form-btn"
+                                        style="font-size:14px;">
+                                    <i class="fas fa-plus w-t"></i> Add Executive Members
+                                </button>
+                            </div>
+                        </div>
+
+
+
+                    </header>
+                    <div>
+                        <div class="table-scroll-x-y  table-scroll"style="max-height: calc(100vh - 100px);">
+                            <table id="main-table"
+                                   class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70px">S.No.</th>
+                                        <th style="width: 200px">Designation</th>
+                                        <th style="width: 300px">Name</th>
+                                        <th style="width: 300px">Email</th>
+                                        <th style="width: 300px">Contact No.</th>
+                                        <th class="text-center" style="width: 100px">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="em in ExecutiveMemberList | filter:searchData.ExecutiveMember | itemsPerPage: perPage.ExecutiveMember" current-page="currentPages.ExecutiveMember" pagination-id="executivememberPagination">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{em.Designation}}</td>
+                                        <td>{{em.FullName}}</td>
+                                        <td>{{em.Email}}</td>
+                                        <td>{{em.Contact}}</td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" ng-click="GetExecutiveMemberById(em)">
+                                                <i class="fas fa-edit text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="DelExecutiveMemberById(em)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- table end -->
+                        </div>
+                    </div>
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="executivememberPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+            <!-- form area starts -->
+            <div id="notice-form">
+
+                <div>
+                    <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="timeline-item">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <!-- select for others -->
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Full Name</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newExecutiveMember.FullName" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Designation</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newExecutiveMember.Designation" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Contact No.</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newExecutiveMember.Contact" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Email</label>
+                                                    <input type="email"
+                                                           class="form-control form-control-sm" ng-model="newExecutiveMember.Email" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <label for="">Message</label>
+                                                    <textarea class="textarea" placeholder="Place some text here"
+                                                              style="width: 100%; height: 250px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" ng-model="newExecutiveMember.Message" html-editor></textarea>
+                                                </div>
+                                            </div>
+                                            <!-- fields after clicking radio button ends -->
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="" class="invisible">Photo</label>
+                                        <div class="person-photo-attachment-wrap text-center">
+                                            <div class="img-wrap mx-auto">
+                                                <img ng-src="{{newExecutiveMember.PhotoData  || newExecutiveMember.ImagePath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                            </div>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#updatePhoto" style="font-size:14px;">
+                                                <i class="fas fa-camera w-t"></i> Upload Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button"
+                                                        class="btn  btn-info"
+                                                        id="back-to-list"
+                                                        style="min-width: 90px">
+                                                    Back to List
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-default"
+                                                        style="min-width: 90px" ng-click="ClearExecutiveMember()">
+                                                    Reset
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-success"
+                                                        style="min-width: 90px" ng-click="SaveUpdateExecutiveMember()">
+                                                    {{newExecutiveMember.Mode}}
+                                                </button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- col-md-9 -->
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END timeline item -->
+            </div>
+            <!-- form area ends -->
+        </div>
+       
+    </section>
+
+    @* photo upload Modal*@
+    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <i class="flaticon-close"></i>
+                    </button>
+                </div>
+                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                     data-max-file-size="3" ng-model="newExecutiveMember.Photo_TMP" @*after-selected="AddExecutiveMemberPhoto()"*@ fileread="newExecutiveMember.PhotoData">
+                    <div class="photo-upload-wrap">
+                        <span class="static-content">
+                            <img ng-src="{{newExecutiveMember.PhotoData || newExecutiveMember.ImagePath}}" class="img-fluid" id="imgPhoto">
+                            <span>Drag & Drop your<br>image here</span>
+                        </span>
+                    </div>
+                    <div class="text-muted pb-3">or</div>
+                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newExecutiveMember.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newExecutiveMember.PhotoData" />
+                    <a ng-click="ClearExecutiveMemberPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                    @*<button type="button" class="btn btn-secondary px-4" ng-click="AddExecutiveMemberImage()">Save</button>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

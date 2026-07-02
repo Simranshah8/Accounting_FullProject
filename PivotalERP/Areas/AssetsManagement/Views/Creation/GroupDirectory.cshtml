@@ -1,0 +1,302 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/AssetsManagement/GroupDirectory.js"></script>
+<div ng-app="myApp" ng-controller="GroupDirectoryController" ng-init="LoadData()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="tab-content">
+                            <div id="GroupDirectory-section">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.GroupDirectory">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.GroupDirectory">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.GroupDirectory">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#EmployeeProfile'" sheet-name="'EmployeeDetails'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#Employee').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#Employee'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary load" ng-click="ClearAssets()"
+                                                    id="add-details" style="min-width: 110px;">
+                                                <i class="fas fa-plus w-t"></i> Add Group
+                                            </button>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="Disabilities">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:50px;text-align:center;">S.No</th>
+                                                    <th style="width: 95px;">For</th>
+                                                    <th>Group Name</th>
+                                                    <th>Decription</th>
+                                                    <th style="width: 103px;">Group Details</th>
+                                                    <th style="width:60px; text-align:center;">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="ld in TableData | filter:searchData.GroupDirectory | itemsPerPage: perPage.GroupDirectory" current-page="currentPages.GroupDirectory" pagination-id="GroupDirectoryPagination">
+                                                    <td style="text-align: center;">{{$index + 1}}</td>
+                                                    <td>{{ld.ForId}}</td>
+                                                    <td>{{ld.GroupName}}</td>
+                                                    <td>{{ld.Description}}</td>
+                                                    <td style="text-align:center;">
+                                                        <a class="p-1" href="#" ng-click="ShowModal(ld)">
+                                                            <i class="fas fa-eye text-secondary"></i>
+                                                        </a>
+                                                    </td>
+                                                    <td style="text-align:center;">
+                                                        <a class="p-1" href="#" ng-click="GetGroupDirectoryById(ld)">
+                                                            <i class="fas fa-edit text-info"></i>
+                                                        </a>
+                                                        <a class="p-1" href="#" ng-click="DelGroupDirectoryById(ld)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="GroupDirectoryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div id="GroupDirectory-form">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>For</label>
+                                            <select class="form-control form-control-sm" @*ng-model="addNewDetails.ForId"*@>
+                                                <option ng-value="it.id" ng-repeat="it in ForUserList" ng-selected="it.id==addNewDetails.ForId">{{it.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label> Group Name</label>
+                                            <input type="text" ng-model="addNewDetails.GroupName" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label> Description</label>
+                                            <input type="text" ng-model="addNewDetails.Description" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-6 col-lg-6 col-md-6 " @*ng-show="addNewDetails.ForId==2"*@ id="selectEmp">
+                                        <label @*class="sr-only" *@ for="inlineFormInputGroup">Select Employee</label>
+                                        <div class="input-group-prepend">
+                                            <select class="input-group-text dropdown-toggle p-0"
+                                                    style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="addNewDetails.SelectEmployee">
+                                                <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==addNewDetails.SelectEmployee">
+                                                    {{ss.text}}
+                                                </option>
+                                            </select>
+                                            <select class="form-control select2 form-control-sm" all-employee ng-model="addNewDetails.EmployeeId" employee-detail="addNewDetails.EmployeeDetails" side-bar-data="addNewDetails.EmpSideBarData" search-by="addNewDetails.SelectEmployee" style="width: 100%;">
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-4 col-lg-4 col-md-4 mt-4 text-right">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary light-btn" style="min-width: 60px;" ng-click="AddEmpData()"> <i class="fas fa-plus"></i> Add </button>
+                                    </div>
+                                            <div class="card table-scroll-x-y m-2" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                                <table id="main-table" class="main-table table table-sm table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width:50px;">S.No</th>
+                                                            <th>Code</th>
+                                                            <th>Name</th>
+                                                            <th>Department</th>
+                                                            <th>Designation</th>
+                                                            <th>Contact No</th>
+                                                            <th>Email</th>
+                                                            <th style="width:100px;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="ld in addNewDetails.GroupEmployeeDetailsColl track by $index">
+                                                            <td>{{$index + 1}}</td>
+                                                            <td>{{ld.Code}}</td>
+                                                            <td>{{ld.Name}}</td>
+                                                            <td>{{ld.Department}}</td>
+                                                            <td>{{ld.Designation}}</td>
+                                                            <td>{{ld.ContactNo}}</td>
+                                                            <td>{{ld.Email}}</td>
+                                                            <td>
+                                                                <button ng-click="delEmpDetails($index)" class="btn btn-link p-0">
+                                                                    <i class="p-1 fas fa-trash-alt text-danger"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+
+                                                </table>
+                                            </div>
+
+                                        </div>
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-secondary" id="back-to-list">Back to List</button>
+                                                <button type="button" class="btn btn-default" ng-click="ClearAssets()">Reset</button>
+                                                <button type="button" class="btn btn-primary" ng-click="SaveUpdateGroupDicts()">Save</button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                    </div>
+                </div>
+                <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="GroupdictModal" role="dialog" tabindex="-1" style="margin-top:50px;">
+                    <div class="modal-dialog modal-lg" role="document" style="margin-top: 0; width: auto; max-width: 60vw; padding: 3px; display: flex; justify-content: center; align-items: center;">
+                        <div class="modal-content">
+                            <div class="modal-body p-2" style="padding: 10px;">
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <span class="s-text">For:</span>
+                                        <b>{{addNewDetails.ForId == 1 ? 'Employee' : 'Employee'}}</b>
+                                    </div>
+
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <span class="s-text">Group Name:</span>
+                                        <b>{{addNewDetails.GroupName}}</b>
+                                    </div>
+
+                                    <div class="col-sm-4 col-md-4 col-lg-4">
+                                        <span class="s-text">Description:</span>
+                                        <b>{{addNewDetails.Description}}</b>
+                                    </div>
+                                </div>
+                                <div class="table-scroll table-scroll-x-y" @*ng-show="addNewDetails.ForId == 2"*@>
+                                    <table class="table table-bordered table-sm bg-white mt-2 ml-1 mr-1" id="emp-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:50px;">S.No</th>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                                <th>Department</th>
+                                                <th>Designation</th>
+                                                <th>Contact No</th>
+                                                <th>Email</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ld in addNewDetails.GroupEmployeeDetailsColl track by $index">
+                                                <td>{{$index + 1}}</td>
+
+
+                                                <td>
+                                                    <span>{{ld.Code}}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{{ld.Name}}</span>
+                                                </td>
+
+                                                <td>
+                                                    <span>{{ld.Department}}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{{ld.Designation}}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{{ld.ContactNo}}</span>
+                                                </td>
+                                                <td>
+                                                    <span>{{ld.Email}}</span>
+                                                </td>
+
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="modal-footer p-2" style="display: flex; justify-content: flex-end; gap: 3px;">
+                                <button class="btn btn-danger btn-rounded btn-sm text-center" data-dismiss="modal" type="button" style="min-width: 80px;">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.card -->
+    </div>
+    <!-- /.container-fluid -->
+</div>
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+

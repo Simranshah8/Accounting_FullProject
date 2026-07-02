@@ -1,0 +1,1351 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/account/creation/Vendor.js?v=@Dynamic.BusinessEntity.Global.AppVer.Ver"></script>
+
+<script>
+    var TranId =@ViewBag.TranId;
+    var LedgerEntity =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Ledger);
+     var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Vendor)";
+</script>
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<style>
+    .resp-vtabs .resp-tabs-list li {
+        padding: 0.1rem 1rem 0.1rem 1.5rem !important;
+    }
+
+    label {
+        margin-bottom: 0.1rem !important;
+        font-size: 13px;
+    }
+
+    .form-group {
+        margin-bottom: 0.1rem !important;
+    }
+</style>
+<div ng-app="myApp" ng-controller="LedgerVendor" ng-init="LoadData()" ng-cloak>
+    <div class="container-fluid">
+        <div class="content">
+            <div class="card">
+                <div class="card-header header-corner-triangle p-1">
+                    <h3 class="card-title">Vendor </h3>
+                    <button class="btn btn-primary btn-light btn-sm  float-right" type="button"
+                            title="Create Multiple Data" ng-click="ShowMultipleModal()">
+                        Create Multiple
+                    </button>
+                </div>
+                <!--Vertical Tab-->
+                <div class="cstm-vertical-nav-tabs">
+                    <div id="parentVerticalTab">
+                        <div class="row no-gutters">
+                            <div class="col-md-4 col-lg-3">
+                                <div class="left-side-wrap">
+                                    <ul class="resp-tabs-list hor_1 mt-0">
+                                        <li id="tab-1st-active">Basic Info</li>
+                                        <li id="tab-2st-active" ng-hide="EPDet.Contact_Panel.ShowHide==2">Contact Details</li>
+                                        <li id="tab-5st-active">Bill To Details</li>
+                                        <li id="tab-6st-active">Ship To Details</li>
+                                        <li id="tab-3st-active" ng-hide="EPDet.Other_Panel.ShowHide==2">Other Details</li>
+                                        <li id="tab-4st-active" ng-hide="EPDet.Doc_Panel.ShowHide==2">Doc. Attach</li>
+                                    </ul>
+                                    <div class="bottom-content-wrap py-0" ng-hide="EPDet.Side_Panel.ShowHide==2" style="padding-bottom: 70px!important;">
+                                        <div class="form-group" ng-hide="EPDet.Status.ShowHide==2">
+                                            <label>{{GetLabel('Status')}}</label>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="radio" id="radioPrimary1" name="r1" checked="" ng-model="newLedger.Status" ng-value="true">
+                                                            <label for="radioPrimary1">Active</label>
+                                                        </div>
+                                                        <div class="icheck-primary d-inline ml-3">
+                                                            <input type="radio" id="radioPrimary2" name="r1" ng-model="newLedger.Status" ng-value="false">
+                                                            <label for="radioPrimary2">De-Active</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" ng-hide="EPDet.ActiveSMS.ShowHide==2">
+                                            <label>{{GetLabel('ActiveSMS')}}</label>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="radio" id="rboSMS1" name="rboSMS" checked="" ng-model="newLedger.ActiveSMS" ng-value="true">
+                                                            <label for="rboSMS1">Active</label>
+                                                        </div>
+                                                        <div class="icheck-primary d-inline ml-3">
+                                                            <input type="radio" id="rboSMS2" name="rboSMS" ng-model="newLedger.ActiveSMS" ng-value="false">
+                                                            <label for="rboSMS2">De-Active</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" ng-hide="EPDet.ActiveEmail.ShowHide==2">
+                                            <label>{{GetLabel('ActiveEmail')}}</label>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="radio" id="rboEmail1" name="rboEmail" checked="" ng-model="newLedger.ActiveEmail" ng-value="true">
+                                                            <label for="rboEmail1">Active</label>
+                                                        </div>
+                                                        <div class="icheck-primary d-inline ml-3">
+                                                            <input type="radio" id="rboEmail2" name="rboEmail" ng-model="newLedger.ActiveEmail" ng-value="false">
+                                                            <label for="rboEmail2">De-Active</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" ng-hide="EPDet.ActiveNotification.ShowHide==2">
+                                            <label>{{GetLabel('ActiveNotification')}}</label>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="radio" id="rboNotification1" name="rboNotification" checked="" ng-model="newLedger.ActiveNotification" ng-value="true">
+                                                            <label for="rboNotification1">Active</label>
+                                                        </div>
+                                                        <div class="icheck-primary d-inline ml-3">
+                                                            <input type="radio" id="rboNotification2" name="rboNotification" ng-model="newLedger.ActiveNotification" ng-value="false">
+                                                            <label for="rboNotification2">De-Active</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @*Basic Information *@
+                            <div class="col-md-8 col-lg-9">
+                                <div class="resp-tabs-container hor_1" style="height:100%!important;margin-bottom:60px!important">
+                                    <div>
+                                        <div class="row">
+
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label title="{{newLedger.LedgerId>0 ? newLedger.LedgerId : ''}}">{{GetLabel('Name')}}<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Name" ng-blur="GenerateCode()" title="{{newLedger.LedgerId>0 ? newLedger.LedgerId : ''}}">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-3" ng-hide="EPDet.Alias.ShowHide==2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Alias')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Alias">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-hide="EPDet.DebtorTypeId.ShowHide==2 || DebtorTypeList.length==0">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('DebtorTypeId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.DebtorTypeId" data-placeholder="** Select Type **" ng-change="ChangeDebtorType()">
+                                                        <option ng-value="cl.DebtorTypeId" ng-repeat="cl in DebtorTypeList" ng-selected="cl.DebtorTypeId==newLedger.DebtorTypeId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.LedgerGroupId.ShowHide==2 || CreditorGroupList.length==1">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('LedgerGroupId')}}<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.LedgerGroupId" data-placeholder="** Select Group **" ng-blur="GenerateCode()">
+                                                        <option ng-value="pl.LedgerGroupId" ng-repeat="pl in CreditorGroupList" ng-selected="pl.LedgerGroupId==newLedger.LedgerGroupId">{{pl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-hide="EPDet.Code.ShowHide==2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Code')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Code" disabled>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newLedger.TypeOfDutyTax==30">
+                                                <div class="form-group">
+                                                    <label>Opening Credit Points</label>
+                                                    <input type="text" number-input positive="true" class="form-control form-control-sm" placeholder="" ng-model="newLedger.OpeningPoint">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Pan/Vat No.</label>
+                                                    @*<input type="text" formatnumber="false" number-input positive="true" integer="true" class="form-control form-control-sm" placeholder="" ng-model="newLedger.StatutoryDetail.PanVatNo" maxlength="9" ng-blur="IsValidPANVat(newLedger.LedgerId,newLedger.StatutoryDetail.PanVatNo)">*@
+
+                                                    <!--search button starts-->
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" formatnumber="false" number-input positive="true" integer="true" ng-model="newLedger.StatutoryDetail.PanVatNo" maxlength="9" @*ng-blur="IsValidPANVat(newLedger.LedgerId,newLedger.StatutoryDetail.PanVatNo)"*@>
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="button" ng-click="IsValidPANVat(newLedger.LedgerId,newLedger.StatutoryDetail.PanVatNo)">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <!--Ends-->
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Country</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.Country" data-placeholder="** Country **" ng-change="ChangeCountry(newLedger)">
+                                                        <option ng-value="cl.Name" ng-repeat="cl in CountryColl" ng-selected="cl.Name==newLedger.Country">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Mobile No.</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" formatnumber="false" positive="true" title="Country Code" integer="true" class="form-control form-control-sm" placeholder="C.Code" ng-model="newLedger.CountryCode" maxlength="10" style="flex: 0 0 35%; max-width: 35%;">
+                                                        <input type="text" formatnumber="false" number-input positive="true" integer="true" class="form-control form-control-sm" placeholder="" ng-model="newLedger.CompanyContactNo" maxlength="10" style="flex: 0 0 65%; max-width: 65%;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.Address.ShowHide==2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Address')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Address">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.CreditLimit.ShowHide==2">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('CreditLimitAmount')}}</label>
+                                                            <input type="text" number-input class="form-control form-control-sm" placeholder="" ng-model="newLedger.CreditLimitAmount">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('CreditLimitDays')}}</label>
+                                                            <input type="text" number-input class="form-control form-control-sm" placeholder="" ng-model="newLedger.CreditLimitDays">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('CreditLimitAs')}}</label>
+                                                            <select class="form-control form-control-sm " data-placeholder="**Select Rule**" ng-model="newLedger.CreditLimitAs">
+                                                                <option ng-value="r.id" ng-repeat="r in CreditRuleTypeList" ng-selected="r.id==newLedger.CreditLimitAs">{{r.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-6" ng-show="CurrencyList.length>1">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('CurrencyId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.CurrencyId" data-placeholder="** Select Currency **">
+                                                        <option ng-value="c.CurrencyId" ng-repeat="c in CurrencyList" ng-selected="c.CurrencyId==newLedger.CurrencyId">{{c.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Payment Type</label>
+                                                    <select class="form-control form-control-sm" style="width: 100%;" ng-model="newLedger.PaymentType">
+                                                        <option ng-value="0">**select PaymentType**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in PaymentTypeColl" ng-selected="cl.id==newLedger.PaymentType">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.AgentId.ShowHide==2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('AgentId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.TmpAgentIdColl" data-placeholder="** Select Salesman **" multiple id="cboAgent">
+                                                        <option value="{{cl.id}}" ng-repeat="cl in SalesManList" @*ng-selected="cl.id==newLedger.AgentId"*@>{{cl.text}}-{{cl.Mobile}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.AreaId.ShowHide==2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('AreaId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.AreaId" data-placeholder="** Select Area **" ng-change="ChangeAreaSelection(newLedger.AreaId)">
+                                                        <option ng-value="pl.AreaId" ng-repeat="pl in AreaList" ng-selected="pl.AreaId==newLedger.AreaId">{{pl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-sm-6" ng-show="IsDealer(newLedger.DebtorTypeId)==true">
+                                                <div class="form-group">
+                                                    <label>Dealer/Distributor</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newLedger.ParentLedgerId" ledgertype="15" fortransaction="true"
+                                                            placeholder="** Select Dealer/Distrubutor **" showdetails="false" confirm-action="ChangeCashBankLedger(beData)" ledger-detail="newLedger.ParentLedgerDetails" side-bar-data="newLedger.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.DebtorRouteId.ShowHide==2">
+                                                <div class="form-group">
+                                                    @*<label>Customer Group</label>*@
+                                                    <label>{{GetLabel('DebtorRouteId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.DebtorRouteId" data-placeholder="** Select DebtorCreditorType **">
+
+                                                        <option ng-value="cl.DebtorRouteId" ng-repeat="cl in RouteList" ng-selected="cl.DebtorRouteId==newLedger.DebtorRouteId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6" ng-hide="EPDet.PriceId.ShowHide==2 || PriceColl.length==0">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('PriceId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.PriceId" data-placeholder="** Select Price **">
+                                                        <option ng-value="cl.PriceId" ng-repeat="cl in PriceColl" ng-selected="cl.PriceId==newLedger.PriceId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-{{vUF.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 1 }:true">
+                                                <div class="form-group">
+                                                    <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                    <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-12" ng-hide="EPDet.Notes.ShowHide==2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Notes')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Notes">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <!-- row -->
+                                    </div>
+                                    <div>
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.Name')}}</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.Name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.Post'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.Post')}}</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.Post">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.CountryId'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.CountryId')}}</label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newContactDetails.Country" data-placeholder="** Country **" ng-change="ChangeCountry(newContactDetails)">
+                                                                <option ng-value="cl.Name" ng-repeat="cl in CountryColl" ng-selected="cl.Name==newContactDetails.Country">{{cl.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.Address'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.Address')}}</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.Address">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.EmailId'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.EmailId')}}</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.EmailId">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.CitizenShipNo'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.CitizenShipNo')}}</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.CitizenShipNo">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.MobileNo1'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.MobileNo1')}}</label>
+                                                            @*<input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.MobileNo1">*@
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="text" title="Country Code" class="form-control form-control-sm" placeholder="C.Code" ng-model="newContactDetails.CountryCode" style="flex: 0 0 30%; max-width: 30%;">
+                                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.MobileNo1" style="flex: 0 0 70%; max-width: 70%;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.MobileNo2'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.MobileNo2')}}</label>
+                                                            @*<input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.MobileNo2">*@
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="text" title="Country Code" class="form-control form-control-sm" placeholder="C.Code" ng-model="newContactDetails.CountryCode2" style="flex: 0 0 30%; max-width: 30%;">
+                                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.MobileNo2" style="flex: 0 0 70%; max-width: 70%;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.TelNo1'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.TelNo1')}}</label>
+                                                            @*<input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.TelNo1">*@
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="text" title="Country Code" class="form-control form-control-sm" placeholder="C.Code" ng-model="newContactDetails.TelCountrCode1" style="flex: 0 0 30%; max-width: 30%;">
+                                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.TelNo1" style="flex: 0 0 70%; max-width: 70%;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6" ng-hide="EPDet['ContactPersons.TelNo2'].ShowHide==2">
+                                                        <div class="form-group">
+                                                            <label>{{GetLabel('ContactPersons.TelNo2')}}</label>
+                                                            @*<input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.TelNo2">*@
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="text" title="Country Code" class="form-control form-control-sm" placeholder="C.Code" ng-model="newContactDetails.TelCountrCode2" style="flex: 0 0 30%; max-width: 30%;">
+                                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.TelNo2" style="flex: 0 0 70%; max-width: 70%;">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group text-right">
+                                                            <label class="d-block invisible">Add more btn</label>
+                                                            <button type="button" class="btn btn-outline-primary btn-sm py-1" ng-click="AddNewContactPerson()"><i class="fas fa-plus"></i> Add New Member</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- col-md-9 -->
+                                        </div>
+                                        <div class="table-responsive mt-4">
+                                            <table class="table table-sm table-hover border">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 60px">SN.</th>
+                                                        <th style="width:180px">{{GetLabel('ContactPersons.Name')}}</th>
+                                                        <th style="width:140px">{{GetLabel('ContactPersons.Post')}}</th>
+                                                        <th style="width:180px">{{GetLabel('ContactPersons.Address')}}</th>
+                                                        <th style="width:130px">{{GetLabel('ContactPersons.CitizenShipNo')}}</th>
+                                                        <th style="width: 120px">Contact No.</th>
+                                                        <th style="width: 90px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cp in newLedger.ContactPersons">
+                                                        <td scope="row" class="align-middle">{{$index+1}}</td>
+                                                        <td align="left">
+                                                            {{cp.Name}}-{{cp.EmailId}}
+                                                        </td>
+                                                        <td class="align-middle">{{cp.Post}}</td>
+                                                        <td class="align-middle">{{cp.Address}}</td>
+                                                        <td class="align-middle">{{cp.CitizenShipNo}}</td>
+                                                        <td class="align-middle">{{cp.MobileNo1}}, {{cp.MobileNo2}}</td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                @*<a href="#" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc."><i class="fas fa-download"></i></a>*@
+                                                                <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="EditContactPerson($index)"><i class="fas fa-eye"></i></a>
+                                                                <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Contact Person." ng-click="DelContactPerson($index)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>AddressId</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newBillToDetails.AddressId">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Full Address</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newBillToDetails.FullAddress">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Province</label>
+                                                            <select class="form-control form-control-sm select2" data-placeholder="** select province **"
+                                                                    style="width: 100%;" ng-model="newBillToDetails.ProvinceId1">
+                                                                <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newBillToDetails.ProvinceId1">
+                                                                    {{cl.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>District</label>
+                                                            <select class="form-control form-control-sm select2"
+                                                                    style="width: 100%;" ng-model="newBillToDetails.DistrictId1" data-placeholder="** select district **">
+                                                                <option ng-repeat="tdc in DistrictColl | filter: { stateId: newBillToDetails.ProvinceId1 }:true" ng-value="tdc.id" ng-selected="tdc.id==newBillToDetails.DistrictId1">
+                                                                    {{tdc.text}}
+                                                                </option>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Palika</label>
+                                                            <select class="form-control form-control-sm select2"
+                                                                    style="width: 100%;" ng-model="newBillToDetails.PalikaId1" data-placeholder="** select area **">
+                                                                <option ng-repeat="tdc in VDCColl| filter: { districtId: newBillToDetails.DistrictId1 }:true" ng-value="tdc.id" ng-selected="tdc.id==newBillToDetails.PalikaId1">
+                                                                    {{tdc.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Ward No.</label>
+                                                            <input type="number" class="form-control form-control-sm" placeholder="" ng-model="newBillToDetails.WardNo">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tole</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newBillToDetails.Tole">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group text-right">
+                                                            <label class="d-block invisible">Add more btn</label>
+                                                            <button type="button" class="btn btn-outline-primary btn-sm py-1" ng-click="AddBillTo()"><i class="fas fa-plus"></i> Add Bill To</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- col-md-9 -->
+                                        </div>
+                                        <div class="table-responsive mt-4">
+                                            <table class="table table-sm table-hover border">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 60px">SN.</th>
+                                                        <th style="width:180px">AddressId</th>
+                                                        <th style="width:140px">Full Address</th>
+                                                        <th style="width: 90px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cp in newLedger.BillToColl">
+                                                        <td scope="row" class="align-middle">{{$index+1}}</td>
+                                                        <td align="left">
+                                                            {{cp.AddressId}}
+                                                        </td>
+                                                        <td class="align-middle">{{cp.FullAddress}}</td>
+
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                @*<a href="#" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc."><i class="fas fa-download"></i></a>*@
+                                                                <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="EditBillTo($index)"><i class="fas fa-eye"></i></a>
+                                                                <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Contact Person." ng-click="DelBillTo($index)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="row">
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>AddressId</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newShipToDetails.AddressId">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Full Address</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newShipToDetails.FullAddress">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Province</label>
+                                                            <select class="form-control form-control-sm select2" data-placeholder="** select province **"
+                                                                    style="width: 100%;" ng-model="newShipToDetails.ProvinceId1">
+                                                                <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newShipToDetails.ProvinceId1">
+                                                                    {{cl.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>District</label>
+                                                            <select class="form-control form-control-sm select2"
+                                                                    style="width: 100%;" ng-model="newShipToDetails.DistrictId1" data-placeholder="** select district **">
+                                                                <option ng-repeat="tdc in DistrictColl | filter: { stateId: newShipToDetails.ProvinceId1 }:true" ng-value="tdc.id" ng-selected="tdc.id==newShipToDetails.DistrictId1">
+                                                                    {{tdc.text}}
+                                                                </option>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Palika</label>
+                                                            <select class="form-control form-control-sm select2"
+                                                                    style="width: 100%;" ng-model="newShipToDetails.PalikaId1" data-placeholder="** select area **">
+                                                                <option ng-repeat="tdc in VDCColl| filter: { districtId: newShipToDetails.DistrictId1 }:true" ng-value="tdc.id" ng-selected="tdc.id==newShipToDetails.PalikaId1">
+                                                                    {{tdc.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Ward No.</label>
+                                                            <input type="number" class="form-control form-control-sm" placeholder="" ng-model="newShipToDetails.WardNo">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Tole</label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newShipToDetails.Tole">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group text-right">
+                                                            <label class="d-block invisible">Add more btn</label>
+                                                            <button type="button" class="btn btn-outline-primary btn-sm py-1" ng-click="AddShipTo()"><i class="fas fa-plus"></i> Add Ship To</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- col-md-9 -->
+                                        </div>
+                                        <div class="table-responsive mt-4">
+                                            <table class="table table-sm table-hover border">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 60px">SN.</th>
+                                                        <th style="width:180px">AddressId</th>
+                                                        <th style="width:140px">Full Address</th>
+                                                        <th style="width: 90px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="cp in newLedger.ShipToColl">
+                                                        <td scope="row" class="align-middle">{{$index+1}}</td>
+                                                        <td align="left">
+                                                            {{cp.AddressId}}
+                                                        </td>
+                                                        <td class="align-middle">{{cp.FullAddress}}</td>
+
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                @*<a href="#" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc."><i class="fas fa-download"></i></a>*@
+                                                                <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="EditShipTo($index)"><i class="fas fa-eye"></i></a>
+                                                                <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Contact Person." ng-click="DelShipTo($index)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="row">
+                                            @*<div class="col-sm-4">
+                                                    <div class="form-group clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="checkbox" id="checkboxPrimary8" checked="" ng-model="newLedger.ActiveRemitDetails">
+                                                            <label for="checkboxPrimary8">Active Remit Details</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="checkbox" id="checkboxPrimary9" checked="" ng-model="newLedger.IsImportExportLedger">
+                                                            <label for="checkboxPrimary9">Is Import or Export Ledger</label>
+                                                        </div>
+                                                    </div>
+                                                </div>*@
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('BankName')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.BankName">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('AccountNo')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.AccountNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label> {{GetLabel('TypeOfDutyTax')}}</label>
+                                                    <select class="form-control form-control-sm" style="width: 100%;" ng-model="newLedger.TypeOfDutyTax">
+                                                        <option ng-value="cl.id" ng-repeat="cl in DutyTaxTypeList" ng-selected="cl.id==newLedger.TypeOfDutyTax">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Rate')}}</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" placeholder="" ng-model="newLedger.Rate">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('AditionalCostOnTheBasis')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.AditionalCostOnTheBasis" data-placeholder="** Select Additional Cost **">
+                                                        <option ng-value="cl.id" ng-repeat="cl in AditionalCostTypeList" ng-selected="cl.id==newLedger.AditionalCostOnTheBasis">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('OpeningForBranchId')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.BDId" data-placeholder="** Select Branch **">
+                                                        <option ng-value="cl.BranchId" ng-repeat="cl in BranchList" ng-selected="cl.BranchId==newLedger.BDId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('TypeOfIncomeExp')}}</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.TypeOfIncomeExp" data-placeholder="** Select Type Of Income Exp **">
+                                                        <option ng-value="cl.id" ng-repeat="cl in IncomeExpensesTypeList" ng-selected="cl.id==newLedger.TypeOfIncomeExp">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group clearfix mt-2">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary7" checked="" ng-model="newLedger.LedgerWiseCostCenter">
+                                                        <label for="checkboxPrimary7">Ledger Wise Cost Center</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group mt-2">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary10" checked="" ng-model="newLedger.IsLC">
+                                                        <label for="checkboxPrimary10">Is L.C.</label>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-sm-6" ng-show="newLedger.IsLC==true">
+                                                <div class="form-group mt-2">
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newLedger.LCPartyId" ledgertype="1"
+                                                            placeholder="** Select LC Party Name **" showdetails="true" confirm-action="ChangeParticularLedger(newLedger)" ledger-detail="newLedger.LCLedgerDetails" side-bar-data="newLedger.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('GLLedgerId')}}</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newLedger.GLLedgerId" ledgertype="1"
+                                                            placeholder="** Select General Ledger **" showdetails="false" ledger-detail="newLedger.GLLedgerDetails" side-bar-data="newLedger.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('DrLedgerId')}}</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newLedger.DrLedgerId" ledgertype="1"
+                                                            placeholder="** Select Debit Ledger **" showdetails="false" ledger-detail="newLedger.DrLedgerDetails" side-bar-data="newLedger.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('CrLedgerId')}}</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newLedger.CrLedgerId" ledgertype="1"
+                                                            placeholder="** Select Credit Ledger **" showdetails="false" ledger-detail="newLedger.CrLedgerDetails" side-bar-data="newLedger.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Channel</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.ChannelId" data-placeholder="** Select Channel **">
+                                                        <option ng-value="pl.ChannelId" ng-repeat="pl in ChannelList" ng-selected="pl.ChannelId==newLedger.ChannelId">{{pl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Category</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.CategoryId" data-placeholder="** Select Category **">
+                                                        <option ng-value="pl.CategoryId" ng-repeat="pl in LedgerCategoryColl" ng-selected="pl.CategoryId==newLedger.CategoryId">{{pl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group clearfix mt-4">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary17" checked="" ng-model="newLedger.BlockDebitTransaction">
+                                                        <label for="checkboxPrimary17">{{GetLabel('BlockDebitTransaction')}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-3">
+                                                <div class="form-group clearfix mt-4">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary18" checked="" ng-model="newLedger.BlockCreditTransaction">
+                                                        <label for="checkboxPrimary18">{{GetLabel('BlockCreditTransaction')}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group clearfix mt-4">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="chkNotVisible" ng-model="newLedger.NotVisible">
+                                                        <label for="chkNotVisible">{{GetLabel('NotVisible')}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-sm-3">
+                                                    <div class="form-group clearfix">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="checkbox" id="checkboxPrimary28" checked="" ng-model="newLedger.BlockLedgerInReport">
+                                                            <label for="checkboxPrimary28">Block Ledger in Report</label>
+                                                        </div>
+                                                    </div>
+                                                </div>*@
+                                        </div>
+                                        <label class="text-primary mt-2"><b>Area Details</b></label>
+
+
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Province')}}:</label>
+                                                    <select class="form-control form-control-sm select2" id="cboProvince" data-placeholder="** select province **"
+                                                            style="width: 100%;" ng-model="newLedger.ProvinceId1">
+                                                        <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newLedger.ProvinceId1">
+                                                            {{cl.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('District')}}:</label>
+                                                    <select class="form-control form-control-sm select2" id="cboDistrict"
+                                                            style="width: 100%;" ng-model="newLedger.DistrictId1" data-placeholder="** select district **">
+                                                        <option ng-repeat="tdc in DistrictColl | filter: { stateId: newLedger.ProvinceId1 }:true" ng-value="tdc.id" ng-selected="tdc.id==newLedger.DistrictId1">
+                                                            {{tdc.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Palika')}}:</label>
+                                                    <select class="form-control form-control-sm select2" id="cboArea"
+                                                            style="width: 100%;" ng-model="newLedger.CityId1" data-placeholder="** select area **">
+                                                        <option ng-repeat="tdc in VDCColl| filter: { districtId: newLedger.DistrictId1 }:true" ng-value="tdc.id" ng-selected="tdc.id==newLedger.CityId1">
+                                                            {{tdc.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('Tole')}}</label>
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Tole">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>{{GetLabel('WardNo')}}</label>
+                                                    <input type="number" class="form-control form-control-sm" placeholder="" ng-model="newLedger.WardNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>User For Vendor</label>
+                                                    <select class="form-control form-control-sm select2"
+                                                            style="width: 100%;" ng-model="newLedger.DealerUserId" data-placeholder="** select user **">
+                                                        <option ng-repeat="tdc in UserNameColl" ng-value="tdc.UserId" ng-selected="tdc.UserId==newLedger.DealerUserId">
+                                                            {{tdc.FirstName}} {{tdc.LastName}} ({{tdc.UserName}})
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-{{vUF.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 2 }:true">
+                                                <div class="form-group">
+                                                    <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                    <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                    <div>
+                                        <div class="pb-1 add-more-than-one-form-block">
+                                            <form>
+                                                <article>
+                                                    <div class="row">
+                                                        <div class="col-sm-3">
+                                                            <div class="form-group">
+                                                                <label>Type Of Document</label>
+                                                                <select class="form-control form-control-sm" ng-model="CurDocument.DocumentTypeId">
+                                                                    <option ng-value="dt.DocumentTypeId" ng-repeat="dt in DocumentTypeList" ng-selected="CurDocument.DocumentTypeId==dt.DocumentTypeId">{{dt.Name}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <div class="row">
+                                                                <div class="col-sm-8">
+                                                                    <div class="form-group">
+                                                                        <label>Attach Doc.</label>
+                                                                        <div class="form-group">
+                                                                            <input type="file" accept=".jpg,.jpeg,.png" class="form-control-file form-control form-control-sm border p-0" id="flMoreFiles" file-model ng-model="CurDocument.Document_TMP" fileread="CurDocument.DocumentData">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-4">
+                                                                    <div class="d-flex">
+                                                                        <div>
+                                                                            <label class="invisible d-block">for height</label>
+                                                                            <button type="button" class="btn btn-outline-primary btn-sm py-1" ng-click="AddMoreFiles()"><i class="fas fa-plus"></i> Add More</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </article>
+                                            </form>
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-responsive table-sm">
+                                                <table class="table table-hover border">
+                                                    <thead>
+                                                        <tr>
+                                                            <th scope="col" style="width: 20px">SN.</th>
+                                                            <th scope="col" style="width: 40%">Doc. Type</th>
+                                                            <th scope="col">Name</th>
+                                                            <th scope="col" style="width: 130px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="dcc in newLedger.DocumentColl">
+                                                            <th scope="row">{{$index+1}}</th>
+                                                            <td>{{dcc.DocumentTypeName}}</td>
+                                                            <td>{{dcc.Name}}</td>
+                                                            <td>
+                                                                <div class="btn-group btn-group-sm">
+                                                                    <a href="{{dcc.DocumentData || dcc.DocPath}}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." download="{{dcc.Name}}"><i class="fas fa-download"></i></a>
+                                                                    <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye"></i></a>
+                                                                    <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)"><i class="fas fa-trash"></i></a>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="px-3" id="interestCalcStstusYes">
+                                        <div class="">
+                                            <div class="">
+                                                <h5 class="">Interest Setting</h5>
+                                                <form action="">
+                                                    <div class="bg-light py-3 px-3">
+                                                        <div class="row">
+                                                            <div class="col-sm-9">
+                                                                <div class="row">
+                                                                    <div class="col-sm-3">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <label class="my-1 mr-2" for="">Active</label>
+                                                                            <input type="text" class="form-control my-1 mr-sm-2">
+                                                                            <label class="my-1 mr-2" for="">Days</label>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <label class="my-1 mr-2 col-6 text-right" for="">Interest Rate</label>
+                                                                            <input type="text" class="form-control my-1 mr-sm-2">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-5">
+                                                                        <div class="row">
+                                                                            <div class="col-sm-6">
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <label class="my-1 mr-2 " for="">Per</label>
+                                                                                    <select class="custom-select">
+                                                                                        <option selected></option>
+                                                                                        <option value="1">One</option>
+                                                                                        <option value="2">Two</option>
+                                                                                        <option value="3">Three</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-sm-6">
+                                                                                <div class="d-flex align-items-center">
+                                                                                    <label class="my-1 mr-2" for="">On</label>
+                                                                                    <select class="custom-select">
+                                                                                        <option selected></option>
+                                                                                        <option value="1">One</option>
+                                                                                        <option value="2">Two</option>
+                                                                                        <option value="3">Three</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- col-md-9 -->
+                                                            <div class="col-sm-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="icheck-primary d-inline">
+                                                                        <input type="checkbox" id="slabwize">
+                                                                        <label for="slabwize">Active Slab Wise Interest</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!-- bg-light -->
+                                                </form>
+                                                <div class="table-responsive">
+                                                    <table class="table bg-light table-sm">
+                                                        <tr>
+                                                            <td>
+                                                                <table class="table table-bordered bg-white">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th colspan="4" class="text-center">Slab Wise Interest Rate</th>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th style="width:90px;">From Days</th>
+                                                                            <th style="width:90px;">To Days</th>
+                                                                            <th style="width:90px;">Per(%)</th>
+                                                                            <th style="width:80px;">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                            <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                            <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                            <td>
+                                                                                <a class="p-1" href="#">
+                                                                                    <i class="fas fa-plus text-info"></i>
+                                                                                </a>
+                                                                                <a class="p-1" href="#">
+                                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                                </a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                            <td>
+                                                                <table class="table table-bordered bg-white">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th colspan="4" class="text-center">Slab Wise Rebate Rate</th>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th style="width:90px;">From Days</th>
+                                                                            <th style="width:90px;">To Days</th>
+                                                                            <th style="width:90px;">Per(%)</th>
+                                                                            <th style="width:80px;">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                            <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                            <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                            <td>
+                                                                                <a class="p-1" href="#">
+                                                                                    <i class="fas fa-plus text-info"></i>
+                                                                                </a>
+                                                                                <a class="p-1" href="#">
+                                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                                </a>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    </table>
+                                                </div>
+                                                <!-- row -->
+                                                <div class="text-right">
+                                                    <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Accept</button>
+                                                    <button type="button" class="btn btn-sm btn-primary">Reset</button>
+                                                    <button type="button" class="btn btn-sm btn-primary">Decline</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <!-- Main Footer -->
+                    <footer class="main-footer py-2">
+                        <div class="text-right control-btns">
+                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="SearchData()">Search</button>
+
+                            <button type="button" class="btn btn-default" ng-click="ClearLedger()">Reset</button>
+
+                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateLedger()">Save</button>
+                        </div>
+                        <!-- /.card-footer-->
+                        <!-- Default to the left -->
+                        <!-- <strong>Copyright &copy; 2020-2021 <a href="https://www.dynamic.net.np/">Dynamic Technosoft Pvt. Ltd.</a></strong> -->
+                    </footer>
+
+
+                    <!--// End Interest Calculation Radio Content-->
+                    <!--Contact Photo Upload-->
+                    <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <i class="flaticon-close"></i>
+                                    </button>
+                                </div>
+                                <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                                     data-max-file-size="3" ng-model="newContactDetails.Photo_TMP" @*after-selected="AddContactDetailsPhoto()"*@ fileread="newContactDetails.PhotoData">
+                                    <div class="photo-upload-wrap">
+                                        <span class="static-content">
+                                            <img ng-src="{{newContactDetails.PhotoData}}" class="img-fluid" id="imgPhoto">
+                                            <span>Drag & Drop your<br>image here</span>
+                                        </span>
+                                    </div>
+                                    <div class="text-muted pb-3">or</div>
+                                    <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                                    <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newContactDetails.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newContactDetails.PhotoData" />
+                                    <a ng-click="ClearContactDetailsPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                                </div>
+                                <div class="modal-footer justify-content-center">
+                                    <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                                    <button type="button" class="btn btn-secondary px-4" ng-click="AddContactDetailsImage()">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        // For Interest Calculation Radio Content
+                        function interestCalcStatus(x) {
+                            if (x == 0)
+                                document.getElementById("interestCalcStstusYes").style.display = "block";
+                            else
+                                document.getElementById("interestCalcStstusYes").style.display = "none";
+                            return;
+                        }
+                        $("#rb-interest-calc-yes").click(function () {
+                            $('html,body').animate({
+                                scrollTop: $("#interestCalcStstusYes").offset().top
+                            },
+                                'slow');
+                        });
+                        $("#rb-interest-cal-no").click(function () {
+                            $('html,body').animate({
+                                scrollTop: $("#interestCalcStstusYes").offset().top
+                            },
+                                'fast');
+                        });
+                    </script>
+
+                    <!--Plug-in In itialisation-->
+                    <script type="text/javascript">
+                        $(document).ready(function () {
+                            //Vertical Tab
+                            $('#parentVerticalTab').easyResponsiveTabs({
+                                type: 'vertical', //Types: default, vertical, accordion
+                                width: 'auto', //auto or any width like 600px
+                                fit: true, // 100% fit in a container
+                                closed: 'accordion', // Start closed if in accordion view
+                                tabidentify: 'hor_1', // The tab groups identifier
+                                activate: function (event) { // Callback function if tab is switched
+                                    var $tab = $(this);
+                                    var $info = $('#nested-tabInfo2');
+                                    var $name = $('span', $info);
+                                    $name.text($tab.text());
+                                    $info.show();
+                                }
+                            });
+                        });
+                    </script>
+
+                    <script>
+                        $(function () {
+                            $("#checkboxPrimary10").click(function () {
+                                if ($(this).is(":checked")) {
+                                    $("#selectoption").show();
+                                } else {
+                                    $("#selectoption").hide();
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-2">
+                    <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                    <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer p-2">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body mb-0 p-0">
+                        <img ng-src="{{viewImg.FileData || viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                    </div>
+                    <div class="modal-footer">
+                        <div><a href="{{viewImg.FileData || viewImg.ContentPath}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+    <div class="modal fade sales-quotation-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Search Vendor</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions" ng-selected="asp.text==paginationOptions.SearchColDet.text">{{asp.text}}</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <form class="float-right">
+                                <div class="form-row align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                        <input type="text" ng-model="paginationOptions.pageSize" class="form-control input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Alias</th>
+                                    <th>Code</th>
+                                    @*<th>Group</th>*@
+                                    <th>PanVat</th>
+                                    <th>Address</th>
+                                    <th>Mobile</th>
+                                    <th>Branch</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                    <td>{{sd.Name}}</td>
+                                    <td>{{sd.Alias}}</td>
+                                    <td>{{sd.Code}}</td>
+                                    @*<td>{{sd.GroupName}}</td>*@
+                                    <td>{{sd.PanVat}}</td>
+                                    <td>{{sd.Address}}</td>
+                                    <td>{{sd.MobileNo}}</td>
+                                    <td>{{sd.Branch}}</td>
+                                    <td>
+                                        <a class="p-1" href="#" ng-click="GetLedgerById(sd)">
+                                            <i class="fas fa-edit text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="DelLedgerById(sd)">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @RenderPage("~/Views/Global/_ImportMultiple.cshtml")
+    @RenderPage("~/Views/Global/_IsValidMaster.cshtml")
+</div>

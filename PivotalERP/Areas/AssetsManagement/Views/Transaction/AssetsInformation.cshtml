@@ -1,0 +1,339 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+
+    .form-group-inline {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-checkbox {
+        margin-top: 15px;
+    }
+
+    .form-label-td {
+        width: 13%;
+        font-weight: 500;
+    }
+
+    .form-input-td {
+        width: 21%;
+    }
+
+    .form-label-td-sm {
+        width: 5%;
+        font-weight: 500;
+    }
+
+    .form-input-td-bg {
+        width: 25%;
+    }
+
+    html, body {
+        height: 100%;
+        overflow-x: hidden;
+    }
+
+    .table-scroll {
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+</style>
+
+<script>
+    var VoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.AssetsMaintenance)";
+	  var DefaultKeyValues = "";
+</script>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/AssetsManagement/Transaction/AssetsInformation.js?v=@Dynamic.BusinessEntity.Global.AppVer.Ver"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="AssetsInformationController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Assets Maintenance</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AssetsInformation">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.AssetsInformation">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllAssetsMaintenance()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AssetsInformation'" report-name="'Assets Information'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'AssetsInformation',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'Asset Category'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="mt-2  table-scroll-x-y table-container flex-grow-1" style="max-height:calc(100vh - 6rem) !important;">
+                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                    <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                        <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                            <thead class="text-left">
+                                                <tr>
+                                                    <th class="cstm-sticky text-center" style="width: 40px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                    <th style="width:100px;">Fiscal Year</th>
+                                                    <th style="width:100px;"> Voucher Date</th>
+                                                    <th style="width:70px;">Is Emp. Need</th>
+                                                    <th style="width:150px;">Emp.Name </th>
+                                                    <th style="width:100px;">Emp.Code </th>
+                                                    <th style="width:100px;"> Assets Name </th>
+                                                    <th style="width:120px;">Maintenance Reason</th>
+                                                    <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 60px; right: 0;">
+                                                        <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                            <option value="" disabled selected>Action</option>
+                                                            <option value="save">Save Layout</option>
+                                                            <option value="reset">Reset Layout</option>
+                                                        </select>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="AI in AssetsInformationList | filter:searchData.AssetsInformation | itemsPerPage:perPage.AssetsInformation" current-page="currentPages.AssetsInformation" pagination-id="AssetsInformationPagination">
+                                                    <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                    <td>{{AI.CostClass}}</td>
+                                                    <td>{{AI.VoucherDateBS}}</td>
+                                                    <td>{{ AI.IsEmployeeNeededId ? 'AI.EmployeeName - AI.EmployeeCode' : 'No' }}</td>
+                                                    <td>{{AI.EmployeeName}}</td>
+                                                    <td>{{AI.EmployeeCode}}</td>
+                                                    <td>{{AI.AssetsName}}</td>
+                                                    <td>{{AI.MaintenanceReason}}</td>
+                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 40px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info" ng-click="GetAssetsMaintenanceById(AI)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-danger" ng-click="DelAssetsMaintenanceById(AI, $index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="AssetsInformationPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-3" ng-hide="HideShow.CostClass==true">
+                                        <div class="form-group row mb-0">
+                                            <label for="" class="col-sm-4 col-form-label text-nowrap">Fiscal Year</label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="newDet.CostClassId">
+                                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == newDet.CostClassId">
+                                                        {{cc.Name}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                    </div>
+                                    <div class="col-md-4 mt-0  float-right">
+                                        <div class="cstm-voucher-date-group-field d-flex float-right">
+                                            <label style="min-width:100px!important" title="Voucher Date">Voucher Date</label>
+                                            <div id="dvDTVoucher">
+                                                <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newDet.VoucherDate_TMP" style="max-width:100px" date-detail="newDet.VoucherDateDet" id="dtVoucherDate" confirm-action="getVoucherNoOnly(2)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td colspan="6" class="p-2"><b>Employee Details</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class=""><label>Do you need Employee ?</label> </td>
+                                        <td colspan="3" class="text-center align-middle  form-input-td">
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="radioPrimary7" name="r4" checked="" ng-model="newDet.IsEmployeeNeeded" ng-value="true" ng-change="GetAssetsByEmp(newDet)">
+                                                    <label for="radioPrimary7">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="radioPrimary8" name="r4" ng-model="newDet.IsEmployeeNeeded" ng-value="false" ng-change="GetAssetsByEmp(newDet)">
+                                                    <label for="radioPrimary8">No</label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="newDet.IsEmployeeNeeded">
+                                        <td style="width:15%"><label for="">Employee Name</label></td>
+                                        <td style="width:35%">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control select2 form-control-sm" all-employee ng-model="newDet.UserId" employee-detail="newDet.EmployeeDetails" side-bar-data="newDet.EmpSideBarData" search-by="newDet.SelectEmployee" style="width: 100%;" confirm-action="confirmAction(newDet)">
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td style="width: 10%"><label for=""> Department </label></td>
+                                        <td style="width: 15%">
+                                            <label class="form-control form-control-sm">{{newDet.Department}}</label>
+                                        </td>
+
+                                        <td style="width: 10%"> <label for=""> Branch </label></td>
+                                        <td style="width: 15%">
+                                            <label class="form-control form-control-sm">{{newDet.BranchName}}</label>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <table class="table table-bordered table-sm">
+                                    <tr>
+                                        <td colspan="6" class="p-2"><b>Asset Maintenance Details</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="form-label-td-sm "><label for="">Assets </label> </td>
+                                        <td class="form-input-td" colspan="2">
+                                            <select class="form-control form-control-sm" active-select2 ng-model="newDet.AssetsNameId" data-placeholder="**select Particulars**" style="width:100%;">
+                                                <option ng-repeat="A in EmployeeAssetsList" ng-value="A.ParticularId" ng-selected="newDet.AssetsNameId==A.ParticularId">{{A.Particular}}</option>
+                                            </select>
+                                        </td>
+                                        <td class="form-label-td"> <label>Is Required Child Parts?</label></td>
+                                        <td class="text-center align-middle form-input-td">
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="radioIsChildNeeded" name="r8" checked="" ng-model="newDet.IsChildNeeded" ng-value="true">
+                                                    <label for="radioIsChildNeeded">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="radioIsChildNeeded2" name="r8" ng-model="newDet.IsChildNeeded" ng-value="false">
+                                                    <label for="radioIsChildNeeded2">No</label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-show="newDet.IsChildNeeded">
+                                        <td colspan="7">
+                                            <div class=" table-scroll">
+                                                <table class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px">S.No.</th>
+                                                            <th style="width: 110px">Particulars</th>
+                                                            <th style="width: 70px">Qty</th>
+                                                            <th style="width: 180px">Remarks</th>
+                                                            <th style="width: 60px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="pDet in newDet.AssetMaintenanceDetailsColl">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm" active-select2 ng-model="pDet.ParticularsId" data-placeholder="**select Particulars**" ng-change="onParticularChange($index,pDet)">
+                                                                    <option ng-value="R.TranId" ng-repeat="R in ParticularList" ng-selected="R.TranId==pDet.ParticularsId">{{R.Name}}-{{R.Code}}-{{R.SerialNum}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm text-center" ng-model="pDet.Qty">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet.Remarks">
+                                                            </td>
+                                                            <td>
+                                                                <a class="p-1" ng-click="AddPHDDetails($index)">
+                                                                    <i class="fas fa-plus text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="delPHDDetails($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table class="table table-bordered table-sm" style="margin-bottom:65px;">
+                                    <tr>
+                                        <td class="form-label-td"> <label>Maintenance Reason</label> </td>
+                                        <td>
+                                            <textarea class="form-control form-control-sm" rows="5" placeholder="" style="overflow:hidden;" ng-model="newDet.MaintenanceReason"></textarea>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateAssetsMaintenance()"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                    </div>
+                                </footer>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

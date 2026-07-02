@@ -1,0 +1,516 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+   /* .table-scroll-x-y {
+        height: auto !important;
+    }*/
+
+    tfoot {
+        background-color: #f0f2f4 !important;
+        z-index: 3;
+    }
+
+    .table th, .table td {
+        padding: 0.25rem;
+    }
+</style>
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.SalesmanTarget)";
+</script>
+<script src="~/jslib/account/creation/SalesmanTarget.js"></script>
+<div ng-app="myApp" ng-controller="SalesmanTargetController" ng-init="LoadData()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> Monthly</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Yearly</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-salesman-tab" data-toggle="pill" href="#custom-tabs-four-salesman" role="tab" aria-controls="custom-tabs-four-salesman" aria-selected="false">SalesmanWise</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label>Date Type</label>
+                                                <select class="form-control form-control-sm" ng-model="newMonthly.DateType">
+                                                    <option ng-repeat="D in DateTypeList" ng-value="D.id" ng-selected="newMonthly.DateType==D.id">{{D.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" ng-show="newMonthly.DateType==1">
+                                                <label>Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newMonthly.YearId">
+                                                    <option ng-value="y.id" ng-repeat="y in AD_YearColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group" ng-show="newMonthly.DateType==2">
+                                                <label>Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newMonthly.YearId">
+                                                    <option ng-value="y.id" ng-repeat="y in BS_YearColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" ng-show="newMonthly.DateType==1">
+                                                <label>Month</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newMonthly.MonthId">
+                                                    <option ng-value="y.id" ng-repeat="y in AD_MonthColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group" ng-show="newMonthly.DateType==2">
+                                                <label>Month</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newMonthly.MonthId">
+                                                    <option ng-value="y.id" ng-repeat="y in BS_MonthColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Target Type</label>
+                                                <select class="form-control form-control-sm" ng-model="newMonthly.TargetType">
+                                                    <option ng-repeat="T in TargetTypeColl" ng-value="T.id" ng-selected="newMonthly.TargetType==T.id">{{T.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3" ng-show="newMonthly.TargetType==2">
+                                            <div class="form-group">
+                                                <label>Product Group</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newMonthly.ProductGroupId">
+                                                    <option>**select group**</option>
+                                                    <option ng-repeat="P in ProductGroupColl" ng-value="P.ProductGroupId">{{P.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mt-4">
+                                            <button class="btn btn-sm load btn-primary" ng-click="GetMonthlyTarget()"><i class="fas fa-sync mr-2"></i>Load</button>
+                                            <button class="btn btn-sm load btn-primary" ng-click="SaveSalesmanTarget()"><i class="fas fa-save mr-2"></i>Save</button>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    title="Create Multiple Data" ng-click="ShowMultipleModal()">
+                                                <i class="fas fa-file-import"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.Monthly">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="dropdown dnld-file float-right" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#MonthlyTarget'" sheet-name="'MonthlyTarget'" report-name="'Monthly Target'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#MonthlyTarget').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <a print-tbl report-name="'Salesman Target'" table-id="'#MonthlyTarget'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>`
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-scroll-x-y  mt-2" style="max-height: calc(100vh - 11rem)!important">
+                                        <table id="MonthlyTarget" class="table table-bordered table-head-fixed">
+                                            <thead>
+                                                <tr>
+                                                    <th class="cstm-sticky align-middle" style="width: 50px; left: 0; z-index: 3; background-color: #ececec !important;" rowspan="2">S.No.</th>
+                                                    <th class="cstm-sticky align-middle" style="width: 180px; left: 50px; z-index: 3; background-color: #ececec !important;" rowspan="2">Salesman</th>
+                                                    <th class="align-middle" style="width: 160px; z-index: 2; background-color: #ececec !important;" rowspan="2">Mobile No</th>
+                                                    <th class="align-middle" style="width: 125px; z-index: 2; background-color: #ececec !important;" rowspan="2">Assigned Branch</th>
+                                                    <th class="align-middle" style="width: 100px; z-index: 2; background-color: #ececec !important;" rowspan="2">SO</th>
+                                                    <th class="text-center align-middle" style="width: 180px; z-index: 2; background-color: #ececec !important;" colspan="{{ newMonthly.TargetType==2 ? 2 : 1 }}">Target</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;" ng-show="newMonthly.TargetType==2">Qty</th>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;">Amt.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="T in MonthlyTargetColl |filter:searchData.Monthly">
+                                                    <td class="cstm-sticky text-center" style="width: 50px;left:0;z-index:2;background-color:#ffffff">{{$index+1}}-{{T.Code}}</td>
+                                                    <td class="cstm-sticky" style="width: 180px;left:50px;z-index:2;background-color:#ffffff">{{T.Name}}</td>
+                                                    <td>{{T.MobileNo}}</td>
+                                                    <td>{{T.DistributorName}}</td>
+                                                    <td>{{T.ParentAgent}}</td>
+                                                    <td ng-show="newMonthly.TargetType==2">
+                                                        <span ng-show="false">{{T.Qty}}</span>
+                                                        <input type="text" number-input class="form-control form-control-sm text-center" ng-model="T.Qty" ng-change="MonthlyQtyChange(T)" />                                                        
+                                                    </td>
+                                                    <td>
+                                                        <span ng-show="false">{{T.Amount}}</span>
+                                                        <input type="text" number-input class="form-control form-control-sm text-center" ng-model="T.Amount" ng-change="MonthlyQtyChange(T)" />
+                                                        
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                            <tfoot style="position: sticky; bottom: 0;">
+                                                <tr>
+                                                    <td class="cstm-sticky text-center border-right-0" style="width: 50px;left:0;z-index:2;background-color:#ffffff"></td>
+                                                    <td class="cstm-sticky border-left-0 border-right-0" style="width: 180px;left:50px;z-index:2;background-color:#ffffff"><b>Total</b></td>
+                                                    <td class="border-left-0" colspan="3"></td>
+                                                    <td ng-show="newMonthly.TargetType==2">
+                                                        <span ng-show="false">{{newMonthly.TotalQty}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="newMonthly.TotalQty" style="font-weight:700" />
+                                                    </td>
+                                                    <td>
+                                                        <span ng-show="false">{{newMonthly.TotalAmount}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="newMonthly.TotalAmount" style="font-weight:700" />
+                                                    </td>
+
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Date Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newYearly.DateType">
+                                                    <option ng-repeat="D in DateTypeList" ng-value="D.id">{{D.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" ng-show="newYearly.DateType==1">
+                                                <label>Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newYearly.YearId">
+                                                    <option ng-value="y.id" ng-repeat="y in AD_YearColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group" ng-show="newYearly.DateType==2">
+                                                <label>Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newYearly.YearId">
+                                                    <option ng-value="y.id" ng-repeat="y in BS_YearColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Target Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newYearly.TargetType">
+                                                    <option ng-repeat="T in TargetTypeColl" ng-value="T.id" ng-selected="newYearly.TargetType==T.id">{{T.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3" ng-show="newYearly.TargetType==2">
+                                            <div class="form-group">
+                                                <label>Product Group</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newYearly.ProductGroupId">
+                                                    <option>**select group**</option>
+                                                    <option ng-repeat="P in ProductGroupColl" ng-value="P.ProductGroupId">{{P.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <button class="btn btn-sm load btn-primary" ng-click="GetYearlyTarget()"><i class="fas fa-sync mr-2"></i>Load</button>
+                                            <button class="btn btn-sm load btn-primary" ng-click="SaveYearlyTarget()"><i class="fas fa-save mr-2"></i>Save</button>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.Yearly">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="dropdown dnld-file float-right" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#YearlyTarget'" sheet-name="'YearlyTarget'" report-name="'Yearly Target'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#YearlyTarget').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <a print-tbl table-id="'#YearlyTarget'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>`
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="table-scroll-x-y  mt-2" style="max-height: calc(100vh - 11rem)">
+                                        <table id="YearlyTarget" class="table table-bordered table-head-fixed">
+                                            <thead>
+                                                <tr>
+                                                    <th class="cstm-sticky align-middle" style="width: 50px; left: 0; z-index: 3; background-color: #ececec !important;" rowspan="2">S.No.</th>
+                                                    <th class="cstm-sticky align-middle" style="width: 180px; left: 50px; z-index: 3; background-color: #ececec !important;" rowspan="2">Salesman</th>
+                                                    <th class="align-middle" style="width: 160px; z-index: 2; background-color: #ececec !important;" rowspan="2">Mobile No</th>
+                                                    <th class="align-middle" style="width: 125px; z-index: 2; background-color: #ececec !important;" rowspan="2">Assigned Branch</th>
+                                                    <th class="align-middle" style="width: 100px; z-index: 2; background-color: #ececec !important;" rowspan="2">SO</th>
+                                                    <th class="text-center align-middle" style="width: 180px; z-index: 2; background-color: #ececec !important;" colspan="{{ newYearly.TargetType==2 ? 2 : 1 }}" ng-repeat="mn in newYearly.MonthColl">{{mn.text}}</th>
+                                                    <th class="text-center align-middle" style="width: 180px; z-index: 2; background-color: #ececec !important;" colspan="{{ newYearly.TargetType==2 ? 2 : 1 }}">Total</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;" ng-show="newYearly.TargetType==2" ng-repeat-start="mn in newYearly.MonthColl">Qty</th>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;" ng-repeat-end>Amt.</th>
+
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;" ng-show="newYearly.TargetType==2">Qty</th>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;">Amt.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="T in YearlyTargetColl |filter:searchData.Yearly">
+                                                    <td class="cstm-sticky text-center" style="width: 50px;left:0;z-index:2;background-color:#ffffff">{{$index+1}}-{{T.Code}}</td>
+                                                    <td class="cstm-sticky" style="width: 180px;left:50px;z-index:2;background-color:#ffffff">{{T.Name}}</td>
+                                                    <td>{{T.MobileNo}}</td>
+                                                    <td>{{T.DistributorName}}</td>
+                                                    <td>{{T.ParentAgent}}</td>
+                                                    <td ng-show="newYearly.TargetType==2" ng-repeat-start="mn in T.MonthColl">
+                                                        <input type="text" number-input class="form-control form-control-sm text-center" ng-model="mn.Qty" ng-change="YearlyQtyChange(T)" /> 
+                                                        <span ng-show="false">{{mn.Qty}}</span>
+                                                    </td>
+                                                    <td ng-repeat-end>
+                                                        <input type="text" number-input class="form-control form-control-sm text-center" ng-model="mn.Amount" ng-change="YearlyQtyChange(T)" /> 
+                                                        <span ng-show="false">{{mn.Amount}}</span>
+                                                    </td>
+
+                                                    <td ng-show="newYearly.TargetType==2">{{T.TotalQty |number:2}}</td>
+                                                    <td>{{T.TotalAmount |number:2}}</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot style="position: sticky; bottom: 0;">
+                                                <tr>
+                                                    <td class="cstm-sticky text-center border-right-0" style="width: 50px;left:0;z-index:2;background-color:#ffffff"></td>
+                                                    <td class="cstm-sticky border-left-0 border-right-0" style="width: 180px;left:50px;z-index:2;background-color:#ffffff"><b>Total</b></td>
+                                                    <td class="border-left-0" colspan="3"></td>
+                                                    <td ng-show="newYearly.TargetType==2" ng-repeat-start="mn in newYearly.MonthColl">
+                                                        <span ng-show="false">{{mn.TotalQty}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="mn.TotalQty" style="font-weight:700" />
+                                                    </td>
+                                                    <td ng-repeat-end>
+                                                        <span ng-show="false">{{mn.TotalAmount}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="mn.TotalAmount" style="font-weight:700" />
+                                                    </td>
+                                                    <td ng-show="newYearly.TargetType==2">
+                                                        <span ng-show="false">{{newYearly.TotalQty}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="newYearly.TotalQty" style="font-weight:700" />
+                                                    </td>
+                                                    <td>
+                                                        <span ng-show="false">{{newYearly.TotalAmount}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="newYearly.TotalAmount" style="font-weight:700" />
+                                                    </td>
+
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-Salesman" role="tabpanel" aria-labelledby="custom-tabs-four-Salesman-tab">
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label>Date Type</label>
+                                                <select class="form-control form-control-sm" ng-model="newSalesmanWise.DateType">
+                                                    <option ng-repeat="D in DateTypeList" ng-value="D.id">{{D.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group" ng-show="newSalesmanWise.DateType==1">
+                                                <label>Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSalesmanWise.YearId">
+                                                    <option ng-value="y.id" ng-repeat="y in AD_YearColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group" ng-show="newSalesmanWise.DateType==2">
+                                                <label>Year</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSalesmanWise.YearId">
+                                                    <option ng-value="y.id" ng-repeat="y in BS_YearColl">{{y.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Target Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSalesmanWise.TargetType">
+                                                    <option ng-repeat="T in TargetTypeColl" ng-value="T.id" ng-selected="newSalesmanWise.TargetType==T.id">{{T.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="newSalesmanWise.TargetType==2">
+                                            <div class="form-group">
+                                                <label>Product Group</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSalesmanWise.ProductGroupId">
+                                                    <option>**select group**</option>
+                                                    <option ng-repeat="P in ProductGroupColl" ng-value="P.ProductGroupId">{{P.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Salesman</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newSalesmanWise.AgentId">
+                                                    <option ng-repeat="T in SalesManList" ng-value="T.AgentId">{{T.Name}}-{{T.Code}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 mt-4">
+                                            <button class="btn btn-sm load btn-primary" ng-click="GetSalesmanTarget()"><i class="fas fa-sync mr-2"></i>Load</button>
+                                            <button class="btn btn-sm load btn-primary" ng-click="SaveAgentWiseTarget()"><i class="fas fa-save mr-2"></i>Save</button>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.SalesmanWise">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="dropdown dnld-file float-right" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#SalesmanWise'" sheet-name="'SalesmanWise'" report-name="'Salesman Wise'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#SalesmanWise').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <a print-tbl table-id="'#SalesmanWise'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>`
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="table-scroll-x-y  mt-2" style="max-height: calc(100vh - 11rem)!important">
+                                        <table id="SalesmanWise" class="table table-bordered table-head-fixed">
+                                            <thead>
+                                                <tr>
+                                                    <th class="cstm-sticky align-middle" style="width: 50px; left: 0; z-index: 3; background-color: #ececec !important;" rowspan="2">S.No.</th>
+                                                    <th class="cstm-sticky align-middle" style="width: 180px; left: 50px; z-index: 3; background-color: #ececec !important;" rowspan="2">Month</th>
+                                                    <th class="text-center align-middle" style="width: 180px; z-index: 2; background-color: #ececec !important;" colspan="{{ newSalesmanWise.TargetType==2 ? 2 : 1 }}">Target</th>
+
+                                                </tr>
+                                                <tr>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;" ng-show="newSalesmanWise.TargetType==2">Qty</th>
+                                                    <th style="text-align: center; top: 29px; background-color: #ececec !important;">Amt.</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="T in AgentTargetColl |filter:searchData.SalesmanWise">
+                                                    <td class="cstm-sticky text-center" style="width: 50px;left:0;z-index:2;background-color:#ffffff">{{$index+1}}</td>
+                                                    <td class="cstm-sticky" style="width: 180px;left:50px;z-index:2;background-color:#ffffff">{{T.MonthName}}</td>
+                                                    <td ng-show="newSalesmanWise.TargetType==2">
+                                                        <input type="text" number-input class="form-control form-control-sm text-center" ng-model="T.Qty" ng-change="AgentQtyChange(T)" /> 
+                                                        <span ng-show="false">{{T.Qty}}</span>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm text-center" ng-model="T.Amount" ng-change="AgentQtyChange(T)" /> 
+                                                        <span ng-show="false">{{T.Amount}}</span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot style="position: sticky; bottom: 0;">
+                                                <tr>
+                                                    <td class="cstm-sticky text-center border-right-0" style="width: 50px;left:0;z-index:2;background-color:#ffffff"></td>
+                                                    <td class="cstm-sticky border-left-0 border-right-0" style="width: 180px;left:50px;z-index:2;background-color:#ffffff"><b>Total</b></td>
+                                                    <td ng-show="newSalesmanWise.TargetType==2">
+                                                        <span ng-show="false">{{newSalesmanWise.TotalQty}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="newSalesmanWise.TotalQty" style="font-weight:700" />
+                                                    </td>
+                                                    <td>
+                                                        <span ng-show="false">{{newSalesmanWise.TotalAmount}}</span>
+                                                        <input type="number" disabled class="form-control form-control-sm text-center" ng-model="newSalesmanWise.TotalAmount" style="font-weight:700" />
+                                                    </td>
+
+
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+
+    @RenderPage("~/Views/Global/_ImportMultiple.cshtml")
+</div>
+
+
+

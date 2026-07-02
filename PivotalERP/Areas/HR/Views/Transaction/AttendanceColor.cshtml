@@ -1,0 +1,230 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+
+    .switch-field {
+        display: flex;
+        overflow: hidden;
+    }
+
+        .switch-field input {
+            position: absolute !important;
+            clip: rect(0, 0, 0, 0);
+            height: 1px;
+            width: 1px;
+            border: 0;
+            overflow: hidden;
+        }
+
+        .switch-field label {
+            background-color: #e4e4e4;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+            line-height: 1;
+            text-align: center;
+            padding: 8px 16px;
+            margin-right: -1px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease-in-out;
+        }
+
+            .switch-field label:hover {
+                cursor: pointer;
+            }
+
+        .switch-field input:checked + label {
+            background-color: #127dc2;
+            box-shadow: none;
+            color: #ffff !important
+        }
+
+        .switch-field label:first-of-type {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .switch-field label:last-of-type {
+            border-radius: 0 4px 4px 0;
+        }
+
+    table th, table td {
+        padding: 0.3rem !important
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_AttendanceColor)";
+</script>
+
+
+
+<script src="~/jslib/hr/Transaction/AttendanceColor.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AttendanceColorController" ng-init="LoadData()">
+    <div class="box-body">
+        <section class="content">
+            <div class="container-fluid">
+                <section class="iframe-content-starts-here">
+                    <div class="tab-content">
+                        <!-- Third Tab Content -->
+                        <div id="root">
+                            <div class="card-primary card-tabs">
+                                <div id="Theme-form" class="card">
+                                    <div class="card-body p-2">
+                                        <div class="row">
+                                            @*<div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Theme</label>
+                                                        <select class="form-control form-control-sm" ng-model="newDet.ThemeId">
+                                                            <option ng-repeat="T in ThemeList" ng-value="T.id">{{T.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Present</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Present" />
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.PColor" />
+                                                    <div class="form-group clearfix mt-2">
+                                                        <div class="switch-field ml-1">
+                                                            <input type="radio" id="pnormal" ng-model="newDet.PresentB" name="PresentB" ng-value="1" />
+                                                            <label class="px-1" for="pnormal" style="font-size:13px;">Normal</label>
+                                                            <input type="radio" id="pbold" ng-model="newDet.PresentB" name="PresentB" ng-value="2" />
+                                                            <label class="px-1" for="pbold" style="font-size:13px;">Bold</label>
+                                                            <input type="radio" id="pitalic" ng-model="newDet.PresentB" name="PresentB" ng-value="3" />
+                                                            <label class="px-1" for="pitalic" style="font-size:13px;">Italic</label>
+                                                        </div>
+                                                    </div>
+                                                    <label class="mt-5">Present's Cell Collor</label>
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.PCellColor" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Absent</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Absent" />
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.AColor" />
+                                                    <div class="form-group clearfix mt-2">
+                                                        <div class="form-group clearfix mt-2">
+                                                            <div class="switch-field ml-1">
+                                                                <input type="radio" id="anormal" ng-model="newDet.AbsentB" name="AbsentB" ng-value="1" />
+                                                                <label class="px-1" for="anormal" style="font-size:13px;">Normal</label>
+                                                                <input type="radio" id="abold" ng-model="newDet.AbsentB" name="AbsentB" ng-value="2" />
+                                                                <label class="px-1" for="abold" style="font-size:13px;">Bold</label>
+                                                                <input type="radio" id="aitalic" ng-model="newDet.AbsentB" name="AbsentB" ng-value="3" />
+                                                                <label class="px-1" for="aitalic" style="font-size:13px;">Italic</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="mt-5">Absent's Cell Collor</label>
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.ACellColor" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Leave</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Leave" />
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.LColor" />
+                                                    <div class="form-group clearfix mt-2">
+                                                        <div class="form-group clearfix mt-2">
+                                                            <div class="switch-field ml-1">
+                                                                <input type="radio" id="normalL" ng-model="newDet.LeaveB" name="LeaveB" ng-value="1" />
+                                                                <label class="px-1" for="normalL" style="font-size:13px;">Normal</label>
+                                                                <input type="radio" id="boldL" ng-model="newDet.LeaveB" name="LeaveB" ng-value="2" />
+                                                                <label class="px-1" for="boldL" style="font-size:13px;">Bold</label>
+                                                                <input type="radio" id="italicL" ng-model="newDet.LeaveB" name="LeaveB" ng-value="3" />
+                                                                <label class="px-1" for="italicL" style="font-size:13px;">Italic</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <label class="mt-5">Leave's Cell Collor</label>
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.LCellColor" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Weekend</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Weekend" />
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.WColor" />
+                                                    <div class="form-group clearfix mt-2">
+                                                        <div class="switch-field ml-1">
+                                                            <input type="radio" id="normal1" ng-model="newDet.WeekendB" name="WeekendB" ng-value="1" />
+                                                            <label class="px-1" for="normal1" style="font-size:13px;">Normal</label>
+                                                            <input type="radio" id="bold1" ng-model="newDet.WeekendB" name="WeekendB" ng-value="2" />
+                                                            <label class="px-1" for="bold1" style="font-size:13px;">Bold</label>
+                                                            <input type="radio" id="italic1" ng-model="newDet.WeekendB" name="WeekendB" ng-value="3" />
+                                                            <label class="px-1" for="italic1" style="font-size:13px;">Italic</label>
+                                                        </div>
+                                                    </div>
+                                                    <label class="mt-5">Weekend's Cell Collor</label>
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.WCellColor" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Holiday</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Holiday" />
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.HColor" />
+                                                    <div class="form-group clearfix mt-2">
+                                                        <div class="switch-field ml-1">
+                                                            <input type="radio" id="normal2" ng-model="newDet.HolidayB" name="HolidayB" ng-value="1" value="1" />
+                                                            <label class="px-1" for="normal2" style="font-size:13px;">Normal</label>
+                                                            <input type="radio" id="bold2" ng-model="newDet.HolidayB" name="HolidayB" ng-value="2" value="2" />
+                                                            <label class="px-1" for="bold2" style="font-size:13px;">Bold</label>
+                                                            <input type="radio" id="italic2" ng-model="newDet.HolidayB" name="HolidayB" ng-value="3" value="3" />
+                                                            <label class="px-1" for="italic2" style="font-size:13px;">Italic</label>
+                                                        </div>
+                                                    </div>
+                                                    <label class="mt-5">Holiday's Cell Collor</label>
+                                                    <input type="color" class="form-control form-control-sm mt-2" ng-model="newDet.HCellColor" />
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-12 mt-3 pb-3">
+                                            <div class="text-center">
+                                                @*<button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearTheme()">Reset</button>*@
+                                                <button type="button" class="btn btn-sm btn-default load" style="min-width: 90px;" ng-click="ResetAttendanceColor()">Reset Color</button>
+                                                <button type="button" class="btn btn-sm btn-primary load" style="min-width: 90px;" ng-click="SaveUpdateAttendanceColor()">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    @*<div class="card mt-3 mb-0">
+                                            <div class="card-header p-2" style="background-color:green;color:#ffffff" ng-show="newDet.ThemeId">
+                                                <p class="mb-0">Website Preview</p>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div class="col-md-12 mt-3">
+                                                    <iframe ng-show="newDet.ThemeId==1" src="https://admin-theme-one-site.netlify.app/" title="themeone" style="max-height:calc(100vh - 16rem)!important"></iframe>
+                                                    <iframe ng-show="newDet.ThemeId==2" src="https://admin-theme-two-site.netlify.app/" title="themetwo" style="max-height:calc(100vh - 16rem)!important"></iframe>
+                                                    <iframe ng-show="newDet.ThemeId==3" src="https://admin-theme-three-site.netlify.app/" title="themethree" style="max-height:calc(100vh - 16rem)!important"></iframe>
+                                                    <iframe ng-show="newDet.ThemeId==4" src="https://admin-theme-four-site.netlify.app/" title="themefour" style="max-height:calc(100vh - 16rem)!important"></iframe>
+                                                    <iframe ng-show="newDet.ThemeId==5" src="https://admin-theme-five-site.netlify.app/" title="themefive" style="max-height:calc(100vh - 16rem)!important"></iframe>
+
+                                                </div>
+                                            </div>
+                                        </div>*@
+
+
+
+                                </div>
+                                <!-- /.card -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- /.row -->
+            </div>
+            <!--/. container-fluid -->
+        </section>
+    </div>
+</div>

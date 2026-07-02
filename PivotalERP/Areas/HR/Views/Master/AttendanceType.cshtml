@@ -1,0 +1,347 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_AttendanceType)";
+</script>
+
+
+
+<script src="~/jslib/hr/Master/AttendanceType.js"></script>
+<div ng-app="myApp" ng-controller="AttendanceTypeController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllAttendanceTypeList()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card my-1 card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearAttendanceType()" aria-controls="custom-tabs-four-profile" aria-selected="false">AttendanceType</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body" style="margin-bottom: 34px;">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AttendanceType">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AttendanceType">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.AttendanceType">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#AttendanceType'" sheet-name="'AttendanceTypeList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#AttendanceType').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#AttendanceType'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="AttendanceType">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50px">S.No</th>
+                                                    <th style="width: 200px">Name</th>
+                                                    <th style="width: 60px">Code</th>
+                                                    <th style="width: 150px">Attendance Types</th>
+                                                    <th style="width: 150px">PeriodType</th>
+                                                    <th style="width: 200px">Description</th>
+                                                    @*<th style="width: 150px">PayHeading</th>*@
+                                                    <th style="width: 80px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in AttendanceTypeList | filter:searchData.AttendanceType | itemsPerPage: perPage.AttendanceType" current-page="currentPages.AttendanceType" pagination-id="AttendanceTypePagination">
+                                                    <td>{{cl.SNO}}</td>
+                                                    <td>{{cl.Name}}</td>
+                                                    <td>{{cl.Code}}</td>
+                                                    <td>{{cl.AttendanceTypeName}}</td>
+                                                    <td>{{cl.Period}}</td>
+                                                    <td>{{cl.Description}}</td>
+                                                    @*<td>{{cl.PayHeading}}</td>*@
+                                                    <td>
+                                                        <div class="btn-group-sm text-white">
+                                                            <a class="btn btn-info" ng-click="GetAttendanceTypeById(cl, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a class="btn btn-danger" ng-click="DelAttendanceTypeById(cl)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="AttendanceTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Name</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newAttendanceType.Name" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Code</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newAttendanceType.Code" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Attendance Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newAttendanceType.Types">
+                                                        <option ng-repeat="A in TypeList" ng-value="A.id" ng-selected="newAttendanceType.Types==A.id">{{A.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Period Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newAttendanceType.PeriodType">
+                                                        <option ng-repeat="A in PeriodTypeList" ng-value="A.id" ng-selected="newAttendanceType.PeriodType==A.id">{{A.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Calculation Value</label>
+                                                    <input type="number"
+                                                           class="form-control form-control-sm" ng-model="newAttendanceType.CalculationValue" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">S.No</label>
+                                                    <input type="number"
+                                                           class="form-control form-control-sm" ng-model="newAttendanceType.SNO" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Formula</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newAttendanceType.Formula" />
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">PayHeading</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newAttendanceType.PayHeadingId">
+                                                            <option ng-repeat="A in PayHeadingList" ng-value="A.PayHeadingId" ng-selected="newAttendanceType.PayHeadingId==A.PayHeadingId">{{A.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Unit Of Work</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newAttendanceType.UnitsOfWorkId">
+                                                        <option ng-repeat="A in UnitOfWorkList" ng-value="A.UnitsOfWorkId" ng-selected="newAttendanceType.UnitsOfWorkId==A.UnitsOfWorkId">{{A.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1 mt-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox1" value="option1" ng-model="newAttendanceType.IsActive">
+                                                    <label for="customCheckbox1"
+                                                           class="custom-control-label">
+                                                        Is Active
+                                                    </label>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-md-2 mt-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox11" value="option11" ng-model="newAttendanceType.CanEditable">
+                                                    <label for="customCheckbox11"
+                                                           class="custom-control-label">
+                                                        Can Editable
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 mt-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="chkShowInSalarySheet" ng-model="newAttendanceType.ShowInSalarySheet">
+                                                    <label for="chkShowInSalarySheet"
+                                                           class="custom-control-label">
+                                                        Show In Salary Sheet
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 mt-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="chkIsMonthly" ng-model="newAttendanceType.IsMonthly">
+                                                    <label for="chkIsMonthly"
+                                                           class="custom-control-label">
+                                                        Is Monthly
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="form-group">
+                                                    <label>Description</label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newAttendanceType.Description" rows="2" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 mt-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox12" value="option15" ng-model="newAttendanceType.ActiveTotalInput">
+                                                    <label for="customCheckbox12"
+                                                           class="custom-control-label">
+                                                        Active Total Input
+                                                    </label>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        @*<label><b>Tax Exemption Details :</b></label>*@
+                                        <div class="table-scroll-x-y table-scroll" style="max-height:400px!important">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr style="background-color: #f8f9fa!important">
+                                                        <th style="width: 80px">S.No.</th>
+                                                        <th style="width: 130px">Branch</th>
+                                                        <th style="width: 150px">Department</th>
+                                                        <th style="width: 150px">EmployeeGroup</th>
+                                                        <th style="width: 110px">Category</th>
+                                                        <th style="width: 110px">Level</th>
+                                                        <th style="width: 100px">CalculationValue</th>
+                                                        <th style="width: 90px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="pDet in newAttendanceType.AttendanceTypeDetailsColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.BranchId">
+                                                                <option ng-value=" ">**Select Branch</option>
+                                                                <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==pDet.BranchId">{{B.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.DepartmentId">
+                                                                <option ng-value=" ">**Select Department</option>
+                                                                <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==pDet.DepartmentId">{{c.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.EmployeeGroupId">
+                                                                <option ng-value=" ">**Select Employee Group</option>
+                                                                <option ng-value="c.EmployeeGroupId" ng-repeat="c in EmployeeGroupList" ng-selected="c.EmployeeGroupId==pDet.EmployeeGroupId">{{c.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.EmployeeCategoryId">
+                                                                <option ng-value=" ">**Select Category</option>
+                                                                <option ng-repeat="B in CategoryList" ng-value="B.CategoryId" ng-selected="B.CategoryId==pDet.EmployeeCategoryId">{{B.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.EmployeeLevelId">
+                                                                <option ng-value=" ">**Select Level</option>
+                                                                <option ng-repeat="B in LevelList" ng-value="B.LevelId" ng-selected="B.LevelId==pDet.EmployeeLevelId">{{B.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="number" class="form-control form-control-sm" ng-model="pDet.CalculationValue"></td>
+
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddDetails($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delDetails($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearAttendanceType()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateAttendanceType()">{{newAttendanceType.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

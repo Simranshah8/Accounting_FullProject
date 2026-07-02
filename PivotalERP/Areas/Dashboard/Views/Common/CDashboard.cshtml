@@ -1,0 +1,261 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    .table td, .table th {
+        Padding: 0.3rem !important;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #ffffff;
+        background-color: #76be4e;
+    }
+    /*  Added form row color*/
+    .table tbody tr:nth-child(odd) td {
+        background-color: #dbebf0 !important;
+    }
+
+    .table tbody tr:nth-child(even) td {
+        background-color: #ffffff !important;
+    }
+
+
+    .table thead th,
+    .table tbody td.cstm-sticky {
+        background-color: #dee2e6 !important;
+    }
+
+    /* New UIUX fixes */
+    .card-header.p-1 .row {
+        align-items: center;
+    }
+    .tab-content .chart.tab-pane .col-md-8 .clearfix {
+        padding-left: 4px;
+        padding-right: 4px; 
+    }
+    .tab-content .chart.tab-pane .col-md-8 {
+        flex: 100%;
+        max-width: 100%;
+    }
+    table.table.table-head-fixed {
+        font-size: 14px;
+        line-height: 20px;
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+
+    .pagination.pagination-sm {
+        margin-bottom: 8px;
+    } 
+</style>
+<style type="text/css">
+    @@media print {
+        .noprint {
+            display: none;
+        }
+    }
+</style>
+<script>
+    var TranId=@ViewBag.TranId;
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="~/jslib/export/tableExport.js"></script>
+
+<script src="~/jslib/setup/DashboardDesigner.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="DashboardViewController" ng-init="LoadData()" ng-cloak>
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <a print-div div-id="'#dvPage'" report-name="'Dashboard'" href="#" title="Print Page" class="btn btn-secondary btn-light btn-sm wait noprint">
+                            <i class="fas fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="row" id="dvPage">
+                    <div class="col-md-{{tb.ColumnLen}}" ng-repeat="tb in TabColl" id="div{{$index}}">
+                        <div class="card" style="border:1px solid #ccc">
+                            <div class="card-header p-1" style="background-color: #eef9f4">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <h6 class="mb-0">{{tb.Name}}</h6>
+                                    </div>
+                                    <div class="col-md-8 text-right">
+                                        <div class="card-tools form-inline float-right">
+                                            <div class="dropdown dnld-file ml-2 noprint" title="Download File">
+                                                <button class="btn btn-sm btn-default border-0 load mt-1 mr-2" data-toggle="modal" data-target="#filtermodal{{$index}}"> <i class="fas fa-filter"></i></button>
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Refresh" ng-click="ReLoadData(tb,$index,'')">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </a>
+                                                <a print-div div-id="tb.DivName" report-name="tb.Name" href="#" title="Print" class="btn btn-secondary btn-light btn-sm wait noprint">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                        type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+
+                                                    <a class="dropdown-item" export-excel table-id="tb.TableName" sheet-name="tb.Name" report-name="tb.Name" href="#">
+                                                        <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                        Excel
+                                                    </a>
+                                                    <a class="dropdown-item" export-excel table-id="tb.TableName" sheet-name="tb.Name" report-name="tb.Name" href="#" file-type="'csv'">
+                                                        <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                             class="img-fluid exports-icon">
+                                                        CSV
+                                                    </a>
+                                                    <a class="dropdown-item" print-tbl table-id="tb.TableName" sheet-name="tb.Name" report-name="tb.Name" href="#" title="Print Data">
+                                                        <i class="fas fa-print text-success mr-3"></i>
+                                                        Print
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <ul class="nav nav-pills ml-auto">
+                                                <li class="nav-item" ng-show="tb.ReportType==2 || tb.ReportType==3">
+                                                    <a class="nav-link p-1 mx-1 {{tb.ReportType==2  ? 'active' :''}}" href="#revenue-chart{{$index}}" data-toggle="tab"><i class="fas fa-table"></i> Tabular Data</a>
+                                                </li>
+                                                <li class="nav-item" ng-show="tb.ReportType==1 || tb.ReportType==3">
+                                                    <a class="nav-link p-1 mr-1 {{tb.ReportType==1 || tb.ReportType==3 ? 'active' :''}}" href="#sales-chart{{$index}}" data-toggle="tab"><i class="fas fa-chart-bar"></i> Graphical Data</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0">
+                                <div class="tab-content">
+                                    <div class="chart tab-pane {{tb.ReportType==2  ? 'active' :''}}" id="revenue-chart{{$index}}" style="position: relative;" ng-show="tb.ReportType==2 || tb.ReportType==3">
+                                        <div class="row my-1">
+                                            <div class="col-md-8">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage[tb.Name]">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage[tb.Name]">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search"
+                                                                   placeholder="Search" aria-label="Search" ng-model="searchData[tb.Name]" ng-blur="RePreviewChart(tb,$index)">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" ng-click="RePreviewChart(tb,$index)">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- New UIUX - max-height: 350px to max-height: 385px -->
+                                        <div class="table-responsive p-0" style="max-height: 385px;">
+                                            <table class="table table-head-fixed text-nowrap mb-0" id="tbl{{$index}}">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="cstm-sticky" style="width: 90px; left: 0; z-index: 3">S.No.</th>
+                                                        <th ng-click="sortData(tb,dc)" ng-repeat="dc in tb.DataSetFieldColl"
+                                                            ng-class="{'cstm-sticky': $index === 0}"
+                                                            ng-style="$index === 0 ?
+                {'width': '120px', 'left': '49px', 'z-index': 2} :
+                {'width': '120px', 'z-index': 1}">
+                                                            {{dc.text}}
+                                                            <i class="{{getSortClass(tb,dc)}}"></i>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="rd in tb.ResultDataColl | orderBy:tb.getSortValue:tb.reverseSort | filter:searchData[tb.Name] | itemsPerPage:perPage[tb.Name]"
+                                                        current-page="currentPages[tb.Name]"
+                                                        pagination-id="tb.PageName">
+                                                        <td class="cstm-sticky" style="left: 0; z-index: 2">{{$index + 1}}</td>
+                                                        <td ng-repeat="dc in tb.DataSetFieldColl"
+                                                            ng-class="{'cstm-sticky': $index === 0,'text-right': isNumeric(rd[dc.text])==true}"
+                                                            ng-style="$index === 0 ?
+                {'left': '49px', 'z-index': 1} : {}">
+                                                            {{rd[dc.text] |formatNumber}}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot ng-show="tb.HasTableFooter==true" style="position: -webkit-sticky; position: sticky; bottom: 0; background: #eef9f4; color: #000000; z-index: 4; ">
+                                                    <tr>
+                                                        <td><b>TOTAL :-</b></td>
+                                                        <td ng-repeat="ft in tb.TblFooterColl">
+                                                            <span ng-show="ft.FunName.length>0 && ft.FunName=='sum'"> <b> {{(tb.ResultDataColl | sumOfValue:ft.Field) |number:2}}</b></span>
+                                                            <span ng-show="ft.FunName.length>0 && ft.FunName=='min'"> <b>{{(tb.ResultDataColl | minOfValue:ft.Field) |number:2}}</b></span>
+                                                            <span ng-show="ft.FunName.length>0 && ft.FunName=='max'"> <b>{{(tb.ResultDataColl | maxOfValue:ft.Field) |number:2}}</b></span>
+                                                            <span ng-show="ft.FunName.length>0 && ft.FunName=='count'"> <b>{{(tb.ResultDataColl | countOfValue:ft.Field) |number:2}}</b></span>
+                                                            <span ng-show="ft.FunName.length>0 && ft.FunName=='avg'"> <b> {{(tb.ResultDataColl | avgOfValue:ft.Field) |number:2}}</b></span>
+                                                        </td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="tb.PageName" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                    <div class="chart tab-pane {{tb.ReportType==1 || tb.ReportType==3 ? 'active' :''}}" id="sales-chart{{$index}}" style="position: relative;" ng-show="tb.ReportType==1 || tb.ReportType==3">
+                                        <div class="card-body p-2">
+                                            <canvas id="chartPreviewTG{{tb.TranId}}" width="800" height="430"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Modal Starts-->
+                        <div id="filtermodal{{$index}}" class="modal fade p-0 " role="dialog">
+                            <div class="modal-dialog  modal-lg">
+                                <div class="modal-content" style="width:62%">
+                                    <div class="modal-header p-2">
+                                        <h5 class="modal-title" id="exampleModalLongTitle">Apply Filter For <b>{{tb.Name}}</b></h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body p-2">
+                                        <div class="row">
+                                            <div class="col-sm-{{udf.ColWidth}} ml-3" ng-repeat="udf in tb.FieldColl">
+                                                <div class="form-group">
+                                                    <label for="id{{udf.Name}}">{{udf.Label}}<span style="color:red" ng-show="udf.IsMandatory==true">*</span></label>
+                                                    <udf-entity udf="udf" be-data="beData" change-event="ReLoadData(tb,$index,udf.Name)" click-event="ReLoadData(tb,$index,udf.Name)" new-entity="NewEntity"></udf-entity>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Ends-->
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>   

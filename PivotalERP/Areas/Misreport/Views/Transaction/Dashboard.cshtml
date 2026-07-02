@@ -1,0 +1,1134 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    #chart {
+        height: 20em !important;
+        width: 30em !important;
+    }
+
+    .card {
+        box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    }
+
+    .greennum {
+        font-size: 24px;
+        color: green;
+    }
+
+    .bluenum {
+        font-size: 24px;
+        color: blue;
+    }
+
+    .rednum {
+        font-size: 24px;
+        color: red;
+    }
+</style>
+
+
+
+
+<style>
+    #stackedBarChart {
+        height: 281px;
+    }
+
+    .card {
+        box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+    }
+
+    .greennum {
+        font-size: 24px;
+        color: green;
+    }
+
+    .statnum {
+        font-size: 24px;
+    }
+
+    .bluecard {
+        height: 126px;
+        background-color: #d7ecfb;
+        border-radius: 12px;
+        color: #1f5d9e
+    }
+
+    .insidecard {
+        background-color: #d7ecfb;
+        border-radius: 12px;
+        color: #1f5d9e
+    }
+    /* Dropdown css */
+    .boxss {
+        width: 150px;
+        height: 30px;
+        border: 1px solid rgb(241, 227, 227);
+        font-size: 15px;
+        color: #111;
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 4px 4px #ccc;
+    }
+
+    /* percentage piechart */
+    :root {
+        --size: 200px;
+        --bord: 20px;
+    }
+
+    .chart {
+        width: var(--size);
+        height: var(--size);
+        margin: 7em auto;
+        border-radius: 50%;
+        background-image: conic-gradient(#74b64d var(--value), lightgrey var(--value));
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+        .chart::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: calc(100% - var(--bord));
+            height: calc(100% - var(--bord));
+            background: white;
+            border-radius: inherit;
+        }
+
+        .chart p {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            font-size: 20px;
+        }
+
+    .x-60 {
+        --value: 60%;
+    }
+
+    /* *****************************Custom Card***************************** */
+    .body1 {
+        height: 10px;
+        margin-bottom: -10px;
+    }
+
+    .body2::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    /* Track */
+    .body2::-webkit-scrollbar-track {
+        /* -webkit-box-shadow: inset 0 0 6px rgba(252, 247, 247, 0.3);  */
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+    }
+
+    /* Handle */
+    .body2::-webkit-scrollbar-thumb {
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+        background: rgb(192, 192, 192);
+        /* -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);  */
+    }
+
+        .body2::-webkit-scrollbar-thumb:window-inactive {
+            background: #fff;
+        }
+
+    .body2 {
+        margin-top: -25px;
+        height: 250px;
+        background-color: #fff;
+    }
+
+    .body3 {
+        margin: 10px;
+        text-align: center;
+    }
+
+    .body2 .name1 {
+        display: flex;
+        margin-top: 10px;
+    }
+
+        .body2 .name1 img {
+            margin-right: 10px;
+        }
+
+
+
+    /* Apexchart css */
+    .apexcharts-toolbar {
+        display: none !important;
+    }
+
+    .apexcharts-yaxis-texts-g {
+        display: none !important;
+    }
+
+    .apexcharts-xaxis-texts-g {
+        display: none !important;
+    }
+
+    .apexcharts-gridlines-horizontal {
+        display: none !important;
+    }
+
+    #SvgjsLine1663 {
+        display: none !important;
+    }
+
+    /* Chart title */
+    .highcharts-title {
+        display: none !important;
+    }
+</style>
+<style>
+    .iframe-mode {
+        overflow-x: hidden;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<div class="content" >
+    <div class="">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="d-flex py-2">
+                    <label class="mt-1">Branch</label>
+                    <select class="form-contrl form-control-sm ml-2">
+                        <option>Birgunj Branch</option>
+                        <option>Kathmandu Branch</option>
+                        <option>Myagdi Branch</option>
+                    </select>
+                </div>
+
+            </div>
+            <div class="col-md-8">
+                <div class="float-right py-2">
+                    <button class="btn btn-sm btn-primary"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card p-2" style="border-radius: 12px; background-color: #c1d4e112">
+
+                    <label style="display: flex; align-items: center;">
+                        <b>Total Amount Receivable : </b><span class="greennum ml-4"><strong>21312312</strong></span>
+                    </label>
+
+                    <div class="row mt-1">
+                        <div class="col-md-4">
+                            <div class="insidecard p-2 text-center">
+                                <label><b> > 30 Days :</b></label>
+                                <h5>345678</h5>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="insidecard p-2 text-center" style="background-color: #ffcd872b; border-radius: 12px; color: #e2901d ">
+                                <label><b> 30-90 Days :</b></label>
+                                <h5>345678</h5>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="insidecard p-2 text-center" style="background-color: #d7edca8a; border-radius: 12px; ">
+                                <label>
+                                    <b>
+                                        < 90 Days :
+                                    </b>
+                                </label>
+                                <h5>345678</h5>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card p-4 bluecard">
+                    <label><b>Total Payable:</b></label>
+                    <label class="statnum"><strong>45678</strong></label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card yellocard p-4" style="height: 126px; background-color: #ffcd872b; border-radius: 12px; color: #e2901d ">
+                    <label><b>Loan & Advance :</b></label>
+                    <label class="statnum"><strong>45678</strong></label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card greecard p-4" style="height: 126px; background-color: #d7edca8a; border-radius: 12px; ">
+                    <label><b>Bank Balance :</b></label>
+                    <label class="statnum"><strong>45678</strong></label>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="">
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-calendar-alt"></i> Monthwise Sales and Purchase</h3>
+                        <div class="card-tools">
+                            <select class="form-contrl form-control-sm">
+                                <option>Baishakh</option>
+                                <option>Jestha</option>
+                                <option>Ashadh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- <canvas id="monthsBarChart" style="width:100%;max-width:600px"></canvas> -->
+                        <!-- <canvas id="myChart2" width="400" height="150"></canvas> -->
+                        <canvas id="myChart" width="400" height="200"></canvas>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+
+            <div class="col-md-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-chart-bar"></i> Divisionwise Sales</h3>
+
+                        <div class="card-tools">
+                            <select class="form-contrl form-control-sm">
+                                <option>Kilogram</option>
+                                <option>1</option>
+                                <option>1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="stackedBarChart" height="281"></canvas>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow mb-5 bg-white rounded">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-2">
+                            <div class="col-md-7" style="display: flex; justify-content:space-between;">
+
+                                <h3 class="card-title"> <i class="fas fa-user-friends"></i> Top 10 customer:(Qty)</h3>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="float-right">
+                                    <select class="form-control form-control-sm">
+                                        <option>> 10</option>
+                                        <option>> 100</option>
+                                        <option>> 1000</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body py-0">
+                        <div id="chart1" class="pt-0 px-0">
+                        </div>
+                        <div class="body2 border-bottom overflow-auto">
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Rajesh Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Bicky Hardware House: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Bhudio Trading: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Pashupati Hardware Pvt. Ltd.: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Nepal Electricity Authority: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Shyam Narayan Hardware: 742678kgs</p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-primary" width="200">
+                            View Complete report
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow mb-5 bg-white rounded">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-2">
+                            <div class="col-md-7" style="display: flex; justify-content:space-between;">
+
+                                <h3 class="card-title"> <i class="fas fa-user-friends"></i> Top 10 Vendor:(Value)</h3>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="float-right">
+                                    <select class="form-control form-control-sm">
+                                        <option>kg</option>
+                                        <option>gm</option>
+                                        <option>mg</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body py-0">
+                        <div id="chart2" class="pt-0 px-0">
+                        </div>
+                        <div class="body2 border-bottom overflow-auto">
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Monalisha International</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Premeir Bearing Pvt. Ltd.</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Khandelwal Enterprises</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Bhudio Trading</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Bishal Enterprises</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Nepal Electricity Authority</p>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-primary" width="200">
+                            View Complete report
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow mb-5 bg-white rounded">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-2">
+                            <div class="col-md-9" style="display: flex; justify-content:space-between;">
+
+                                <h3 class="card-title"> <i class="fas fa-shopping-cart"></i> Top 10 Fast Moving Item:(Qty)</h3>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="float-right">
+                                    <select class="form-control form-control-sm">
+                                        <option>kg</option>
+                                        <option>gm</option>
+                                        <option>mg</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body py-0">
+                        <div id="chart3" class="pt-0 px-0">
+                        </div>
+                        <div class="body2 border-bottom overflow-auto">
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-primary" width="200">
+                            View Complete report
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow mb-5 bg-white rounded">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-2">
+                            <div class="col-md-9" style="display: flex; justify-content:space-between;">
+
+                                <h3 class="card-title"> <i class="fas fa-user-friends"></i> Top 10 Closing Stock:(Qty)</h3>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="float-right">
+                                    <select class="form-control form-control-sm">
+                                        <option>kg</option>
+                                        <option>gm</option>
+                                        <option>mg</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body py-0">
+                        <div id="chart4" class="pt-0 px-0">
+                        </div>
+                        <div class="body2 border-bottom overflow-auto">
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-primary" width="200">
+                            View Complete report
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card shadow mb-5 bg-white rounded">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-2">
+                            <div class="col-md-7" style="display: flex; justify-content:space-between;">
+
+                                <h3 class="card-title"> <i class="fas fa-user-friends"></i> Top 10 customer:(Qty)</h3>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="float-right">
+                                    <select class="form-control form-control-sm">
+                                        <option>kg</option>
+                                        <option>gm</option>
+                                        <option>mg</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body py-0">
+                        <div id="chart5" class="pt-0 px-0">
+                        </div>
+                        <div class="body2 border-bottom overflow-auto">
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                            <div class="name1">
+                                <img alt="..."
+                                     src="https://images.unsplash.com/photo-1610878722345-79c5eaf6a48c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=3&w=256&h=256&q=80"
+                                     class="avatar avatar-sm rounded-circle me-2" style="height:30px;width:30px;">
+                                <p>Laxmi Narayan Hardware: 742678kgs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button type="button" class="btn btn-primary" width="200">
+                            View Complete report
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-3">
+                            <div class="col-md-12" style="display: flex; justify-content:space-between;">
+
+                                <h3 class="card-title"> <i class="fas fa-wallet"></i> Budget/Expenses: Advertisement</h3>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart x-60">
+                            <p>60%<br>Completed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="col-md-4" style="display: flex; align-items: center;">
+                <div id="container" style="height: 200px; width: 385px"></div>
+
+            </div> -->
+        </div>
+    </div>
+    <div class="">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- <div id="container" style="height: 300px; width: 1000px"></div> -->
+                <div class="card shadow bg-white rounded">
+                    <div class="card-heading" style="border-bottom: 1px solid #ccc;">
+                        <div class="row p-2">
+                            <div class="col-md-7">
+                                <h3 class="card-title"><i class="fas fa-calendar ml-2"></i> Monthwise Expenses</h3>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="float-right">
+                                    <select class="form-control form-control-sm">
+                                        <option>Baishakh</option>
+                                        <option>Jestha</option>
+                                        <option>Ashadh</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="myChart10" height="280"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-Knob/1.2.13/jquery.knob.min.js" integrity="sha512-NhRZzPdzMOMf005Xmd4JonwPftz4Pe99mRVcFeRDcdCtfjv46zPIi/7ZKScbpHD/V0HB1Eb+ZWigMqw94VUVaw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="~/jslib/main.js"></script>
+<script>
+    $(function () {
+        //Initialize Select2 Elements
+        $('.select2').select2()
+
+        //Initialize Select2 Elements
+        $('.select2bs4').select2({
+            theme: 'bootstrap4'
+        })
+    })</script>
+<script>
+    // For Interest Calculation Radio Content
+    //function interestCalcStatus(x) {
+    //    if (x == 0)
+    //        document.getElementById("interestCalcStstusYes").style.display = "block";
+    //    else
+    //        document.getElementById("interestCalcStstusYes").style.display = "none";
+    //    return;
+    //}
+    //$("#rb-interest-calc-yes").click(function () {
+    //    $('html,body').animate({
+    //        scrollTop: $("#interestCalcStstusYes").offset().top
+    //    },
+    //        'slow');
+    //});
+    //$("#rb-interest-cal-no").click(function () {
+    //    $('html,body').animate({
+    //        scrollTop: $("#interestCalcStstusYes").offset().top
+    //    },
+    //        'fast');
+    //});
+    // End Interest Calculation Radio Content</script>
+
+
+<!-- bar and line graph -->
+<script>
+    var ctx = document.getElementById("myChart");
+    var chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["Baishak", "jestha", "Ashar", "Sharwan", "Bhadra"],
+            datasets: [
+                {
+                    type: "bar",
+                    backgroundColor: "rgba(54, 162, 235, 0.2)",
+                    borderColor: "rgba(54, 162, 235, 1)",
+                    borderWidth: 1,
+                    label: "Sales",
+                    data: [60, 49, 72, 90, 100, 60]
+                },
+                {
+                    type: "line",
+                    label: "Purchase",
+                    data: [25, 13, 30, 35, 25, 40],
+                    lineTension: 0,
+                    fill: true
+                }
+            ]
+        }
+    });
+</script>
+
+<script>
+    const stackedBarChart = document.getElementById("stackedBarChart").getContext('2d')
+    new Chart(stackedBarChart, {
+        type: 'bar',
+        data: {
+            labels: ['baisakh', 'jestha', 'ashar', 'shrawan', 'bhadra', 'ashoj', 'kartik'],
+            datasets: [{
+                label: 'Sheet Division',
+                backgroundColor: "#079ad5",
+                data: [72, 59, 5, 56, 58, 42, 59, 87, 45],
+            }, {
+
+                label: 'Pipe Division',
+                backgroundColor: "#75b64e",
+                data: [34, 59, 5, 56, 58, 12, 59, 85, 23],
+            }, {
+                label: 'CRM Division',
+                backgroundColor: "#d7ecfb",
+                data: [52, 59, 5, 56, 58, 12, 59, 65, 51],
+            }, {
+                label: 'Pole Division',
+                backgroundColor: "#d7edca",
+                data: [32, 59, 5, 56, 58, 12, 59, 12, 74],
+            }],
+        },
+        options: {
+            tooltips: {
+                displayColors: true,
+                callbacks: {
+                    mode: 'x',
+                },
+            },
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: {
+                        display: false,
+                    }
+                },
+                y: {
+                    stacked: true,
+                    ticks: {
+                        beginAtZero: true,
+                    },
+                    grid: {
+                        display: true
+                    },
+                    type: 'linear',
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: { position: 'bottom' },
+        }
+    });
+</script>
+
+<!-- linegraph -->
+<script>
+    var ctx = document.getElementById("myChart10").getContext('2d');
+
+
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ["Baishakh", "Jestha", "Ashar", "Shrawan", "Bhadra", "Ashwin", "Kartik", "Mangsir", "Poush", "Magh", "Falgun", "Chaitra"],
+            datasets: [{
+                label: 'Expenses', // Name the series
+                data: [500, 50, 2424, 14040, 14141, 4111, 4544, 47, 5555, 6811, 456, 7899], // Specify the data values array
+                fill: false,
+                borderColor: '#049bdb', // Add custom color border (Line)
+                backgroundColor: '#049bdb', // Add custom color background (Points and Fill)
+                borderWidth: 1 // Specify bar border width
+            }]
+        },
+        options: {
+            responsive: true, // Instruct chart js to respond nicely.
+            maintainAspectRatio: false, // Add to prevent default behaviour of full-width/height
+        }
+    });
+</script>
+
+
+<!-- *********************Custom Card Javascript******************* -->
+<!-- chart1 -->
+<script>
+    var options = {
+        chart: {
+            height: 150,
+            width: 330,
+            type: "area"
+        },
+        dataLabels: {
+            enabled: false
+        },
+        series: [
+            {
+                name: "Series 1",
+                data: [50, 40, 35, 30, 25, 25, 22, 20, 24, 20, 18]
+            }
+        ],
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        legend: {
+            display: false //This will do the task
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart1"), options);
+
+    chart.render();
+</script>
+
+
+<!-- chart2 -->
+<script>
+    var options = {
+        chart: {
+            height: 150,
+            width: 330,
+            type: "area"
+        },
+        dataLabels: {
+            enabled: false
+        },
+        series: [
+            {
+                name: "Series 1",
+                data: [50, 40, 35, 30, 25, 25, 22, 20, 24, 20, 18]
+            }
+        ],
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        legend: {
+            display: false //This will do the task
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart2"), options);
+
+    chart.render();
+</script>
+
+
+<!-- chart3 -->
+
+<script>
+    var options = {
+        chart: {
+            height: 150,
+            width: 330,
+            type: "area"
+        },
+        dataLabels: {
+            enabled: false
+        },
+        series: [
+            {
+                name: "Series 1",
+                data: [50, 40, 35, 30, 25, 25, 22, 20, 24, 20, 18]
+            }
+        ],
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        legend: {
+            display: false //This will do the task
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart3"), options);
+
+    chart.render();
+</script>
+
+<!-- chart4 -->
+<script>
+    var options = {
+        chart: {
+            height: 150,
+            width: 330,
+            type: "area"
+        },
+        dataLabels: {
+            enabled: false
+        },
+        series: [
+            {
+                name: "Series 1",
+                data: [50, 40, 35, 30, 25, 25, 22, 20, 24, 20, 18]
+            }
+        ],
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        legend: {
+            display: false //This will do the task
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart4"), options);
+
+    chart.render();
+</script>
+
+<!-- chart5 -->
+<script>
+    var options = {
+        chart: {
+            height: 150,
+            width: 330,
+            type: "area"
+        },
+        dataLabels: {
+            enabled: false
+        },
+        series: [
+            {
+                name: "Series 1",
+                data: [50, 40, 35, 30, 25, 25, 22, 20, 24, 20, 18]
+            }
+        ],
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.9,
+                stops: [0, 90, 100]
+            }
+        },
+        legend: {
+            display: false //This will do the task
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#chart5"), options);
+
+    chart.render();
+</script>

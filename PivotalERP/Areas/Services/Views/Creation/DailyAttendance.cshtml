@@ -1,0 +1,404 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+       height:auto;
+    }
+</style>
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="DailyAttendanceCntrl">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">For Date:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.ForDate_TMP" style="max-width:130px" date-detail="dayBook.ForDateDet" />                                            
+                                        </div>
+                                    </div>
+                                </div>                             
+                               
+                               
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary load" style="float: right; " data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetDayBook()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                           
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">                                      
+                                       
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExport()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                                
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-target="#itemAllocationForModal" title="Filter">
+                                            <i class="fas fa-filter"></i>
+                                        </a>
+                                    </form>
+
+                                </div>
+
+                            </header>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-scroll-x-y mb-1" style="height: calc(100vh - 7rem)!important">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="cstm-sticky" style="left:0px; width: 90px;z-index:4;background-color:#ececec!important">Date</th>
+                                                    <th class="cstm-sticky" style="left: 90px; width: 200px; z-index: 4; background-color: #ececec !important ">Full Name</th>
+                                                    <th style="width: 180px; background-color: #ececec !important ">User Roles</th>
+                                                    <th style="width: 110px; background-color: #ececec !important ">Phone Number</th>
+                                                    <th style="width: 85px; background-color: #ececec !important ">Check In</th>
+                                                    <th style="width: 90px; background-color: #ececec !important ">Check Out</th>
+                                                    <th style="width: 160px; background-color: #ececec !important ">Location</th>
+                                                    <th style="width: 260px; background-color: #ececec !important ">Agendas</th>
+                                                    <th style="width: 110px; background-color: #ececec !important ">Check In Image</th>
+                                                    <th style="width: 120px; background-color: #ececec !important ">Check Out Image</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky" style="left:0px; width: 90px;background-color:#ffffff!important">2024-03-28</td>
+                                                    <td class="align-middle cstm-sticky" style="left:90px; width: 200px;background-color:#ffffff!important">Madan Marasini</td>
+                                                    <td class="align-middle">Direct Sales Representative</td>
+                                                    <td class="align-middle">0987654321</td>
+                                                    <td class="align-middle">08:00 AM</td>
+                                                    <td class="align-middle">05:00 PM</td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-map-marker-alt text-info mr-1"></i><span style="color:#000000">MFM2+5Q2, Butwal</span> </a></td>
+                                                    <td class="align-middle"><a href="#"><i class="fas fa-list-alt text-default" style=" font-size: 20px;"></i> </a> aisud asda sdasd asd asdas  </td>
+                                                    <td class="text-center align-middle">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <img src="~/wwwroot/dynamic-erp/images/icon.png" style="height:50px;width:45px;" />
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot style="position: -webkit-sticky; position: sticky; bottom: 0; background: #ececec; color: #000000; z-index: 4; ">
+                                                <tr>
+                                                    <td class="align-middle cstm-sticky py-2" style="left:0px;z-index:4; width: 90px;background-color:#ececec!important">Total</td>
+                                                    <td class="align-middle cstm-sticky py-2" style="left: 90px; z-index: 4; width: 200px; background-color: #ececec !important"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                    <td class=" py-2"></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+
+</div>

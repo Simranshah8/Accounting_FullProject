@@ -1,0 +1,401 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/Appointment/Master/DoctorSchedule.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="DoctorScheduleController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Doctor Schedule</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form class="pb-5">
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <label>Department</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.DepartmentId">
+                                                    <option ng-value="DS.id" ng-repeat="DS in DepartmentList" ng-selected="D.id==newDet.LabCategoryId">{{DS.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <label>Doctor</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.DoctorId">
+                                                    <option ng-value="D.id" ng-repeat="D in DoctorList" ng-selected="D.id==newDet.DoctorId">{{D.FullName}}  </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 mb-3">
+                                            <div class="form-group">
+                                                <label class="d-block">Schedule Type</label>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio"name="ScheduleType" id="daywise" ng-value="1"
+                                                           ng-model="newDoctorSchedule.ScheduleTypeId">
+                                                    <label class="form-check-label" for="daywise">Day-Wise</label>
+                                                </div>
+
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="ScheduleType" id="datewise" ng-value="2"
+                                                           ng-model="newDoctorSchedule.ScheduleTypeId">
+                                                    <label class="form-check-label" for="datewise">Date-Wise</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div id="daywise-table" class="col-md-12" ng-repeat="daywise in newDoctorSchedule.DaywiseColl" ng-if="newDoctorSchedule.ScheduleTypeId == 1">
+                                            <div class="row col-md-12">
+                                                <div class="col-md-9  d-flex">
+                                                <div class="custom-control custom-checkbox mr-3" ng-if="!usedDays.Sun || daywise.IsSunday">
+                                                    <input class="custom-control-input"  type="checkbox" id="IsSun_{{$index}}" ng-model="daywise.IsSunday"
+                                                           ng-change="updateUsedDays()">
+                                                    <label for="IsSun_{{$index}}" class="custom-control-label">Sun</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox mr-3" ng-if="!usedDays.Mon || daywise.IsMonday">
+                                                    <input type="checkbox" class="custom-control-input"  id="IsMon_{{$index}}" ng-model="daywise.IsMonday" ng-change="updateUsedDays()">
+                                                    <label for="IsMon_{{$index}}" class="custom-control-label">Mon</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox mr-3" ng-if="!usedDays.Tue || daywise.IsTue">
+                                                    <input type="checkbox" id="IsTue_{{$index}}" class="custom-control-input" ng-model="daywise.IsTue" ng-change="updateUsedDays()">
+                                                    <label for="IsTue_{{$index}}" class="custom-control-label">Tue</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox mr-3" ng-if="!usedDays.Wed || daywise.IsWed">
+                                                    <input type="checkbox" id="IsWed_{{$index}}" class="custom-control-input" ng-model="daywise.IsWed"  ng-change="updateUsedDays()">
+                                                    <label for="IsWed_{{$index}}" class="custom-control-label">Wed</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox mr-3" ng-if="!usedDays.Thu || daywise.IsThus">
+                                                    <input type="checkbox" id="IsThu_{{$index}}" class="custom-control-input" ng-model="daywise.IsThus"   ng-change="updateUsedDays()">
+                                                    <label for="IsThu_{{$index}}" class="custom-control-label">Thu</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox mr-3" ng-if="!usedDays.Fri || daywise.IsFri">
+                                                    <input type="checkbox" id="IsFri_{{$index}}" class="custom-control-input" ng-model="daywise.IsFri" ng-change="updateUsedDays()">
+                                                    <label for="IsFri_{{$index}}" class="custom-control-label">Fri</label>
+                                                </div>
+
+                                                <div class="custom-control custom-checkbox" ng-if="!usedDays.Sat || daywise.IsSat">
+                                                    <input type="checkbox" id="IsSat_{{$index}}" class="custom-control-input"    ng-model="daywise.IsSat"  ng-change="updateUsedDays()">
+                                                    <label for="IsSat_{{$index}}" class="custom-control-label">Sat</label>
+                                                </div>
+                                               </div>
+                                                    
+                                                    <div class="col-md-3  text-right"  >
+                                                    <a href="#" ng-click="AddDaywiseTable($index)" ><i class="fas fa-plus  " style="width: 10px; height: 10px"></i></a>
+                                                    <a href="#" ng-click="DeleteDaywiseTable($index)" ng-show="$index!=0" ><i class="fas fa-trash-alt text-danger   ml-2" style="width: 10px; height: 10px"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="search-toolbar mb-3">
+                                                <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 20px"></th>
+                                                            <th colspan="2">Session Type</th>
+                                                            <th>From Time</th>
+                                                            <th>To Time</th>
+                                                            <th>Slot Duration</th>
+                                                            <th>Maximum Patient/slot</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-class="{ 'disabled-row': daywise.OPD.FullDay.IsChecked }">
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" ng-attr-id="MorningOPD_{{$index}}" ng-model="daywise.OPD.Morning.IsChecked"
+                                                                           ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                                    <label class="custom-control-label"  ng-attr-for="MorningOPD_{{$index}}">
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">Morning OPD</td>
+                                                            <td>
+                                                                <input type="time"  class="form-control form-control-sm" ng-model="daywise.OPD.Morning.FromTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                            <td>
+                                                                <input type="time"  class="form-control form-control-sm" ng-model="daywise.OPD.Morning.ToTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text"     class="form-control form-control-sm"   ng-model="daywise.OPD.Morning.SlotTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="daywise.OPD.Morning.MaxSlot"  ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-class="{ 'disabled-row': daywise.OPD.FullDay.IsChecked }">
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" ng-attr-id="AfterNoonOPD_{{$index}}"
+                                                                           ng-model="daywise.OPD.AfterNoon.IsChecked"
+                                                                           ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                                    <label class="custom-control-label" ng-attr-for="AfterNoonOPD_{{$index}}"> </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">AfterNoon OPD</td>
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm"
+                                                                       ng-model="daywise.OPD.AfterNoon.FromTime"
+                                                                       ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm"  ng-model="daywise.OPD.AfterNoon.ToTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="daywise.OPD.AfterNoon.SlotTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm"  ng-model="daywise.OPD.AfterNoon.MaxSlot" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-class="{ 'disabled-row': daywise.OPD.FullDay.IsChecked }">
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input"   type="checkbox" ng-attr-id="EveningOPD_{{$index}}"
+                                                                           ng-model="daywise.OPD.Evening.IsChecked"
+                                                                           ng-disabled="daywise.OPD.FullDay.IsChecked">
+
+                                                                    <label class="custom-control-label" ng-attr-for="EveningOPD_{{$index}}"></label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">Evening OPD</td>
+
+                                                            <td>
+                                                                <input type="time"  class="form-control form-control-sm" ng-model="daywise.OPD.Evening.FromTime"  ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm" ng-model="daywise.OPD.Evening.ToTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text"  class="form-control form-control-sm" ng-model="daywise.OPD.Evening.SlotTime" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="daywise.OPD.Evening.MaxSlot" ng-disabled="daywise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input"  type="checkbox"
+                                                                           ng-attr-id="FullDayOPD_{{$index}}"
+                                                                           ng-model="daywise.OPD.FullDay.IsChecked">
+
+                                                                    <label class="custom-control-label" ng-attr-for="FullDayOPD_{{$index}}"> </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">Full Day OPD</td>
+                                                            <td>
+                                                                <input type="time"  class="form-control form-control-sm" ng-model="daywise.OPD.FullDay.FromTime">
+                                                            </td>
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm"  ng-model="daywise.OPD.FullDay.ToTime">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="daywise.OPD.FullDay.SlotTime">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm"  ng-model="daywise.OPD.FullDay.MaxSlot">
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div id="datewise-table" class="col-md-12" ng-repeat="datewise in newDoctorSchedule.DatewiseColl" ng-if="newDoctorSchedule.ScheduleTypeId == 2">
+                                            <div class="row mb-3">
+                                                <div class="col-md-3 d-flex">
+                                                    <label class="text-nowrap mr-2">Date From:</label>
+                                                    <input type="text" class="form-control form-control-sm " date-picker date-details="newDoctorSchedule.DatewiseColl.newDet_DateFrom" ng-model="datewise.DateFrom_TMP">
+                                                </div>
+                                                <div class="col-md-3 d-flex">
+                                                    <label class="text-nowrap mr-2">Date To:</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker date-details="newDoctorSchedule.DatewiseColl.newDet_DateTo" ng-model="datewise.DateTo_TMP">
+                                                </div>
+                                                <div class="col-md-6  pr-3 text-right ">
+                                                    <a href="#" ng-click="AddDatewiseTable($index)"><i class="fas fa-plus  " style="width: 10px; height: 10px"></i></a>
+                                                    <a href="#"   ng-click="DeleteDatewiseTable($index)" ng-show="$index!=0"><i class="fas fa-trash-alt text-danger   ml-2" style="width: 10px; height: 10px"></i></a>
+                                                </div>
+                                            </div>
+                                            <div class="search-toolbar mb-3">
+                                                <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 20px"></th>
+                                                            <th colspan="2">Session Type</th>
+                                                            <th>From Time</th>
+                                                            <th>To Time</th>
+                                                            <th>Slot Duration</th>
+                                                            <th>Maximum Patient/slot</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-class="{ 'disabled-row': Datewise.OPD.FullDay.IsChecked }">
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox"  ng-attr-id="MorningOPD_{{$index}}"   ng-model="Datewise.OPD.Morning.IsChecked"
+                                                                           ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                                    <label class="custom-control-label"
+                                                                           ng-attr-for="MorningOPD_{{$index}}">
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">Morning OPD</td>
+
+                                                            <td>
+                                                                <input type="time"  class="form-control form-control-sm" ng-model="Datewise.OPD.Morning.FromTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm" ng-model="Datewise.OPD.Morning.ToTime"  ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="Datewise.OPD.Morning.SlotTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text"   class="form-control form-control-sm" ng-model="Datewise.OPD.Morning.MaxSlot"  ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-class="{ 'disabled-row': Datewise.OPD.FullDay.IsChecked }">
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" ng-attr-id="AfterNoonOPD_{{$index}}"
+                                                                           ng-model="Datewise.OPD.AfterNoon.IsChecked"
+                                                                           ng-disabled="Datewise.OPD.FullDay.IsChecked">
+
+                                                                    <label class="custom-control-label" ng-attr-for="AfterNoonOPD_{{$index}}">  </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">AfterNoon OPD</td>
+
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm" ng-model="Datewise.OPD.AfterNoon.FromTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm" ng-model="Datewise.OPD.AfterNoon.ToTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="Datewise.OPD.AfterNoon.SlotTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="Datewise.OPD.AfterNoon.MaxSlot"ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                        </tr>
+                                                        <tr ng-class="{ 'disabled-row': Datewise.OPD.FullDay.IsChecked }">
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox"  ng-attr-id="EveningOPD_{{$index}}"
+                                                                           ng-model="Datewise.OPD.Evening.IsChecked"
+                                                                           ng-disabled="Datewise.OPD.FullDay.IsChecked">
+
+                                                                    <label class="custom-control-label"  ng-attr-for="EveningOPD_{{$index}}">  </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">Evening OPD</td>
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm"  ng-model="Datewise.OPD.Evening.FromTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                            <td>
+                                                                <input type="time"  class="form-control form-control-sm" ng-model="Datewise.OPD.Evening.ToTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text"    class="form-control form-control-sm" ng-model="Datewise.OPD.Evening.SlotTime" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text"  class="form-control form-control-sm" ng-model="Datewise.OPD.Evening.MaxSlot" ng-disabled="Datewise.OPD.FullDay.IsChecked">
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox"  ng-attr-id="FullDayOPD_{{$index}}" ng-model="Datewise.OPD.FullDay.IsChecked">
+
+                                                                    <label class="custom-control-label" ng-attr-for="FullDayOPD_{{$index}}"> </label>
+                                                                </div>
+                                                            </td>
+
+                                                            <td colspan="2">Full Day OPD</td>
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm"  ng-model="Datewise.OPD.FullDay.FromTime">
+                                                            </td>
+                                                            <td>
+                                                                <input type="time" class="form-control form-control-sm" ng-model="Datewise.OPD.FullDay.ToTime">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="Datewise.OPD.FullDay.SlotTime">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm"  ng-model="Datewise.OPD.FullDay.MaxSlot">
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                        @*<div class="col-md-3">
+                                            <div class="form-group form-group-sm">
+                                                <label>Effective From</label>
+                                                <input type="text" date-picker date-details="newDoctorSchedule.newDet_EffictiveFrom" ng-model="newDoctorSchedule.EffictiveFrom_TMP" class="form-control form-control-sm" />
+                                            </div>
+                                        </div>*@
+                                        @*<div class="col-md-3">
+                                            <div class="form-group form-group-sm">
+                                                <label>Effective To</label>
+                                                <input type="text" date-picker date-details="newDoctorSchedule.newDet_EffictiveTo" ng-model="newDoctorSchedule.EffictiveTo_TMP" class="form-control form-control-sm" />
+                                            </div>
+                                        </div>*@
+                                        <div class="col-md-3">
+                                            <div class="custom-control custom-checkbox mt-1">
+                                                <input class="custom-control-input" type="checkbox" id="IsActive">
+                                                <label for="IsActive" class="custom-control-label" ng-model="newDoctorSchedule.IsActive"> IsActive? </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateDoctorSchedule()"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

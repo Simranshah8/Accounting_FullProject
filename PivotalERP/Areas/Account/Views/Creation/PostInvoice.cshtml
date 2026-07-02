@@ -1,0 +1,159 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<div ng-app="myApp" ng-controller="PostInvoiceController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllPostInvoice()" ng-cloak>
+
+    <div class="p-4"></div>
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Add Post Invoice Term</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div class="search-toolbar mb-3">
+                                    <div class="row">
+                                        <div class="col-lg-4">
+                                            <div class="card-tools">
+                                                <div class="input-group">
+                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.col-lg-6 -->
+                                        <div class="col-lg-8">
+                                            <form class="float-right">
+                                                <div class="form-row align-items-center">
+                                                    <div class="d-flex align-items-center">
+                                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                                        <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                                                            <option selected>10</option>
+                                                            <option value="1">25</option>
+                                                            <option value="2">50</option>
+                                                            <option value="3">100</option>
+                                                        </select>
+                                                        <label class="ml-sm-1 mb-0" for="inlineFormCustomSelect">entries</label>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <table cellpadding="12" class="table table-bordered table-striped table-hover table-responsive" id="datatable">
+                                    <tr>
+                                        <th ng-click="sort('PostInvoiceTermId')" style="text-align:center">
+
+                                            S.No
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='PostInvoiceTermId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+
+
+                                        <th ng-click="sort('LastPostDate')" style="text-align:center;width: 50%">
+                                            LastPostDate
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='LastPostDate'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th ng-click="sort('PostDate')" style="text-align:center;width: 50%">
+                                            PostDate
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='PostDate'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+
+
+
+                                        <th style="text-align:center"><b>Action</b></th>
+                                    </tr>
+                                    <tr dir-paginate="beData in PostInvoiceTermColl|orderBy:sortKey:reverse|filter:search|itemsPerPage:noofrows">
+                                        <td style="text-align:center">
+                                            {{$index+1}}
+                                        </td>
+
+
+                                        <td style="text-align:center">
+                                            {{beData.LastPostDate}}
+                                        </td>
+
+                                        <td style="text-align:center">
+                                            {{beData.PostDate}}
+                                        </td>
+
+
+
+
+                                        <td class="project-actions">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="#" class="btn btn-info" ng-click="GetPostInvoiceTermById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                <a href="#" class="btn btn-danger" ng-click="DeletePostInvoiceTerm(beData)"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="p-4">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Last Post Date</label>
+                                                    <input type="Date" class="form-control" ng-model="beData.LastPostDate">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Post Date</label>
+                                                    <input type="Date" class="form-control" ng-model="beData.PostDate">
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="box-footer pull-right">
+                                            <label class="invisible d-block">for height</label>
+                                            <button type="button" class="btn btn-danger btn btn-sm" ng-click="Clear()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-success btn btn-sm" ng-click="AddNewPostInvoiceTerm()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Accept</button>
+                                        </div>
+
+
+
+
+
+
+
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+</div>

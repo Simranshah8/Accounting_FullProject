@@ -1,0 +1,447 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .content-wrapper, .sale-page-wrap, .content {
+        height: calc(100vh - calc(0.3125rem + 1px) - calc(3.5rem + 1px)) !important;
+    }
+</style>
+<script>
+
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.HMS_DischargeSlip)";
+</script>
+
+<script src="~/jslib/hospital/DischargeSlip.js"></script>
+
+<div ng-app="myApp" ng-controller="DischargeSlipController" ng-init="LoadData()">
+    <div>
+        <div class="sale-page-wrap">
+            <div class="overflow-hidden mt-1 m-2" style="overflow-y:auto!important">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group d-flex">
+                            <label style="min-width:120px">Discharge Slip No</label>
+                            <input type="text" class="form-control form-control-sm" style="width:120px" disabled ng-model="newDet.DischargeSlipNo" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group d-flex">
+                            <label style="min-width:100px">Patient Id</label>
+                            @*<input type="text" class="form-control form-control-sm" style="width:150px" ng-model="SearchPatientId" ng-blur="getPatientDet()" onfocus="this.select();" />*@
+                            <input type="text" class="form-control form-control-sm" style="width:150px" ng-blur="GetPatientDetailById()" ng-model="newDet.PatientNo" ng-disabled="newDet.TranId>0" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group d-flex">
+                            <label style="min-width:170px">Discharge Slip Date</label>
+                            <input type="text"
+                                   class="form-control form-control-sm" date-picker ng-model="newDet.DichargeSlipDateTMP" date-detail="newDet.DichargeSlipDateDet" disabled>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header header-corner-triangle py-1">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h3 class="card-title">Patient Details</h3>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Patient Name </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.PatientName}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Age/Sex </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.Age}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Department </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.Department}}</b></label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Address </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.Address}}</b></label>
+                                </div>
+
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Ward </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.Ward}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Bed No </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.BedNo}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Guardian Name </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.GuardianName}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Relation</label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.Relation}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Phone No </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.MobileNo}}</b></label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width:130px">Date of Admission </label>
+                                    <label class="text-nowrap">: <b>{{newDetPatient.IDateStr}} {{newDet.InDate |timeFormat}}</b></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-2" style="padding-bottom:65px !important">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Final Diagnosis<span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.FinalDiagnosis"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Discharge Status (Management/Surgery)<span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.DischargeStatus"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>History (Chief Complaints/Findings)<span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.History"></textarea>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Examination Finding On Admission</label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.ExaminationAdmission"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <h6 class="text-primary my-3"><b>Investigation</b></h6>
+                    <div class="table-scroll-x-y mb-3" style="max-height:250px;">
+                        <table id="main-table" class="table table-sm table-head-fixed table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="px-0 text-center" style="width: 40px; background-color: #ececec!important">S.No</th>
+                                    <th style="width: 200px; background-color: #ececec !important">Test</th>
+                                    <th style="width: 250px; background-color: #ececec !important">Result</th>
+                                    <th style="width: 250px; background-color: #ececec !important">Remarks</th>
+                                    <th class="text-center px-0" style="width: 60px; background-color: #ececec !important">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="I in newDet.InvestigationDetailsColl">
+                                    <td class="align-middle text-center pl-0">{{$index+1}}</td>
+                                    <td><input type="text" class="form-control form-control-sm" ng-model="I.Test"></td>
+                                    <td><input type="text" class="form-control form-control-sm" ng-model="I.Result"></td>
+                                    <td><input type="text" class="form-control form-control-sm" ng-model="I.Remarks"></td>
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group btn-group-sm">
+                                            <a class="btn btn-info text-white" ng-click="AddInvestigation($index)"><i class="fas fa-plus"></i></a>
+                                            <a class="btn btn-info text-danger ml-1" ng-click="delInvestigation($index)"><i class="fas fa-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                    <h6 class="text-primary my-2"><b> Medication<span class="text-danger">*</span> </b></h6>
+                    <div class="table-scroll-x-y mb-3" style="max-height:250px;">
+                        <table id="main-table" class="table table-sm table-head-fixed table-bordered">
+                            <thead>
+                                <tr>
+                                    <th class="px-0 text-center" style="width: 40px; background-color: #ececec!important">S.No</th>
+                                    <th style="width: 350px; background-color: #ececec !important">Medicine Name</th>
+                                    <th style="width: 350px; background-color: #ececec !important">Remarks</th>
+                                    <th class="text-center px-0" style="width: 60px; background-color: #ececec !important">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="M in newDet.MedicationDetailsColl">
+                                    <td class="align-middle text-center pl-0">{{$index+1}}</td>
+                                    <td>
+                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="M.ProductId" style="max-width :80%" placeholder=" Select Product  " showdetails="true" confirm-action="ProductSelectionChange(sp,$index)" product-detail="sp.productDetail" side-bar-data="sp.sideBarData">
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <textarea class="form-control form-control-sm" rows="1" ng-model="M.Remarks"></textarea>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group btn-group-sm">
+                                            <a class="btn btn-info text-white" ng-click="AddMedication($index)"><i class="fas fa-plus"></i></a>
+                                            <a class="btn btn-info text-danger ml-1" ng-click="delMedication($index)"><i class="fas fa-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Course In Hospital<span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.CourseInHospital"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Condition At the time Of Discharge<span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.ConditionTimeDischarge"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                    <h6 class="text-primary my-2"><b>Next Followup</b></h6>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Date</label>
+
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.NextFollowupDate_TMP" date-detail="newDet.NextFollowupDateDet">
+
+                            </div>
+
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Time</label>
+                                <input type="time" class="form-control form-control-sm" ng-model="newDet.NextFollowupTime_TMP" />
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Advice<span class="text-danger">*</span></label>
+                                <textarea class="form-control form-control-sm" rows="1" ng-model="newDet.Advice"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Recommendation</label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.Recommendation"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Medications</label>
+                                <textarea class="form-control form-control-sm" rows="3" ng-model="newDet.Medications"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-primary my-2"><b>Prepared By</b></h6>
+                            <div class="form-group">
+                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PreparedBy" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-primary my-2"><b>Checked By</b></h6>
+                            <div class="form-group d-flex">
+                                <input type="text" class="form-control form-control-sm" ng-model="newDet.CheckedBy" />
+                                <a class="btn  btn-default text-info"><i class="fas fa-plus"></i></a>
+                            </div>
+                            @*<div class="form-group d-flex">
+                                    <input type="text" class="form-control form-control-sm" />
+                                    <a class="btn btn-default text-info"><i class="fas fa-plus"></i></a>
+                                    <a class="btn btn-default text-danger ml-1"><i class="fas fa-trash"></i></a>
+                                </div>*@
+
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-primary my-2"><b>Approved By</b></h6>
+                            <div class="form-group">
+                                <input type="text" class="form-control form-control-sm" ng-model="newDet.ApprovedBy" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="main-footer">
+                    <div class="text-right control-btns">
+                        <button type="button" class="btn btn-secondary load" data-toggle="modal" ng-click="ShowSearch()">Search</button>
+                        <button type="button" class="btn btn-default ml-1" ng-click="Print()" ng-show="lastTranId>0">Re-Print</button>
+                        <button type="button" class="btn btn-default load" ng-click="ClearFields()">Cancel</button>
+                        <button type="button" class="btn btn-primary load" ng-click="SaveUpdateDischargeSlip()">{{newDet.Mode}}</button>
+                    </div>
+                </footer>
+
+                <!--Search  Modal Starts-->
+                <div class="modal fade" id="SearchModal" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style="overflow:auto">
+                    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document" style="min-width:1050px!important;">
+                        <div class="modal-content">
+                            <div class="modal-header p-2">
+                                <h5 class="modal-title" id="exampleModalLongTitle"><b>Patient DischargeList</b></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body p-2">
+                                <header class="row">
+                                    <div class="col-md-6">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.DischargeSlip">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.DischargeSlip">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.DischargeSlip">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-6 text-right">
+                                        <form class="form-inline  float-right">
+
+                                            <div class="dropdown dnld-file"
+                                                 data-placement="top" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                        </form>
+
+
+
+                                    </div>
+                                </header>
+                                <div class="mt-1">
+                                    <table id="datatable" class="main-table table table-sm table-striped table-bordered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 125px;">Discharge Slip No</th>
+                                                <th style="width: 110px;">Discharge Date</th>
+                                                <th style="width: 130px;">Patient Id</th>
+                                                <th style="width: 200px;">Name</th>
+                                                <th style="width: 200px;">Address</th>
+                                                <th style="width: 100px;">Department</th>
+                                                <th style="width: 120px;">Date Of Adm.</th>
+                                                <th style="width: 100px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="V in DischargeSlipList | filter:searchData.DischargeSlip | itemsPerPage: perPage.DischargeSlip" current-page="currentPages.DischargeSlip" pagination-id="DischargeSlipPagination">
+                                                <td>{{V.DischargeSlipNo}}</td>
+                                                <td>{{V.DichargeSlipDate |dateFormat}}</td>
+                                                <td>{{V.PatientId}}</td>
+                                                <td>{{V.PatientName}}</td>
+                                                <td>{{V.Address}}</td>
+                                                <td>{{V.Department}}</td>
+                                                <td>{{V.DateAdmission |dateFormat}}</td>
+                                                <td>
+                                                    <a class="p-1" ng-click="GetDischargeSlipById(V)">
+                                                        <i class="fas fa-edit text-info"></i>
+                                                    </a>
+                                                    <a href="~/Hospital/Transaction/DischargeSlipPrint?TranId= {{V.TranId}}" class="p-1" target="_blank">
+                                                        <i class="fas fa-print text-secondary"></i>
+                                                    </a>
+                                                    <a href="#" ng-click="PrintVoucher(V.TranId)" class="p-1">
+                                                        <i class="fas fa-print text-secondary"></i>
+                                                    </a>
+                                                    <a class="p-1" ng-click="DelDischargeSlipById(V)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- /.card-body -->
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="DischargeSlipPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!--Search Modal Ends-->
+            </div>
+        </div>
+    </div>
+
+
+    @RenderPage("~/Global/_ReportTemplates.cshtml")
+    @RenderPage("~/Views/Global/_IsValidTran.cshtml")
+</div>

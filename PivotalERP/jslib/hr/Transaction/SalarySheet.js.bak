@@ -1,0 +1,919 @@
+﻿app.controller('SalarySheetController', function ($scope, $http, $timeout, $filter, GlobalServices) {
+	$scope.Title = 'Salary Sheet';
+
+	$scope.LoadData = function () {
+		$('.select2').select2();
+		var gSrv = GlobalServices;
+		$scope.confirmMSG = gSrv.getConfirmMSG();
+		$scope.perPageColl = gSrv.getPerPageList();
+		$scope.MonthList = gSrv.getMonthList();
+
+		//$scope.DepartmentList = [];
+		//gSrv.getDepartmentList().then(function (res) {
+		//	$scope.DepartmentList = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
+
+
+		//$scope.CategoryList = [];
+		//gSrv.getCategoryList().then(function (res) {
+		//	$scope.CategoryList = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
+
+		$scope.AcademicYearColl = [];
+		$scope.AcademicYearColl = gSrv.getYearList();
+		//gSrv.getAcademicYearList().then(function (res) {
+		//	$scope.AcademicYearColl = res.data.Data;
+		//}, function (reason) {
+		//	Swal.fire('Failed' + reason);
+		//});
+
+		$scope.CategoryList = [];
+		$http({
+			method: 'GET',
+			url: base_url + "HR/Transaction/GetCategoryListforPayhead",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.CategoryList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.DepartmentList = [];
+		$http({
+			method: 'GET',
+			url: base_url + "HR/Master/GetAllDepartment",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.DepartmentList = res.data.Data;
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+		$scope.PayHeadingList = [];
+		$http({
+			method: 'GET',
+			url: base_url + "HR/Transaction/GetAllPayHeadingForTran",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.PayHeadingList = res.data.Data;
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+		$scope.AttendanceTypeList = [];
+		$http({
+			method: 'Get',
+			url: base_url + "HR/Transaction/GetAttendanceTypeForTran",
+			dataType: "json"
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.AttendanceTypeList = res.data.Data;
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+		$scope.BranchList = [];
+		$http({
+			method: 'GET',
+			url: base_url + "HR/Transaction/GetBranchListforPayhead",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.BranchList = res.data.Data;
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+
+		$scope.currentPages = {
+			SalarySheet: 1,
+		};
+
+		$scope.searchData = {
+			SalarySheet: '',
+		};
+
+		$scope.perPage = {
+			SalarySheet: gSrv.getPerPageRow(),
+		};
+
+		$scope.newFilter = {
+			BranchId: 0,
+			DepartmentId: 0,
+			CategoryId: 0,
+			//YearId: null,
+			//MonthId: null
+		};
+
+		$http({
+			method: 'GET',
+			url: base_url + "HR/Transaction/GetAllTaxRule",
+			dataType: "json"
+		}).then(function (res) {
+			$scope.TaxRuleColl = mx(res.data.Data);
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
+	$scope.sortEmpData = function (keyname) {
+		$scope.sortKeySS = keyname;   //set the sortKey to the param passed
+		$scope.reverseSS = !$scope.reverseSS; //if true make it false and vice versa
+	}
+	$scope.SaveSalarySheet = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var dtColl = [];
+		var atColl = [];
+		$scope.EmployeeListForSalarySheet.forEach(function (emp) {
+			emp.PayHeadColl.forEach(function (ph) {
+				if (ph.Amount > 0 || ph.Amount < 0) {
+					dtColl.push({
+						EmployeeId: emp.EmployeeId,
+						PayHeadingId: ph.PayHeadingId,
+						Amount: isEmptyAmt(ph.Amount),
+						Rate: isEmptyAmt(ph.Rate),
+						YearId: $scope.newFilter.YearId,
+						MonthId: $scope.newFilter.MonthId,
+						Earning: isEmptyAmt(emp.Earning),
+						Deducation: isEmptyAmt(emp.Deducation),
+						Tax: isEmptyAmt(emp.Tax),
+						Netpayable: isEmptyAmt(emp.Netpayable),
+					});
+				}
+			})
+		});
+
+		$scope.EmployeeListForSalarySheet.forEach(function (emp) {
+			emp.AttendanceTypeColl.forEach(function (ph) {
+				if (ph.Value > 0 || ph.Value < 0) {
+					atColl.push({
+						EmployeeId: emp.EmployeeId,
+						AttendanceTypeId: ph.AttendanceTypeId,
+						Value: ph.Value,
+						YearId: $scope.newFilter.YearId,
+						MonthId: $scope.newFilter.MonthId
+
+					});
+				}
+			})
+		});
+
+
+		$http({
+			method: 'POST',
+			url: base_url + "HR/Transaction/SaveSalarySheet",
+			headers: { 'Content-Type': undefined },
+			transformRequest: function (data) {
+				var formData = new FormData();
+				formData.append("dtColl", angular.toJson(data.dtColl));
+				formData.append("atColl", angular.toJson(data.atColl));
+
+				return formData;
+			},
+			data: { dtColl: dtColl, atColl: atColl }
+		}).then(function (res) {
+			$scope.loadingstatus = "stop";
+			hidePleaseWait();
+			Swal.fire(res.data.ResponseMSG);
+			if (res.data.IsSuccess == true) {
+				$scope.GetEmployeeForSalarySheet();
+			}
+		}, function (errormessage) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+		});
+	}
+
+	$scope.GetEmployeeForSalarySheet = function () {
+
+
+		if ($scope.newFilter.YearId && $scope.newFilter.YearId > 0 && $scope.newFilter.MonthId && $scope.newFilter.MonthId > 0) {
+
+		} else {
+			return;
+		}
+
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		$scope.EmployeeListForSalarySheet = [];
+
+		var para = {
+			BranchId: $scope.newFilter.BranchId,
+			DepartmentId: $scope.newFilter.DepartmentId,
+			CategoryId: $scope.newFilter.CategoryId,
+			YearId: $scope.newFilter.YearId,
+			MonthId: $scope.newFilter.MonthId,
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "HR/Transaction/GetAllEmployeeForSalarySheet",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data.PayColl) {
+				var dataColl = mx(res.data.Data.PayColl);
+				var attColl = mx(res.data.Data.AttColl);
+				var query = dataColl.groupBy(t => ({ EmployeeId: t.EmployeeId }));
+
+				angular.forEach(query, function (q) {
+					var fst = q.elements[0];
+					var subQry = mx(q.elements);
+					var subQryAtt = attColl.where(p1 => p1.EmployeeId == fst.EmployeeId);
+
+					var beData = {
+						EmployeeId: fst.EmployeeId,
+						EmployeeCode: fst.EmployeeCode,
+						EmployeeName: fst.EmployeeName,
+						EnrollNo: fst.EnrollNo,
+						Department: fst.Department,
+						Designation: fst.Designation,
+						PayHeading: fst.PayHeading,
+						MonthId: fst.MonthId,
+						YearId: fst.YearId,
+						PayHeadColl: [],
+						AttendanceTypeColl: [],
+						TaxRuleAs: fst.TaxRuleAs,
+						Resident: fst.Resident,
+						GenderId: fst.GenderId,
+						MaritalStatus: fst.MaritalStatus,
+						Earning: isEmptyAmt(fst.Earning),
+						Deducation: isEmptyAmt(fst.Deducation),
+						Tax: isEmptyAmt(fst.Tax),
+						Netpayable: isEmptyAmt(fst.Netpayable),
+					};
+
+					$scope.PayHeadingList.forEach(function (pa) {
+						var find = subQry.firstOrDefault(p1 => p1.PayHeadingId == pa.PayHeadingId);
+						beData.PayHeadColl.push({
+							Name: pa.Name,
+							Code: pa.Code,
+							PayHeadingId: pa.PayHeadingId,
+							Amount: find ? find.Amount : 0,
+							Rate: find ? find.Rate : 0,
+							IsAllow: find ? find.IsAllow : false,
+							IsEditable: find ? find.IsEditable : false,
+							PayheadType: pa.PayheadType,
+							Natures: pa.Natures,
+							MonthId: pa.MonthId,
+							CalculationType: pa.CalculationType,
+							PayHeadGroupId: pa.PayHeadGroupId,
+							PayHeadCategoryId: pa.PayHeadCategoryId,
+							CalculationOnHeading: pa.CalculationOnHeading,
+							SNo: pa.SNo,
+							IsTaxable: pa.IsTaxable,
+							Formula: pa.Formula,
+							TaxRuleAs: pa.TaxRuleAs,
+							AttendanceTypeId: pa.AttendanceTypeId,
+							PayHeadingDetailsColl: pa.PayHeadingDetailsColl,
+							PayHeadingTaxExemptionColl: pa.PayHeadingTaxExemptionColl,
+						});
+
+					});
+
+					$scope.AttendanceTypeList.forEach(function (pa) {
+						var find = subQryAtt.firstOrDefault(p1 => p1.AttendanceTypeId == pa.AttendanceTypeId);
+						beData.AttendanceTypeColl.push({
+							AttendanceTypeId: pa.AttendanceTypeId,
+							Value: find ? find.Value : 0,
+							Rate: find ? find.Rate : pa.CalculationValue,
+							CalculationValue: pa.CalculationValue,
+							PeriodType: pa.PeriodType,
+							PayHeadingId: pa.PayHeadingId,
+							CanEditable: pa.CanEditable,
+							Description: pa.Description,
+							AttendanceTypeDetailsColl: pa.AttendanceTypeDetailsColl,
+						});
+
+					});
+
+					$scope.CalculateTax(beData);
+					$scope.EmployeeListForSalarySheet.push(beData);
+
+					if (beData.MonthId)
+						$scope.newFilter.MonthId = beData.MonthId;
+
+					if (beData.YearId)
+						$scope.newFilter.YearId = beData.YearId;
+				});
+
+
+				$scope.CalculateGrandTotal();
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+	}
+
+
+	$scope.ReplaceFormula = function (curEmp) {
+		angular.forEach(curEmp.PayHeadColl, function (ph) {
+			if (ph.Formula && ph.Formula.length > 0) {
+
+				var formula = ph.Formula;
+				curEmp.PayHeadColl.forEach(function (cph) {
+					if (cph.SNo > 0) {
+						var sno = 'p' + cph.SNo + '#';
+						var amt = isEmptyAmt(cph.Amount);
+						formula = formula.replaceAll(sno, amt);
+					}
+				});
+
+				try {
+					var nVal = math.evaluate(formula);
+					ph.Amount = isEmptyNum(nVal);
+				} catch { }
+
+			}
+			else if ((ph.CalculationOnHeading == null || ph.CalculationOnHeading == 0) && ph.PayHeadingDetailsColl && ph.PayHeadingDetailsColl.length > 0) {
+
+			}
+		});
+	}
+
+	$scope.TotalRow = {};
+	$scope.CalculateGrandTotal = function () {
+		$scope.TotalRow = {
+			Earning: 0,
+			Deduction: 0,
+			Tax: 0,
+			Netpayable: 0,
+		}
+
+		$scope.PayHeadingList.forEach(function (ph) {
+			ph.GTAmount = 0;
+		});
+		var payHeadQry = mx($scope.PayHeadingList);
+
+		$scope.EmployeeListForSalarySheet.forEach(function (emp) {
+			$scope.TotalRow.Earning += isEmptyAmt(emp.Earning);
+			$scope.TotalRow.Deduction += isEmptyAmt(emp.Deduction);
+			$scope.TotalRow.Tax += isEmptyAmt(emp.Tax);
+			$scope.TotalRow.Netpayable += isEmptyAmt(emp.Netpayable);
+
+			if (emp.PayHeadColl) {
+				emp.PayHeadColl.forEach(function (ph) {
+					var findPH = payHeadQry.firstOrDefault(p1 => p1.PayHeadingId == ph.PayHeadingId);
+					if (findPH) {
+						findPH.GTAmount += isEmptyAmt(ph.Amount);
+					}
+				});
+			}
+
+		});
+	};
+	$scope.ChangeAttendance = function (curEmp, curAT) {
+
+		$scope.ReplaceFormula(curEmp);
+		var findPayHead = mx(curEmp.PayHeadColl).firstOrDefault(p1 => p1.AttendanceTypeId == curAT.AttendanceTypeId);
+		if (findPayHead) {
+			$scope.ChangeRate(curEmp, findPayHead);
+		}
+	}
+	$scope.ChangeRate = function (curEmp, curPH) {
+
+		$scope.ReplaceFormula(curEmp);
+		var curPHQry = mx(curEmp.PayHeadColl);
+
+		angular.forEach(curEmp.AttendanceTypeColl, function (atc) {
+			angular.forEach(curEmp.PayHeadColl, function (ph) {
+				$scope.ReplaceFormula(curEmp);
+				if (ph.IsAllow == true) {
+					if (ph.CalculationType == 1) {
+						if (ph.AttendanceTypeId == atc.AttendanceTypeId) {
+							if (ph.CalculationOnHeading > 0) {
+								var findOnPayHead = curPHQry.firstOrDefault(p1 => p1.PayHeadingId == ph.CalculationOnHeading);
+								if (findOnPayHead) {
+
+									if (ph.PayHeadingDetailsColl) {
+
+										var phDetCollQry = mx(ph.PayHeadingDetailsColl);
+										var findPHOnCal = phDetCollQry.firstOrDefault(p1 => p1.BranchId == curEmp.BranchId && p1.CategoryId == curEmp.CategoryId && p1.MinAmount <= findOnPayHead.Amount && p1.MaxAmount >= findOnPayHead.Amount);
+										if (!findPHOnCal) {
+											findPHOnCal = phDetCollQry.firstOrDefault(p1 => p1.BranchId == curEmp.BranchId && p1.MinAmount <= findOnPayHead.Amount && p1.MaxAmount >= findOnPayHead.Amount);
+										}
+										if (!findPHOnCal) {
+											findPHOnCal = phDetCollQry.firstOrDefault(p1 => p1.CategoryId == curEmp.CategoryId && p1.MinAmount <= findOnPayHead.Amount && p1.MaxAmount >= findOnPayHead.Amount);
+										}
+										if (!findPHOnCal) {
+											findPHOnCal = phDetCollQry.firstOrDefault(p1 => p1.MinAmount <= findOnPayHead.Amount && p1.MaxAmount >= findOnPayHead.Amount);
+										}
+
+										if (findPHOnCal) {
+											if (findPHOnCal.Rate > 0) {
+												ph.Amount = findOnPayHead.Amount * findPHOnCal.Rate / 100;
+											} else if (findPHOnCal.FixedAmount > 0) {
+												ph.Amount = findPHOnCal.FixedAmount;
+											}
+										}
+
+									}
+
+								}
+							}
+							else {
+								ph.Amount = isEmptyAmt(ph.Rate) * isEmptyAmt(atc.Value);
+							}
+
+						}
+					}
+					else if (ph.CalculationType == 2) {
+						ph.Amount = isEmptyAmt(ph.Rate);
+					}
+
+				}
+
+			});
+
+		});
+
+
+		// Calculate Tax
+		$scope.CalculateTax(curEmp);
+
+		$scope.CalculateGrandTotal();
+	}
+
+	$scope.CalculateTax = function (emp) {
+
+		var totalEarning = 0;
+		var totalDeduction = 0;
+		var taxExemptionAmt = 0;
+		var taxExeptionAmtMax = 0;
+
+		var taxableEarning = 0;
+		emp.Earning = 0;
+		emp.Deduction = 0;
+		emp.NetPayaable = 0;
+
+		var taxPayableAmt = 0;
+
+		var totalSalary = 0;
+		angular.forEach(emp.PayHeadColl, function (ph) {
+			if (ph.PayheadType == 1 && ph.IsAllow == true)
+				totalSalary += ph.Amount;
+		});
+
+		angular.forEach(emp.PayHeadColl, function (ph) {
+			if (ph.IsAllow == true && ph.PayheadType != 1) {
+				ph.Amount = isEmptyAmt(parseFloat(parseFloat(ph.Amount).toFixed(2)));
+
+				if (isNaN(ph.Amount))
+					ph.Amount = 0;
+
+				//Earning=2
+				if (ph.PayheadType == 2) {
+					totalEarning += ph.Amount;
+
+					if (ph.IsTaxable == true)
+						taxableEarning += ph.Amount;
+				}
+				//Deduction=3
+				else if (ph.PayheadType == 3) {
+					totalDeduction += ph.Amount;
+
+					if (ph.IsTaxable == true) {
+
+						var amt = 0, rate = 0;
+						var formula = '';
+						angular.forEach(ph.PayHeadingTaxExemptionColl, function (rl) {
+							if (rl.Gender == emp.GenderId && rl.MaritalStatus == emp.MaritalStatusId && rl.Resident == emp.ResidentId) {
+								amt = rl.Amount;
+								rate = rl.Rate;
+								formula = rl.Formula;
+							}
+							else if (rl.Gender == emp.GenderId && rl.MaritalStatus == emp.MaritalStatusId) {
+								amt = rl.Amount;
+								rate = rl.Rate;
+								formula = rl.Formula;
+							}
+							else if (rl.Gender == emp.Gender) {
+								amt = rl.Amount;
+								rate = rl.Rate;
+								formula = rl.Formula;
+							}
+							else if (rl.MaritalStatus == emp.MaritalStatus) {
+								amt = rl.Amount;
+								rate = rl.Rate;
+								formula = rl.Formula;
+							}
+							else if (rl.Resident == emp.Resident) {
+								amt = rl.Amount;
+								rate = rl.Rate;
+								formula = rl.Formula;
+							} else if (rl.Gender == 0 && rl.MaritalStatus == 0 && rl.Resident == 0) {
+								amt = rl.Amount;
+								rate = rl.Rate;
+								formula = rl.Formula;
+							}
+
+						});
+
+						var totalTaxDAmt = ph.Amount * 12;
+						var amt1 = (totalSalary * 12) * rate / 100;
+
+						var minVal = 0;
+						if (rate > 0 && amt > 0) {
+
+							if (amt1 > amt)
+								minVal = amt;
+							else
+								minVal = amt1;
+						} else if (amt > 0) {
+							minVal = amt;
+						}
+
+						if (totalTaxDAmt > minVal)
+							taxExemptionAmt += minVal;
+						else
+							taxExemptionAmt += totalTaxDAmt;
+
+					}
+				}
+				//ExemptionTax=5
+				else if (ph.PayheadType == 5) {
+
+					angular.forEach(ph.PayHeadingTaxExemptionColl, function (rl) {
+
+						if (rl.Gender == emp.GenderId && rl.MaritalStatus == emp.MaritalStatusId && rl.Resident == emp.ResidentId) {
+							if (rl.Amount > 0) {
+								taxExeptionAmtMax = rl.Amount;
+							} else if (rl.Formula.length > 0) {
+
+							}
+						}
+						else if (rl.Gender == emp.GenderId && rl.MaritalStatus == emp.MaritalStatusId) {
+							if (rl.Amount > 0) {
+								taxExeptionAmtMax = rl.Amount;
+							} else if (rl.Formula.length > 0) {
+
+							}
+						}
+						else if (rl.Gender == emp.Gender) {
+							if (rl.Amount > 0) {
+								taxExeptionAmtMax = rl.Amount;
+							} else if (rl.Formula.length > 0) {
+
+							}
+						}
+						else if (rl.MaritalStatus == emp.MaritalStatus) {
+							if (rl.Amount > 0) {
+								taxExeptionAmtMax = rl.Amount;
+							} else if (rl.Formula.length > 0) {
+
+							}
+						}
+						else if (rl.Resident == emp.Resident) {
+							if (rl.Amount > 0) {
+								taxExeptionAmtMax = rl.Amount;
+							} else if (rl.Formula.length > 0) {
+
+							}
+						} else if (rl.Gender == 0 && rl.MaritalStatus == 0 && rl.Resident == 0) {
+							if (rl.Amount > 0) {
+								taxExeptionAmtMax = rl.Amount;
+							} else if (rl.Formula.length > 0) {
+
+							}
+						}
+
+					});
+
+					if (ph.Rate > taxExeptionAmtMax)
+						taxExemptionAmt += taxExeptionAmtMax;
+					else
+						taxExemptionAmt += ph.Amount;
+
+				}
+			}
+
+		});
+
+		emp.Earning = totalEarning;
+		emp.Deduction = totalDeduction;
+
+		var taxRules = {};
+		if (emp.TaxRuleAs == 1) {
+			//Normal
+			if (emp.MaritalStatus == 1) // For Unmarried
+			{
+				if (emp.Resident == 1)
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 1 && p1.TaxFor == 1 && p1.CalculationFor == 1);
+				else
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 1 && p1.TaxFor == 2 && p1.CalculationFor == 1);
+			}
+			else {
+				if (emp.Resident == true)
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 1 && p1.TaxFor == 1 && p1.CalculationFor == 2);
+				else
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 1 && p1.TaxFor == 2 && p1.CalculationFor == 2);
+			}
+
+
+		} else {
+			//SSF
+			if (emp.MaritalStatus == 1) // For Unmarried
+			{
+				if (emp.Resident == 1)
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 2 && p1.TaxFor == 1 && p1.CalculationFor == 1);
+				else
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 2 && p1.TaxFor == 2 && p1.CalculationFor == 1);
+			}
+			else {
+				if (emp.Resident == 1)
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 2 && p1.TaxFor == 1 && p1.CalculationFor == 2);
+				else
+					taxRules = $scope.TaxRuleColl.where(p1 => p1.TaxType == 2 && p1.TaxFor == 2 && p1.CalculationFor == 2);
+			}
+
+		}
+
+		$scope.TaxCal = {
+			EmployeeId: 0,
+			BranchId: 0,
+			DepartmentId: 0,
+			CategoryId: 0,
+			Code: '',
+			EnrollNumber: 0,
+			GenderId: 1,
+			ResidentId: 1,
+			MaritalStatusId: 1,
+			AllowPayHeadingColl: []
+		};
+
+		$scope.TaxCal.SlabColl = [];
+		var totalTaxableEarning = (taxableEarning * 12) - taxExemptionAmt;
+		var taxCalRateColl = [];
+		if (taxRules) {
+
+			var maxValue = 0;
+			var isFirst = true;
+
+			angular.forEach(taxRules, function (tr) {
+
+				if (isFirst) {
+					maxValue = tr.MaxValue;
+					isFirst = false;
+				}
+				else
+					maxValue = tr.MaxValue - tr.MinValue;
+
+
+				if (totalTaxableEarning > 0) {
+					if (maxValue >= totalTaxableEarning) {
+						taxCalRateColl.push({
+							Amount: totalTaxableEarning,
+							Rate: tr.Rate,
+							PayHeadingId: tr.PayHeadingId,
+						});
+						totalTaxableEarning = 0;
+					} else if (maxValue < totalTaxableEarning) {
+						taxCalRateColl.push({
+							Amount: maxValue,
+							Rate: tr.Rate,
+							PayHeadingId: tr.PayHeadingId,
+						});
+
+						totalTaxableEarning -= maxValue;
+					}
+				}
+			});
+		}
+
+		if (totalTaxableEarning > 0 && taxCalRateColl && taxCalRateColl.length > 0) {
+			var lastRate = taxCalRateColl[taxCalRateColl.length - 1];
+			taxCalRateColl.push({
+				Amount: totalTaxableEarning,
+				Rate: lastRate.Rate,
+				PayHeadingId: lastRate.PayHeadingId,
+			});
+			totalTaxableEarning = 0;
+		}
+
+		var taxAmt = 0;
+		angular.forEach(taxCalRateColl, function (cr) {
+			var tAmt = ((cr.Amount * cr.Rate) / 100) / 12;
+			taxAmt += tAmt;
+			taxPayableAmt += tAmt;
+			$scope.TaxCal.SlabColl.push({
+				Amount: cr.Amount,
+				Rate: cr.Rate,
+				Tax: tAmt,
+				PayHeadingId: cr.PayHeadingId
+			});
+		});
+
+		angular.forEach(emp.PayHeadColl, function (ph) {
+			if (ph.IsAllow == true && (ph.PayheadType == 4 || ph.PayheadType == 6)) {
+
+				var findTaxColl = mx($scope.TaxCal.SlabColl).where(p1 => p1.PayHeadingId == ph.PayHeadingId);
+				ph.TaxSlabColl = findTaxColl;
+				if (findTaxColl) {
+					ph.Amount = isEmptyAmt(findTaxColl.sum(p1 => p1.Tax));
+				}
+			}
+		});
+
+		emp.Tax = taxPayableAmt;
+		emp.Netpayable = totalEarning - totalDeduction - taxPayableAmt;
+	};
+
+	$scope.CurTaxDetailsColl = [];
+	$scope.ShowTaxDetails = function (emp, ph) {
+		$scope.CurTaxDetailsColl = [];
+		if (ph.TaxSlabColl) {
+			ph.TaxSlabColl.forEach(function (ts) {
+				$scope.CurTaxDetailsColl.push(ts);
+			});
+			$('#detailmodel').modal('show');
+		}
+	}
+
+	$scope.CurTaxDetailsColl = [];
+	$scope.ShowTaxDetails = function (emp, ph) {
+		$scope.CurTaxDetailsColl = [];
+		if (ph.TaxSlabColl) {
+			ph.TaxSlabColl.forEach(function (ts) {
+				$scope.CurTaxDetailsColl.push(ts);
+			});
+			$('#detailmodel').modal('show');
+		}
+	}
+	$scope.DeleteSalarySheet = function () {
+		Swal.fire({
+			title: 'Do you want to delete the selected data?',
+			showCancelButton: true,
+			confirmButtonText: 'Delete',
+		}).then((result) => {
+			if (result.isConfirmed) {
+				var para = {
+					BranchId: $scope.newFilter.BranchId,
+					DepartmentId: $scope.newFilter.DepartmentId,
+					CategoryId: $scope.newFilter.CategoryId,
+					YearId: $scope.newFilter.YearId,
+					MonthId: $scope.newFilter.MonthId
+				};
+				$http({
+					method: 'POST',
+					url: base_url + "HR/Transaction/DeleteSalarySheet",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+
+					Swal.fire(res.data.ResponseMSG);
+					if (res.data.IsSuccess) {
+						$scope.GetEmployeeForSalarySheet();
+					} else {
+						Swal.fire(res.data.ResponseMSG);
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+
+	$scope.DelSalarySheetData = function (refData, ind) {
+		Swal.fire({
+			title: 'Do you want to delete SalarySheet of ' + refData.EmployeeName + '?',
+			showCancelButton: true,
+			confirmButtonText: 'Delete',
+			//message: 'Are you sure to delete selected Branch :-' + beData.Name,
+		}).then((result) => {
+			if (result.isConfirmed) {
+				var para = {
+					EmployeeId: refData.EmployeeId,
+					YearId: $scope.newFilter.YearId,
+					MonthId: $scope.newFilter.MonthId
+				};
+				$http({
+					method: 'POST',
+					url: base_url + "HR/Transaction/DelSalarySheetData",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingStatus = "stop";
+
+					Swal.fire(res.data.ResponseMSG);
+					if (res.data.IsSuccess == true) {
+						$scope.GetEmployeeForSalarySheet();
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+
+		});
+	}
+
+
+
+	$scope.UpdateDetailData = function (refData, ind) {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var dtColl = [];
+		var atColl = [];
+		refData.PayHeadColl.forEach(function (ph) {
+			if (ph.Amount > 0 || ph.Amount < 0) {
+				dtColl.push({
+					EmployeeId: refData.EmployeeId,
+					PayHeadingId: ph.PayHeadingId,
+					Amount: isEmptyAmt(ph.Amount),
+					Rate: isEmptyAmt(ph.Rate),
+					YearId: $scope.newFilter.YearId,
+					MonthId: $scope.newFilter.MonthId,
+					Earning: isEmptyAmt(refData.Earning),
+					Deducation: isEmptyAmt(refData.Deducation),
+					Tax: isEmptyAmt(refData.Tax),
+					Netpayable: isEmptyAmt(refData.Netpayable),
+				});
+			}
+		});
+
+		refData.AttendanceTypeColl.forEach(function (ph) {
+			if (ph.Value > 0 || ph.Value < 0) {
+				atColl.push({
+					EmployeeId: refData.EmployeeId,
+					AttendanceTypeId: ph.AttendanceTypeId,
+					Value: isEmptyAmt(ph.Value),
+					Rate: isEmptyAmt(ph.Rate),
+					YearId: $scope.newFilter.YearId,
+					MonthId: $scope.newFilter.MonthId
+				});
+			}
+		})
+		$http({
+			method: 'POST',
+			url: base_url + "HR/Transaction/SaveSalarySheet",
+			headers: { 'Content-Type': undefined },
+			transformRequest: function (data) {
+				var formData = new FormData();
+
+				formData.append("dtColl", angular.toJson(data.dtColl));
+				formData.append("atColl", angular.toJson(data.atColl));
+
+				return formData;
+			},
+			data: { dtColl: dtColl, atColl: atColl }
+		}).then(function (res) {
+			$scope.loadingstatus = "stop";
+			hidePleaseWait();
+			Swal.fire(res.data.ResponseMSG);
+			if (res.data.IsSuccess == true) {
+				$scope.GetEmployeeForSalarySheet();
+			}
+		}, function (errormessage) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+		});
+	}
+
+
+	$scope.pageChangeHandler = function (num) {
+		console.log('page changed to ' + num);
+	};
+
+});

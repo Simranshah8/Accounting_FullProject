@@ -1,0 +1,199 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .ag-ltr .ag-header-cell-resize {
+        right: 0px !important;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Att_AttendanceAppeals)";
+</script>
+
+<script src="~/jslib/hr/Report/AttendanceAppeals.js"></script>
+<div id="AttendanceAppealsCtrl" class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AttendanceAppealsController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-0 mb-0">
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label> Date From</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="filterAttAppeals.DateForm_TMP" date-detail="filterAttAppeals.DateFromDet">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label> Date To</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="filterAttAppeals.DateTo_TMP" date-detail="filterAttAppeals.DateToDet">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="">Status</label>
+                                    <multi-select-option ng-model="filterAttAppeals.ApprovedType" data="LeaveStatusColl" label="text" value="id"></multi-select-option>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 text-right">
+                                <div class="">
+                                    <button class="btn btn-sm btn-info load mt-4" ng-click="GetAttendanceAppealDetails()"><i class="fas fa-sync-alt pr-1"></i> Load</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div id="phg-section" class="">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm" style="width: 200px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+                                        <div class="dropdown dnld-file ml-2" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </header>
+                            <div class="">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal fade" id="AttendanceAppeals" style="margin-top:25px!important;">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header p-2">
+                                    <h6 class="modal-title" id="exampleModalCenterTitle">Attendance Appeals</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body p-2">
+                                    <div class="row">
+                                        <div class="col-md-9">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Branch</label><br />
+                                                        <label class="form-control form-control-sm">{{beData.Branch}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Department</label>
+                                                        <label class="form-control form-control-sm">{{beData.Department}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Code</label>
+                                                        <label class="form-control form-control-sm">{{beData.EmployeeCode}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Name</label>
+                                                        <label class="form-control form-control-sm">{{beData.Name}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Punchase DateTime</label>
+                                                        <label class="form-control form-control-sm">{{beData.PunchDateTimeBS}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Mode</label>
+                                                        <label class="form-control form-control-sm">{{beData.InOutMode}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Reason</label>
+                                                        <label class="form-control form-control-sm">{{beData.Reason}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Approved Type</label>
+                                                    <select class="form-control form-control-sm" ng-model="beData.ApprovedType">
+                                                        <option ng-value="ls.id" ng-repeat="ls in ApprovedStatusColl" ng-selected="beData.ApprovedType==ls.id">{{ls.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Remarks</label>
+                                                        <textarea class="form-control form-control-sm" rows="3" placeholder="" ng-model="beData.ApprovedRemarks"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="person-photo-attachment-wrap text-center">
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{ beData.PhotoPath }}" class="img-fluid" alt="" id="imgPhoto1" style="height: 158px; width: 158px; border: 1px solid #ccc; border-radius: 15px; ">
+                                                </div>
+                                                <label style=" font-weight: 600;">{{beData.Location}}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="time-label">
+                                    <span class="d-block border-0 p-3 text-center">
+                                        <button type="button" class="btn btn-sm btn-info load" data-dismiss="modal" style="min-width: 90px;">Clear</button>
+                                        <button type="button" class="btn btn-sm btn-success load" style="min-width: 90px;" ng-click="SaveAttendanceAppeals()">Save</button>
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+                        <!-- /.modal-content -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

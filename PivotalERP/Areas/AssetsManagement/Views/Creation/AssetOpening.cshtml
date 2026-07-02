@@ -1,0 +1,153 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+</style>
+<script>
+    var VoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.Receipt)";
+	  var DefaultKeyValues = "";
+</script>
+
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+<script src="~/jslib/AssetsManagement/AssetOpening.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="AssetOpeningController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active " id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form class="mb-0">
+                                    <div class="row">
+                                        <div class="col-sm-3 col-md-3" ng-hide="HideShow.CostClass==true">
+                                            <div class="form-group row mb-0">
+                                                <label for="" class="col-sm-4 col-form-label text-nowrap">Fiscal Year</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="newDet.CostClassId">
+                                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == newDet.CostClassId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="d-inline-block d-flex">
+                                                <label style="min-width:60px">Branch <span class="text-danger">*</span> </label>
+                                                <div class="w-100">
+                                                    <select class="form-control form-control-sm select2" ng-model="newDet.BranchId">
+                                                        <option ng-value="pl.id" ng-repeat="pl in BranchList" ng-selected="pl.id==newDet.BranchId">{{pl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-1"></div>
+
+                                        <div class="col-md-4 mt-0">
+                                            <div class="d-inline-block d-flex">
+                                                <label style="min-width:100px">Voucher Date</label>
+                                                <div class="input-group input-group-sm" id="dvDTVoucher">
+                                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newDet.VoucherDate_TMP" style="max-width:100px" date-detail="newDet.VoucherDateDet" id="dtVoucherDate" confirm-action="getVoucherNoOnly(2)" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 table-scroll-x-y table-container " style="height:calc(100vh - 16rem) !important;">
+                                        <div class="  outer-scroll-wrapper-h-scrollbar-fix">
+                                            <div class="  table-h-scrollbar-fix table-scroll-wrapper">
+                                                <table id="main-table" make-table-resizable class=" main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th class="cstm-sticky text-center" style="width: 50px; left: 0; background-color: #e6f5fb !important; z-index: 4">S.No.</th>
+                                                            <th class="cstm-sticky text-center" style="width: 200px; left: 50px; background-color: #e6f5fb !important; z-index: 4">Particulars<span class="text-danger">*</span></th>
+                                                            <th style="width:80px;">QTY<span class="text-danger">*</span></th>
+                                                            <th style="width:150px;">Rate<span class="text-danger">*</span></th>
+                                                            <th style="width:150px;">Amount<span class="text-danger"></span></th>
+
+                                                            <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px; z-index: 3; right:0;">
+                                                                <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                    <option value="" disabled selected>Action</option>
+                                                                    <option value="save">Save Layout</option>
+                                                                    <option value="reset">Reset Layout</option>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="PDet in newDet.AssetOpeningDetailsColl">
+                                                            <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                            <td class="cstm-sticky " style="left: 50px; background-color: #ffffff !important; z-index: 3">
+                                                                <select class=" form-control  form-control-sm" active-select2 ng-model="PDet.ParticularId" data-placeholder="**Select Particulars**" ng-change="onParticularChange($index,PDet)">
+                                                                    @*<option ng-value="R.TranId" ng-repeat="R in ParticularList" ng-selected="R.TranId==PDet.ParticularId">{{R.Name}}-{{R.AssetGroupName}}-{{R.SerialNum}}</option>*@
+                                                                    <option ng-value="R.TranId" ng-repeat="R in getFilteredParticularList($index)" ng-selected="R.TranId==PDet.ParticularId">{{R.Name}}-{{R.AssetGroupName}}-{{R.SerialNum}}</option>
+                                                                </select>
+                                                            </td>
+
+                                                            <td><input type="number" ng-change="CalculateAmount(PDet)" class=" text-center  form-control form-control-sm" data-placeholder="**Select Qty**" ng-model="PDet.Qty" onkeydown="return event.key !== '-'" /></td>
+                                                            <td><input type="number" ng-change="CalculateAmount(PDet)" class="text-right  form-control form-control-sm" ng-model="PDet.Rate" onkeydown="return event.key !== '-'" /></td>
+                                                            <td><input type="number" ng-change="CalculateRate(PDet)" class="text-right form-control form-control-sm" ng-model="PDet.Amt" onkeydown="return event.key !== '-'" /></td>
+                                                            <td class="text-center cstm-sticky sticky-action-col" style=" background-color: #ffffff !important; z-index: 3; right: 0;">
+                                                                <a class="p-1" ng-click="Add($index)">
+                                                                    <i class="fas fa-plus text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="Delete($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        <tr class="font-weight-bold bg-light">
+                                                            <td colspan="2" class="text-right">Total</td>
+                                                            <td class="text-center">
+                                                                {{ getTotalQty() }}
+                                                            </td>
+                                                            <td></td>
+                                                            <td class="text-right">
+                                                                {{ getTotalAmount() }}
+                                                            </td>
+                                                            <td></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <footer class="main-footer">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                    </div>
+                                    <div class="text-right control-btns col-sm-8">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateAssetOpening()"><span class="glyphicon glyphicon-save"></span>{{newDet.Mode}}</button>
+                                    </div>
+                                </div>
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+
+
+
+
+

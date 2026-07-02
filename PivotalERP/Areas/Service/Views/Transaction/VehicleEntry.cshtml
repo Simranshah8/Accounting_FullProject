@@ -1,0 +1,563 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    input {
+        text-transform: capitalize;
+    }
+
+    textarea {
+        text-transform: capitalize;
+    }
+</style>
+<script>
+
+    var VoucherType = "@ViewBag.VoucherType";
+    var EntityId = "@ViewBag.EntityId";
+</script>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/service/transaction/VechicleEntry.js?v=1"></script>
+<div ng-app="myApp" ng-controller="VehicleEntry" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+
+                <div class="card">
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Entry No</label>
+                                    <input type="text" class="form-control form-control-sm" disabled ng-model="beData.AutoNumber" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Vin No</label>
+                                    <input type="text" class="form-control form-control-sm" style="text-transform: uppercase;" ng-model="beData.VinNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Entry Date</label>
+                                    <input type="text" date-picker class="form-control form-control-sm" ng-model="beData.EntryDate_TMP" date-detail="beData.EntryDateDet" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Sale Date<span style="color:red">*</span></label>
+                                    <input type="text" date-picker class="form-control form-control-sm" ng-model="beData.DateOfSale_TMP" date-detail="beData.DateOfSaleDet" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Vehicle Type<span style="color:red">*</span></label>
+                                    <select class="form-control form-select select2 form-control-sm" style="width: 100%;" ng-model="beData.VehicleTypeId" ng-change="getVehicleFields()">
+                                        <option ng-repeat="Vt in VechicleTypelist" ng-value="Vt.VehicleTypeId" ng-selected="Vt.VehicleTypeId==beData.VehicleTypeId">{{Vt.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Vehicle Color<span style="color:red">*</span></label>
+                                    <select class="form-control form-select select2 form-control-sm" style="width: 100%;" ng-model="beData.VehicleColorId">
+                                        <option ng-repeat="Vc in VechicleColorlist" ng-value="Vc.VehicleColorId" ng-selected="Vc.VehicleColorId==beData.VehicleColorId">{{Vc.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Model<span style="color:red">*</span></label>
+                                    <select class="form-control form-select select2 form-control-sm" style="width: 100%;" ng-model="beData.VehicleModelId">
+                                        <option ng-repeat="M in VechicleModelList" ng-value="M.VehicleModelId" ng-selected="M.VehicleModelId==beData.VehicleModelId">{{M.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Regd No<span style="color:red">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" style="text-transform: uppercase;" ng-model="beData.RegdNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width: 120px;">Engine No<span style="color:red">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" style="text-transform: uppercase;" ng-model="beData.EngineNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Chassis/Srl No<span style="color:red">*</span></label>
+                                    <input type="text" class="form-control form-control-sm" style="text-transform: uppercase;" ng-model="beData.ChSrlNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Code No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.CodeNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Key No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.KeyNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Battery No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.BatteryNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Charger No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ChargerNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">MFG. Year</label>
+                                    <input type="number" class="form-control form-control-sm" ng-model="beData.MFGYear" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Transporter</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Transporter" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Shipment No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ShipmentNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Delivery No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.DeliveryNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">LR No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.LRNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">LR Date</label>
+                                    <input type="text" date-picker class="form-control form-control-sm" ng-model="beData.LRDate_TMP" date-detail="beData.LRDateDet" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Driver</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.LRDriver" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Licence No</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.LRDriverLicNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Received By</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ReceivedByName" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Running KM</label>
+                                    <input type="text" class="form-control form-control-sm" number-input ng-model="beData.ReceivedKM" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Running HR</label>
+                                    <input type="text" class="form-control form-control-sm" number-input ng-model="beData.ReceivedHR" />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Remarks</label>
+                                    <textarea class="form-control form-control-sm" id="exampleFormControlTextarea1" rows="1" ng-model="beData.ReceivedRemarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">InWard In Stock</label>
+                                    <input type="checkbox" class="form-control form-control-sm" ng-model="beData.AutoInWard">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Party</label>
+                                    <select autoShowHide="true" class="select2 serial form-control-sm" all-ledger ng-model="beData.PartyLedgerId" style="width:95%" ledgertype="3" fortransaction="false"
+                                            placeholder="** Select Party Name **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="beData.PartyLedger" side-bar-data="beData.partySideBarData" vouchertype="14"></select>
+                                </div>
+                            </div>
+                            <div ng-repeat="uf in UDFFeildsColl" class="col-sm-{{uf.ColWidth}}">
+                                <div class="form-group">
+                                    <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                    <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @*<div class="table-scroll-x-y table-scroll mt-2" style="max-height: calc(100vh - 100px);">
+                                <table id="maintable" class="table table-bordered table-hover table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:200px; z-index: 3; background-color: #ececec !important">Field Name</th>
+                                            <th style="width:200px; z-index: 3; background-color: #ececec !important">Values</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <tr ng-repeat="ve in beData.DetailsColl">
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" ng-model="ve.FieldName" disabled>
+                                            </td>
+                                            <td>
+                                                <select ng-show="ve.FieldType=='ComboBox'" class="form-control form-control-sm"
+                                                        style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1;" ng-model="ve.FieldValue">
+
+                                                    <option ng-repeat="ss in ve.SelectOptions | commaBreak" ng-value="ss" ng-selected="ss==ve.FieldValue">
+                                                        {{ss}}
+                                                    </option>
+                                                </select>
+
+                                                <input ng-show="ve.FieldType=='YesNo'" type="checkbox" class="form-control form-control-sm" ng-model="ve.FieldValue">
+                                                <input ng-show="ve.FieldType=='Number'" type="text" number-input class="form-control form-control-sm" ng-model="ve.FieldValue" onfocus="this.select()" style="text-align:right">
+                                                <input ng-show="ve.FieldType=='String'" type="text" class="form-control form-control-sm" ng-model="ve.FieldValue" onfocus="this.select()">
+                                                <input ng-show="ve.FieldType=='Date'" type="text" class="form-control form-control-sm" date-picker ng-model="ve.FieldValue_TMP" onfocus="this.select()" date-detail="ve.FieldValueDet">
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+                            </div>*@
+
+                    </div>
+                </div>
+                <footer class="main-footer">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentAttachModal">
+                                Document Attach ({{ (beData.AttechFiles.length+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }} )
+                            </button>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="text-right control-btns">
+                                <button type="button" class="btn btn-default ml-1" ng-click="SearchData()">Search</button>
+                                <button type="button" class="btn btn-default btn" ng-click="ClearVehicleEntry()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                <button type="button" class="btn btn-primary btn" ng-click="AddVehicleEntry()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Accept</button>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!--<div class="modal fade sales-invoice-page-modal document-attach-modal" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="input-group" ng-repeat="fl in beData.DocumentColl">
+                        <a href="#"> <span class="text-danger mr-1" ng-click="RemoveAttachment(1,$index)"><i class="fas fa-times"></i></span> {{$index+1}}  -  {{fl.Name}}</a>
+                    </div>
+                    <div class="input-group" ng-repeat="fl in beData.AttechFiles">
+                        <a href="#"> <span class="text-danger mr-1" ng-click="RemoveAttachment(2,$index)"><i class="fas fa-times"></i></span> {{(($index+1)+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }}  -  {{fl.name}}</a>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="exampleInputFile" multiple file-model ng-model="beData.AttechFiles">
+                            <label class="custom-file-label" for="exampleInputFile">Choose file ({{beData.AttechFiles.length}} )</label>
+                        </div>
+                    </div>
+                </div>-->
+    <!-- end modal body -->
+    <!--<div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>-->
+
+    <div class="modal fade sales-invoice-page-modal document-attach-modal modal-static-esc" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title text-primary" id="exampleModalCenterTitle">
+                        <strong>Document Attach</strong>
+                    </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg pt-2">
+                    <div class="timeline-item">
+                        <div class="add-more-than-one-form-block">
+                            <form>
+                                <article>
+                                    <div class="row">
+                                        @*UIUX code update: grid from col-sm-10 to col-sm-12*@
+                                        <div class="col-sm-12">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Attach Document</label>
+                                                        @*<div class="form-group">
+                                                                <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                            </div>*@
+                                                        @*<div class="new-cstm-file-upload">
+                                                                    <div class="drop-area" file-drop>
+                                                                        <h3>Drag & Drop Files Here</h3>
+                                                                        <p>or click to browse</p>
+                                                                        <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                        <ul class="file-list"></ul>
+                                                                    </div>
+                                                            </div>*@
+
+                                                        <div class="new-cstm-file-upload">
+                                                            <div class="drop-area" file-drop>
+                                                                <div class="icon"></div>
+                                                                <h3>Drag & Drop Files Here</h3>
+                                                                <p>or <span>click to browse</span></p>
+                                                                <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                <div class="attached-list">
+                                                                    <ul class="file-list"></ul>
+                                                                    <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex flex-column h-100 justify-content-between">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            @*<input type="text" class="form-control form-control-sm"
+                                                                ng-model="docDescription"
+                                                                placeholder="">*@
+                                                            <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <div>
+                                                                <label class="invisible d-none">for height</label>
+                                                                <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </article>
+                            </form>
+                        </div>
+                        <div class="">
+                            <div class="table-responsive">
+                                <table class="table table-hover border bg-white mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style="width: 20px">SN.</th>
+
+                                            <th scope="col">File Name</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col" style="width: 130px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ac in beData.DocumentColl">
+                                            <th scope="row">{{$index+1}}</th>
+
+                                            <td>{{ac.Name}}</td>
+                                            <td>{{ac.Description}}</td>
+                                            <td>
+                                                <div>
+                                                    <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                        <i class="fas fa-eye text-secondary"></i>
+                                                    </a>
+
+                                                    <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-1">
+                    <button type="button" class="btn btn-sm btn-add btn-outline-secondary dynamic-uiux-sm-btn" style="width:50px" data-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-2">
+                    <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                    <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer p-2">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  Search Voucher right button Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Search JobCard</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                <option ng-value="asp" ng-repeat="asp in TranSearchOptions">{{asp.text}}</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <form class="float-right">
+                                <div class="form-row align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                        <input type="text" ng-model="paginationOptions.pageSize" class="form-control input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Miti</th>
+                                    <th>Entry No.</th>
+                                    <th>Vin No.</th>
+                                    <th>Engine No.</th>
+                                    <th>ChSrl No.</th>
+                                    <th>Regd. No.</th>
+                                    <th>Party</th>
+
+                                    <th>Branch</th>
+                                    <th style="min-width:100px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                    <td align="center">{{sd.EntryMiti}}</td>
+                                    <td align="center">{{sd.JobCardNo}}</td>
+                                    <td>{{sd.VinNo}}</td>
+                                    <td>{{sd.EngineNo}}</td>
+                                    <td>{{sd.ChSrlNo}}</td>
+                                    <td>{{sd.RegdNo}}</td>
+                                    <td>{{sd.PartyName}}</td>
+
+                                    <td>{{sd.Branch}}</td>
+                                    <td>
+                                        <a class="p-1" href="#" ng-click="GetTransactionById(sd)" ng-hide="ButtonED.IRD==true">
+                                            <i class="fas fa-edit text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="DelTransactionById(sd)" ng-hide="ButtonED.IRD==true">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+                                        @*<a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId)">
+                                                <i class="fas fa-print text-primary"></i>
+                                            </a>*@
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>

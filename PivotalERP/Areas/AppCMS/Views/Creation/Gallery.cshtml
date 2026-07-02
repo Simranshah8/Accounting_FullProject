@@ -1,0 +1,266 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<link rel="stylesheet" href="~/wwwroot/dynamic-erp/css/dropzone.css" />
+<script src="~/jslib/AppCMS/gallery.js"></script>
+<style>
+    .fa-upload {
+        background-color: #28a745;
+        color: #fff;
+        padding: 5px;
+        font-size: 15px;
+    }
+
+    .img-preview {
+        height: 150px;
+        width: auto;
+        border: 1px solid green;
+    }
+
+    .btn-add-file {
+        padding: 35px 35px;
+        border: 2px dotted green;
+    }
+
+    .fa-plus-circle {
+        color: #28a745;
+        font-size: 20px;
+    }
+
+    .dz-image img {
+        width: 130px;
+        height: 130px;
+    }
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="GalleryController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="table-listing">
+                    <!-- Second Tab Content -->
+                    <div class="card p-2">
+                        <header class="row mb-2">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Gallery">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Gallery">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.Gallery">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file">
+                                    <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-primary"
+                                            id="open-form-btn" style="font-size:14px;">
+                                        <i class="fas fa-plus w-t"></i> Add Gallery
+                                    </button>
+                                </div>
+                            </div>
+ 
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 100px);">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60px">Order No</th>
+                                            <th style="width: 250px">Title</th>
+                                            <th style="width: 350px">Description</th>
+                                            <th style="width: 60px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in GalleryList | filter:searchData.Gallery | itemsPerPage: perPage.Gallery" current-page="currentPages.Gallery" pagination-id="GalleryPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.Title}}</td>
+                                            <td>{{cl.Description}}</td>
+                                            <td>
+                                                <a class="p-1" href="#">
+                                                    <i class="fas fa-eye text-secondary"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="GetGalleryById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelGalleryById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="GalleryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="notice-form">
+                    <!-- The time line -->
+                    <div>
+                        <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="timeline-item">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <!-- select for others -->
+                                                <div class="col-md-9">
+                                                    <div class="form-group">
+                                                        <label for="">Title</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newGallery.Title" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Order No.</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm" ng-model="newGallery.OrderNo" />
+                                                    </div>
+                                                </div>
+                                                <!-- fields after clicking radio button ends -->
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control form-control-sm" ng-model="newGallery.Description"
+                                                                  rows="1"></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card-body mt-0" id="add-file-area" style="background-color: #eff0ef;">
+                                                <label><b>Upload Photos</b></label>
+                                                <div id="actions" class="row">
+                                                    <div class="col-md-1 mt-4">
+                                                        <div class="btn-group">
+                                                            <span class="btn-add-file col fileinput-button">
+                                                                <span><i class="fas fa-plus-circle"></i></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-11">
+                                                        <div class="d-flex p-2" id="previews" style="overflow-x: auto;">
+                                                            <div id="template">
+                                                                <a data-dz-remove class="cancel float-right">
+                                                                    <i class="fas fa-times-circle" style="  color:#28a745;font-size: 14px;"></i>
+                                                                </a>
+                                                                <span class="preview p-2 ml-2"><img style="height:150px;width:auto" src="data:," alt="" data-dz-thumbnail /></span>
+                                                                <div class="align-items-center" style="width: 100%;">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="time-label">
+                                                <span class="d-block border-0 p-3 text-center">
+                                                    <button type="button"
+                                                            class="btn btn-sm btn-info"
+                                                            id="back-to-list"
+                                                            style="min-width: 90px">
+                                                        Back to List
+                                                    </button>
+                                                    <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="ClearGallery()">Reset</button>
+                                                    <button type="button" class="btn btn-success" style="min-width: 90px;" ng-click="SaveUpdateGallery()">{{newGallery.Mode}}</button>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- col-md-9 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END timeline item -->
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+
+<script src="~/wwwroot/dynamic-erp/js/dropzone.js"></script>
+<script type="text/javascript">
+    // DropzoneJS Demo Code Start
+    Dropzone.autoDiscover = false
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+    var previewNode = document.querySelector("#template")
+    previewNode.id = ""
+    var previewTemplate = previewNode.parentNode.innerHTML
+    previewNode.parentNode.removeChild(previewNode)
+
+    var myDropzone = new Dropzone(document.body, { // Make the whole body a dropzone
+        url: "/target-url", // Set the url
+        thumbnailWidth: 130,
+        thumbnailHeight: 130,
+        parallelUploads: 20,
+        previewTemplate: previewTemplate,
+        autoQueue: false, // Make sure the files aren't queued until manually added
+        previewsContainer: "#previews", // Define the container to display the previews
+        clickable: ".fileinput-button" // Define the element that should be used as click trigger to select files.
+    })
+    document.querySelector("#actions .cancel").onclick = function () {
+        myDropzone.removeAllFiles(true)
+    }
+    // DropzoneJS Demo Code End
+</script>
+
+

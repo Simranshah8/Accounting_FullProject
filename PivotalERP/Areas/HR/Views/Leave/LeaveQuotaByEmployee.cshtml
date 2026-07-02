@@ -1,0 +1,283 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_LeaveQuotaByEmployee)";
+</script>
+
+<script src="~/jslib/hr/leave/LeaveQuotaByEmloyee.js"></script>
+<div ng-app="myApp" ng-controller="LeaveQuotaByEmpController" ng-init="GetAllLeaveQuotaByEmpList()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Add Leave Quota</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LeaveQuotaByEmp">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LeaveQuotaByEmp">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search" ng-model="searchData.LeaveQuotaByEmp"
+                                                           aria-label="Search">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#LeaveQuotaByEmpTbl'" sheet-name="'LeaveQuotaByEmpList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#LeaveQuotaByEmpTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+
+                                            <a print-tbl table-id="'#LeaveQuotaByEmpTbl'" href="#" class="btn btn-secondary btn-light btn-sm" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            @*<button type="button" class="btn btn-sm btn-primary" id="add-LeaveQuotaByEmp"
+                                                        style="min-width: 90px;font-size:12px">
+                                                    <i class="fas fa-plus w-t"></i> Add LeaveQuotaByEmp
+                                                </button>*@
+                                        </div>
+                                    </div>
+                                </header>
+                                <div>
+                                    <div class="table-scroll-x-y table-scroll" style="height:auto !important; max-height :calc(100vh - 10rem) !important;">
+                                        <table id="LeaveQuotaByEmpTbl"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th style="background-color: #e9ecef !important; width: 70px">S.No</th>
+                                                    <th style="background-color: #e9ecef !important; width: 100px">For</th>
+                                                    <th style="background-color: #e9ecef !important; width: 140px">Period</th>
+                                                    <th style="background-color: #e9ecef !important; width: 90px">Code</th>
+                                                    <th style="background-color: #e9ecef !important; width: 200px">Name</th>
+                                                    <th style="background-color: #e9ecef !important; width: 130px">Branch</th>
+                                                    <th style="background-color: #e9ecef !important; width: 150px">Department</th>
+                                                    <th style="background-color: #e9ecef !important; width: 120px">Opening Balance</th>
+                                                    <th style="background-color: #e9ecef !important; width: 80px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in LeaveQuotaByEmpList | filter:searchData.LeaveQuotaByEmp | itemsPerPage: perPage.LeaveQuotaByEmp" current-page="currentPages.LeaveQuotaByEmp" pagination-id="LeaveQuotaByEmpPagination">
+                                                    <td align="center">
+                                                        {{$index+1 }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.ForEmpOrSalesman }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.PeriodName }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Code }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Name }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Branch}}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Department}}
+                                                    </td>
+                                                    <td align="right">
+                                                        {{cl.OpeningQty}}
+                                                    </td>
+                                                    <td>
+                                                        @*<a class="p-1" href="#" ng-click="GetLeaveQuotaByEmpById(cl)" data-toggle="tooltip"
+                                                               data-placement="top" title="Edit">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>*@
+                                                        <a class="p-1" href="#" ng-click="DelLeaveQuotaByEmpById(cl)" data-toggle="tooltip"
+                                                           data-placement="top" title="Delete">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- table end -->
+                                </div>
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="LeaveQuotaByEmpPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="p-2">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">For</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="form-control form-control-sm" ng-model="newLeaveQuotaByEmp.EmployeeOrSalesman" style="width:100%;">
+                                                                <option ng-value="pp.id" ng-repeat="pp in TypeColl" ng-selected="pp.id==newLeaveQuotaByEmp.EmployeeOrSalesman">{{pp.text}}</option>
+                                                            </select>
+
+                                                      
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-8 col-md-8" ng-show="newLeaveQuotaByEmp.EmployeeOrSalesman==1">
+                                                <div class="form-group">
+                                                    <label for="">Employee</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="input-group-text dropdown-toggle p-0"
+                                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newLeaveQuotaByEmp.SelectEmployee">
+
+                                                            <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newLeaveQuotaByEmp.EmployeeSearchBy">
+                                                                {{ss.text}}
+                                                            </option>
+
+                                                        </select>
+                                                        @*<select class="form-control form-control-sm select2" ng-model="newLeaveQuotaByEmp.UserId" style="width:100%;">
+                                                            <option ng-value="pp.UserId" ng-repeat="pp in EmployeeList | filter:newLeaveQuotaByEmp.EmployeeSearchBy" ng-selected="pp.UserId==newLeaveQuotaByEmp.UserId">{{pp.Name}} - {{pp.EmployeeCode}} - {{pp.ContactPer}}</option>
+                                                        </select>*@
+
+                                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newLeaveQuotaByEmp.UserId" employee-detail="newLeaveQuotaByEmp.EmployeeDetails" side-bar-data="newLeaveQuotaByEmp.EmpSideBarData" search-by="newLeaveQuotaByEmp.EmployeeSearchBy" confirm-action="GetLeaveQuotaByEmpById()">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-8 col-md-8" ng-show="newLeaveQuotaByEmp.EmployeeOrSalesman==2">
+                                                <div class="form-group">
+                                                    <label for="">Salesman</label>
+                                                    <div class="input-group-prepend">
+                                                       
+                                                        <select class="form-control form-control-sm select2" ng-model="newLeaveQuotaByEmp.UserId" style="width:100%;">
+                                                                <option ng-value="pp.UserId" ng-repeat="pp in SalesManList" ng-selected="pp.UserId==newLeaveQuotaByEmp.UserId">{{pp.Name}} - {{pp.Code}}</option>
+                                                            </select>
+
+                                                        @*<select class="form-control select2bs4 form-control-sm" all-employee ng-model="newLeaveQuotaByEmp.EmployeeId" student-detail="newLeaveQuotaByEmp.EmployeeDetails" side-bar-data="newLeaveQuotaByEmp.EmpSideBarData" search-by="newLeaveQuotaByEmp.EmployeeSearchBy" confirm-action="GetLeaveQuotaByEmpById()">
+                                                        </select>*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">
+                                                        Fiscal Year
+                                                    </label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newLeaveQuotaByEmp.PeriodId" ng-change="GetLeaveQuotaByEmpById()">
+                                                        <option ng-repeat="C in CostClassList" ng-value="C.CostClassId" ng-selected="C.CostClassId==newLeaveQuotaByEmp.PeriodId">{{C.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            @*<div class="col-sm-2 col-md-2 mt-4">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="customCheckbox1" ng-model="newLeaveQuotaByEmp.IsBalance">
+                                                        <label for="customCheckbox1"
+                                                               class="custom-control-label">
+                                                            Is Balance
+                                                        </label>
+                                                    </div>
+                                                </div>*@
+                                        </div>
+                                        <label class="mt-2"><b>Leave:</b></label>
+                                        <div class="table-scroll-x-y  table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 80px">S.No.</th>
+                                                        <th style="width: 400px">Leave Type</th>
+                                                        <th style="width: 150px">Balance</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="lt in newLeaveQuotaByEmp.LeaveQuotaByEmpDetailsColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{lt.Name}}</td>
+                                                        <td> <input type="number" class="form-control form-control-sm" ng-model="lt.NoOfLeave" /></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="ClearLeaveQuotaByEmp()">Reset</button>
+                                            <button type="button" class="btn btn-primary" style="min-width: 90px;" ng-click="SaveUpdateLeaveQuotaByEmp()">{{newLeaveQuotaByEmp.Mode}}</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,318 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/account/creation/Resource.js"></script>
+<div ng-app="myApp" ng-controller="ResourceController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+
+    <div class="container-fluid">
+
+        <div class="card card-primary card-outline card-outline-tabs">
+            <div class="card-header p-0 border-bottom-0">
+                <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Resource</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-2">
+                <div class="tab-content" id="custom-tabs-four-tabContent">
+                    <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                        <header class="row">
+                            <div class="col-md-8">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Resource">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Resource">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.Resource">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-4 text-right">
+                                <div class="dropdown dnld-file" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                       title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                </div>
+
+
+                            </div>
+                        </header>
+                        <div class="search-toolbar mt-2">
+                            <div class="">
+
+                                <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                    <tr>
+                                        <th style="text-align: center; width: 90px;">
+                                            S.No
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='ResourceId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th ng-click="sort('Name')" style="text-align: left; width: 200px;">
+                                            Name
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th ng-click="sort('Code')" style="text-align: left; width: 130px;">
+                                            ResourceType
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='Code'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+                                        <th ng-click="sort('Alias')" style="text-align: left; width: 130px;">
+                                            UOMText
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='Alias'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th ng-click="sort('District')" style="text-align: left; width: 130px;">
+
+                                            Status
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='District'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th style="text-align: center; width: 100px;">Action</th>
+
+                                    </tr>
+                                    <tr dir-paginate="P in ResourceList|orderBy:sortKey:reverse|filter:searchData.Resource|itemsPerPage:perPage.Resource" current-page="currentPages.Resource" pagination-id="ResourcePagination">
+
+
+                                        <td style="text-align:center;margin:auto">
+                                            {{$index+1}}
+                                        </td>
+                                        <td style="margin: auto; text-align: left">
+                                            {{P.Name}}
+                                        </td>
+
+                                        <td style="margin:auto;text-align:left">
+                                            {{P.ResourceType}}
+                                        </td>
+                                        <td style="margin:auto;text-align:left">
+                                            {{P.UOMText}}
+                                        </td>
+                                        <td style="margin:auto;text-align:left">
+                                            {{P.Status}}
+                                        </td>
+                                        <td class="project-actions text-center" style="text-align:center">
+                                            <div class="btn-group-sm">
+                                                <a href="#" class="btn btn-info" ng-click="GetResourceById(P)"><i class="fas fa-pencil-alt"></i></a>
+                                                <a href="#" class="btn btn-danger" ng-click="DelResourceById(P,$index)"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="ResourcePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                        <div class="p-2">
+
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>ResourceNo</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.ResourceNo">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Name</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.Name">
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Alias</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.Alias">
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Code</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.Code">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.Description">
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>ResourceType</label>
+                                        <select class="form-control form-control-sm select2" ng-model="beData.ResourceType">
+                                            <option ng-repeat="R in ResourceTypelist" ng-value="R.id" ng-selected="beData.ResourceType=R.id">{{R.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>Resource Group Id</label>
+                                        <select class="form-control form-control-sm select2" ng-model="beData.ResourceGroupId">
+                                            <option ng-repeat="R in ResourceGroupList" ng-value="R.ResourceGroupId" ng-selected="beData.ResourceGroupId=R.ResourceGroupId">{{R.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <label>UOMText</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.UOMText">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Res. Units per Time period</label>
+                                        <input type="number" class="form-control form-control-sm" ng-model="beData.ResUnitsPerTimePeriod">
+                                    </div>
+                                </div>
+
+
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Time per Resouce Units</label>
+
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">HH</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" ng-model="beData.R_HH">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">MM</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" ng-model="beData.R_MM">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">SS</span>
+                                            </div>
+                                            <input type="number" class="form-control form-control-sm" ng-model="beData.R_SS">
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Resource Allocation on</label>
+                                        <select class="form-control form-control-sm select2" ng-model="beData.ResourceAllocationOn">
+                                            <option ng-repeat="R in ResourceAllocationOnList" ng-value="R.id" ng-selected="beData.ResourceAllocationOn=R.id">{{R.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label>Status</label>
+                                    <div class="form-group clearfix mb-0 pb-0">
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check mt-1 mr-2" type="radio" id="active" ng-model="beData.Status" name="Status" ng-value="true">
+                                            <label class="form-check-label" for="active">Active</label><br>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check mt-1 mr-2" type="radio" id="inactive" ng-model="beData.Status" name="Status" ng-value="false">
+                                            <label class="form-check-label" for="inactive">Inactive</label><br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <label><b>Resource Costing</b></label>
+                            <div class="table-scroll-x-y  table-scroll" style="max-height:calc(100vh - 21rem)">
+                                <table class="main-table table table-sm table-bordered bg-white">
+                                    <thead class=" text-nowrap">
+                                        <tr>
+                                            <th class="text-center" style="width: 100px;background-color: #ececec!important">S.No</th>
+                                            <th style="width: 250px; background-color: #ececec !important">Resource Std Cost</th>
+                                            <th style="width: 200px; background-color: #ececec !important">Name</th>
+                                            <th style="width: 140px; background-color: #ececec !important">Cost Amt</th>
+                                            <th class="text-center" style="width: 80px; background-color: #ececec !important">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="R in beData.ResourceCostingColl">
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>
+                                                <select class="form-control form-control-sm select2" style="width: 100%; background-color: #fff" ng-model="R.ledgerId">
+                                                    <option ng-value="sl.LedgerId" ng-repeat="sl in SalesLedgerColl" ng-selected="R.LedgerId==sl.LedgerId">{{sl.Name}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" ng-model="R.Name" />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control form-control-sm" ng-model="R.CostAmt" />
+                                            </td>
+
+                                            <td class="text-center">
+                                                <a class="p-1" ng-click="AddResourceGroupCosting($index)">
+                                                    <i class="fas fa-plus text-secondary"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="delResourceGroupCosting($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <footer class="main-footer">
+                                <div class="text-right control-btns">
+                                    <button type="button" class="btn load btn-default" ng-click="ClearResource()">Cancel</button>
+                                    @*<button type="button" class="btn btn-secondary" ng-click="AddResource()">Save & Close</button>*@
+                                    <button type="button" class="btn load btn-primary" ng-click="SaveUpdateResource()">Save</button>
+                                </div>
+
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+
+    </div>
+</div>
+
+

@@ -1,0 +1,127 @@
+﻿<nav id="sidebarzz" class="order-last float-right active active">
+    <!--<div class="custom-menu">
+        <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+        <button type="button" id="ctmRightSidebarCollapse1" class="btn btn-secondary" ng-click="UDFClick=!UDFClick" ng-show="SelectedVoucher.ActiveUDF==true">UDF</button>
+        <input class="btn btn-secondary" id="ctmRightSidebarCollapse2" type="file" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" product-file-model ng-model="ImportItemData.Files_TMP" itemfilepath="ItemFilePath" sheetcoll="SheetColl" />
+        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                title="Create Multiple Data" ng-click="ShowMultipleModal()">
+            <i class="fas fa-file-import"></i>
+        </button>-->
+        @*<div class="btn btn-default btn-file">
+            <i class="fa fa-file-excel-o"></i> Select Excel File
+            <input class="form-control form-control-sm p-0" id="documents" type="file" style="padding: 1px" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" product-file-model ng-model="ImportItemData.Files_TMP" itemfilepath="ItemFilePath" sheetcoll="SheetColl" />
+        </div>*@
+    <!--</div>-->
+    <div class="" ng-hide="UDFClick==true && SelectedVoucher.ActiveUDF==true">
+        <div class="right-box-wrap cstm-sales-invoice">
+            <!--New Button created for close-->
+            <button type="button" id="" class="btn circle-close-btn ctmRightSidebarCollapse"><i class="fas fa-times m-0"></i></button>
+            <!--Ends-->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" ng-repeat="sd in sideBarData">
+                    <span class="title">{{sd.text}}</span>
+                    <span class="desc">{{sd.value}}</span>
+                </li>
+            </ul>
+            <div class="d-xl-block" style="height: 200px;"></div>
+        </div>
+    </div>
+
+    <div class="" ng-show="UDFClick==true && SelectedVoucher.ActiveUDF==true">
+        <div class="right-box-wrap">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" ng-repeat="vUF in beData.UDFFeildsColl | filter: { FieldAfter: 5 }">
+                    <label class="title">{{vUF.Name}} <span style="color:red" ng-show="vUF.IsMandatory==true">*</span> </label>
+                    <div class="form-group">
+                        <udf-field udf="vUF" change-event="ChangeUDFField(vUF.NameId)"></udf-field>                        
+                    </div>
+
+                </li>
+            </ul>
+            <div class="d-xl-block" style="height: 200px;"></div>
+        </div>
+    </div>
+</nav>
+ 
+<!-- model form for table input -->
+<div class="modal fade"
+     id="AddNewExcel"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true"
+     style="margin-top:0px;margin-left: 60px;">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    Import Data
+                </h5>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Close">
+                    <div aria-hidden="true">&times;</div>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="control-label">
+                            Select Sheet Name <span id="ErrName" style="color:red;"></span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-info"></i></span>
+                            <select ng-model="SelectedSheet" class="form-control input-sm" ng-change="LoadProperties()">
+                                <option ng-repeat="ttl in SheetColl" value="{{ttl}}">{{ttl}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12" id="tblPart">
+                    <div class="box-body scroller">
+                        <div class="table-scroll-x-y table-scroll" style="max-height:360px!important;">
+                            <table cellpadding="12" class="table table-bordered table-hover enquiry-table" id="clientTable">
+                                <thead>
+                                    <tr>
+                                        <td class="col2">S.No.</td>
+                                        <td class="col1">Target Fields Name</td>
+                                        <td class="col3">Source Fields Name</td>
+                                        <td class="col4">Default Value</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr id="tablerow0" ng-repeat="newBeData in PropertiesColl ">
+                                        <td class="col1">
+                                            {{$index+1}}
+                                        </td>
+                                        <td class="col3">
+                                            {{newBeData.PropertyName}}
+                                        </td>
+                                        <td class="col4">
+                                            <select ng-model="newBeData.Id" class="form-control form-control-sm input-sm">
+                                                <option ng-repeat="cl in ColumnColl track by cl.Id" value="{{cl.Id}}">
+                                                    {{cl.Name}}
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm input-sm" ng-model="newBeData.DefaultValue" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="time-label">
+                <span class="d-block border-0 p-3 text-center">
+                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="ImportItemDataExcel()">ImportData</button>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal form for table input close -->

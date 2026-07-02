@@ -1,0 +1,260 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<!-- ChartJS -->
+<script src="~/wwwroot/plugins/chart.js/Chart.min.js"></script>
+<!-- Sparkline -->
+<script src="~/wwwroot/plugins/sparklines/sparkline.js"></script>
+<!-- JQVMap -->
+<script src="~/wwwroot/plugins/jqvmap/jquery.vmap.min.js"></script>
+<script src="~/wwwroot/plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+<!-- jQuery Knob Chart -->
+<script src="~/wwwroot/plugins/jquery-knob/jquery.knob.min.js"></script>
+<!-- daterangepicker -->
+<script src="~/wwwroot/plugins/moment/moment.min.js"></script>
+<script src="~/wwwroot/plugins/daterangepicker/daterangepicker.js"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="~/wwwroot/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- Summernote -->
+<script src="~/wwwroot/plugins/summernote/summernote-bs4.min.js"></script>
+<!-- overlayScrollbars -->
+<script src="~/wwwroot/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="~/jslib/dashboard/inventory/inventorysummary.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    .pointer {
+        cursor: pointer;
+    }
+</style>
+<style type="text/css">
+       /*******************************************************************
+    *  hide navigation
+    */
+       .t-Body-nav {
+           display: none;
+       }
+
+       #t_Body_content {
+           margin-left: 0px;
+       }
+
+       #sunburst .oj-legend {
+           padding-left: 120px;
+       }
+
+       .t-Header, .t-Header-branding {
+           background-color: #267db3;
+       }
+
+       .t-Header-logo {
+           margin-top: 0px !important;
+       }
+
+       .t-Header-logo-link {
+           color: #FFF;
+       }
+
+       .t-Header-branding .t-Button {
+           display: none;
+       }
+
+
+       /*******************************************************************
+    *  style info blocks
+    */
+       .db2_container {
+           background-color: rgb(237, 102, 71);
+           color: white;
+           float: left;
+           height: 100px;
+           margin-right: 1%;
+           margin-top: 2%;
+           padding: 5px;
+           position: relative;
+           width: 98%;
+       }
+
+       .db2_icon_container {
+           height: 100%;
+           left: 0;
+           padding-top: 30px;
+           position: absolute;
+           text-align: center;
+           top: 0;
+           width: 80px;
+       }
+
+       .db2_red {
+           background-color: rgb(237, 102, 71);
+       }
+
+       .db2_blue {
+           background-color: rgb(38,125,179);
+       }
+
+       .db2_green {
+           background-color: rgb(104,193,130);
+       }
+
+       .db2_orange {
+           background-color: rgb(250,213,92);
+       }
+
+       .db2_main {
+           border-left: 1px solid white;
+           left: 80px;
+           padding: 0 10px;
+           position: absolute;
+           top: 5px;
+           height: 110px;
+       }
+
+       .db2_number {
+           font-size: 1.8em;
+           padding: 10px 0 5px;
+       }
+
+       .db2_container i {
+           font-size: 50px;
+       }
+
+       .db2_text {
+           font-size: 0.8em;
+           line-height: 1.1em;
+       }
+</style>
+<div ng-app="myApp" ng-controller="inventorySummaryDashboardController" ng-class="{waiting: loadingstatus=='running'}">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <div class="row">
+        <div class="col-md-3">
+            <div class="db2_container" style="background-color: rgb(248, 196, 113);">
+                <div class="db2_main">
+                    <div class="db2_number">
+                        {{invSummary.PendingPurchaseOrderLineItem}}
+                    </div>
+                    <div class="db2_title">
+                        PENDING PURCHASE ORDER
+                    </div>
+                    <div class="db2_text">
+                        No. of line items
+                    </div>
+                </div>
+                <div class="db2_icon_container">
+                    <i class="fa fa-calculator"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="db2_container db2_blue">
+                <div class="db2_main">
+                    <div class="db2_number">
+                        {{invSummary.PendingSalesOrderLineItem}}
+                    </div>
+                    <div class="db2_title">
+                        PENDING SALES ORDER
+                    </div>
+                    <div class="db2_text">
+                        No. of line items
+                    </div>
+                </div>
+                <div class="db2_icon_container">
+                    <i class="fa fa-building"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="db2_container db2_green">
+                <div class="db2_main">
+                    <div class="db2_number">
+                        {{invSummary.PendingStockReceivedLineItem}}
+                    </div>
+                    <div class="db2_title">
+                        PENDING STOCK FOR RECIVED
+                    </div>
+                    <div class="db2_text">
+                        No. of line items
+                    </div>
+                </div>
+                <div class="db2_icon_container">
+                    <i class="fa fa-calendar-plus-o"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="db2_container" style="background-color: rgb(167, 132, 124);">
+                <div class="db2_main">
+                    <div class="db2_number">
+                        {{invSummary.PendingStockIssueLineItem}}
+                    </div>
+                    <div class="db2_title">
+                        PENDING STOCK FOR ISSUED
+                    </div>
+                    <div class="db2_text">
+                        No. of line items
+                    </div>
+                </div>
+                <div class="db2_icon_container">
+                    <i class="fa fa-calendar-minus-o"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="db2_container db2_red">
+                <div class="db2_main">
+                    <div class="db2_number">
+                        {{invSummary.NegativeStockLineItem}}
+                    </div>
+                    <div class="db2_title">
+                        NEGATIVE STOCK
+                    </div>
+                    <div class="db2_text">
+                        No. of line items
+                    </div>
+                </div>
+                <div class="db2_icon_container">
+                    <i class="fa fa-calendar-times-o"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="db2_container" style="background-color: rgb(52, 73, 94);">
+                <div class="db2_main">
+                    <div class="db2_number">
+                        {{invSummary.NonMovingStockLineItem}}
+                    </div>
+                    <div class="db2_title">
+                        NON MOVING STOCK
+                    </div>
+                    <div class="db2_text">
+                        No. of line items
+                    </div>
+                </div>
+                <div class="db2_icon_container">
+                    <i class="fa fa-cubes"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    // For Interest Calculation Radio Content
+    function interestCalcStatus(x) {
+        if (x == 0)
+            document.getElementById("interestCalcStstusYes").style.display = "block";
+        else
+            document.getElementById("interestCalcStstusYes").style.display = "none";
+        return;
+    }
+
+
+    // End Interest Calculation Radio Content
+</script>

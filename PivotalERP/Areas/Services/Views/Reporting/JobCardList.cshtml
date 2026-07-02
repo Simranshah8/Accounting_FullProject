@@ -1,0 +1,526 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.JobCardSummary)";
+    var EntityIdJW = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.JobCardWork)";
+</script>
+
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+ 
+<script src="~/jslib/service/reporting/JobCardList.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="jobCardListCntrl">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">From:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.DateFrom_TMP" style="max-width:100px" date-detail="dayBook.DateFromDet" />
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">To:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.DateTo_TMP" style="max-width:100px" date-detail="dayBook.DateToDet" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group d-flex  mb-0">
+                                        <label class="mt-1 mr-2">ReportType</label>
+                                        <select class="form-control form-control-sm" data-placeholder="**Select Report Type**" ng-model="dayBook.ReportType" ng-change="GetDayBook()">
+                                            <option ng-value="0" selected>All</option>
+                                            <option ng-value="1">Open Only</option>
+                                            <option ng-value="2">Close Only</option>
+                                            <option ng-value="3">Cancel Only</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="col-md-6">
+                                        <label>Total Open :  <b> {{dayBook.TotalOpen}}</b> </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="col-md-6">
+                                        <label>Total Closed : <b> {{dayBook.TotalClose}}</b></label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary load" style="float: right; min-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetDayBook()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Find:</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control pr-0"
+                                                        id="exampleFormControlSelect1">
+                                                    <option>Contain</option>
+                                                    <option>Prefix</option>
+                                                </select>
+                                            </div>
+                                            <div class="input-group input-group-sm" style="width: 150px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+                                        <label class="text-primary" data-toggle="modal" data-target="#CollectionReport" ng-show="comDet.Maintain==3"><strong><u>User Collection Report</u></strong></label>
+                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExport()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                                <a class="dropdown-item" href="#">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    PDF
+                                                </a>
+                                                <a class="dropdown-item" href="#">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/word.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Word
+                                                </a>
+                                                <a class="dropdown-item" href="#">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Mail
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a class="btn btn-secondary btn-light btn-sm ml-2" title="Add Custom Columns" ng-click="ShowCustomColumns()">
+                                            <i class="fas fa-magnet"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                            <i class="fas fa-save"></i>
+                                        </a>
+                                        @*<a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-target="#itemAllocationForModal" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>*@
+                                    </form>
+
+                                </div>
+
+                            </header>
+
+                            <div id="datatable" style="height: calc(100vh - 10rem); width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                            <div id="myGridBottom" style="height: 50px;" class="ag-theme-alpine"></div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-cancel">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Cancel {{SelectedVoucher.VoucherName}} {{ SelectedVoucher.AutoManualNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Cancel Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedVoucher.CancelRemarks"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CancelVoucher()">Save</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+    <!--Modal for USer Collection Report Starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="CollectionReport" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">User Collection Report</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <header class="row">
+                        <div class="col-md-5 col-sm-5">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm" style="width: 250px;">
+                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchData.UserColl">
+
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-default">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7 col-sm-7 text-right">
+                            <form class="form-inline  float-right">
+                                <div class="dropdown dnld-file ml-2">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                </div>
+                                <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm ml-2"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                @*<a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                       data-target="#itemAllocationForModal" title="Filter">
+                                        <i class="fas fa-filter"></i>
+                                    </a>*@
+                            </form>
+
+                        </div>
+
+                    </header>
+                    <div class="table-scroll-x-y" style="height:354px!important;">
+                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 150px; background-color: #ececec !important">Username</th>
+                                    <th colspan="2" scope="colgroup" class="text-center" style="width: 180px; background-color: #ececec !important">Sales</th>
+                                    <th colspan="2" scope="colgroup" class="text-center" style="width: 180px; background-color: #ececec !important">Sales Return</th>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 95px; background-color: #ececec !important">Cash Deposit</th>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 95px; background-color: #ececec !important">Cash Refund</th>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 150px; background-color: #ececec !important">Net Sales (Cash)<br />(Sales-Sales Return)</th>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 150px; background-color: #ececec !important">Net Cash Collection<br />(Deposit-Refund)</th>
+                                    <th rowspan="2" class="text-center align-middle" style="width: 110px; background-color: #ececec !important">Net Cash<br />(Available)</th>
+                                </tr>
+                                <tr>
+                                    <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Cash</th>
+                                    <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Credit</th>
+                                    <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Cash</th>
+                                    <th scope="col" class="text-center" style="top: 30px; background-color: #ececec !important">Credit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="uc in UserWiseColl | filter:searchData.UserColl">
+                                    <th class="align-middle cstm-sticky">{{uc.User}}</th>
+                                    <td style="text-align:right">{{uc.SalesCash |number:2}}</td>
+                                    <td style="text-align:right">{{uc.SalesCredit |number:2}}</td>
+                                    <td style="text-align:right">{{uc.ReturnCash |number:2}}</td>
+                                    <td style="text-align:right">{{uc.ReturnCredit |number:2}}</td>
+                                    <td style="text-align:right">{{uc.Receipt |number:2}}</td>
+                                    <td style="text-align:right">{{uc.Payment |number:2}}</td>
+                                    <td style="text-align:right">{{uc.NetSales |number:2}}</td>
+                                    <td style="text-align:right">{{uc.NetCash |number:2}}</td>
+                                    <td style="text-align:right">{{uc.NetCashBal |number:2}}</td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- end modal body -->
+                @*<div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Ok</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-runningkm">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Update K.M. Of {{SelectedVoucher.VoucherName}} {{ SelectedVoucher.AutoManualNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Running K.M.</label>
+                        <input type="text" class="form-control form-control-sm" number-input ng-model="SelectedVoucher.RunningKM" />
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedVoucher.KMReason"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="UpdateRunningKM()">Update</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-runninghr">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Update K.M. Of {{SelectedVoucher.VoucherName}} {{ SelectedVoucher.AutoManualNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Running H.R.</label>
+                        <input type="text" class="form-control form-control-sm" number-input ng-model="SelectedVoucher.RunningHR" />
+                    </div>
+                    <div class="form-group">
+                        <label>Reason</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedVoucher.HRReason"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="UpdateRunningHR()">Update</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+
+
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmCustomColumns" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                    <h6 class="modal-title" id="exampleModalCenterTitle"><b>Custom Columns</b></h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row" style="margin-top: -10px">
+                        <div class="table-responsive">
+                            <div class="table-scroll-x-y mt-1" style="height: 200px!important">
+                                <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                            <th style="width: 220px; background-color: #ececec !important ">Ref. Column</th>
+                                            <th style="width: 220px; background-color: #ececec !important ">Source. Column</th>
+                                            <th style="width: 150px; background-color: #ececec !important ">New Column</th>
+                                            <th style="width: 250px; background-color: #ececec !important ">Formula</th>
+                                            <th class="text-center align-middle;" style="width: 70px; background-color: #ececec !important ">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="rtr in RefTableRows">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td>
+                                                <select class="form-control form-control-sm select2" active-select2 ng-model="rtr.RefColName">
+                                                    <option ng-value="dp.name" ng-repeat="dp in RefTableColColl" ng-selected="dp.name==rpt.RefColName">{{dp.text}}-{{dp.name}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <select class="form-control form-control-sm select2" active-select2 ng-model="rtr.SourceColName">
+                                                    <option ng-value="dp.name" ng-repeat="dp in SourceColColl" ng-selected="dp.name==rpt.SourceColName">{{dp.text}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input class="form-control form-control-sm" type="text" ng-model="rtr.ColName" />
+                                            </td>
+                                            <td>
+                                                <input class="form-control form-control-sm" type="text" ng-model="rtr.Formula" />
+                                            </td>
+                                            <td>
+                                                <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowIntoRefTblRow($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowIntoRefTblRow($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top: -10px">
+                        <div class="table-responsive">
+                            <div class="table-scroll-x-y mt-1" style="height: 350px!important">
+                                <textarea rows="5" class="form-control form-control-sm" ng-model="CustomRptColumn.Qry"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer p-2" style="padding: 3px;  ">
+                    <button type="button" class="btn load btn-outline-secondary" data-dismiss="modal" style="min-width:70px">Cancel</button>
+                    <button type="button" class="btn load btn-success" ng-click="OkRefTableRows()" style="min-width:70px">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="WorkOrder">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Work Order Of {{SelectedJobForWork.VoucherName}} {{ SelectedJobForWork.AutoManualNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Job No.</label>
+                                <label class="form-control form-control-sm">{{SelectedJobForWork.AutoManualNo}}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>From Date</label>
+                                <input class="form-control form-control-sm" type="text" date-picker ng-model="newWorkOrder.FromDate_TMP" date-detail="newWorkOrder.FromDateDet" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>To Date</label>
+                                <input class="form-control form-control-sm" type="text" date-picker ng-model="newWorkOrder.ToDate_TMP" date-detail="newWorkOrder.ToDateDet" />
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="newWorkOrder.Remarks"></textarea>
+                            </div>
+                        </div>                       
+                    </div>                  
+
+                  
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="UpdateWorkOrder()">Update</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+
+</div>

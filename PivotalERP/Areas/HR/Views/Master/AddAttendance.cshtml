@@ -1,0 +1,137 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_AddAttendance)";
+</script>
+
+
+<script src="~/jslib/hr/Master/AddAttendance.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AddAttendanceController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body P-2">
+                        <div class="row">
+                            <div class="col-md-6 p-0 d-flex">
+                                <div class="col-md-3">
+                                    <label>For Date</label>
+                                    <input type="text"
+                                           class="form-control form-control-sm" date-picker ng-model="newEmployeeWise.ForDate_TMP" date-detail="newEmployeeWise.ForDateDet" />
+                                </div>
+                                <div class="col-md-6 ml-2">
+                                    <label>Department</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newEmployeeWise.DepartmentId" multiple>
+                                        <option ng-value="0" ng-selected="false">**All**</option>
+                                        <option ng-value="d.CostCenterDepartmentId" ng-repeat="d in DepartmentList">{{d.Name}}</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="button"
+                                            class="btn btn-sm btn-default load mt-4"
+                                            style="min-width: 90px" ng-click="GetEmpSummaryList()">
+                                        Load
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mt-4">
+                                <div class="form-inline float-right">
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search"
+                                               placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.AddAttendance" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <button type="button"
+                                            class="btn btn-sm btn-info load ml-2"
+                                            style="min-width: 90px" ng-click="SaveUpdateEmployeeWise()">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="mt-2">
+                            <div class="table-scroll-x-y" style="height:auto !important; max-height :calc(100vh - 6rem) !important;">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr class="text-nowrap text-center">
+                                            <th style="width: 80px; background-color: #ececec !important; z-index: 2;">Id</th>
+                                            <th style="width: 100px; background-color: #ececec !important; z-index: 2;">Code</th>
+
+                                            <th style="width: 250px; background-color: #ececec !important; z-index: 2;">Name</th>
+                                            <th style="width: 150px; background-color: #ececec !important; z-index: 2;">Contact</th>
+                                            <th style="background-color: #ececec !important; z-index: 2;">
+                                                <div class="justify-content-center d-flex">
+                                                    Present
+                                                    &nbsp;
+
+                                                    <input type="checkbox" class="" style="margin-top: 2px;" ng-model="newEmployeeWise.Present" ng-change="PresentAllEmployee()">
+                                                </div>
+
+                                            </th>
+                                            <th style="background-color: #ececec !important; z-index: 2;"> Absent </th>
+                                            <th style="background-color: #ececec !important; z-index: 2;">Late </th>
+                                            <th style="background-color: #ececec !important; z-index: 2;" id="late-heading1">Late Min.</th>
+                                            <th style="background-color: #ececec !important; z-index: 2;"> Leave </th>
+                                            <th style="width: 250px; background-color: #ececec !important; z-index: 2;">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ew in newEmployeeWise.EmployeeWiseDetailsColl | filter:searchData.AddAttendance">
+                                            <td>{{ew.AutoNumber}}</td>
+                                            <td>{{ew.EmployeeCode}}</td>
+                                            <td>{{ew.Name}}</td>
+                                            <td>{{ew.ContactNo}}</td>
+                                            <td class="text-center align-middle">
+                                                <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="1" ng-model="ew.Attendance" />
+
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="2" ng-model="ew.Attendance" />
+
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="3" ng-model="ew.Attendance" />
+
+
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <input type="number" class="form-control form-control-sm" ng-model="ew.LateMin" ng-readonly="ew.Attendance!=3" />
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                <input type="radio" class="iradio_flat-green input-sm" name="rboAtt+{{$index}}" data-ng-value="4" ng-model="ew.Attendance" />
+                                            </td>
+                                            <td>
+                                                <textarea cols="30"
+                                                          rows="1"
+                                                          class="form-control form-control-sm" ng-model="ew.Remarks"></textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+        </div>
+        <!--/. container-fluid -->
+    </div>
+</div>

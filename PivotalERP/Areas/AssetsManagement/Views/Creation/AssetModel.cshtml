@@ -1,0 +1,175 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/AssetsManagement/AssetModel.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="AssetModelController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Assets Model</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AssetModel">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.AssetModel">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllAssetModel()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AssetModel'" report-name="'List of Asset Model'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'AssetModel',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'Asset Model'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="mt-2  table-scroll-x-y table-container flex-grow-1" style="max-height:calc(100vh - 6rem) !important;">
+                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                    <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                        <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                            <thead class="text-left">
+                                                <tr>
+                                                    <th class="cstm-sticky text-center" style="width: 20px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                    <th style="width:100px;">Name</th>
+                                                    <th style="width:60px;">Code</th>
+                                                    <th style="width:80px;">Parent</th>
+                                                    <th class="text-left align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 50px; right: 0;">
+                                                        <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                            <option value="" disabled selected>Action</option>
+                                                            <option value="save">Save Layout</option>
+                                                            <option value="reset">Reset Layout</option>
+                                                        </select>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="beData in AssetModelList | filter:searchData.AssetModel| itemsPerPage:perPage.AssetModel" current-page="currentPages.AssetModel" pagination-id="AssetModelPagination">
+                                                    <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                    <td>{{beData.ModelName}}</td>
+                                                    <td>{{beData.ModelCode}}</td>
+                                                    <td>{{beData.ModelParentName}}</td>
+                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 50px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info" ng-click="GetAssetModelById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-danger" ng-click="deleteAssetModel(beData, $index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="AssetModelPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form class="mb-0">
+                                    <div class="row">
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newAssetModel.ModelName">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Code <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newAssetModel.ModelCode">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Parent</label>
+                                                <select class="form-control form-control-sm" ng-model="newAssetModel.ModelParentId">
+                                                    <option ng-repeat=" i in ModelParentList" ng-value="i.AssetModelId" ng-selected="i.AssetModelId == newAssetModel.ModelParent">{{i.ModelName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateAssetModel()"><span class="glyphicon glyphicon-save"></span>{{newAssetModel.Mode}}</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

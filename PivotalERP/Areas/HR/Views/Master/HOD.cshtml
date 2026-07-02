@@ -1,0 +1,236 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+@*<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.HR_HeadOfDepartment)";
+</script>*@
+
+
+<script src="~/jslib/hr/master/HeadOfDepartment.js"></script>
+<div ng-app="myApp" ng-controller="HeadOfDepartmentController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllHeadOfDepartment()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearHeadOfDepartment()" aria-controls="custom-tabs-four-profile" aria-selected="false">HOD</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.HeadOfDepartment">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.HeadOfDepartment">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.HeadOfDepartment">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#HeadOfDepartment'" sheet-name="'HeadOfDepartmentList'" report-name="'Head of Department List'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#HeadOfDepartment').tableExport({type:'csv',escape:'false', reportname:'Head of Department List'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#HeadOfDepartment'"  report-name="'Head Of Department List'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="HeadOfDepartment">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px; ">S.No</th>
+                                                    <th style="width: 350px; ">Company</th>
+                                                    <th style="width: 350px; ">Branch</th>
+                                                    <th style="width: 130px; ">Department</th>
+                                                    <th style="width: 130px; ">ServiceType</th>
+                                                    <th style="width: 280px; ">HOD(Name)</th>
+                                                    <th style="width: 280px; ">Co-HOD(Name)</th>
+                                                    <th style="width: 120px; ">StartDate</th>
+                                                    <th class="no-print" style="width: 80px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="D in HeadOfDepartmentList | filter:searchData.HeadOfDepartment | itemsPerPage: perPage.HeadOfDepartment" current-page="currentPages.HeadOfDepartment" pagination-id="HeadOfDepartmentPagination">
+                                                    <td style="text-align:center;margin:auto">{{$index+1}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.Company}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.Branch}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.Department}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.ServiceType}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.Employee}} - {{D.EmployeeCode}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.CoEmployee}} <label ng-if="D.CoEmployeeCode">- {{D.CoEmployeeCode}}</label></td>
+                                                    <td style="text-align:left;margin:auto">{{D.StartDateMiti}}</td>
+                                                    <td class="project-actions no-print" style="text-align:center">
+                                                        <div class="btn-group-sm text-white">
+                                                            <a class="btn btn-info" ng-click="getHeadOfDepartmentById(D, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a class="btn btn-danger" ng-click="DelHeadOfDepartmentById(D)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="HeadOfDepartmentPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            @*<div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Company</label><span style="color: red">*</span>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDet.CompanyId" style="width: 100%;">
+                                                        <option ng-value="0">**Select Company**</option>
+                                                        <option ng-repeat="tdc in CompanyList" ng-value="tdc.CompanyId" ng-selected="tdc.CompanyId==newDet.CompanyId"> {{tdc.Name}} </option>
+                                                    </select>
+                                                </div>
+                                            </div>*@
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Company</label><span style="color: red">*</span>
+                                                    <multi-select-option ng-model="newDet.CompanyRelationshipIdColl" data="CompanyRelationshipList" label="Name" value="TranId"></multi-select-option>
+                                                    @*<select class="form-control form-control-sm select2" ng-model="newDet.CompanyId" style="width: 100%;">
+                                                        <option ng-repeat="tdc in CompanyRelationshipList" ng-value="tdc.TranId" ng-selected="tdc.TranId==newDet.CompanyId"> {{tdc.Name}} </option>
+                                                    </select>*@
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Branch</label><span style="color: red">*</span>
+                                                    <multi-select-option ng-model="newDet.BranchColl" data="BranchList" label="Name" value="BranchId"></multi-select-option>
+                                                    @*<select class="form-control form-control-sm select2" ng-model="newDet.BranchId" style="width: 100%;">
+                                                        <option ng-value="0">**Select Branch**</option>
+                                                        <option ng-repeat="tdc in BranchList" ng-value="tdc.BranchId" ng-selected="tdc.BranchId==newDet.BranchId"> {{tdc.Name}} </option>
+                                                    </select>*@
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Department</label><span style="color: red">*</span>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDet.DepartmentId" style="width: 100%;">
+                                                        <option ng-value="0">**Select Department**</option>
+                                                        <option ng-repeat="tdc in DepartmentList" ng-value="tdc.CostCenterDepartmentId" ng-selected="tdc.CostCenterDepartmentId==newDet.DepartmentId"> {{tdc.Name}} </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Service Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDet.ServiceTypeId" style="width: 100%;">
+                                                        <option ng-value="0">**Select Service Type**</option>
+                                                        <option ng-repeat="tdc in ServiceTypeList" ng-value="tdc.ServiceTypeId" ng-selected="tdc.ServiceTypeId==newDet.ServiceTypeId"> {{tdc.Name}} </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4 col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Employee</label><span style="color: red">*</span>
+                                                    <div class="input-group-prepend">
+                                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1;" ng-model="newDet.SelectEmployee">
+                                                            <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newDet.EmployeeSearchBy">{{ss.text}}</option>
+                                                        </select>
+                                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newDet.UserId" employee-detail="newDet.EmployeeDetails" side-bar-data="newDet.EmpSideBarData" search-by="newDet.EmployeeSearchBy" confirm-action="getEmployeeId(newDet,1)"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4 col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Co-Employee</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1; " ng-model="newDet.SelectCoEmployee">
+                                                            <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newDet.SelectCoEmployee">{{ss.text}}</option>
+                                                        </select>
+                                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newDet.CoUserId" employee-detail="newDet.EmployeeDetails" side-bar-data="newDet.EmpSideBarData" search-by="newDet.SelectCoEmployee" confirm-action="getEmployeeId(newDet,2)"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Start Date</label><span style="color: red">*</span>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" date-picker ng-model="newDet.StartDate_TMP" date-detail="newDet.StartDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label>Note</label>
+                                                    <textarea class="form-control form-control-sm" ng-model="newDet.Note" rows="1" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearHeadOfDepartment()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveHeadOfDepartment()">{{newDet.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

@@ -1,0 +1,268 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/account/creation/PaymentTerms.js"></script>
+<div ng-app="myApp" ng-controller="ControllPaymentTerms" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllPaymentTerms()" ng-cloak>
+
+    <div class="box-body1 ">
+        <div class="content1">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Payment Type</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PaymentTerms">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PaymentTerms">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.PaymentTerms">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllPaymentTerms()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'PaymentTerms'" report-name="'List Of Payment Terms'" ignore-column="'5'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'PaymentTerms',ignoreColumn:'5' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Payment Terms'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align: center; width: 10%;">
+                                                        S.No.
+                                                        <span class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th ng-click="sort('Name')" style="text-align:left;width: 30% ;">
+                                                        Name
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+
+                                                    <th ng-click="sort('IsCash')" style="text-align:left;width:20%;">
+                                                        IsCash
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='IsCash'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th ng-click="sort('LedgerName')" style="text-align:left;width: 15%;">
+                                                        Ledger
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='LedgerName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th ng-click="sort('BranchName')" style="text-align:left;width: 15%;">
+                                                        Branch
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='BranchName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th style="text-align:center;width: 10%;" class="no-print">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="beData in PaymentTermsColl | orderBy:sortKey:reverse | filter:searchData.PaymentTerms | itemsPerPage:perPage.PaymentTerms" current-page="currentPages.PaymentTerms" pagination-id="PaymentTermsPagination">
+                                                    <td style="text-align:center;">
+                                                        {{beData.AutoNumber}}
+                                                    </td>
+                                                    <td style="text-align:left">
+                                                        {{beData.Name}}
+                                                    </td>
+
+                                                    <td style="text-align:left">
+                                                        {{beData.IsCash}}
+                                                    </td>
+                                                    <td style="text-align:left">
+                                                        {{beData.LedgerName}}
+                                                    </td>
+                                                    <td style="text-align:left">
+                                                        {{beData.BranchName}}
+                                                    </td>
+                                                    <td class="project-actions no-print text-center">
+                                                        <div class="btn-group-sm">
+                                                            <a class="p-1" href="#" ng-click="ShowPersonalImg(beData)">
+                                                                <i class="fas fa-eye text-secondary"></i>
+                                                            </a>
+                                                            <a href="#" class="btn btn-sm btn-info" ng-click="getPaymentTermsById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-sm btn-danger" ng-click="deletePaymentTerms(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="PaymentTermsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div>
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Name<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Name" title="{{beData.PaymentTermsId>0 ? beData.PaymentTermsId : ''}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>S.No.<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.AutoNumber">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label class="ml-8">Is CASH</label>
+                                                    <input type="checkbox" class="form-control form-control-sm" ng-model="beData.IsCash">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Ledger</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.LedgerId" id="cboSalesLedger" @*style="width:95%"*@ ledgertype="1"
+                                                            placeholder="** Select Name **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="beData.SalesLedgerInfo" side-bar-data="beData.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Branch</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.BranchId" data-placeholder="** Select Branch **">
+                                                        <option value="0">**select branch**</option>
+                                                        <option ng-value="cl.BranchId" ng-repeat="cl in BranchList" ng-selected="cl.BranchId==beData.BranchId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Pay type</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.PayType" data-placeholder="** Select PayType **">
+                                                        <option ng-value="cl.id" ng-repeat="cl in PayTypeList" ng-selected="cl.id==beData.PayType">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="" class="invisible">Image</label>
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <div class="img-wrap mx-auto" style="width:100%;">
+                                                        <img ng-src="{{beData.PhotoData[0] || beData.ImagePath}}" class="img-fluid" alt="" id="imgPhoto1">
+                                                    </div>
+                                                    <label for="choose-file" type="button" class="btn btn-outline-secondary btn-sm">Upload Image</label>
+                                                    <input id="choose-file" class="btn btn-outline-secondary btn-sm" style="display: none;" type="file" accept=".jpg,.jpeg,.png" file-model-resize ng-model="beData.Photo_TMP" fileread="beData.PhotoData" />
+                                                    <a ng-click="ClearSliderPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="AddNewPaymentTerms()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Accept</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+
+
+    </div>
+
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

@@ -1,0 +1,306 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var VoucherType = "@ViewBag.VoucherType";
+    var EntityId = "@ViewBag.EntityId";
+</script>
+
+<script src="~/jslib/inventory/transaction/Bom.js"></script>
+<div ng-app="myApp" ng-controller="BOMController" ng-init="LoadData()">
+    <div class="sale-page-wrap" style="overflow-y:auto!important">
+        <div class="overflow-hidden" style="overflow-y:auto!important">
+            @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+            @RenderPage("~/Views/Global/_LedgerDetails.cshtml")
+
+            <!-- Page Content  -->
+            <div class="content-wrapper-new">
+                <div class="container-fluid">
+                    <div class="pt-1"></div>
+
+                    <div class="card p-2">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="mr-4">Product</label>
+                                    <select class="form-control form-control-sm select2" style="width:100%">
+                                        <option>Product1</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group d-flex">
+                                    <label class="text-nowrap mr-4">BOM Name</label>
+                                    <input type="text" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group d-flex">
+                                    <label class="text-nowrap mr-4">Qty</label>
+                                    <input type="text" class="form-control form-control-sm" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group d-flex">
+                                    <label class="mr-4">Unit</label>
+                                    <select class="form-control form-control-sm select2"  style="width:100%">
+                                        <option>Unit1</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header py-1 header-primary"style="background-color: #068abfe8; color: #ffffff;">
+                                    <h5 class="mb-0">Consumption (Component / outwards)</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-scroll-x-y mb-2" style="height:auto!important;max-height: 13rem!important" ;>
+                                        <table id="main-table-production" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="px-1 text-center" style="width: 50px; background-color: #ececec !important">S.No</th>
+                                                    <th style="width:200px;background-color:#ececec!important;z-index:3;">Product name</th>
+                                                    <th class="text-center" style="width: 60px; background-color: #ececec !important">Qty</th>
+                                                    <th class="text-center" style="width: 60px; background-color: #ececec !important">Unit</th>
+                                                    <th class="text-center" style="width: 70px; background-color: #ececec !important">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="itemDet in beData.ConsumptionColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td class="align-middle cstm-sticky" style="width: 250px; z-index: 2; left: 50px; background-color: #fff">
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId" style="width:100%"
+                                                                placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet,$index)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData" voucher-id="SelectedVoucher.VoucherId" ledger-id="beData.PartyLedgerId" vouchertype="8"></select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" ng-model="itemDet.Qty" name="ActualQty" style="text-align:center" onfocus="this.select();">
+                                                    </td>
+
+                                                    <td><input type="text" class="form-control  form-control-sm" ng-model="itemDet.UnitName" disabled></td>
+                                                    <td class="project-actions no-print text-center">
+                                                        <div class="btn-group-sm">
+                                                            <a class="btn btn-info" ng-click="AddConsumptionRow($index)"><i class="fas fa-plus"></i></a>
+                                                            <a class="btn btn-danger" ng-click="delConsumptionRow($index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                               
+
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header py-1 header-primary" style="background-color: #068abfe8; color: #ffffff;">
+                                    <h5 class="mb-0">Production(Co-Product/By-Product/Scrap/InWard)</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-scroll-x-y mb-2" style="height:auto!important;max-height: 13rem!important" ;>
+                                        <table id="main-table-production" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="px-1 text-center" style="width: 50px; background-color: #ececec !important">S.No</th>
+                                                    <th style="width: 200px; background-color: #ececec !important; z-index: 3;">Product name</th>
+                                                    <th class="text-center" style="width: 60px; background-color: #ececec !important">Qty</th>
+                                                    <th class="text-center" style="width: 60px; background-color: #ececec !important">Unit</th>
+                                                    <th class="text-center" style="width: 70px; background-color: #ececec !important">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="itemDet in beData.ProductionColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td class="align-middle cstm-sticky" style="width: 250px; z-index: 2; left: 50px; background-color: #fff">
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId" style="width:100%"
+                                                                placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet,$index)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData" voucher-id="SelectedVoucher.VoucherId" ledger-id="beData.PartyLedgerId" vouchertype="8"></select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" ng-model="itemDet.Qty" name="ActualQty" style="text-align:center" onfocus="this.select();">
+                                                    </td>
+
+                                                    <td><input type="text" class="form-control  form-control-sm" ng-model="itemDet.UnitName" disabled></td>
+                                                    <td class="project-actions no-print text-center">
+                                                        <div class="btn-group-sm">
+                                                            <a class="btn btn-info" ng-click="AddProductionRow($index)"><i class="fas fa-plus"></i></a>
+                                                            <a class="btn btn-danger" ng-click="delProductionRow($index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- end form fiels -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header py-1 header-primary" style="background-color: #068abfe8; color: #ffffff;">
+                                    <h5 class="mb-0">Additional Costs</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-scroll-x-y mb-2" style="height:auto!important;max-height: 18rem!important" ;>
+                                        <table id="main-table-production" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th class="px-1 text-center" style="width: 50px; background-color: #ececec !important">S.No</th>
+                                                    <th style="width: 250px; background-color: #ececec !important; z-index: 3;">Ledger</th>
+                                                    <th class="text-center" style="width: 80px; background-color: #ececec !important">Percentage</th>
+                                                    <th class="text-center" style="width: 80px; background-color: #ececec !important">Amount</th>
+                                                    <th style="width: 200px; background-color: #ececec !important">Remarks</th>
+                                                    <th class="text-center" style="width: 65px; background-color: #ececec !important">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="itemDet in beData.AdditionalCostColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td class="pl-0">
+                                                        <select ng-disabled="itemDet.AutoCharge==true" autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="itemDet.LedgerId" ledgertype="1" fortransaction="true"
+                                                                placeholder="** Select Additional Ledger **" showdetails="true" confirm-action="AditionalCostSelectionChange(itemDet,$index)" ledger-detail="itemDet.costLedgerDetail" side-bar-data="itemDet.costSideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="8"></select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" ng-model="itemDet.Percentage" name="ActualQty" style="text-align:center">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" ng-model="itemDet.Amount" style="text-align:right">
+                                                    </td>
+                                                    <td><input type="text" class="form-control  form-control-sm" ng-model="itemDet.Remarks"></td>
+                                                    <td class="project-actions no-print text-center">
+                                                        <div class="btn-group-sm">
+                                                            <a class="btn btn-info" ng-click="AddAdditionalCostRow($index)"><i class="fas fa-plus"></i></a>
+                                                            <a class="btn btn-danger" ng-click="delAdditionalCostRow($index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+        <footer class="main-footer control-btns pt-0 pb-2">
+            <div class="secondary-footer mb-2 mt-2">
+                <div class="row">
+                    <div class="col-md-1 col-xl-1">
+                        
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right">Consumption Total:</label>
+                            <div class="col-7 col-sm-6 col-md-6">
+                                <input type="text" number-input class="form-control hideSideBar" style="text-align:right;" placeholder="" readonly ng-model="beData.SourceTotalAmount">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-xl-3">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right">Production Total:</label>
+                            <div class="col-7 col-sm-6 col-md-6">
+                                <input type="text" number-input class="form-control hideSideBar" style="text-align:right;" placeholder="" readonly ng-model="beData.TargetTotalAmount">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right">Additional Cost Total:</label>
+                            <div class="col-7 col-sm-6 col-md-6">
+                                <input type="text" number-input class="form-control hideSideBar" style="text-align:right;" placeholder="" readonly ng-model="beData.TargetTotalAmount">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 col-xl-6">
+                    <div class="form-group">
+                        <input type="text" list="lstNarration" class="form-control  hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                        <datalist id="lstNarration">
+                            <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                        </datalist>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <form class="text-right control-btns mb-0">
+
+                        <button type="button" class="btn btn-default ml-1" ng-click="ClearData()">Clear</button>
+                        <button type="button" class="btn btn-secondary ml-1" ng-click="SearchData()">Search</button>
+                        <button type="button" class="btn btn-primary ml-1" ng-click="SaveStockJournal()" ng-disabled="loadingstatus=='running'">Save</button>
+                    </form>
+                </div>
+            </div>
+        </footer>
+
+        @RenderPage("~/Global/_ReportTemplates.cshtml")
+    </div>
+</div>
+<script>
+    (function ($) {
+
+        "use strict";
+
+        var fullHeight = function () {
+
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>
+
+<script>
+
+    $(document).ready(function () {
+
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                //var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                //if (key == 13) {
+                //    e.preventDefault();
+                //    var inputs = $(this).closest('form').find(':input:visible');
+                //    inputs.eq(inputs.index(this) + 1).focus();
+                //}
+
+                var index = $('.serial').index(this) + 1;
+                $('.serial').eq(index).focus();
+            }
+        });
+
+
+
+    });
+
+
+</script>

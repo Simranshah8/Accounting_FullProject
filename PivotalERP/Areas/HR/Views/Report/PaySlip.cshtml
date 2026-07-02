@@ -1,0 +1,144 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Payroll_PaySlip)";
+</script>
+
+<script src="~/jslib/hr/Report/PaySlip.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="PaySlipController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="card p-2">
+                    <div class="row">
+
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label class="">Company</label>
+                                <select class="form-control form-control-sm select2" ng-model="newPaySlip.CompanyRelationshipId" style="width: 100%;">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="tdc in CompanyRelationshipList" ng-value="tdc.TranId" ng-selected="tdc.TranId==newPaySlip.CompanyRelationshipId"> {{tdc.Name}} </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 d-flex">
+                            <div class="col-md-6">
+                                <div class="form-group ">
+                                    <label>From Year </label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPaySlip.YearId">
+                                        <option ng-value="A.id" ng-repeat="A in YearList" ng-selected="A.id==newFilter.YearId">{{A.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>From Month</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newPaySlip.MonthId">
+                                        <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFilter.MonthId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Branch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newPaySlip.BranchId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newPaySlip.BranchId">{{B.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control form-control-sm select2" ng-model="newPaySlip.DepartmentId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.CostCenterDepartmentId" ng-repeat="c in DepartmentList" ng-selected="c.CostCenterDepartmentId==newPaySlip.DepartmentId">{{c.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control form-control-sm select2" ng-model="newPaySlip.CategoryId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.CategoryId" ng-repeat="c in CategoryList" ng-selected="c.CategoryId==newPaySlip.CategoryId">{{c.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Employee Group</label>
+                                <select class="form-control form-control-sm select2" ng-model="newPaySlip.EmployeeGroupId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.EmployeeGroupId" ng-repeat="c in GroupList" ng-selected="c.EmployeeGroupId==newPaySlip.EmployeeGroupId">{{c.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-7 col-lg-7 col-md-7"
+                             id="meet-employee">
+                            <label for="inlineFormInputGroup">Select Employee</label>
+                            <div class="input-group-prepend">
+                                <select class="input-group-text dropdown-toggle p-0"
+                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newPaySlip.SelectEmployee">
+
+                                    <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newPaySlip.EmployeeSearchBy">
+                                        {{ss.text}}
+                                    </option>
+
+                                </select>
+                                <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newPaySlip.UserId" employee-detail="newPaySlip.EmployeeDetails" side-bar-data="newPaySlip.EmpSideBarData" search-by="newPaySlip.EmployeeSearchBy">
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">Select Report</label>
+                                <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintPaySlip()" ng-model="newPaySlip.RptTranId">
+                                    <option ng-value="0" ng-selected="true">Select Report</option>
+                                    <option ng-value="rt.RptTranId" ng-repeat="rt in newPaySlip.TemplatesColl">{{rt.ReportName}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div class="">
+                                <button class="btn btn-sm load btn-primary mt-4" ng-click="PrintPaySlip()"><i class="fas fa-redo-alt"></i> Load</button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="row mt-2" id="schedule-report-table">
+                        <iframe id="frmRptBillPrint" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+</div>

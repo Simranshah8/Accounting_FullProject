@@ -1,0 +1,263 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Lab_Packages)";
+</script>
+<script src="~/jslib/Lab/Packages.js"></script>
+
+<div ng-app="myApp" ng-controller="Packages" ng-init="LoadData()">
+
+    <div class="content">
+        <div class="p-1"></div>
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+
+                        <div class="tab-pane fade show active" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+
+                                <label><b>Packages Details :</b></label>
+                                <form>
+
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Package Name<span style="color:red"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Code">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Code</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Name">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Organization/Branch<span style="color:red"></span></label>
+                                                <select class="form-control form-control-sm" ng-model="newDet.OrganizationId">
+                                                    <option ng-value="Org.id" ng-repeat="Org in OrganizationColl " ng-selected="Org.id==newDet.OrganizationId">{{Org.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Category<span style="color:red"></span></label>
+                                                <select class="form-control form-control-sm" ng-model="newDet.CategoryId">
+                                                    <option ng-value="C.id" ng-repeat="C in CategoryColl" ng-selected="C.id==newDet.CategoryId">{{C.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label> Pricing Policy<span style="color:red"></span></label>
+                                                <select class="form-control form-control-sm" ng-model="newDet.PricingId" ng-change="UpdateTotals()">
+                                                    <option ng-value="pp.id" ng-repeat="pp in PricingColl " ng-selected="pp.id==newDet.PricingId">{{pp.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Discount %</label>
+                                                <input type="text" class="form-control form-control-sm"  ng-model="newDet.Discount" ng-change="UpdateTotals()">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Fixed Net Amount (Bundle)
+                                                    <span style="color:red"></span>
+                                                </label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.FdAmount"number-input noofdecimal="2" style="text-align:right" onfocus="this.select();"  ng-change="UpdateTotals()">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label for="" class=" d-block">Status</label>
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="checkboxPrimary1" ng-model="newDet.IsProfileTest">
+                                                    <label for="checkboxPrimary1">Is Active?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </form>
+
+                                <label><b>Packages Items :</b></label>
+
+                                <label><b></b></label>
+
+                                <div class="table-responsive">
+                                    <table id="main-table" class="table table-sm table-bordered bg-white" style="table-layout: auto; width:100%;">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th style="width:20%"> Add Test/Profile</th>
+                                                <th style="width:20%"> Test Name</th>
+                                                <th style="width: 15%"> Code</th>
+                                                <th style="width: 10%"> Qty</th>
+                                                <th style="width: 10%"> Discount</th>
+                                                <th style="width: 15%"> Unit Price</th>
+                                                <th style="width:15%"> Line Total </th>
+                                                <th style="width:10%"> Actions</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+                                            <tr ng-repeat="pDet in newDet.LabPackageItemsColl">
+                                                <td>
+                                                    <select class="form-control form-control-sm" ng-model="pDet.TestPackageId" ng-change="LabTestDetails(pDet)">
+                                                        <option ng-value="pp.LabTestId" ng-repeat="pp in TestPackagesColl " ng-selected="pp.LabTestId==newDet.TestPackageId">{{pp.TestName}}</option>
+                                                    </select>
+                                                </td>
+                                                <td><input type="text" class="form-control form-control-sm" readonly ng-model="pDet.TestName"></td>
+                                                <td><input type="text" class="form-control form-control-sm" readonly ng-model="pDet.Code"></td>
+                                                <td><input type="text" class="form-control form-control-sm" ng-model="pDet.Qty" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" ng-change="CalQtyPrice(pDet)"></td>
+                                                <td><input type="text" class="form-control form-control-sm" ng-model="pDet.Discount" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();"></td>
+                                                <td><input type="text" class="form-control form-control-sm text-right" readonly number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" ng-model="pDet.UnitPrice"></td>
+                                                <td><input type="text" class="form-control form-control-sm text-right" readonly number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" ng-model="pDet.LineTotal"></td>
+                                                <td class="text-center align-middle">
+                                                    <a ng-click="AddPHDDetails($index)"><i class="fas fa-plus"></i></a>
+                                                    <a ng-click="delPHDDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                    <div class="p-1  w-25">
+                                        <p class="mb-1">Sum of items prices <strong class="float-right">{{newDet.GrandTotal | number: 2}}</strong></p>
+                                        <p class="mb-1">Discount <strong class="float-right">{{newDet.DiscountAmount | number: 2}}</strong></p>
+                                        <p class="mb-0 "> Net Package Amount <strong class="float-right">{{newDet.NetTotal | number: 2}}</strong> </p>
+                                    </div>
+                                </div>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="GetAllPackages()"> <span class="glyphicon glyphicon-remove"></span>Search</button>
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdatePackages()"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                    </div>
+                                </footer>
+
+                            </div>
+                        </div>
+
+
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="ApproveModal" role="dialog" tabindex="-1">
+                            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                                <div class="modal-content" style="width:calc(100vw - 2rem)">
+                                    <div class="modal-header p-2">
+                                        <h6 class="modal-title" id="exampleModalCenterTitle">Search Packages</h6>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body p-2">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Packages">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Packages">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search"
+                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.Packages">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="table-scroll-x-y my-1 table-container card" style="height:auto !important;">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white text-nowrap table-hover" style="table-layout: auto;">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <th style="width:60px">S.N</th>
+                                                        <th style="width:100px">Name</th>
+                                                        <th style="width:100px">Code</th>
+                                                        <th style="width:120px">Organization</th>
+                                                        <th style="width:120px">Category</th>
+                                                        <th style="width:120px">Pricing Policy</th>
+                                                        <th style="width:80px">Discount</th>
+                                                        <th style="width: 80px">Net Amount</th>
+                                                        <th style="width: 80px">Status</th>
+                                                        <th style="width:60px">Action</th>
+
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                    <tr dir-paginate="pDet in PackageData | filter:searchData.Packages | itemsPerPage:perPage.Packages" current-page="currentPages.Packages" pagination-id="PackagePagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{pDet.Name}}</td>
+                                                        <td>{{pDet.Code}}</td>
+                                                        <td>{{(OrganizationColl | filter:{id: pDet.OrganizationId})[0].text }}</td>
+                                                        <td>{{(CategoryColl | filter:{id: pDet.CategoryId})[0].text }}</td>
+                                                        <td>{{(PricingColl | filter:{id: pDet.PricingId})[0].text }}</td>
+                                                        <td>{{pDet.Discount}} </td>
+                                                        <td style="text-align:right">{{pDet.FdAmount}}</td>
+                                                        <td>{{pDet.IsProfileTest}}</td>
+                                                        <td style="text-align:center;">
+                                                            <a class="p-1" href="#" ng-click="GetPackagesById(pDet)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelPackage(pDet,$index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="PackagePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer p-2" style="display: flex; justify-content: flex-end; gap: 3px;">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

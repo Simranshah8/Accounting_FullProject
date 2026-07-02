@@ -1,0 +1,196 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script src="~/jslib/account/creation/NarrationMaster.js"></script>
+<div ng-app="myApp" ng-controller="NarrationMaster" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllNarrationMasterList()" ng-cloak>
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Narration Master</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body py-1">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.NarrationMaster">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.NarrationMaster">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.NarrationMaster">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'Narration'" report-name="'List Of Narration'" ignore-column="'2'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'Narration',ignoreColumn:'2' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Narration'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align:center;">
+                                                    S.No
+                                                    <span class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+                                                <th ng-click="sort('Name')" style="text-align:left;width: 70% ;">
+                                                    Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+
+                                                <th style="text-align:center;" class="no-print">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="beData in NarrationMasterColl | orderBy:sortKey:reverse | filter:searchData.NarrationMaster | itemsPerPage:perPage.NarrationMaster" current-page="currentPages.NarrationMaster" pagination-id="NarrationMasterPagination">
+
+                                                <td style="text-align:center;">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td style="text-align:left">
+                                                    {{beData.Name}}
+                                                </td>
+                                                <td class="project-actions no-print" style="text-align:center">
+                                                    <div class="btn-group-sm">
+                                                        <a href="#" class="btn btn-info" ng-click="getNarrationMasterById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="#" class="btn btn-danger" ng-click="deleteNarrationMaster(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="NarrationMasterPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="row">
+                                    <div class="col-sm-9">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" class="form-control" ng-model="beData.Name">
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="card p-2">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox100" ng-model="CheckedAll" ng-change="CheckAllVoucher()">
+                                                <label for="customCheckbox100"
+                                                       class="custom-control-label" style="font-weight: bold;font-size: 16px;">
+                                                    Voucher Name
+                                                </label>
+                                            </div>
+
+                                            <hr style="margin-top: -0.5px;margin-bottom: -.1px;">
+
+                                            <div class="custom-control custom-checkbox" ng-repeat="vt in VoucherTypeList">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox{{$index}}" ng-model="vt.IsChecked">
+                                                <label for="customCheckbox{{$index}}"
+                                                       class="custom-control-label">
+                                                    {{vt.text}}
+                                                </label>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" ng-click="ClearFields()">Reset</button>
+
+                                        <button type="button" class="btn btn-primary" ng-click="AddNarrationMaster()">Save</button>
+                                    </div>
+
+                                </footer>
+
+                            </div>
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+
+
+
+        </div>
+    </div>
+    @RenderPage("~/Views/Global/_IsValidMaster.cshtml")
+</div>
+
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

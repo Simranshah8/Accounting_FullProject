@@ -1,0 +1,243 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+@*<script>
+        var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.HR_HeadOfDepartment)";
+    </script>*@
+
+<script src="~/jslib/GateMaster/VehicleMaster.js"></script>
+<div ng-app="myApp" ng-controller="VehicleController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllVehicle()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearFields()" aria-controls="custom-tabs-four-profile" aria-selected="false">Vehicle</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Vehicle">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Vehicle">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Vehicle">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#Vehicle'" sheet-name="'Vehicle'" report-name="'Vehicle List'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#Vehicle').tableExport({type:'csv',escape:'false', reportname:'Vehicle List'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#Vehicle'" report-name="'Head Of Department List'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="Vehicle">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px; ">S.No</th> 
+                                                    <th style="width: 150px; ">Vehicle Type</th>
+                                                    <th style="width: 150px; ">Transporter Name</th>
+                                                    <th style="width: 150px; ">Branch</th>
+                                                    <th style="width: 130px; ">RFID Tag</th>
+                                                    <th style="width: 130px; ">Insurance No</th>
+                                                    <th style="width: 130px; ">Pollution No</th>
+                                                    <th style="width: 130px; ">Registration No</th>
+                                                    <th style="width: 115px; ">Is Black Listed</th>
+                                                    <th style="width: 80px; ">Is Active</th>
+                                                   
+                                                    <th class="no-print" style="width: 80px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="D in VehicleList | filter:searchData.Vehicle | itemsPerPage: perPage.Vehicle" current-page="currentPages.Vehicle" pagination-id="VehiclePagination">
+                                                    <td style="text-align:center;margin:auto">{{$index+1}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.VehicleType}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.TransporterName}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.BranchName}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.RFIDTag}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.InsuranceNo}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.PollutionNo}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.RegNo}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.IsBlackListed}}</td>
+                                                    <td style="text-align:left;margin:auto">{{D.IsActive}}</td>
+                                                    <td class="project-actions no-print" style="text-align:center">
+                                                        <div class="btn-group-sm text-white">
+                                                            <a class="btn btn-info" ng-click="GetVehicleById(D, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a class="btn btn-danger" ng-click="DelVehicleById(D)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="VehiclePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Branch</label><span style="color: red">*</span>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.BranchId" data-placeholder="** Select Branch **">
+                                                        <option ng-value="cl.BranchId" ng-repeat="cl in BranchList" ng-selected="cl.BranchId==beData.BranchId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Vehicle Type</label><span style="color: red">*</span>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.VehicleType" data-placeholder="** Select Vehicle Type **">
+                                                        <option ng-value="V.text" ng-repeat="V in VehicleTypeColl" ng-selected="V.text==beData.VehicleType">{{V.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Transporter Name</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.TransporterName">
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>RFID Tag</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.RFIDTag">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Insurance No</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.InsuranceNo">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Pollution No</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.PollutionNo">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Engine No</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.EngineNo">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Vin No</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.VinNo">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label>Reg No</label><span style="color: red">*</span>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.RegNo">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="IsBlackListed" ng-model="beData.IsBlackListed">
+                                                    <label for="IsBlackListed"
+                                                           class="custom-control-label">
+                                                        Is Black Listed ?
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="chkIsActive" ng-model="beData.IsActive">
+                                                    <label for="chkIsActive"
+                                                           class="custom-control-label">
+                                                        Is Active ?
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateVehicle()">{{beData.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

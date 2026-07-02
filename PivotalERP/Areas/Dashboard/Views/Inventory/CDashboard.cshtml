@@ -1,0 +1,261 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    .table td, .table th {
+        Padding: 0.3rem !important;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #ffffff;
+        background-color: #76be4e;
+    }
+</style>
+<script>
+    var TranId=@ViewBag.TranId;
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script src="~/jslib/setup/DashboardDesigner.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="DashboardViewController" ng-init="LoadData()" ng-cloak>
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="row">
+                    <div class="col-md-{{tb.ColumnLen}}" ng-repeat="tb in TabColl">
+                        <div class="card" style="border:1px solid #ccc" ng-hide="tb.ReportType==3">
+                            <div class="card-header p-1" style="background-color: #eef9f4">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h6 class="mb-0">{{tb.Name}}</h6>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-default border-0 load mt-1 mr-2" data-toggle="modal" data-target="#filtermodal{{$index}}"> <i class="fas fa-filter"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0" ng-show="tb.ReportType==2">
+                                <!--Pagination code starts-->
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.DebtorsCreditorsType">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.DebtorsCreditorsType">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.DebtorsCreditorsType">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllDebtorsCreditorsTypes()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'DebtorCreditorType'" report-name="'List Of DebtorCreditorType'" ignore-column="'4'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'DebtorCreditorType',ignoreColumn:'4' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of DebtorCreditor Type'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </header>
+                                <!--Ends-->
+                                <div class="table-responsive table-striped p-0" style="height: 325px;">
+                                    <table class="table table-head-fixed text-nowrap">
+                                        <thead>
+                                            <tr>
+                                                <th class="cstm-sticky" style="width: 90px; left: 0; z-index: 3; background-color: #ececec !important">S.No.</th>
+                                                <th class="cstm-sticky" style="width: 120px; left: 90px; z-index: 3; background-color: #ececec !important" ng-repeat="dc in tb.DataSetFieldColl">{{dc.text}}</th>
+                                                <!--Please put the z-index after second column to 2-->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="rd in tb.ResultDataColl">
+                                                <td class="cstm-sticky" style="left:0;z-index:2;background-color:#ffffff!important">{{$index+1}}</td>
+                                                <td class="cstm-sticky" style="left: 90px; z-index: 2; background-color: #ffffff !important" ng-repeat="dc in tb.DataSetFieldColl">{{rd[dc.text]}}</td>
+                                                <!--Please put the z-index after second column to 1-->
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-body p-2" style="background-color: #f6faf8" ng-show="tb.ReportType==1">
+                                <canvas id="chartPreview{{tb.TranId}}" width="800" height="400"></canvas>
+                            </div>
+                        </div>
+                        <div class="card" style="border:1px solid #ccc" ng-show="tb.ReportType==3">
+                            <div class="card-header p-2" style="background-color: #eef9f4">
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-pie mr-1"></i>
+                                    {{tb.Name}}
+                                </h3>
+                                <div class="card-tools">
+                                    <ul class="nav nav-pills ml-auto">
+                                        <!--filter added By Suresh-->
+                                        <li class="nav-item">
+                                            <button class="btn btn-sm btn-default border-0 load mt-1 mr-2" data-toggle="modal" data-target="#filtermodal{{$index}}"> <i class="fas fa-filter p-1"></i></button>
+                                        </li>
+                                        <!--Ends-->
+                                        <li class="nav-item">
+                                            <a class="nav-link btn-default" href="#revenue-chart{{$index}}" data-toggle="tab"><i class="fas fa-table"></i> Tabular Data</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link btn-default active" href="#sales-chart{{$index}}" data-toggle="tab"><i class="fas fa-chart-bar"></i> Graphical Data</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="tab-content">
+                                    <div class="chart tab-pane" id="revenue-chart{{$index}}" style="position: relative;">
+                                        @*<div class="row">
+            <div class="col-sm-{{udf.ColWidth}} ml-3" ng-repeat="udf in tb.FieldColl">
+                <div class="form-group">
+                    <label for="id{{udf.Name}}">{{udf.Label}}<span style="color:red" ng-show="udf.IsMandatory==true">*</span></label>
+                    <udf-entity udf="udf" be-data="beData" change-event="ReLoadData(tb,$index,udf.Name)" click-event="ReLoadData(tb,$index,udf.Name)" new-entity="NewEntity"></udf-entity>
+                </div>
+            </div>
+        </div>*@
+
+                                        <!--Pagination starts-->
+                                        <header class="row">
+                                            <div class="col-md-8">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.DebtorsCreditorsType">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.DebtorsCreditorsType">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar" type="search"
+                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.DebtorsCreditorsType">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                           
+                                            <div class="col-md-4 text-right">
+                                                <div class="dropdown dnld-file">
+                                                    <a class="btn btn-secondary btn-light btn-sm wait"
+                                                       title="Refresh" ng-click="GetAllDebtorsCreditorsTypes()">
+                                                        <i class="fas fa-sync-alt"></i>
+                                                    </a>
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'DebtorCreditorType'" report-name="'List Of DebtorCreditorType'" ignore-column="'4'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'DebtorCreditorType',ignoreColumn:'4' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                    <a print-tbl report-name="'List Of DebtorCreditor Type'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </header>
+                                        <!--Pagination Ends-->
+                                        <div class="table-responsive table-striped p-0" style="height: 350px;">
+                                            <table class="table table-head-fixed text-nowrap">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="cstm-sticky" style="width: 90px; left: 0; background-color: #ececec !important; z-index: 3">S.No.</th>
+                                                        <th class="cstm-sticky" style="width: 120px; left: 90px; background-color: #ececec !important; z-index: 3" ng-repeat="dc in tb.DataSetFieldColl">{{dc.text}}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="rd in tb.ResultDataColl">
+                                                        <td class="cstm-sticky" style="left: 0; background-color: #ffffff !important; z-index: 2">{{$index+1}}</td>
+                                                        <td class="cstm-sticky" style="left: 90px; background-color: #ffffff !important; z-index: 2" ng-repeat="dc in tb.DataSetFieldColl">{{rd[dc.text]}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="chart tab-pane active" id="sales-chart{{$index}}" style="position: relative;">
+                                        <div class="card-body p-2">
+                                            <canvas id="chartPreviewTG{{tb.TranId}}" width="800" height="430"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Modal Starts-->
+                        <div id="filtermodal{{$index}}" class="modal fade p-0 " role="dialog">
+                            <div class="modal-dialog  modal-lg">
+                                <div class="modal-content" style="width:62%">
+                                    <div class="modal-header p-2">
+                                        <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body p-2">
+                                        <div class="row">
+                                            <div class="col-sm-{{udf.ColWidth}} ml-3" ng-repeat="udf in tb.FieldColl">
+                                                <div class="form-group">
+                                                    <label for="id{{udf.Name}}">{{udf.Label}}<span style="color:red" ng-show="udf.IsMandatory==true">*</span></label>
+                                                    <udf-entity udf="udf" be-data="beData" change-event="ReLoadData(tb,$index,udf.Name)" click-event="ReLoadData(tb,$index,udf.Name)" new-entity="NewEntity"></udf-entity>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Ends-->
+                    </div>
+                </div>  
+            </section>
+        </div>
+    </section>
+</div>   

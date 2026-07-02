@@ -1,0 +1,414 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/account/creation/ReceiptEntry.js"></script>
+<div ng-app="myApp" ng-controller="ReceiptEntryController" ng-init="LoadData()" ng-cloak>
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="ReceiptEntry-tab" data-toggle="pill" href="#ReceiptEntry" role="tab" aria-controls="ReceiptEntry" aria-selected="false">Receipt Entry</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="ChequeRegister-tab" data-toggle="pill" href="#ChequeRegister" role="tab" aria-controls="ChequeRegister" aria-selected="false">Receipt Register</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+
+                            <div class="tab-pane fade  show active" id="ReceiptEntry" role="tabpanel" aria-labelledby="ReceiptEntry-tab">
+                                <div id="ReceiptEntrytable">
+                                    <header class="row">
+                                        <div class="col-md-8">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ReceiptEntry">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ReceiptEntry">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white">entries</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search"
+                                                               placeholder="Search" aria-label="Search" ng-model="searchData.ReceiptEntry">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-4 text-right">
+                                            <div class="dropdown dnld-file" title="Download File">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#dtReceiptEntry'" sheet-name="'ChequeList'" report-name="'List Of Cheque'" ignore-column="'6'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#dtReceiptEntry').tableExport({type:'csv',escape:'false',reportName:'ChequeList',ignoreColumn:'6' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                </div>
+                                                <a print-tbl report-name="'List Of Cheque'" table-id="'#dtReceiptEntry'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button class="btn btn-primary load btn-sm" id="AddReceiptEntry">
+                                                    Add Receipt
+                                                </button>
+                                            </div>
+
+
+                                        </div>
+                                    </header>
+                                    <div class="search-toolbar mt-2">
+                                        <div class="">
+                                            <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="dtReceiptEntry">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align: center; width:70px"> S.No </th>
+                                                        <th style="width:400px"> Branch</th>
+                                                        <th style="width:200px"> FromRange </th>
+                                                        <th style="width:300px">ToRange </th>
+                                                        <th style="width:300px">NoOfReceipt </th>
+                                                        <th style="width:300px">ReceiptName </th>
+                                                        <th style="width:300px">Alloted To </th>
+                                                        <th style="text-align:center;width: 100px;">Action</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="beData in ReceiptEntryColl | orderBy:sortKey:reverse | filter:searchData.ReceiptEntry | itemsPerPage:perPage.ReceiptEntry" current-page="currentPages.ReceiptEntry" pagination-id="ReceiptEntryPagination">
+
+
+                                                        <td style="text-align:center;margin:auto">
+                                                            {{$index+1}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.AccountNo}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.FromRange  }}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.ToRange   }}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.NoOfReceipt}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.ReceiptName}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.AllotedTo}}
+                                                        </td>
+                                                        <td class="project-actions text-center" style="text-align:center">
+                                                            <div class="btn-group-sm">
+                                                                <a href="#" class="btn btn-info btn-sm" ng-click="ShowAllotedTo(beData)" title="Alloted To"><i class="fas fa-info"></i></a>
+                                                                <a href="#" class="btn btn-info btn-sm" ng-click="GetReceiptEntryById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                                <a href="#" class="btn btn-danger btn-sm" ng-click="DeleteReceiptEntry(beData)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+
+                                            </table>
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ReceiptEntryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div id="ReceiptEntryForm">
+                                    <div class="p-2">
+                                        <form>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Branch</label>
+                                                        <select class="form-control form-control-sm" style="width:100%" ng-model="newReceiptEntry.BranchId" active-select2>
+                                                            <option ng-repeat="BA in BranchColl" ng-value="BA.BranchId" ng-selected="BA.BranchId==newReceiptEntry.BranchId">{{BA.Name}}-{{BA.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>No.Of Digits</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newReceiptEntry.NoOfDigits" title="{{newReceiptEntry.TranId>0 ? newReceiptEntry.TranId : ''}}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>FromRange</label>
+                                                        <input type="text" number-input class="form-control form-control-sm" ng-model="newReceiptEntry.FromRange" ng-blur="ChequeNoChanged()" integer="true" positive="true" formatnumber="false">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <div class="form-group">
+                                                        <label>ToRange</label>
+                                                        <input type="text" number-input class="form-control form-control-sm" ng-model="newReceiptEntry.ToRange" ng-blur="ChequeNoChanged()" integer="true" positive="true" formatnumber="false">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>ReceiptName</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newReceiptEntry.ReceiptName">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>NoOfReceipt</label>
+                                                        <input type="number" class="form-control form-control-sm" ng-model="newReceiptEntry.NoOfReceipt" readonly>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </form>
+                                        <footer class="main-footer">
+                                            <div class="text-right control-btns">
+                                                <button type="button" class="btn btn-default btn" id="backtoReceiptEntry"> <span class="glyphicon glyphicon-remove"></span>Back to List</button>
+                                                <button type="button" class="btn btn-default btn" ng-click="ClearReceiptEntry()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                                <button type="button" class="btn btn-primary" ng-click="SaveUpdateReceiptEntry()">{{newReceiptEntry.Mode}}</button>
+                                            </div>
+                                        </footer>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="ChequeRegister" role="tabpanel" aria-labelledby="ChequeRegister-tab">
+                                <div id="ChequeRegistertable">
+                                    <header class="row">
+                                        <div class="col-md-8">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ChequeRegister">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ChequeRegister">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white">entries</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search"
+                                                               placeholder="Search" aria-label="Search" ng-model="searchData.ChequeRegister">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-4 text-right">
+                                            <div class="dropdown dnld-file" title="Download File">
+                                                <select ng-model="newChequeRegister.ReportType" ng-change="LoadChequeRegister()">
+                                                    <option ng-value="pp.id" ng-repeat="pp in ReportTypeColl" ng-selected="pp.id==newChequeRegister.ReportType">{{pp.text}}</option>
+                                                </select>
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#dtChequeRegister'" sheet-name="'ChequeRegister'" report-name="'Cheque Register'" ignore-column="'14'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#dtChequeRegister').tableExport({type:'csv',escape:'false',reportName:'ChequeRegister',ignoreColumn:'14' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                </div>
+                                                <a print-tbl report-name="'Cheque Register'" table-id="'#dtChequeRegister'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button class="btn btn-primary load btn-sm" ng-click="LoadChequeRegister()">
+                                                    Load Data
+                                                </button>
+                                            </div>
+
+
+                                        </div>
+                                    </header>
+                                    <div class="search-toolbar mt-2">
+                                        <div class="">
+                                            <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="dtChequeRegister">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="text-align: center; width:70px"> S.No </th>
+                                                        <th style="width:200px"> Branch </th>
+                                                        <th style="width:100px">Receipt No. </th>
+                                                        <th style="width:100px">Receipt Name </th>
+                                                        <th style="width:100px">Amount</th>
+                                                        <th style="width:150px" ng-show="newChequeRegister.ReportType==2">Voucher Miti </th>
+                                                        <th style="width:150px" ng-show="newChequeRegister.ReportType==2">Voucher No. </th>
+                                                        <th style="width:300px" ng-show="newChequeRegister.ReportType==2">Party Name </th>
+                                                        <th style="width:150px" ng-show="newChequeRegister.ReportType==3">Cancel Miti </th>
+                                                        <th style="width:150px" ng-show="newChequeRegister.ReportType==3">Remarks </th>
+                                                        <th style="width:300px" ng-show="newChequeRegister.ReportType==3">Cancel By </th>
+                                                        <th style="width:150px" ng-show="newChequeRegister.ReportType==2">Voucher Miti </th>
+                                                        <th style="text-align:center;width: 100px;" ng-show="newChequeRegister.ReportType==1">Action</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="beData in ChequeRegisterColl | orderBy:sortKey:reverse | filter:searchData.ChequeRegister | itemsPerPage:perPage.ChequeRegister" current-page="currentPages.ChequeRegister" pagination-id="ChequeRegisterPagination">
+
+                                                        <td style="text-align:center;margin:auto">
+                                                            {{beData.SNo}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.BranchName}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.DisplayReceiptNo}}
+                                                        </td>
+
+                                                        <td style="text-align: left; margin: auto">
+                                                            {{beData.ReceiptName}}
+                                                        </td>
+                                                        <td style="text-align: right; margin: auto">
+                                                            {{beData.Amount |number:2}}
+                                                        </td>
+                                                        <td style="text-align: center; margin: auto" ng-show="newChequeRegister.ReportType==2">
+                                                            {{beData.VoucherMiti}}
+                                                        </td>
+                                                        <td style="text-align: center; margin: auto" ng-show="newChequeRegister.ReportType==2">
+                                                            {{beData.VoucherNo}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto" ng-show="newChequeRegister.ReportType==2">
+                                                            {{beData.PartyName}}
+                                                        </td>
+                                                        <td style="text-align: center; margin: auto" ng-show="newChequeRegister.ReportType==3">
+                                                            {{beData.ChequeMiti}}
+                                                        </td>
+                                                        <td style="text-align: center; margin: auto" ng-show="newChequeRegister.ReportType==3">
+                                                            {{beData.ChequeRemarks}}
+                                                        </td>
+                                                        <td style="text-align: left; margin: auto" ng-show="newChequeRegister.ReportType==3">
+                                                            {{beData.CancelBy}}
+                                                        </td>
+                                                        <td style="text-align: center; margin: auto" ng-show="newChequeRegister.ReportType==2">
+                                                            {{beData.ChequeMiti}}
+                                                        </td>
+                                                        <td class="project-actions text-center" style="text-align:center" ng-show="newChequeRegister.ReportType==1">
+                                                            <div class="btn-group-sm">
+                                                                <a href="#" class="btn btn-danger btn-sm" ng-click="CancelModal(beData)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+
+                                            </table>
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="ChequeRegisterPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+    </div>
+
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-cancel">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Cancel {{SelectedCheque.BankName}} {{ SelectedCheque.DisplayChequeNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Cancel Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedCheque.CancelRemarks"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="CancelVoucher()">Save</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-alloted">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Alloted of {{SelectedRec.ReceiptName}} {{ SelectedRec.AccountNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Alloted To</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedRec.AllotedTo"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveAllotedTo()">Save</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+
+</div>
+
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

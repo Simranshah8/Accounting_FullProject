@@ -1,0 +1,224 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+<script src="~/jslib/inventory/creation/ProductBundle.js"></script>
+<div ng-app="myApp" ng-controller="Bundle" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllBundle()">
+    <div class="box-body">
+        <div class="content"style="overflow-x:hidden!important">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Product Bundle</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">                               
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ProductBundle">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ProductBundle">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.ProductBundle">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                            <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mb-3 mt-1">
+                                    <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                        <tr>
+                                            <th style="text-align: center; width:60px;">
+
+                                                S.No
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='BundleId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+
+                                            <th ng-click="sort('Name')" style="text-align: left; width: 200px">
+                                                Bundle Name
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='BundleName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+
+                                            <th ng-click="sort('Description')" style="text-align: left; width: 300px">
+                                               Description
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Description'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                          
+                                            <th style="text-align:center;" width="90px">Action</th>
+
+                                        </tr>
+                                        <tr dir-paginate="newBundle in BundleColl|orderBy:sortKey:reverse|filter:searchData.ProductBundle|itemsPerPage:perPage.ProductBundle" current-page="currentPages.ProductBundle" pagination-id="ProductBundlePagination">
+
+
+                                            <td style="text-align:center;margin:auto">
+                                                {{$index+1}}
+                                            </td>
+                                            <td style="text-align: left; margin: auto">
+                                                {{newBundle.BundleName}}
+                                            </td>
+
+                                            <td style="text-align: left; margin: auto">
+                                                {{newBundle.Description}}
+                                            </td>
+                                            
+                                            <td class="project-actions" style="text-align:center">
+                                                <div class="btn-group-sm">
+                                                    <a href="#" class="btn btn-sm btn-info" ng-click="getBundleByIdd(newBundle)"><i class="fas fa-pencil-alt"></i></a>
+                                                    <a href="#" class="btn btn-sm btn-danger" ng-click="deleteBundle(newBundle,$index)"><i class="fas fa-trash"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="ProductBundlePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab" style="overflow-x:hidden!important">                              
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Name</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newBundle.Name">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newBundle.Description">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="pt-0 table-responsive">
+                                        <div class="table-scroll-x-y" style="max-height: calc(100vh - 241px);">
+                                            <table id="main-table" class="main-table table table-sm table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="text-center align-middle" style="width:60px;z-index: 3; background-color: #ececec !important">SN.</th>
+                                                        <th class="text-center align-middle" style="width:170px;z-index: 3; background-color: #ececec !important">Particulars</th>
+                                                        <th class="text-center align-middle" style="width:100px;z-index: 3; background-color: #ececec !important">Quantity</th>
+                                                        <th class="text-center align-middle" style="width:100px;z-index: 3; background-color: #ececec !important">Rate</th>
+                                                        <th class="text-center align-middle" style="width:100px;z-index: 3; background-color: #ececec !important">Per</th>
+                                                        <th class="text-center align-middle" style="width:100px;z-index: 3; background-color: #ececec !important">Amount</th>
+                                                        <th class="text-center align-middle" style="width:80px;z-index: 3; background-color: #ececec !important">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr @*ng-repeat="itemDet in beData.ItemDetailsColl"*@>
+                                                        <td align="center">
+                                                            {{$index+1}}
+                                                        </td>
+                                                        <td>
+                                                            <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId"
+                                                                    placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData"></select>
+                                                        </td>
+                                                        <td> <input type="text" class="form-control form-control-sm"></td>
+                                                        <td> <input type="text" class="form-control form-control-sm" disabled value="12121" style="text-align:right"></td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2">
+                                                                <option selected></option>
+                                                                <option value="1">kg</option>
+                                                                <option value="2">liter</option>
+                                                            </select>
+                                                        </td>
+                                                        <td> <input type="text" class="form-control form-control-sm" disabled style="text-align:right" value="1231212"></td>
+                                                        <td class="text-center">
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a class="btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Row" ng-click="AddRowInItemDetails($index,false)"><i class="fas fa-plus"></i></a>
+                                                                <a class="btn btn-danger text-white ml-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Row." ng-click="delRowFromItemDetails($index)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                                </div>
+                               
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Cancel</button>
+                                            @*<button type="button" class="btn btn-secondary" ng-click="AddCostCategory()">Save & Close</button>*@
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateBundle()">Save</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+                            </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+

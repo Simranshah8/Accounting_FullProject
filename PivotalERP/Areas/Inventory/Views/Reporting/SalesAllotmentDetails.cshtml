@@ -1,0 +1,579 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script src="~/jslib/inventory/reporting/salesallotment.js"></script>
+<style>
+    .third-level-scroll-only {
+        height: 100px !important;
+        overflow: unset;
+    }
+</style>
+<style>
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+</style>
+<script>
+    var entitySalesAllotment =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.SalesAllotment);
+    var entityBankQuotation =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.BankQuotation);
+    var entityBankDO=@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.BankDO);
+    var entityBankAllotment=@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.BankAllotment);
+    var entityNamsari =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Namsari);
+    var entityBankPayment =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.BankPayLetter);
+
+    var voucherSalesAllotment =@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.SalesAllotment);
+    var voucherBankQuotation =@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.BankQuotation);
+    var voucherBankDO=@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.BankDO);
+    var voucherBankAllotment=@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.BankAllotment);
+    var voucherNamsari =@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.Namsari);
+    var voucherBankPayment =@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.BankPayLetter);
+</script>
+<div ng-app="myApp" ng-controller="rptSalesAllotmentCtrl" ng-class="{waiting: loadingstatus=='running'}">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <!-- Main content -->
+    <div class="content  third-level-scroll-only">
+        <!-- Page Content  -->
+        <div class="container-fluid">
+            <div class="container-fluid" style="width:100%;">
+                <div class="card overflow-hidden">
+                    <div class="card-header header-corner-triangle border">
+                        <form action="">
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <label>SALES ALLOTMENT LIST:</label>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group row">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchCol">
+                                                    <option ng-value="asp.value" ng-repeat="asp in AllotmentSearchOptions" ng-selected="paginationOptions.SearchCol==asp.value">{{asp.text}}</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control text-dark input-sm" placeholder="Search" ng-model="paginationOptions.SearchVal">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary btn-sm" style="float: right; max-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetData()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download">Load</i></a>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary btn-sm" style="float: right;" data-toggle="tooltip" data-placement="top" title="" data-original-title="Calculate Allotment" ng-click="CalculateAllotment()" ng-disabled="loadingstatus=='running'">Calculate Allotment</a>
+                                    </div>
+                                </div>
+                                <div class="col-sm-1">
+                                    <div class="dropdown dnld-file">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                           <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="datatable" style="height: calc(100vh - 6rem);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+
+    <!--  Party's A/c No. right button Modal demo -->
+    <!--  Party's A/c No. right button Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="partyAccRightBtn" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document" style="min-width:1000px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-6 col-form-label col-form-label-sm">Interest Rate</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="number" class="form-control" placeholder="" ng-model="CurParty.InterestRate">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-6 col-form-label col-form-label-sm">CR.Days</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="number" class="form-control" placeholder="" ng-model="CurParty.CreditDays">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-5 col-form-label col-form-label-sm">CutOff Date</label>
+                                <div class="col-sm-7">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="date" class="form-control text-dark input-sm" ng-model="CurParty.IntCutOffDate" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group form-inline">
+                                <a href="#" class="btn btn-primary btn-sm" ng-click="CalPartyTranDetails()">Calculate</a>
+                                <a href="#" class="btn btn-primary btn-sm" ng-click="UpdateIntCutOffDate()">UpdateDate</a>
+                                <a print-tbl table-id="'#main-table-intDet'" class="btn btn-secondary btn-light btn-sm wait"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-intDet'" sheet-name="'Interest Details'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table-intDet').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+
+                            </div>
+                          
+                        </div>
+                    </div>                     
+                    <div class="table-scroll-x-y" style="max-height: 400px; overflow-x: auto;">
+                        <table id="main-table-intDet" class="main-table table table-sm table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th colspan="3" style="width: 270px; left: 0; z-index: 3; background-color: #fff !important;">
+                                        Party : {{CurParty.CustomerName}}
+                                    </th>
+                                    <th colspan="3" style="width: 300px; left: 0; z-index: 3; background-color: #fff !important;">
+                                        Address : {{CurParty.Address}}
+                                    </th>
+                                    <th style="width: 100px; left: 0; z-index: 3; background-color: #fff !important;">
+                                        {{CurParty.PrintOn}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <thead>
+                                <tr>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">SN.</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px ">Date</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Dr. Amt.</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Cr. Amt.</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Balance</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Extra Days</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Interest</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr ng-repeat="ic in InterestColl">
+                                    <td align="center">{{ic.AutoId}}</td>
+                                    <td align="center">{{ic.VoucherDate |dateFormat}}</td>
+                                    <td align="right">{{ic.DrAmount |number:2}}</td>
+                                    <td align="right">{{ic.CrAmount |number:2}}</td>
+                                    <td align="right">{{ic.Balance |number:2}}</td>
+                                    <td align="center">{{ic.ExtraDays}}</td>
+                                    <td align="right">{{ic.Interest |number:2}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="font-weight-bold" colspan="2">Total</td>
+                                    <td class="font-weight-bold" align="right">{{CurParty.DrAmount | number:2}}</td>
+                                    <td class="font-weight-bold" align="right">{{CurParty.CrAmount | number:2}}</td>
+                                    <td></td>
+                                    <td class="font-weight-bold" align="right">{{CurParty.ExtraDays}}</td>
+                                    <td class="font-weight-bold" align="right">{{CurParty.Interest | number:2}}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!--  Party's Comment Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="partyCommentDialog" role="dialog" aria-labelledby="partyCommentDialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="box box-danger direct-chat direct-chat-danger">
+
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <!-- Conversations are loaded here -->
+                            <div class="direct-chat-messages">
+                                <!-- Message. Default to the left -->
+                                <div class="direct-chat-msg" ng-repeat-start="fb in FeedbackColl" ng-show="$index%2==1">
+                                    <div class="direct-chat-info clearfix">
+                                        <span class="direct-chat-name pull-left">{{fb.UserName}}</span>
+                                        <span class="direct-chat-timestamp pull-right">{{fb.LogDateTime}}</span>
+                                    </div>
+                                    <!-- /.direct-chat-info -->
+
+                                    <img class="direct-chat-img" src="~/wwwroot/dynamic-erp/images/Logo1.jpeg" alt="message user image">
+                                    <!-- /.direct-chat-img -->
+                                    <div class="direct-chat-text">
+                                        {{fb.Remarks}}
+                                    </div>
+                                    <!-- /.direct-chat-text -->
+                                </div>
+                                <!-- /.direct-chat-msg -->
+                                <!-- Message to the right -->
+                                <div class="direct-chat-msg right" ng-repeat-end ng-show="$index%2==0">
+                                    <div class="direct-chat-info clearfix">
+                                        <span class="direct-chat-name pull-right">{{fb.UserName}}</span>
+                                        <span class="direct-chat-timestamp pull-left">{{fb.LogDateTime}}</span>
+                                    </div>
+                                    <!-- /.direct-chat-info -->
+                                    <img class="direct-chat-img" src="~/wwwroot/dynamic-erp/images/Logo1.jpeg" alt="message user image">
+                                    <!-- /.direct-chat-img -->
+                                    <div class="direct-chat-text">
+                                        {{fb.Remarks}}
+                                    </div>
+                                    <!-- /.direct-chat-text -->
+                                </div>
+                                <!-- /.direct-chat-msg -->
+                            </div>
+                            <!--/.direct-chat-messages-->
+
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer">
+                            <div class="input-group">
+                                <input type="text" name="message" placeholder="Type Message ..." class="form-control" ng-model="CurParty.NewRemarks">
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-danger btn-flat" ng-click="AddLedgerFeedback()">Add</button>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- /.box-footer-->
+                    </div>
+                    <!--/.direct-chat -->
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--  Party's Document Attachment Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="partyDocAttachmentDialog" role="dialog" aria-labelledby="partyCommentDialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="box box-danger direct-chat direct-chat-danger">
+                        <div class="box-body">
+                            <div>
+                                <div class="pb-3 add-more-than-one-form-block">
+                                    <form>
+                                        <article>
+                                            <div class="row">
+                                                <div class="col-sm-5">
+                                                    <div class="form-group">
+                                                        <label>Type Of Document</label>
+                                                        <select class="custom-select" ng-model="CurParty.DocumentTypeId">
+                                                            <option ng-value="dt.DocumentTypeId" ng-repeat="dt in DocumentTypeColl">{{dt.DocumentType}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-7">
+                                                    <div class="row">
+                                                        <div class="col-sm-8">
+                                                            <div class="form-group">
+                                                                <label>Attach Doc.</label>
+                                                                <div class="form-group">
+                                                                    <input type="file" class="form-control-file border p-1" id="exampleFormControlFile1" file-model ng-model="CurParty.AttachFiles">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="d-flex">
+                                                                <div>
+                                                                    <label class="invisible d-block">for height</label>
+                                                                    <button type="button" class="btn btn-primary" ng-click="AddPartyDoc()">Add</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </article>
+                                    </form>
+                                </div>
+                                <div class="pb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                    <th scope="col" style="width: 40%">Doc. Type</th>
+                                                    <th scope="col">Has Attach</th>
+                                                    <th scope="col" style="width: 130px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="dt in DocumentColl">
+                                                    <th scope="row">{{$index+1}}</th>
+                                                    <td>{{dt.DocumentType}}</td>
+                                                    <td>{{dt.HasDocument}}</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="{{dt.Path}}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." target="_blank" download><i class="fas fa-download"></i></a>
+                                                            <a href="{{dt.Path}}" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" target="_blank"><i class="fas fa-eye"></i></a>
+                                                            <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="DelPartyDoc(dt)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--/.direct-chat -->
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--  Party's Document Attachment Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="doDocAttachmentDialog" role="dialog" aria-labelledby="partyCommentDialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="box box-danger direct-chat direct-chat-danger">
+                        <div class="box-body">
+                            <div>
+
+                                <div class="pb-3">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover border">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 20px">SN.</th>
+                                                    <th scope="col" style="width: 40%">Doc. Name</th>
+                                                    <th scope="col" style="width: 130px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="dt in CurDODocumentColl">
+                                                    <th scope="row">{{$index+1}}</th>
+                                                    <td>{{dt.Name}}</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a href="{{dt.DocPath}}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." target="_blank" download><i class="fas fa-download"></i></a>
+                                                            <a href="{{dt.DocPath}}" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" target="_blank"><i class="fas fa-eye"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--/.direct-chat -->
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--  Party's Ledger Voucher Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="partyLedgerDialog" role="dialog" aria-labelledby="partyCommentDialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable  modal-lg" role="document" style="min-width:1300px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="box box-danger direct-chat direct-chat-danger">
+                        <div class="box-body">
+                            <div class="col-md-12">
+                                <div id="datatableLV" style="height: 400px;width:100%;" class="ag-theme-balham" ag-grid="gridOptionsLV"></div>
+                                <div id="myGridBottom" style="height: 120px;" class="ag-theme-balham"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--/.direct-chat -->
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--  Party's Allotment Status Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="partyStatusDialog" role="dialog" aria-labelledby="partyStatusDialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="box box-danger direct-chat direct-chat-danger">
+
+                        <div class="box-footer">
+                            <div class="">
+                                <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th align="center">SN.</th>
+                                            <th align="center">Status</th>
+                                            <th align="center">User</th>
+                                            <th align="center">At Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ic in CurParty.AllotmentStatusColl">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td align="center">{{ic.Status}}</td>
+                                            <td align="right">{{ic.UserName}}</td>
+                                            <td align="right">{{ic.LogDateTime }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="text" class="form-control float-right serial" data-ng-model="CurParty.AllotmentStatus" list="lstBankList" />
+                                <datalist id="lstBankList">
+                                    <option data-ng-repeat="ttl in AllotmentStatusList" value="{{ttl}}">
+                                </datalist>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-danger btn-flat" ng-click="UpdateLegalStatus()">Update</button>
+                                </span>
+                            </div>
+                        </div>
+                        <!-- /.box-footer-->
+                    </div>
+                    <!--/.direct-chat -->
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @RenderPage("~/Global/_ReportTemplates.cshtml");
+	@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+</div>

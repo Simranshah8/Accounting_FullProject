@@ -1,0 +1,164 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Lab_Answerset)";
+</script>
+<script src="~/jslib/Lab/Lookups.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="Lookups" ng-init="LoadData()">
+
+
+    <div class="content">
+ 
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Answer Set </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllLookups()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                Excel
+                                            </a>
+                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                     class="img-fluid exports-icon">
+                                                CSV
+                                            </a>
+                                        </div>
+                                        <a print-tbl report-name="'List Of Specimen'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                            <i class="fas fa-save"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Name<span style="color:red">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="e.g., “Reactive / Non-Reactive”" ng-model="newDet.Name">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <label>Purpose/Category<span style="color:red"></span></label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="Serology, Urine, Micro" ng-model="newDet.Purpose">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-2">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix">
+                                                    <label for="" class="invisible d-block">Is Active?</label>
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary1" ng-model="newDet.IsActive">
+                                                        <label for="checkboxPrimary1">Is Active?</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <label><b> Lookups</b></label>
+                                <div class="table-responsive">
+                                    <table id="main-table" class="table table-sm table-bordered bg-white" style="table-layout: auto; width:100%;">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="text-center" style="width:200px">Values</th>
+                                                <th class="text-center" style="width:200px">Value Label</th>
+                                                <th class="text-center" style="width:90px">Sort Order</th>
+                                                <th class="text-center" style="width:80px">IsNormal?</th>
+                                                <th class="text-center" style="width:100px">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="pDet in newDet.LookUpsColl">
+                                                <td><input type="text" class="form-control form-control-sm" placeholder="NR" ng-model="pDet.ValuesName"></td>
+                                                <td><input class="form-control form-control-sm" placeholder="e.g.,Non-Reactive" ng-model="pDet.ValuesLabel"></td>
+                                                <td><input class="form-control form-control-sm" ng-model="pDet.SortOrder" type="number"></td>
+                                                <td style="text-align:center;">
+                                                    <input type="checkbox" class="icheck-primary d-inline" id="checkboxNormal" ng-model="pDet.IsNormal">
+                                                </td>
+                                                <td class="text-center gap-2 ">
+                                                    <a ng-click="AddPHDDetails($index)" class="mr-2"><i class="fas fa-plus"></i></a>
+                                                    <a ng-click="delPHDDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateLookUps()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                    </div>
+                                </footer>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

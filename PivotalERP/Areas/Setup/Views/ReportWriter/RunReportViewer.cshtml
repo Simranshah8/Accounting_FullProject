@@ -1,0 +1,100 @@
+﻿@model Dynamic.BusinessEntity.Setup.ReportWriter
+<link href="~/pivot-orb/orb.css" rel="stylesheet" />
+<script src="~/pivot-orb/react-0.12.2.js"></script>
+<script src="~/pivot-orb/orb.js"></script>
+
+<script src="~/jslib/setup/ReportWriter.js"></script>
+<script>
+    var TranId ="@Model.TranId";
+</script>
+
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        /* display: none; <- Crashes Chrome on hover */
+        -webkit-appearance: none;
+        margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    }
+
+    input[type=number] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+
+   
+</style>
+<style>
+    .third-level-scroll-only {
+        height: 100px !important;
+        overflow: unset;
+    }
+</style>
+<div ng-app="App" ng-controller="reportViewerCntrl" ng-class="{waiting: loadingstatus=='running'}">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <div class="content  third-level-scroll-only">
+        <div class="form-group" style="width:100%">
+            <div class="box box-info" id="frmUser">
+                <div class="form-group">
+                    <div compile class="row" ng-bind-html="ParaHtml | unsafe" id="divHtml">
+                    </div>
+                   
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="datatable" style="height: calc(100vh - 250px);width: 100%;" class="ag-theme-balham" ag-grid="gridOptions"></div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script type="text/javascript">
+    //function exportTableToExcel(tableID, filename = '') {
+    //    var downloadLink;
+    //    var dataType = 'application/vnd.ms-excel';
+    //    var tableSelect = document.getElementById(tableID);
+    //    var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+    //    filename = filename ? filename + '.xls' : 'excel_data.xls';
+    //    downloadLink = document.createElement("a");
+
+    //    document.body.appendChild(downloadLink);
+
+    //    if (navigator.msSaveOrOpenBlob) {
+    //        var blob = new Blob(['\ufeff', tableHTML], {
+    //            type: dataType
+    //        });
+    //        navigator.msSaveOrOpenBlob(blob, filename);
+    //    } else {
+
+    //        downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+
+    //        downloadLink.download = filename;
+
+    //        downloadLink.click();
+    //    }
+    //}
+
+    var tableToExcel = (function () {
+        var uri = 'data:application/vnd.ms-excel;base64,',
+            template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body><table>{table}</table></body></html>'
+            , base64 = function (s) {
+                return window.btoa(unescape(encodeURIComponent(s)))
+            }
+            , format = function (s, c) {
+                return s.replace(/{(\w+)}/g, function (m, p) {
+                    return c[p];
+                })
+            };
+        return function (table, name) {
+            if (!table.nodeType) table = document.getElementById(table);
+            var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+            window.location.href = uri + base64(format(template, ctx));
+        }
+    })();
+
+  
+
+</script>

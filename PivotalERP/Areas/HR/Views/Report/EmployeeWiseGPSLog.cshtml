@@ -1,0 +1,114 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .ag-ltr .ag-header-cell-resize {
+        right: 0px !important;
+    }
+</style>
+<link href="~/wwwroot/plugins/leaflet/leaflet/dist/leaflet.css" rel="stylesheet" />
+<script src="~/wwwroot/plugins/leaflet/leaflet/dist/leaflet.js"></script>
+<script src="~/wwwroot/plugins/leaflet/leaflet-rotatedmarker/leaflet.rotatedMarker.js"></script>
+<script src="~/jslib/hr/Report/EmployeeWiseGPSLog.js"></script>
+<div id="AttendanceAppealsCtrl" class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="EmployeeWiseGPSLogController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-0 mb-0">
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label> For Date </label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="beData.ForDate_TMP" date-detail="beData.ForDateDet">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mt-4" id="selectStu">
+                                <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                <div class="input-group-prepend">
+                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1; font-size: 13px;" ng-model="beData.SelectEmployee">
+                                        <option ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==beData.SelectEmployee">
+                                            {{ss.text}}
+                                        </option>
+                                    </select>
+                                    <select class="form-control select2 form-control-sm" all-employee ng-model="beData.UserId" employee-detail="beData.EmployeeDetails" side-bar-data="beData.EmpSideBarData" search-by="beData.SelectEmployee" style="width: 100%;" confirm-action="GetEmployeeWiseGPSLog()">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="form-group text-right">
+                                    <button class="btn btn-sm btn-info load mt-4" ng-click="GetEmployeeWiseGPSLog()"><i class="fas fa-sync-alt pr-1"></i> Load</button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-3 mt-4">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm" style="width: 200px;">
+                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-2 col-sm-2 text-right mt-4">
+                                <form class="form-inline  float-right">
+                                    <div class="switch-field ml-1 mr-2">
+                                        <input type="radio" id="all" ng-model="beData.IsMapOrList" name="statuschoose" ng-value="true" ng-change="GetEmployeeWiseGPSLog()" />
+                                        <label class="px-1" for="all">List</label>
+                                        <input type="radio" id="open" ng-model="beData.IsMapOrList" name="statuschoose" ng-value="false" ng-change="GetEmployeeWiseGPSLog()" />
+                                        <label class="px-1" for="open">Map</label>
+                                    </div>
+                                    <div class="dropdown dnld-file ml-2" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image">Excel</a>
+                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon">CSV</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="phg-section" class="">
+                            <div class="" ng-if="beData.IsMapOrList">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+                            <div class="" ng-if="!beData.IsMapOrList">
+                                <div id="map" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+                        </div>
+
+                        <!-- Google Map Modal -->
+                        <div class="modal fade" id="googleMapModal">
+                            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                                <div class="modal-content" style="width: calc(100vw - 2rem) !important;">
+                                    <div class="modal-header p-2">
+                                        <h5 class="modal-title">{{LocationFor}} Map</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body p-0">
+                                        <iframe id="mapFrame" frameborder="0" style="border:0;width: 100%;height:500px;" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Google Map Modal End-->
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

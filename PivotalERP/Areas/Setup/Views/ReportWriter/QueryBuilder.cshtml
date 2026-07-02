@@ -1,0 +1,375 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/setup/ReportWriter.js?v=1"></script>
+<style>
+    .third-level-scroll-only {
+        height: 100px !important;
+        overflow: unset;
+    }
+</style>
+<div ng-app="myApp" ng-controller="queryBuilderCntrl" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllQueryBuilder()">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Report Writer</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div class="search-toolbar1">
+                                    <div class="row">
+                                        <div class="col-lg-3">
+                                            <div class="card-tools1">
+                                                <div class="input-group">
+                                                    <input type="text" id="txtSearch" ng-model="search" class="form-control form-control-sm" placeholder="Search">
+                                                    <div class="input-group-append">
+                                                        <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.col-lg-6 -->
+                                        <div class="col-lg-9">
+                                            <form class="float-right mb-2">
+                                                <div class="form-row align-items-center">
+                                                    <div class="d-flex align-items-center">
+                                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                                        <input type="text" ng-model="noofrows" class="form-control form-control-sm" placeholder="NoOfRows" value="10">
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <table cellpadding="12" class="table table-bordered table-striped table-hover table-responsive mb-2" id="datatable">
+                                    <tr>
+                                        <th ng-click="sort('TranId')" style="text-align:center">
+                                            S.No
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='TranId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th ng-click="sort('Name')" style="text-align:center;width: 30% ;Height:20px">
+                                            Name
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+
+                                        <th ng-click="sort('Alias')" style="text-align:center;width: 30% ;Height:20px">
+                                            Module
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='Alias'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+                                        <th ng-click="sort('ReportType')" style="text-align:center;width: 30% ;Height:20px">
+                                            ReportType
+                                            <span class="glyphicon sort-icon" ng-show="sortKey=='ReportType'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                        </th>
+                                        <th style="text-align:center;width:10%">Action</th>
+                                    </tr>
+                                    <tr dir-paginate="dc in DataColl |orderBy:sortKey:reverse|filter:search|itemsPerPage:noofrows">
+                                        <td align="center">
+                                            {{$index+1}}
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("RunReportViewer", "ReportWriter", new { Area = "Setup" })?TranId={{dc.TranId}}">
+                                                {{dc.ReportName}}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {{dc.ModuleId}}
+                                        </td>
+                                        <td>
+                                            {{dc.ReportType}}
+                                        </td>
+                                        <td class="project-actions">
+                                            <div class="btn-group btn-group-sm">
+                                                <a class="btn btn-info" ng-click="getQueryBuilderById(dc)"><i class="fas fa-pencil-alt"></i></a>
+                                                <a class="btn btn-danger" ng-click="deleteQueryBuilder(dc)"><i class="fas fa-trash"></i></a>
+                                                <a class="btn btn-info" download="{{dc.Name}}.rdl" href="~/Setup/ReportWriter/DownloadTemplate?TranId={{dc.TranId}}" @*ng-show="dc.ReportType==1 || dc.ReportType==5"*@><i class="fas fa-download"></i></a>
+                                                <a class="btn btn-info" download="{{dc.Name}}.rdl" href="~/Setup/ReportWriter/DownloadTemplateRdlc?TranId={{dc.TranId}}" @*ng-show="dc.ReportType==1 || dc.ReportType==5"*@><i class="fas fa-download"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <dir-pagination-controls max-size="5" direction-links="true" boundary-links="true">
+                                </dir-pagination-controls>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="content">
+                                    <div class="container-fluid1">
+                                        <div class="card1">
+                                           
+                                            <div class="card-body1 p-2">
+                                                <form>
+                                                    <div class="row">
+
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Report Type</label>
+                                                                <select ng-model="beData.ReportType" class="form-control form-control-sm">
+                                                                    <option ng-repeat="et in ReportTypeColl track by et.id" value="{{et.id}}" ng-selected="et.id == beData.ReportType">
+                                                                        {{et.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Module</label>
+                                                                <select ng-model="beData.ModuleId" class="form-control form-control-sm">
+                                                                    <option ng-repeat="et in ModuleColl track by et.id" value="{{et.id}}" ng-selected="et.id == beData.ModuleId">
+                                                                        {{et.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div class="form-group">
+                                                                <label>Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="beData.ReportName">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            @*<div class="form-group">
+                                                                <input type="checkbox" id="chkIsActive" name="IsActive" ng-model="beData.IsActive">
+                                                                <label for="chkIsActive">Is Active</label>
+                                                            </div>*@
+
+                                                            <div class="form-group clearfix mt-4">
+                                                                <div class="icheck-primary d-inline">
+                                                                    <input type="checkbox" id="chkIsActive" name="IsActive" ng-model="beData.IsActive">
+                                                                    <label for="chkIsActive">Is Active</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label>Allow User</label>
+                                                                <select ng-model="beData.UserIdColl" class="form-control form-control-sm select2" multiple="multiple" id="cboUser" name="cboUser">
+                                                                    <option ng-repeat="cl in UserColl track by cl.UserId" value="{{cl.UserId}}" ng-selected="{{beData.UserIdColl.containt(cl.UserId)}}">
+                                                                        {{cl.UserName}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            <div class="form-group">
+                                                                <label>Allow Group</label>
+                                                                <select ng-model="beData.GroupIdColl" class="form-control form-control-sm select2" multiple="multiple" id="cboGroup" name="cboGroup">
+                                                                    <option ng-repeat="cl in UserGroupList track by cl.GroupId" value="{{cl.GroupId}}" ng-selected="{{beData.GroupIdColl.containt(cl.UserId)}}">
+                                                                        {{cl.GroupName}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="form-group">
+                                                                <label class="text-primary"><b>SQL Text</b></label>
+                                                                <textarea rows="8" style="width:100%" id="txtMessage" class="form-control form-control-sm" ng-model="beData.TSql"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-12">
+                                                            <div class="form-group">
+                                                                <label class="text-primary"><b>Para</b></label>
+                                                                <table cellpadding="12" class="table table-bordered table-sm table-striped1 table-hover" id="clientTable">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <td class="align-middle" style="width: 70px; z-index: 3; background-color: #ececec !important;">S.No.</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Variable</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Label</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">DataType</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Source</td>
+                                                                            <td class="align-middle text-center" style="width: 150px; z-index: 3; background-color: #ececec !important;">Allow Null</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Default Value</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Width</td>
+                                                                            <td class="align-middle" style="width: 250px; z-index: 3; background-color: #ececec !important;">References</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Val Col</td>
+                                                                            <td class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important;">Text Col</td>
+                                                                            <td class="align-middle text-center" style="width: 150px; z-index: 3; background-color: #ececec !important;">Action</td>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tr id="tablerow0" ng-repeat="newBeData in beData.ParaColl">
+                                                                        <td class="col1">
+                                                                            {{$index+1}}
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="text" ng-model="newBeData.VariableName" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="text" ng-model="newBeData.Label" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <select ng-model="newBeData.DataType" class="form-control form-control-sm">
+                                                                                    <option ng-repeat="et in DataTypeColl track by et.id" ng-value="{{et.id}}" ng-selected="et.id == newBeData.DataType">
+                                                                                        {{et.text}}
+                                                                                    </option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="text" ng-model="newBeData.Source" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="text-center">
+                                                                            @Html.CheckBox("chkIsOptional", new { @ng_model = "newBeData.AllowNull" })
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="text" ng-model="newBeData.DefaultValue" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="col1">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="number" ng-model="newBeData.ColWidth" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <select class="form-control form-control-sm select2" active-select2 ng-model="newBeData.SelectedRefTable">
+                                                                                <option ng-repeat="dt in PkTablesColl" ng-value="dt" ng-selected="dt.Table==newBeData.SelectedRefTable.TableName">{{dt.Table}}</option>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td> <input type="text" class="form-control form-control-sm" ng-model="newBeData.RefColumn" /></td>
+                                                                        <td> <input type="text" class="form-control form-control-sm" ng-model="newBeData.TextColumn" /></td>
+                                                                        <td class="text-center">
+                                                                            <a class="btn btn-default btn-sm" ng-click="addrow($index)"><i class="fa fa-plus"></i></a>
+                                                                            <a class="btn btn-danger btn-sm text-white" ng-click="delete($index)"><i class="fa fa-trash"></i></a>
+                                                                            <a class="btn btn-info btn-sm text-white" ng-click="runReport(newBeData.TranId)"><i class="fa fa-arrow-alt-circle-up"></i></a>
+                                                                            @*<a class="btn btn-default btn-xs" ng-click="runReport(newBeData.TranId)"><i class="fa fa-arrow-circle-o-up"></i></a>*@
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" ng-hide="beData.ReportType==2 || beData.ReportType==3">
+                                                        <div class="col-sm-12">
+                                                            <div class="form-group">
+                                                                <label class="text-primary"><b>Select Report Template File(s)</b></label>
+                                                                <table cellpadding="12" class="table table-sm table-bordered table-striped1 table-hover" id="clientTable">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <td class="align-middle" style="width: 80px; z-index: 3; background-color: #ececec !important;">S.No.</td>
+                                                                            <td class="align-middle" style="width: 250px; z-index: 3; background-color: #ececec !important;">Name</td>
+                                                                            <td class="align-middle" style="width: 250px; z-index: 3; background-color: #ececec !important;">Path</td>
+                                                                            <td class="align-middle text-center" style="width: 90px; z-index: 3; background-color: #ececec !important;">File</td>
+                                                                            <td class="align-middle text-center" style="width: 90px; z-index: 3; background-color: #ececec !important;">Action</td>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tr id="tablerow0" ng-repeat="tc in beData.TemplateColl">
+                                                                        <td class="col5">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box  form-control-sm form-control" type="number" ng-model="tc.SNO" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="text" ng-model="tc.ReportName" />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="col2">
+                                                                            <div class="editor-field">
+                                                                                <input class="text-box form-control-sm form-control" type="text" ng-model="tc.Path" disabled />
+                                                                            </div>
+                                                                        </td>
+                                                                        <td class="text-center">
+                                                                            <button class="btn btn-success btn-sm" type="button" ng-click="ShowFileChoose(tc)"><i class="fas fa-file-invoice"></i></button>
+                                                                            <a download="{{tc.FileName}}" href="~/Setup/Security/DownloadReportTemplates?fpath={{tc.Path}}"><i class="fas fa-download"></i></a>
+                                                                        </td>
+
+                                                                        <td class="text-center">
+                                                                            <a class="btn btn-default btn-sm" ng-click="addrowRT($index)"><i class="fa fa-plus"></i></a>
+                                                                            <a class="btn btn-danger text-white btn-sm" ng-click="deleteRT($index)"><i class="fa fa-trash"></i></a>
+                                                                            <a class="btn btn-info text-white btn-sm" ng-click="runReport(newBeData.TranId)"><i class="fa fa-arrow-alt-circle-up"></i></a>
+                                                                            @*<a class="btn btn-default btn-xs" ng-click="runReport(newBeData.TranId)"><i class="fa fa-arrow-circle-o-up"></i></a>*@
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </form>
+                                                <footer class="main-footer">
+                                                    <div class="text-right control-btns">
+                                                        <button type="button" class="btn btn-default" ng-click="ClearFields()">Cancel</button>
+                                                        @*<button type="button" class="btn btn-secondary">Save & Close</button>*@
+                                                        <button type="button" class="btn btn-primary" ng-click="AddNewQueryBuilder()">Save</button>
+                                                    </div>
+
+                                                </footer>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+    </div>
+    <!-- Add Report Path Modal -->
+    <div class="modal fade" id="addReportFilePath" role="dialog" aria-labelledby="myModalLabel3" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Select Report Files</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="example">
+                                <div id="fileTreeDemo_2" class="demo"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-primary py-2" id="btnCancel" data-dismiss="modal" ng-click="SelectedFileClick()">Accept</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End Add User Modal -->
+
+</div>
+
+<script src="~/Scripts/jqueryFileTree.js"></script>
+
+
+

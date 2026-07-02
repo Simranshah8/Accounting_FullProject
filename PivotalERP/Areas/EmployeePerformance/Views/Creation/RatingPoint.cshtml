@@ -1,0 +1,480 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/EmployeePerformance/RatingPoint.js"></script>
+<style>
+    .Ratingpoint,
+    .FeedBack {
+        width: 100%;
+        border-radius: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .FeedBack {
+        background-color: #39bcd3;
+        color: white;
+        border: 2px;
+        gap: 3px;
+        text-align: start;
+        padding: 6px 18px;
+        font-size: 10px;
+        border-radius: 6px;
+    }
+
+    .Ratingpoint {
+        background-color: #39bcd3;
+        color: white;
+        border: 2px;
+        gap: 3px;
+        text-align: start;
+        padding: 6px 18px;
+        font-size: 10px;
+        border-radius: 6px;
+    }
+
+    .Ratingpoint, FeedBack:hover {
+        background-color: #2faac1;
+        color: white;
+    }
+
+    /* Rating Star*/
+
+    .stars-box1 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #cbdde0;
+        padding: 6px 14px;
+        border-radius: 20px;
+        width: fit-content;
+        margin: 0 auto 10px auto;
+    }
+
+    .stars-box2 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #c3e6c3;
+        padding: 6px 14px;
+        border-radius: 20px;
+        width: fit-content;
+        margin: 0 auto 10px auto;
+    }
+    .stars-box3 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #e5b2b1;
+        padding: 6px 14px;
+        border-radius: 20px;
+        width: fit-content;
+        margin: 0 auto 10px auto;
+    }
+
+
+    .stars-box1 i {
+        font-size: 16px;
+        margin: 2px;
+        cursor: pointer;
+        color: #2cbed9;
+        /* -webkit-text-stroke: 1px black;*/
+    }
+
+    .stars-box2 i {
+        font-size: 16px;
+        margin: 2px;
+        cursor: pointer;
+        color: #17e017;
+        /* -webkit-text-stroke: 1px black;*/
+    }
+    .stars-box3 i {
+        font-size: 16px;
+        margin: 2px;
+        cursor: pointer;
+        color: #d81c18;
+        /* -webkit-text-stroke: 1px black;*/
+    }
+
+
+    .filled1 {
+        color: #15c0e0;
+    }
+
+    .filled2 {
+        color: #15ea15;
+    }
+
+    .filled3 {
+        color: #cc1a16;
+    }
+    .circle1 {
+        width: 90px;
+        height: 90px;
+        border: 6px solid #25c2de;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+    }
+
+    .circle2 {
+        width: 90px;
+        height: 90px;
+        border: 6px solid #15ea15;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+    }
+    .circle3 {
+        width: 90px;
+        height: 90px;
+        border: 6px solid #d3110c;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+    }
+
+
+    .number {
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .label {
+        font-size: 14px;
+        display: flex;
+        text-align: center;
+        justify-content: center;
+        font-weight: 600;
+    }
+
+
+    .inline-field {
+        display: flex;
+        align-items: center;
+        gap: 1px
+    }
+
+        .inline-field label {
+            margin: 0;
+            min-width: 120px;
+        }
+
+        .inline-field label1 {
+            margin: 0;
+            min-width: 20px;
+        }
+
+        .inline-field input, .inline-field select {
+            width: 200px;
+            flex: unset;
+        }
+
+    .modal-header {
+        margin: -10px;
+        border-bottom: none !important;
+    }
+
+    .modal-body {
+        margin: -10px;
+    }
+
+    #ratingModal.modal-header {
+        padding-bottom: 5px !important;
+    }
+
+    #feedbackModal.modal-header {
+        padding-bottom: 5px !important;
+    }
+</style>
+<div id="" ng-app="myApp" ng-controller="RatingPointController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body p-2">
+
+                        <header class="row">
+                            <div class="col-md-8">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.RatingPoint">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.RatingPoint">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <div class="dropdown dnld-file" data-placement="top" title="Download File">
+                                    <a class="btn btn-secondary btn-light btn-sm wait" title="Refresh" ng-click="GetAssignedGoalSubmited()">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </a>
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#RatingPoint'" sheet-name="'RatingPoint'" report-name="'List of Rating Point'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#RatingPoint').tableExport({type:'csv',escape:'false',reportName:'RatingPoint',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                    <a print-tbl report-name="'Rating Point'" table-id="'#RatingPoint'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </header>
+                        <div class="table-scroll-x-y pb-2" style="height:auto!important;max-height: calc(100vh - 6rem)!important; ">
+                            <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="RatingPoint">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                        <th style="width: 100px; background-color: #e6f5fb !important;">EmpCode</th>
+                                        <th style="width: 180px; background-color: #e6f5fb !important;">Name</th>
+                                        <th style="width: 140px; background-color: #e6f5fb !important;">Company</th>
+                                        <th style="width: 140px; background-color: #e6f5fb !important;">Branch</th>
+                                        <th style="width: 150px; background-color: #e6f5fb !important;">Department</th>
+                                        @*<th style="width: 150px; background-color: #e6f5fb !important" ng-repeat="sup in EmployeeList[0].SupervisorColl">{{sup.SuperVisorName}}</th>*@
+                                        <th style="width: 100px; background-color: #e6f5fb !important">First Level</th>
+                                        <th style="width: 100px; background-color: #e6f5fb !important">Second Level</th>
+                                        <th style="width: 100px; background-color: #e6f5fb !important">Third Level</th>
+                                        <th style="width: 250px; background-color: #e6f5fb !important ">Feed Back</th>
+                                        <th style="width: 90px; background-color: #e6f5fb !important ">Final Rating</th>
+                                        <th class="cstm-sticky" style="width: 80px;right:0; background-color: #e6f5fb !important; z-index: 3;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="cl in EmployeeList | filter:searchData.RatingPoint | itemsPerPage: perPage.RatingPoint" current-page="currentPages.RatingPoint" pagination-id="RatingPointPagination">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{cl.EmployeeCode}}</td>
+                                        <td>{{cl.EmployeeName}}</td>
+                                        <td>{{cl.CompanyRelationship}}</td>
+                                        <td>{{cl.BranchName}}</td>
+                                        <td>{{cl.Department}}</td>
+                                        <td>{{cl.Supervisor1Rating}}</td>
+                                        <td>{{cl.Supervisor2Rating}}</td>
+                                        <td>{{cl.Supervisor3Rating}}</td>
+                                        @*<td ng-repeat="sup in cl.SupervisorColl">{{sup.Rating}}</td>*@
+                                        <td>{{cl.FeedbackType}}</td>
+                                        <td>{{cl.HRRating}}</td>
+                                        <td class="cstm-sticky text-center align-middle" style="background-color: #fff !important; right: 0; z-index: 3; ">
+                                            <a ng-click="openRatingModal(cl)"><i class="fas fa-star mr-2 text-info"></i></a>
+                                            <a ng-click="openFeedbackModal(cl)"><i class="fas fa-comment-dots text-danger"></i></a>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="RatingPointPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+
+                    </div>
+                    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="ratingModal" role="dialog" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                            <div class="modal-content" style="width: calc(100vw - 2rem) !important;">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Rating Point</h5>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row px-2">
+                                        <div class="col-md-12">
+                                            <div class="card p-2 row" ng-repeat="test in RatingFieldList" style="background-color: #049bdb3b !important;">
+                                                <div class="col-md-9 d-flex">
+                                                    <label class="mb-0" style="min-width: 105px;">From Date</label>
+                                                    <label class="mb-0"><b> : {{test.FromDateBS}}</b></label>
+                                                    <label class="mb-0 ml-2" style="min-width: 60px;">To Date</label>
+                                                    <label class="mb-0"><b> : {{test.ToDateBS}}</b></label>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="mb-0" style="min-width: 100px;" title="GoalType">GoalType</label>
+                                                    <label class="mb-0"><b>: {{test.GoalType}}</b></label>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <label class="mb-0" style="min-width: 100px;" title="Description">Description</label>
+                                                    <label class="mb-0"><b> : {{test.Description}}</b></label>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <label class="mb-0" style="min-width: 100px;" title="TargetValue">TargetValue</label>
+                                                            <label class="mb-0"><b> : {{test.TargetValue}}</b>   {{test.GoalMeasurement}}</label>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="mb-0" style="min-width: 100px;" title="Total Target Achivement">TotalTargetAchivement</label>
+                                                            <label class="mb-0"><b> : {{test.TotalTargetAchivement}} <span ng-show="test.WeightedId == 3">%</span> </b>  {{test.GoalMeasurement}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <!-- your rating div code -->
+                                        <div class="col-md-12 mt-3">
+                                            <div class="row text-center">
+                                                <div class="col-md-4" ng-repeat="SV in SupervisorList track by $index">
+                                                    <div class="stars-box{{ $index + 1 }} mb-2">
+                                                        <i ng-repeat="s in [1,2,3,4,5]"
+                                                           ng-click="setRating(s, SV)"
+                                                           ng-class="SV.Rating >= s ? 'fas fa-star filled'+ '($index + 1)' : 'far fa-star'"
+                                                           style="cursor:pointer;"></i>
+                                                    </div>
+                                                    <div class="circle{{ $index + 1 }}">
+                                                        <div class="number">{{SV.Rating}}</div>
+                                                    </div>
+                                                    <div class="label mt-2">{{SV.SuperVisorName}}</div>
+                                                </div>
+                                                <div class="col-md-12 d-flex justify-content-center mt-3 mb-2">
+                                                    <button type="submit" class="btn btn-primary" ng-click="SavesubmitRating()">Submit</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="feedbackModal" role="dialog" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                            <div class="modal-content" style="width: calc(100vw - 2rem) !important;">
+                                <!-- Header -->
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Feedback</h5>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="modal-body">
+                                    <div class="col-md-12">
+                                        <div class="card p-2 row" ng-repeat="test in FeedFieldList" style="background-color: #049bdb3b !important;">
+                                            <div class="col-md-9 d-flex">
+                                                <label class="mb-0" style="min-width: 105px;">From Date</label>
+                                                <label class="mb-0"><b> : {{test.FromDateBS}}</b></label>
+                                                <label class="mb-0 ml-2" style="min-width: 60px;">To Date</label>
+                                                <label class="mb-0"><b> : {{test.ToDateBS}}</b></label>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="mb-0" style="min-width: 100px;" title="GoalType">Goal Type</label>
+                                                <label class="mb-0"><b>: {{test.GoalType}}</b></label>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="mb-0" style="min-width: 100px;" title="Description">Description</label>
+                                                <label class="mb-0"><b> : {{test.Description}}</b></label>
+                                            </div>
+
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label class="mb-0" style="min-width: 100px;" title="TargetValue">Target Value</label>
+                                                        <label class="mb-0"><b> : {{test.TargetValue}}</b>   {{test.GoalMeasurement}}</label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="mb-0" style="min-width: 100px;" title="Total Target Achivement">TotalTargetAchivement</label>
+                                                        <label class="mb-0"><b> : {{test.TotalTargetAchivement}} <span ng-show="test.WeightedId == 3">%</span> </b>  {{test.GoalMeasurement}}</label>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <!-- your feedback div -->
+                                        <div class="col-md-12 mt-3">
+                                            <div class="row">
+                                                <div class="col-md-4" ng-repeat="SV in SupervisorForFBList track by $index">
+                                                    <div class="stars-box{{ $index + 1 }} mb-2">
+                                                        <i ng-repeat="s in [1,2,3,4,5]" 
+                                                           ng-class="SV.Rating >= s ? 'fas fa-star filled'+ '($index + 1)' : 'far fa-star'"
+                                                           style="cursor: not-allowed;"></i>
+                                                    </div>
+                                                    <div class="circle{{ $index + 1 }}">
+                                                        <div class="number">{{SV.Rating}}</div>
+                                                    </div>
+                                                    <div class="label mt-2">{{SV.SuperVisorName}}</div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="stars-box2 mb-2">
+                                                        <i ng-repeat="s in [1,2,3,4,5]"
+                                                           ng-click="setHRRating(s)"
+                                                           ng-class="fedrating3 >= s ? 'fas fa-star filled2' : 'far fa-star'"
+                                                           style="cursor:pointer;"></i>
+                                                    </div>
+                                                    <div class="circle2 mb-2">
+                                                        <div class="number">{{fedrating3}}</div>
+                                                    </div>
+                                                    <div class="label mt-2">HR</div>
+                                                </div>
+                                                
+                                                <div class="col-md-6 mt-3">
+                                                    <div class="form-group inline-field">
+                                                        <label>Feed Back Type</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="beData.FeedBackTypeId" style="width:70%">
+                                                            <option ng-repeat="pp in ObjectiveQuestionList" ng-value="pp.id" ng-selected="pp.id==beData.FeedBackTypeId">{{pp.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 mt-3">
+                                                    <div class="form-group inline-field">
+                                                        <label1>Remarks</label1>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="beData.Remarks" style="width:80%">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 d-flex justify-content-center mt-4 mb-2">
+                                                    <button type="submit" class="btn btn-primary" ng-click="SaveFeedback()">Submit{{feedback.Mode}}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

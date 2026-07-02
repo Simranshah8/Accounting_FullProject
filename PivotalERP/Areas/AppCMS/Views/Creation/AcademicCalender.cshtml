@@ -1,0 +1,402 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .month {
+        padding: 5px 25px;
+        background: #025a58;
+        text-align: center;
+    }
+
+        .month ul {
+            margin: 0;
+            padding: 0;
+        }
+
+            .month ul li {
+                color: white;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+
+    .weekdays {
+        margin: 0;
+        padding: 5px 5px;
+        background-color: #ddd;
+    }
+
+        .weekdays li {
+            list-style-type: none;
+            display: inline-block;
+            width: 13% !important;
+            text-align: center;
+            background-color: #76be4e;
+            border: 1px solid #ccc;
+            font-size: 13px;
+            padding: 4px;
+            font-weight: 600;
+        }
+
+    .days {
+        padding: 0px 5px;
+        background: #eee;
+        margin: 0;
+    }
+
+        .days li {
+            list-style-type: none;
+            display: inline-block;
+            width: 13.5% !important;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 5px;
+            padding: 7px;
+            font-family: "Lucida Console", "Courier New", monospace;
+            font-size: 13px;
+            background-color: #fff;
+            box-shadow: rgb(40 40 40 / 94%) 0px -1px 1px 0px;
+        }
+
+            .days li .active {
+                display: block;
+                width: 30px;
+                height: 30px;
+                padding: 5px;
+                border: 1px solid #ccc;
+                background: linear-gradient(to right, red 30%, orange 30% 60%, yellow 60% 100%);
+            }
+
+    .underlinered:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: red;
+    }
+
+    .underlineblue:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: blue;
+    }
+
+    .underlineyellow:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: yellow;
+    }
+
+    .tooltip-inner {
+        background-color: #025a58 !important;
+        color: #fff;
+    }
+
+    .print-heading {
+        display: none;
+    }
+
+    @@media print {
+        .print-heading {
+            display: block; /* Make it visible during print */
+            text-align: center; /* Center the heading */
+            margin-bottom: 20px; /* Add some space below the heading */
+        }
+    }
+
+    #calenderheader {
+        visibility: hidden; /* Keeps it hidden in the view */
+        position: absolute; /* Prevents layout shift */
+    }
+
+    @@media print {
+        #calenderheader {
+            visibility: visible !important; /* Shows only in print preview */
+            position: static; /* Resets the position for printing */
+        }
+    }
+</style>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/printThis/1.15.0/printThis.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.3/html2canvas.min.js"></script>
+<script src="~/jslib/AppCMS/academiccalendar.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="npCalenderController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="row">
+                    <div class="col-sm-2">
+                        <div class="card">
+                        <div class="form-group row p-1">
+                            <label for="" class="col-sm-4 col-form-label text-nowrap">Year</label>
+                            <div class="col-sm-8">
+                                <select class="form-control form-control-sm" ng-change="getNepaliCalendar()" ng-model="AcademicCalendar.YearId">
+                                    <option ng-value="yc.id" ng-repeat="yc in YearColl" ng-selected="AcademicCalendar.YearId==yc.id">{{yc.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-md-3" ng-repeat="et in EventTypeList">
+                                    <label><i class="fas fa-square mr-2" ng-style="{ 'color' : et.ColorCode }"></i> {{et.Name}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button class="btn btn-sm btn-default float-right" ng-click="PrintData()"><i class="fas fa-print"></i></button>
+                    </div>
+                </div>
+                <div class="Calender container-fluid" id="Calenderprint">
+                    <div id="calenderheader">
+                        <div class="card" style="border: 1px solid #11101052">
+                            <div class="card-body">
+                                <div class="tab-content">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <div class="col-md-2">
+                                                    <div class="form-group d-flex">
+                                                        <img ng-src="{{CompanyDetail.CompanyLogoPath}}" class="img-fluid" alt="" id="imgPhoto1" style="height:50px; width:auto;" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="text-center">
+                                                        <h3 class="mb-1" style="font-weight: 600; font-size: 18px;">{{CompanyDetail.Name}} </h3>
+                                                        <h5 class="mb-1" style="font-weight: 500; font-size: 14px;">{{CompanyDetail.Address}}, {{CompanyDetail.Country}} </h5>
+                                                        <h5 class="mb-0" style="font-weight: 500; font-size: 14px;">{{CompanyDetail.PhoneNo}}<label ng-if="CompanyDetail.PhoneNo && CompanyDetail.EmailId">, </label> {{CompanyDetail.EmailId}}</h5>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*/.card*@
+                        </div>
+                        <div class="calendar-month" style="background-color: #459cd1; color: white; font-weight: bold; text-align: center; padding: 5px; ">
+                            <h5 class="mb-0" style="margin-right: 2%; margin-right: 7%;">Calendar - {{ getSelectedYearText() }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="row mt-1">
+                        <div class="col-md-4 mb-2" ng-repeat="mn in AcademicCalendar.MonthColl">
+
+                            <div class="calendar-header" style="background-color: #459cd1; color: white; text-align: center; padding: 5px; font-size: 16px; border-top-left-radius: 4px; border-top-right-radius: 4px; ">
+                                <span> {{mn.MonthName}}</span>
+                            </div>
+
+                            <div class="calendar-week" style="background-color: #8bc95f; display: flex; justify-content: space-around; padding: 5px 0; font-weight: bold; border-right: 2px solid #c8c9c7; border-left: 2px solid #c8c9c7; ">
+                                <div style=" text-align: center; ">Sun</div>
+                                <div style=" text-align: center;">Mon</div>
+                                <div style=" text-align: center;">Tue</div>
+                                <div style=" text-align: center;">Wed</div>
+                                <div style=" text-align: center;">Thu</div>
+                                <div style=" text-align: center;">Fri</div>
+                                <div style="color: red;">Sat</div>
+                            </div>
+
+                            <div class="calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr);  border: none; background-color: #F5F8F1; border-left: 2px solid #c8c9c7; border-right: 2px solid #c8c9c7; border-bottom: 2px solid #c8c9c7; min-height: 190px ">
+
+                                <div ng-repeat="dd in mn.BlankDaysColl track by $index" class="calendar-day highlight" style="padding: 5px; text-align: center; font-size: 15px; border: 1px solid #dee2e6; font-weight: 600; ">&emsp;</div>
+                                <div ng-repeat="dd in mn.DataColl" ng-click="ClickOnDay(dd)" class="calendar-day highlight-blue" ng-style="{ 'background-color' : ec.ColorCode }" style="padding: 5px; text-align: center; font-size: 17px; border: 1px solid #dee2e6; font-weight: 600; ">
+
+                                    {{dd.ND}}
+                                    <span ng-show="dd.IsWeekend==true" style="content: ''; display: block; height: 24px; width: 100%; margin-top: -25px; border-radius: 50%; border: 1px solid #dee2e6;" ng-style="{ 'background-color' : dd.WeekendColorCode }"> </span>
+                                    <span style="content: ''; display: block; height: 24px; width: 100%; margin-top: -27px; border-radius: 50%; border: 1px solid #dee2e6;" ng-style="{ 'background-color' : ec.ColorCode }" ng-repeat="ec in dd.EventColl"> </span>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div style="page-break-before: always;">
+                        <div class="event-container mt-2">
+                            <div class="calendar-month" style="background-color: #459cd1; color: white; font-weight: bold; text-align: center; padding: 5px;">
+                                <h5 class="mb-0" style="margin-right: 2%; margin-right: 7%;">Event Lists - {{ getSelectedYearText() }}</h5>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-12" ng-repeat="A in AcademicCalendar.MonthColl">
+                                    <div class="calender-month mb-2" style="background: white; border-radius: 10px;  margin-bottom: 5px; border: 2px solid #c8c9c7;" ng-if="A.EventColl.length>0">
+                                        <div class="header" style=" background: #d4edda; padding: 6px; font-weight: bold; font-size: 14px; border-radius: 5px;">{{A.MonthName}}</div>
+                                        @*<div class="text-center p-2" ng-if="A.EventColl.length<1">
+                                            <h6><i class="fas fa-exclamation-triangle text-danger"></i> No events found for this month</h6>
+                                        </div>*@
+                                        <div class="row">
+                                            <div class="col-md-4" ng-repeat="P in A.EventColl" >
+                                                <div class="px-2">
+                                                    <div class="event" style="background: #EFFFE1; display: flex; align-items: center; padding: 4px; margin: 4px 0; border-radius: 5px; border: 1px solid #c7e3a2;">
+                                                        <div ng-style="{ 'background-color' : P.ColorCode }" style=" width: 25px; height: 25px; border-radius: 5px; font-size: 14px; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                                            {{P.ND}}
+                                                        </div>{{P.Name}}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title" style="color: #068abf">Manage Holiday/Event</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Event/Holiday</label>
+                                <select class="form-control form-control-sm select2" ng-model="currentEvent.EventTypeId" ng-change="ChangeEventType()">
+                                    <option ng-selected="currentEvent.EventTypeId==et.EventTypeId" ng-value="et.EventTypeId" ng-repeat="et in EventTypeList">{{et.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Name</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="currentEvent.Name">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="currentEvent.Description"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="">From Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="currentEvent.FromDate_TMP" date-detail="currentEvent.FromDateDet" before-days="365" after-days="365">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="">To Date</label>
+                                <input type="text" class="form-control form-control-sm" date-picker ng-model="currentEvent.ToDate_TMP" date-detail="currentEvent.ToDateDet" before-days="365" after-days="365">
+                            </div>
+                        </div>
+                        <div class="col-md-4" ng-show="ShowAtTime==true">
+                            <div class="form-group">
+                                <label for="">At Time</label>
+                                <input type="time" class="form-control form-control-sm" ng-model="currentEvent.AtTime_TMP">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Religion</label>
+                                <multi-select-option ng-model="currentEvent.ReligionColl" data="ReligionList" label="text" value="id"></multi-select-option>
+                            </div>
+                        </div>
+                        <!--Added by simran on 12th Chaitra-->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Company</label>
+                                <multi-select-option ng-model="currentEvent.CompanyColl" data="CompanyRelationshipList" label="Name" value="TranId"></multi-select-option>
+                            </div>
+                        </div>
+                        <!--End-->
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Branch</label>
+                                <multi-select-option ng-model="currentEvent.BranchColl" data="BranchList" label="Name" value="BranchId"></multi-select-option>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Department</label>
+                                <multi-select-option ng-model="currentEvent.DepartmentColl" data="DepartmentList" label="Name" value="CostCenterDepartmentId"></multi-select-option>
+
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Designation</label>
+                                <multi-select-option ng-model="currentEvent.DesignationColl" data="DesignationList" label="Name" value="DesignationId"></multi-select-option>
+
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Service Type</label>
+                                <multi-select-option ng-model="currentEvent.ServiceTypeColl" data="ServiceTypeList" label="Name" value="ServiceTypeId"></multi-select-option>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Employee</label>
+                                <multi-select-option ng-model="currentEvent.EmployeeColl" data="EmployeeList" label="Name" value="EmployeeId"></multi-select-option>
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label> Gender</label>
+                                <multi-select-option ng-model="currentEvent.GenderColl" data="GenderList" label="text" value="id"></multi-select-option>
+                            </div>
+                        </div>
+
+                        @*<div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="">Applied For</label>
+                                    <select class="form-control form-control-sm select2" multiple="multiple" ng-model="currentEvent.ApplicableForClassColl">
+                                        <option ng-value="0" selected>All</option>
+                                        <option ng-value="c.CostCenterDepartmentId" ng-repeat="c in DepartmentList">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button ng-show="currentEvent.EventHolidayId>0" type="button" class="btn load btn-danger" style="min-width: 70px;" ng-click="DelEvent()">Delete</button>
+                        <button type="button" class="btn load btn-default" style="min-width: 70px;">Reset</button>
+                        <button type="button" class="btn load btn-success" style="min-width: 70px;" ng-click="SaveUpdateEvent()">Save</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+

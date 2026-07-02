@@ -1,0 +1,391 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+<script src="~/jslib/hr/Report/GrievanceList.js"></script>
+<div ng-app="myApp" ng-controller="GrievanceListController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div class="row">
+                                    <div class="col-md-1">
+                                        <div class="form-group mb-1">
+                                            <label for="">Date From</label>
+                                            <input type="text"
+                                                   class="form-control form-control-sm" date-picker ng-model="beData.DateFrom_TMP" date-detail="beData.DateFromDet">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <div class="form-group mb-1">
+                                            <label for="">Date To</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="beData.DateTo_TMP" date-detail="beData.DateToDet">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Department</label>
+                                            <select class="form-control form-control-sm select2" ng-model="beData.DepartmentId">
+                                                <option ng-value="T.CostCenterDepartmentId" ng-repeat="T in DepartmentList" ng-selected="T.CostCenterDepartmentId==beData.DepartmentId">{{T.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-3">
+                                        <div>
+                                            <label>Employee</label>
+                                            <div class="form-group d-flex ">
+                                                <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1; font-size: 13px;" ng-model="beData.SelectEmployee">
+                                                    <option ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==beData.SelectEmployee">
+                                                        {{ss.text}}
+                                                    </option>
+                                                </select>
+                                                <select class="form-control select2 form-control-sm" all-employee ng-model="beData.EmployeeId" employee-detail="beData.EmployeeDetails" side-bar-data="beData.EmpSideBarData" search-by="beData.SelectEmployee" style="width: 100%;" confirm-action="getEmployeeUserId(beData)">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Grievance Type</label>
+                                            <select class="form-control form-control-sm" ng-model="beData.GrievanceTypeId">
+                                                <option ng-value="G.TranId" ng-repeat="G in GrievanceTypeList" ng-selected="G.TranId==beData.GrievanceTypeId">{{G.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Status </label>
+                                            <select class="form-control form-control-sm" ng-model="beData.StatusId">
+                                                <option ng-value="S.id" ng-repeat="S in StatusColl" ng-selected="S.id==beData.StatusId">{{S.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1 text-right mt-4">
+                                        <button type="button" class="btn btn-sm btn-primary load float-right" style="width: 80px;" ng-click="GetData()"><i class="fas fa-sync-alt mr-2"></i>Load</button>
+                                    </div>
+                                </div>
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Grievance">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Grievance">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Grievance">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#GrievanceList'" sheet-name="'Grievance List'" report-name="'Grievance List'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#GrievanceList').tableExport({type:'csv',escape:'false',reportName:'Grievance List',ignoreColumn:'3'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#GrievanceList'" report-name="'Grievance List'" class="btn btn-secondary btn-light btn-sm wait" title="Print"><i class="fas fa-print"></i></a>
+                                        </div>
+
+                                    </div>
+                                </header>
+                                <div class="mt-2 table-scroll-x-y table-container flex-grow-1 ">
+                                    <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                        <div class="table-h-scrollbar-fix table-scroll-wrapper pb-2" style="height:auto; max-height: calc(100vh - 8rem)!important;">
+                                            <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                <thead style="background: #e6f5fb;">
+                                                    <tr>
+                                                        <th class="cstm-sticky text-center" style="width: 50px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                        <th style="width:100px;">Sub. Date</th>
+                                                        <th style="width:150px;"> Grievance Type</th>
+                                                        <th style="width:100px;">Emp. Code</th>
+                                                        <th style="width:150px;">Emp. Name</th>
+                                                        <th style="width:100px;">Designation</th>
+                                                        <th style="width:100px;">Department</th>
+                                                        <th style="width:100px;">Contact No</th>
+                                                        <th style="width:140px;">Email</th>
+                                                        <th style="width:100px;">Enroll No</th>
+                                                        <th style="width:100px;">Branch</th>
+                                                        <th style="width:100px;">Company</th>
+                                                        <th style="width:100px;">Description</th>
+                                                        <th style="width:60px;">Doc.</th>
+                                                        <th style="width:100px;">Status</th>
+                                                        <th style="width:100px;">Action Taken</th>
+                                                        <th style="width:150px;">Action Taken By</th>
+                                                        <th style="width:100px;">Assigned To</th>
+                                                        <th style="width:150px;">Action Taken At</th>
+                                                        <th style="width:100px;">Notes</th>
+                                                        <th style="width:100px;">Remarks</th>
+                                                        <th style="width:100px;" ng-show="beData.StatusId==4">Closure Date</th>
+                                                        <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px;">
+                                                            <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                <option value="" disabled selected>Action</option>
+                                                                <option value="save">Save Layout</option>
+                                                                <option value="reset">Reset Layout</option>
+                                                            </select>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="SL in TableData | filter:searchData.Grievance | itemsPerPage: perPage.Grievance" current-page="currentPages.Grievance" pagination-id="GrievancePagination">
+                                                        <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                        <td>{{SL.SubmittedMiti}}</td>
+                                                        <td>{{SL.GrievanceType}}</td>
+                                                        <td>{{SL.EmpCode}}</td>
+                                                        <td>{{SL.EmpName}}</td>
+                                                        <td>{{SL.Designation}}</td>
+                                                        <td>{{SL.Department}}</td>
+                                                        <td>{{SL.ContactNo}}</td>
+                                                        <td>{{SL.Email}}</td>
+                                                        <td>{{SL.EnrollNo}}</td>
+                                                        <td>{{SL.Branch}}</td>
+                                                        <td>{{SL.CompanyName}}</td>
+                                                        <td>{{SL.Description}}</td>
+                                                        <td>
+                                                            <a class="btn" ng-click="ShowPersonalImg(SL)" title="Attachment"><i class="fas fa-eye"></i></a>
+                                                        </td>
+                                                        @*<td>{{SL.Status}}</td>*@
+
+                                                        <td ng-style="{
+                                                                'color': SL.StatusId == 1 ? 'gray' :
+                                                                         SL.StatusId == 2 ? 'blue' :
+                                                                         SL.StatusId == 3 ? 'orange' :
+                                                                         SL.StatusId == 4 ? 'green' :
+                                                                         SL.StatusId == 5 ? 'red' : 'black'
+                                                            }">
+                                                            {{SL.Status}}
+                                                        </td>
+                                                        <td>{{SL.ActionTaken}}</td>
+                                                        <td>{{SL.ActionTakenBy}}</td>
+                                                        <td>{{SL.AssignedTo}}</td>
+                                                        <td>{{SL.ActionTakenAt}}</td>
+                                                        <td title="{{SL.Notes}}">
+                                                            {{SL.Notes && SL.Notes.length > 30 ? (SL.Notes | limitTo:30) + '...' : SL.Notes}}
+                                                        </td>
+                                                        <td title="{{SL.Remarks}}">
+                                                            {{SL.Remarks && SL.Remarks.length > 30 ? (SL.Remarks | limitTo:50) + '...' : SL.Remarks}}
+                                                        </td>
+                                                        <td ng-show="beData.StatusId==4">{{SL.ClosureDate}}</td>
+                                                        <td class="cstm-sticky highlight-on-scroll" style="width: 37px; right: 0; z-index: 3; background-color: #FFF !important;">
+                                                            <div class="btn-group-sm text-center">
+                                                                <a class="btn btn-info" href="#" ng-click="GetGrievanceListById(SL)">
+                                                                    <i class="fas fa-pencil-alt"></i>
+                                                                </a>
+                                                                <a class="btn btn-info" title="View in Details" href="#" ng-click="GetGrievanceListInDetails(SL)">
+                                                                    <i class="fas fa-info"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <dir-pagination-controls pagination-id="GrievancePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="GrievanceList" @*tabindex="-1"*@ role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Grievance List</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body gradient-bg py-0">
+                            <div class=" row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label> Action  </label>
+                                        <select class="form-control form-control-sm" ng-model="newDet.StatusId">
+                                            <option ng-value="G.id" ng-repeat="G in ActionTakenColl" ng-selected="G.id==newDet.StatusId">{{G.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label> Action Taken </label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newDet.ActionTaken">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" ng-show="newDet.StatusId==2">
+                                    <label>Employee</label>
+                                    <div class="form-group d-flex ">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1; font-size: 13px;" ng-model="newDet.SelectEmployee">
+                                            <option ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newDet.SelectEmployee">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-employee ng-model="newDet.AssignedToId" employee-detail="newDet.EmployeeDetails" side-bar-data="newDet.EmpSideBarData" search-by="newDet.SelectEmployee" style="width: 100%;" confirm-action="getEmployeeUserIdForUpdate(newDet)">
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6" ng-show="newDet.StatusId==2">
+                                    <label>Notes</label>
+                                    <textarea class="form-control form-control-sm" rows="1" ng-model="newDet.Notes"></textarea>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn load btn-outline-secondary load btn-sm dynamic-uiux-sm-btn" data-dismiss="modal" style="width:80px">Cancel</button>
+                            <button type="button" class="btn load btn-primary btn-sm load dynamic-uiux-sm-btn" ng-click="SaveUpdateGrievance()" style="width:80px">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="GrievanceListInDetails" @*tabindex="-1"*@ role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Grievance  In Details</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body gradient-bg py-0">
+
+                         
+                
+                            <div class=" row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label> Employee Name:  </label>
+                                            {{newDet.EmployeeName}}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label> Employee Code:  </label>
+                                            {{newDet.EmployeeCode}}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label> Grievance  Type:  </label>
+                                            {{newDet.GrievanceTypeName}}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label> Submission   Date:  </label>
+                                            {{newDet.SubmissionMiti}}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label> Action Taken At:  </label>
+                                            {{newDet.ActionTakenMiti}}
+                                        </div>
+                                    </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label> Assigned To:  </label>
+                                        {{newDet.AssignTo}}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label> Assigned Notes: </label>
+                                        {{newDet.Notes}}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Location Of Incident:</label>
+                                    {{newDet.LocationOfInc}}
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label>Date of Incident:</label>
+                                    {{newDet.IncidentMiti}}
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Suggestion:</label>
+                                    {{newDet.Suggestion}}
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer py-2">
+                            <button type="button" class="btn load btn-outline-secondary load btn-sm dynamic-uiux-sm-btn" data-dismiss="modal" style="width:80px">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-2">
+                            <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                            <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                        </div>
+                        <div class="modal-footer p-2">
+                            <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+
+
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>

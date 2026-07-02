@@ -1,0 +1,301 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Payroll_PayrollConfiguration)";
+</script>
+
+
+
+<script src="~/jslib/hr/Transaction/PayrollConfiguration.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="PayrollConfigurationController" ng-init="LoadData()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+
+                <div>
+                    <div class="card p-2">
+                        <div class="card border">
+                            <div class="p-2 card-header" style="background-color: aliceblue;">
+                                <h6 class="mb-0">Journal Voucher</h6>
+                            </div>
+                            <div class="p-2 card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Voucher</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.JV_VoucherId">
+                                                <option ng-repeat="P in VoucherTypeColl" ng-value="P.VoucherId" ng-selected="P.VoucherId==newPayrollConfig.JV_VoucherId">{{P.VoucherName }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">CostClass</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.JV_CostClassId">
+                                                <option ng-repeat="P in CostClassColl" ng-value="P.CostClassId" ng-selected="P.CostClassId==newPayrollConfig.JV_CostClassId">{{P.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label>Auto Generate Journal </label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="HL-yes" name="HL" ng-value="true" ng-model="newPayrollConfig.JV_AutoGenerate">
+                                                <label class="form-check-label" for="HL-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="HL-no" name="HL" ng-value="false" ng-model="newPayrollConfig.JV_AutoGenerate">
+                                                <label class="form-check-label" for="HL-no">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Auto Cancel and re-generate Journal</label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="HT-yesJCancel" name="HT" ng-value="true" ng-model="newPayrollConfig.JV_AutoCancelRegenerate">
+                                                <label class="form-check-label" for="HT-yesJCancel">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="HT-noJCancel" name="HT" ng-value="false" ng-model="newPayrollConfig.JV_AutoCancelRegenerate">
+                                                <label class="form-check-label" for="HT-noJCancel">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        @*<div class="card border">
+            <div class="p-2 card-header" style="background-color: #bdddab63">
+                <h6 class="mb-0">Payment Voucher</h6>
+            </div>
+            <div class="p-2 card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">Voucher</label>
+                            <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.PV_VoucherId">
+                                <option ng-repeat="P in VoucherTypeColl" ng-value="P.VoucherId" ng-selected="P.VoucherId==newPayrollConfig.PV_VoucherId">{{P.VoucherName }}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="">CostClass</label>
+                            <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.PV_CostClassId">
+                                <option ng-repeat="P in CostClassColl" ng-value="P.CostClassId" ng-selected="P.CostClassId==newPayrollConfig.PV_CostClassId">{{P.Name}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Auto Generate Voucher </label>
+                        <div class="form-group clearfix">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="HL-yesV" name="HLA" ng-value="true" ng-model="newPayrollConfig.PV_AutoGenerate">
+                                <label class="form-check-label" for="HL-yesV">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="HL-noV" name="HLA" ng-value="false" ng-model="newPayrollConfig.PV_AutoGenerate">
+                                <label class="form-check-label" for="HL-noV">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label>Auto Cancel and re-generate Voucher</label>
+                        <div class="form-group clearfix">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="HT-yesVCancel" name="HTC" ng-value="true" ng-model="newPayrollConfig.PV_AutoCancelRegenerate">
+                                <label class="form-check-label" for="HT-yesVCancel">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" id="HT-noVCancel" name="HTC" ng-value="false" ng-model="newPayrollConfig.PV_AutoCancelRegenerate">
+                                <label class="form-check-label" for="HT-noVCancel">No</label>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>*@
+
+                        <div class="card border mb-0">
+                            <div class="p-2 card-header" style="background-color: aliceblue;">
+                                <h6 class="mb-0">Advance Voucher</h6>
+                            </div>
+                            <div class="p-2 card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Voucher</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.AV_VoucherId">
+                                                <option ng-repeat="P in VoucherTypeColl" ng-value="P.VoucherId" ng-selected="P.VoucherId==newPayrollConfig.AV_VoucherId">{{P.VoucherName }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">CostClass</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.AV_CostClassId">
+                                                <option ng-repeat="P in CostClassColl" ng-value="P.CostClassId" ng-selected="P.CostClassId==newPayrollConfig.AV_CostClassId">{{P.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label>Auto Generate Voucher </label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="AVHL-yesAV" name="AVHLA" ng-value="true" ng-model="newPayrollConfig.AV_AutoGenerate">
+                                                <label class="form-check-label" for="AVHL-yesAV">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="AVHL-noAV" name="AVHLA" ng-value="false" ng-model="newPayrollConfig.AV_AutoGenerate">
+                                                <label class="form-check-label" for="AVHL-noAV">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label>Auto Cancel and re-generate Voucher</label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="AV-yesVCancel" name="AVHTC" ng-value="true" ng-model="newPayrollConfig.AV_AutoCancelRegenerate">
+                                                <label class="form-check-label" for="AV-yesVCancel">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="AV-noVCancel" name="AVHTC" ng-value="false" ng-model="newPayrollConfig.AV_AutoCancelRegenerate">
+                                                <label class="form-check-label" for="AV-noVCancel">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        @*<div class="p-2 card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">No Of Decimals</label>
+                                        <input class="form-control form-control-sm" type="number" ng-model="newPayrollConfig.NoOfDecimal" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Payslip for App</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newPayrollConfig.PaySlipTemplateId">
+                                            <option ng-selected="mt.RptTranId==dd.PaySlipTemplateId" ng-value="mt.RptTranId" ng-repeat="mt in PaySlipReportColl">{{mt.ReportName}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+
+                        @*added by yubaraj poudel*@
+
+
+                        <div class="card border mb-0">
+                            <div class="p-2 card-header" style="background-color: aliceblue;">
+                                <h6 class="mb-0">General Config.</h6>
+                            </div>
+                            <div class="p-2 card-body">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>Show Salary Attendance</label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="ShowSalaryAttend-Yes" name="ShowSalaryAttend" ng-value="true" ng-model="newPayrollConfig.ShowSalAttn">
+                                                <label class="form-check-label" for="ShowSalaryAttend-Yes">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="ShowSalaryAttend-No" name="ShowSalaryAttend" ng-value="false" ng-model="newPayrollConfig.ShowSalAttn">
+                                                <label class="form-check-label" for="ShowSalaryAttend-No">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label>Block Screenshot </label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="BlockScreenshot-yes" name="BlockScreenshot" ng-value="true" ng-model="newPayrollConfig.BlockScreenshot">
+                                                <label class="form-check-label" for="BlockScreenshot-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="BlockScreenshot-No" name="BlockScreenshot" ng-value="false" ng-model="newPayrollConfig.BlockScreenshot">
+                                                <label class="form-check-label" for="BlockScreenshot-No">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <label>Allow Payslip Download</label>
+                                        <div class="form-group clearfix">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="AllowPaySlipDownload-yes" name="AllowPaySlipDownload" ng-value="true" ng-model="newPayrollConfig.AllowPayslipDL">
+                                                <label class="form-check-label" for="AllowPaySlipDownload-yes">Yes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" id="AllowPaySlipDownload-No" name="AllowPaySlipDownload" ng-value="false" ng-model="newPayrollConfig.AllowPayslipDL">
+                                                <label class="form-check-label" for="AllowPaySlipDownload-No">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">No Of Decimals</label>
+                                            <input class="form-control form-control-sm" type="number" ng-model="newPayrollConfig.NoOfDecimal" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Payslip for App</label>
+                                            <select class="form-control form-control-sm" ng-model="newPayrollConfig.PaySlipTemplateId">
+                                                <option ng-selected="mt.RptTranId==dd.PaySlipTemplateId" ng-value="mt.RptTranId" ng-repeat="mt in PaySlipReportColl">{{mt.ReportName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        @*end*@
+
+                        <div class="time-label pb-3">
+                            <span class="d-block border-0 text-center">
+                                <button type="button" class="btn btn-sm btn-default load" style="min-width: 90px;" ng-click="ClearPayrollConfig()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-info load" style="min-width: 90px;" ng-click="SaveUpdatePayrollConfig()">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+

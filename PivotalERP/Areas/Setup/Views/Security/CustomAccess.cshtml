@@ -1,0 +1,211 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<style>
+    /* Selected tags */
+    .select2-container .select2-selection--multiple .select2-selection__choice {
+        background: #007bff !important; /* Tag background color */
+        color: white !important; /* Tag text color */
+        border: none !important; /* Remove border */
+        border-radius: 6px !important; /* Rounded tag */
+        padding: 2px 8px !important;
+        margin-top: 4px !important;
+        font-size: 12px;
+    }
+
+    /* Remove button inside tag */
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+        color: white !important; /* X icon color */
+        margin-right: 6px;
+    }
+</style>
+
+<script src="~/jslib/Setup/Security/CustomAccess.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="CustomAccess" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid p-0">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs fixed-top" id="custom-tabs-four-tab" role="tablist" style="background-color: #fff !important;">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true" ng-click="GetAllCustomAccess()"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Custom Access</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2" style="margin-top: 38px !important">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.CustomAccess">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.CustomAccess">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllCustomAccess()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'CustomAccess'" report-name="'List of CustomAccess'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'CustomAccess',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'CustomAccess'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="table-responsive" style="margin-bottom: 55px;">
+                                <table id="main-table" class="table table-sm table-bordered bg-white" style="table-layout: auto; width:100%;">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th style="width: 60px;">S.No.</th>
+                                            <th style="width: 150px;"> Module Name</th>
+                                            <th style="width: 80px;"> Entity Name </th>
+                                            <th style="width: 78px;">No of Access</th>
+                                            <th style="width: 130px ;">No. of Allowed User(s)</th>
+                                            <th style="width: 130px ;">No. of Allowed UserGroups(s)</th>
+                                            <th style="width: 60px; text-align:center;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="newDet in CustomAccessList | filter:searchData.CustomAccess| itemsPerPage:perPage.CustomAccess" current-page="currentPages.CustomAccess" pagination-id="CustomAccessPagination">
+                                            <td >{{$index+1}}</td>
+                                            <td>{{newDet.ModuleName }}</td>
+                                            <td>{{newDet.EntityName}}</td>
+                                            <td>{{newDet.TotalAccessName}}</td>
+                                            <td>{{newDet.NoOfaAllowedUsers}}</td>
+                                            <td>{{newDet.NoOfAllowedGroup}}</td>
+                                            <td class="text-center">
+                                                <div class="btn-group-sm">
+                                                    <a href="#" class="btn btn-info" ng-click="GetCustomAccessById(newDet)"><i class="fas fa-pencil-alt"></i></a>
+                                                    <a href="#" class="btn btn-danger" ng-click="DeleteCustomAccess(newDet, $index)"><i class="fas fa-trash"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="CustomAccessPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Module<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.ModuleId" ng-change="ChangeModule()" ng-disabled="!beData.IsEdit" id="moduleId">
+                                                    <option ng-value="M.ModuleId" ng-repeat="M in ModuleList" ng-selected="M.ModuleId==beData.ModuleId">{{M.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Entity<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.EntityIds" @*ng-disabled="!beData.IsEdit"*@ id="EntityIds">
+                                                    <option ng-value="pl.EntityId" ng-repeat="pl in EntityList" ng-selected="pl.EntityId==beData.EntityIds">{{pl.EntityName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <label><b>    </b></label>
+                                <div class="table-responsive" style="margin-bottom: 55px;">
+                                    <table id="main-table" class="table table-sm table-bordered bg-white" style="table-layout: auto; width:100%;">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="text-center" style="width: 10px;">SNo</th>
+                                                <th class="text-left" style="width: 150px">Access Name<span class="text-danger">*</span></th>
+                                                <th class="text-left" style="width: 150px;">Allow User</th>
+                                                <th class="text-left" style="width: 150px;">Allow Group</th>
+                                                <th class="text-center" style="width: 10px!important">Action  </th>
+                                                <th hidden class="text-center" style="width:40px"> AutoNumber</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="pDet in beData.CustomAccessColl">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td><input type="text" class="form-control form-control-sm" ng-model="pDet.AccessName" ng-disabled="!pDet.IsNew"   id="accessName_{{$index}}"  ></td>
+                                                <td>
+                                                    <select class="form-control form-control-sm" active-select2 multiple ng-model="pDet.UserId" data-placeholder="Select Users">
+                                                        <option ng-repeat="pl in UserList" ng-value="pl.UserId" ng-selected="pl.UserId==pDet.UserId">{{pl.UserName}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control form-control-sm" active-select2 multiple ng-model="pDet.GroupId" data-placeholder="Select UserGroup">
+                                                        <option ng-repeat="pl in UserGroupList" ng-value="pl.GroupId" ng-selected="pl.GroupId==pDet.GroupId">{{pl.GroupName}} </option>
+                                                    </select>
+                                                </td>
+                                                <td hidden><input class="form-control form-control-sm" ng-model="pDet.AutoNumber" ng-init="pDet.AutoNumber = $index + 1" type="number"></td>
+                                                <td class="text-center gap-2 align-middle">
+                                                    <a ng-click="AddPHDDetails($index)" class="mr-2" ng-if="$last"><i class="fas fa-plus"></i></a>
+                                                    @*<a ng-click="delPHDDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>*@
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="SaveCustomAccess()"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

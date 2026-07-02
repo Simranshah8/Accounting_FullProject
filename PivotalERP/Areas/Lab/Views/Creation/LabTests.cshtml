@@ -1,0 +1,496 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    /* Selected tags */
+    .select2-container .select2-selection--multiple .select2-selection__choice {
+        background: #007bff !important; /* Tag background color */
+        color: white !important; /* Tag text color */
+        border: none !important; /* Remove border */
+        border-radius: 6px !important; /* Rounded tag */
+        padding: 2px 8px !important;
+        margin-top: 4px !important;
+        font-size: 12px;
+    }
+
+    /* Remove button inside tag */
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+        color: white !important; /* X icon color */
+        margin-right: 6px;
+    }
+</style>
+<script>
+        var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Lab_LabTests)";
+</script>
+<script src="~/jslib/Lab/LabTests.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="LabTests" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid p-0">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs fixed-top" id="custom-tabs-four-tab" role="tablist" style="background-color: #fff !important;">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Test Name</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2" style="margin-top: 38px !important">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllLabTests()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                Excel
+                                            </a>
+                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                     class="img-fluid exports-icon">
+                                                CSV
+                                            </a>
+                                        </div>
+                                        <a print-tbl report-name="'List Of Specimen'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                            <i class="fas fa-save"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Test Name<span style="color:red">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TestName">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Test Code<span style="color:red">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TestCode">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Alias (Short Name)<span style="color:red"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Alias">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Reporting Name (for print)<span style="color:red"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.ReportPrintName">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Product</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="newDet.ProductId" style="width:100%" placeholder="** Select Product  **"
+                                                        showdetails="false" confirm-action="ProductSelectionChange(newDet)" product-detail="newDet.productDetail" side-bar-data="newDet.sideBarData"></select>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label> Rate </label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="custom-control custom-checkbox float-right">
+                                                            <input class="custom-control-input" type="checkbox" id="checkboxCanChangeRate" ng-model="newDet.CanChangeRate" value="option1" checked>
+                                                            <label for="checkboxCanChangeRate" class="custom-control-label"> Can Editable </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Charge" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" ng-disabled="!newDet.CanChangeRate">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix d-flex">
+                                                    <div class="custom-control custom-checkbox mx-2">
+                                                        <input class="custom-control-input" type="checkbox" id="checkboxAllowDiscount" ng-model="newDet.AllowDiscount">
+                                                        <label for="checkboxAllowDiscount" class="custom-control-label"> Allow Discount </label>
+                                                    </div>
+                                                    <div class="custom-control custom-checkbox mx-2">
+                                                        <input class="custom-control-input" type="checkbox" id="checkboxPrimary2" ng-model="newDet.IsActive">
+                                                        <label for="checkboxPrimary2" class="custom-control-label">Is Active</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix d-flex">
+                                                    <div class="custom-control custom-checkbox mx-2">
+                                                        <input class="custom-control-input" type="checkbox" id="checkboxApplyTax" ng-model="newDet.ApplyTax">
+                                                        <label for="checkboxApplyTax" class="custom-control-label">ApplyTax</label>
+                                                    </div>
+                                                    <div class="custom-control custom-checkbox mx-2">
+                                                        <input class="custom-control-input" type="checkbox" id="checkboxIncludeTax" ng-model="newDet.IncludeTax">
+                                                        <label for="checkboxIncludeTax" class="custom-control-label">Include Tax</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Department <span style="color:red">*</span> </label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.DepartmentId">
+                                                    <option ng-value="DS.id" ng-repeat="DS in DepartmentList" ng-selected="D.id==newDet.LabCategoryId">{{DS.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Group <span style="color:red">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.LabCategoryId">
+                                                    <option ng-value="D.id" ng-repeat="D in LabCategoryList" ng-selected="D.id==newDet.LabCategoryId">{{D.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group clearfix">
+                                                <div class="custom-control custom-checkbox mx-2">
+                                                    <input class="custom-control-input" type="checkbox" id="IsIncentiveApplicable" ng-model="newDet.IsIncentiveApplicable">
+                                                    <label for="IsIncentiveApplicable" class="custom-control-label">Is Incentive Applicable?</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group clearfix">
+                                                <div class="custom-control custom-checkbox mx-2">
+                                                    <input class="custom-control-input" type="checkbox" id="IsPathology" ng-model="newDet.IsPathology">
+                                                    <label for="IsPathology" class="custom-control-label"> Is Pathology Test? </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group clearfix">
+                                                <div class="custom-control custom-checkbox mx-2">
+                                                    <input class="custom-control-input" type="checkbox" id="IsRadiology" ng-model="newDet.IsRadiology">
+                                                    <label for="IsRadiology" class="custom-control-label"> Is Radiology Test? </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Discount Per Upto</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.DiscountUpToPer" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Gender</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.ForGender">
+                                                    <option ng-value="D.id" ng-repeat="D in GenderColl" ng-selected="D.id==newDet.ForGender">{{D.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>SSF Rate</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.SSFCharge" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>SSF %</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.SSFPer" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();">
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label> Order Priority </label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.OrderPriorityId">
+                                                    <option ng-value="Ord.id" ng-repeat="Ord in OrderPriorityColl" ng-selected="Ord.id==newDet.OrderPriorityId">{{Ord.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Default Specimen <span style="color:red">*</span> </label>
+                                                <select class="form-control form-control-sm select2" multiple ng-model="newDet.DefaultSpecimenColl">
+                                                    <option ng-value="DS.id" ng-repeat="DS in SpecimenColl">{{DS.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label> Default Method </label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.DefaultMethodId">
+                                                    <option ng-value="M.MethodId" ng-repeat="M in MethodColl" ng-selected="M.MethodId==newDet.DefaultMethodId">{{M.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>Default Container </label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.DefaultContainerId">
+                                                    <option ng-value="C.ContainerTypeId" ng-repeat="C in ContainerColl" ng-selected="C.ContainerTypeId==newDet.DefaultContainerId">{{C.ContainerName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>TAT(Turnaround Time)(Min)<span style="color:red"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TAT">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Display Sequence<span style="color:red"></span></label>
+
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.DisplaySequence">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>LONIC (SSF Code)<span style="color:red"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.LONIC">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Report Template</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.ReportTemplateId">
+                                                    <option ng-value="RT.TranId" ng-repeat="RT in ReportTemplateList" ng-selected="RT.TranId==newDet.ReportTemplateId">{{RT.TemplateName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-4">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix d-flex">
+                                                    <div class="custom-control custom-checkbox mx-2">
+                                                        <input class="custom-control-input" type="checkbox" id="checkboxIsOutSources" ng-model="newDet.IsOutSources">
+                                                        <label for="checkboxIsOutSources" class="custom-control-label">Is OutSources</label>
+                                                    </div>
+                                                    <div class="custom-control custom-checkbox mx-2">
+                                                        <input class="custom-control-input" type="checkbox" id="checkboxIsProfileTest" ng-model="newDet.IsProfileTest">
+                                                        <label for="checkboxIsProfileTest" class="custom-control-label"> Is ProfileTest </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3" ng-show="newDet.IsProfileTest">
+                                            <div class="form-group">
+                                                <label>
+                                                    Profile Member Test<span style="color:red"></span>
+                                                </label>
+                                                <select class="form-control form-control-sm select2" multiple ng-model="newDet.ProfileMemberTestIdColl">
+                                                    <option ng-value="pp.LabTestId" ng-repeat="pp in LabTestList" ng-selected="pp.LabTestId==newDet.ProfileMemberTestId">{{pp.TestName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Interpretation / Notes<span style="color:red"></span></label>
+                                                <textarea class="form-control form-control-sm" ng-model="newDet.Interpretation" rows="3"> </textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <label><b> Components for this Test:</b></label>
+                                <div class="table-responsive" style="margin-bottom: 55px;">
+                                    <table id="main-table" class="table table-sm table-bordered bg-white" style="table-layout: auto; width:100%;">
+                                        <thead class="thead-light">
+                                            <tr>
+                                                <th class="text-center" style="width: 40px">SNo</th>
+                                                <th class="text-center" style="width: 110px">Name</th>
+                                                <th class="text-center" style="width: 80px">Code</th>
+                                                <th class="text-center" style="width: 70px">Unit</th>
+                                                <th class="text-center" style="width: 70px">Value Type</th>
+                                                <th class="text-center" style="width: 70px">Def.Value</th>
+                                                <th class="text-center" style="width: 40px">Disp Seq.</th>
+                                                <th class="text-center" style="width: 100px">Component Group </th>
+                                                <th class="text-center" style="width: 40px">AnswerSet</th>
+                                                <th class="text-center" style="width: 40px">Method</th>
+                                                <th class="text-center" style="width: 40px">Remarks</th>
+                                                <th class="text-center" style="width: 80px">Formula</th>
+                                                <th class="text-center" style="width: 40px">Is Active  </th>
+                                                @*<th class="text-center" style="width: 40px">IsCalculated</th>*@
+                                                <th class="text-center" style="width: 40px">Action  </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="pDet in newDet.LabComponentsColl">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td><input type="text" class="form-control form-control-sm" ng-model="pDet.Name"></td>
+                                                <td><input class="form-control form-control-sm" ng-model="pDet.Code"></td>
+                                                <td>
+                                                    <select class="form-control form-control-sm"
+                                                            ng-model="pDet.UnitId">
+                                                        <option value="">--Select--</option>
+                                                        <option ng-value="U.UnitId" ng-repeat="U in UnitColl">
+                                                            {{U.Symbol}}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control form-control-sm form-select" ng-model="pDet.TypeId">
+                                                        <option value="">--Select--</option>
+                                                        <option ng-value="Ty.id" ng-repeat="Ty in TypeListColl"> {{Ty.text}} </option>
+                                                    </select>
+                                                </td>
+                                                <td><input class="form-control form-control-sm" ng-model="pDet.DefValue" type="number"></td>
+                                                <td><input class="form-control form-control-sm" ng-model="pDet.DisplaySequence" ng-init="pDet.DisplaySequence = $index + 1" type="number"></td>
+                                                <td><input class="form-control form-control-sm" ng-model="pDet.ComponentGroup" type="text"></td>
+                                                <td>
+                                                    <select class="form-control form-control-sm" ng-model="pDet.AnswerSetId" ng-disabled="pDet.TypeId != 3">
+                                                        <option ng-value="pp.LookupId" ng-repeat="pp in AnswerSetList" ng-selected="pp.LookupId==pDet.AnswerSetId"> {{pp.Name}} </option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control form-control-sm"
+                                                            ng-model="pDet.MethodId">
+                                                        <option ng-value="pp.MethodId"
+                                                                ng-repeat="pp in MethodColl">
+                                                            {{pp.Name}}
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td><input class="form-control form-control-sm" ng-model="pDet.Remarks" type="text"></td>
+                                                <td>
+                                                    <input class="form-control form-control-sm"
+                                                           ng-model="pDet.Formula"
+                                                           type="text"
+                                                           ng-disabled="!(pDet.TypeId == 1)">
+                                                </td>
+                                                <td style="text-align:center;">
+                                                    <input type="checkbox" class="icheck-primary d-inline"
+                                                           ng-model="pDet.IsActive">
+                                                </td>
+                                                <td class="text-center gap-2 align-middle">
+                                                    <a ng-click="AddPHDDetails($index)" class="mr-2"><i class="fas fa-plus"></i></a>
+                                                    <a ng-click="delPHDDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                    <a class="btn btn-primary btn-sm text-white" ng-click="RefRules(pDet)"> Ref.Value</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="SaveLabTest()"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="RefRules" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content" style="width:calc(100vw - 2rem)">
+                    <div class="modal-header p-2">
+                        <h6 class="modal-title">Reference Range Value : Component Name</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered table-sm mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th rowspan="2" style="width: 10%">Gender</th>
+                                    <th rowspan="2" style="width: 12%">Gender Description</th>
+                                    <th colspan="2" class="text-center" style="width: 13%; background-color: #96e1ff">Age Range</th>
+                                    <th colspan="2" class="text-center" style="width: 13%; background-color: #cdf5d6">Normal Range</th>
+                                    <th colspan="2" class="text-center" style="width: 13%; background-color: #ffd8dc ">Critical Range</th>
+                                    <th rowspan="2" style="width: 18%">Textual Reference</th>
+                                    <th rowspan="2" style="width: 30%">Reference Range Description</th>
+                                </tr>
+                                <tr>
+                                    <th style="background-color: #96e1ff">Min Age</th>
+                                    <th style="background-color: #96e1ff">Max Age</th>
+                                    <th style="background-color: #cdf5d6">Min</th>
+                                    <th style="background-color: #cdf5d6">Max</th>
+                                    <th style="background-color: #ffd8dc">Min</th>
+                                    <th style="background-color: #ffd8dc">Max</th>
+                                </tr>
+                            </thead>
+                            @*<tr ng-repeat="row in pDet.ReferenceRangeColl">*@
+                            <tr ng-repeat="row in newDet.LabComponentsColl[activeIndex].ReferenceRangeColl">
+                                <td>{{row.Gender}}</td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.GenderDescription"></td>
+                                <td><input type="number" class="form-control form-control-sm" ng-model="row.AgeMin"></td>
+                                <td><input type="number" class="form-control form-control-sm" ng-model="row.AgeMax"></td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.NormalLow"></td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.NormalHigh"></td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.CriticalLow"></td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.CriticalHigh"></td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.TextualReference"></td>
+                                <td><input type="text" class="form-control form-control-sm" ng-model="row.ReferenceRangeDescription"></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        @*<button type="button" class="btn btn-default" data-dismiss="modal">Reset</button>*@
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" ng-click="SaveRefRules()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,2145 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.HR_EmployeeProfile)";
+</script>
+
+
+
+<script src="~/jslib/hr/master/EmployeeProfile.js"></script>
+
+<div ng-app="myApp" ng-controller="EmployeeProfileController" ng-init="LoadData()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="tab-content">
+                            <div id="employee-profile-section">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-select form-control border-left-0 border-right-0 px-1" ng-model="perPage.Employee" style="width:65px;" ng-change="GetEmployeeWithPag()">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Employee">{{pp.text}}</option>
+                                                    </select>
+
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Employee" ng-change="GetEmployeeWithPag()">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" data-placement="top" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait" title="Refresh" ng-click="GetEmployeeWithPag()">
+                                                <i class="fas fa-redo-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#EmployeeProfile'" sheet-name="'EmployeeProfile'" report-name="'Employee Profile'" ignore-column="'5'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#EmployeeProfile').tableExport({type:'csv',escape:'false',reportName:'Employee Profile',ignoreColumn:'5' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                 </div>
+                                            <a print-tbl table-id="'#EmployeeProfile'" class="btn btn-secondary btn-light btn-sm wait"title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-primary load" ng-click="ClearEmpProfile()" id="add-employee-details" style="min-width: 110px;">
+                                                <i class="fas fa-plus w-t"></i> Add Employee
+                                            </button>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="table-scroll-x-y" style="height:auto!important;max-height: calc(100vh - 6rem)!important; ">
+                                    <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="EmployeeProfile">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center; width: 60px; background-color:#ececec !important;"> S.No  </th>
+                                                <th style="text-align: center; width: 120px; background-color:#ececec !important;" title="Employee Code"> E. Code  </th>
+                                                <th style="text-align: center; width: 150px; background-color:#ececec !important;" title="Employee Name">  Name </th>
+                                                <th style="text-align: center; width: 150px; background-color:#ececec !important;" title="Department"> Department </th>
+                                                <th style="text-align: center; width: 150px; background-color:#ececec !important;" title="Designation"> Designation </th>
+                                                <th style="text-align: center; width: 200px; background-color:#ececec !important;" title="EmailId"> EmailId </th>
+                                                <th style="text-align: center; width: 150px; background-color:#ececec !important;" title="Contact No"> Contact No</th>
+                                                <th style="text-align: center; width: 150px; background-color:#ececec !important;" title="Enroll Number"> Enroll Number </th>
+                                                <th style="text-align: center; width: 150px; background-color:#ececec !important;" title="Branch"> Branch </th>
+                                                <th style="text-align: center; width: 150px; background-color: #ececec !important;" class="no-print">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="E in AllEmployeeList | filter:searchData.Employee |orderBy:sortKey:reverse|itemsPerPage:perPage.Employee" total-items="paginationOptions.TotalRows">
+                                                <td style="text-align:center;margin:auto">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.EmployeeCode}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.Name}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.DepartmentName}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.DesignationName}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.EmailId}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.ContactPer}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.EnrollNumber}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{E.BranchName}}
+                                                </td>
+                                                <td class="project-actions align-middle no-print" style="text-align:center;">
+                                                    <div class="btn-group-sm">
+                                                        <a href="#" class="btn btn-info btn-sm my-1" ng-click="getEmployeeById(E)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="~/HR/Master/Employee?EmployeeId= {{E.EmployeeId}}" class="btn btn-primary btn-sm my-1"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="#" class="btn btn-danger btn-sm my-1" ng-click="DelEmployeeById(E)"><i class="fas fa-trash"></i></a>
+                                                        <a href="~/HR/Master/EmpPrint?EmployeeId= {{E.EmployeeId}}" class="btn btn-secondary my-1 btn-sm"><i class="fas fa-print"></i></a>
+                                                        <a href="#" class="btn btn-info btn-sm my-1" ng-click="getDocViewById(E)"><i class="fas fa-eye"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+                                </div>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls max-size="perPage.Employee" direction-links="true" boundary-links="true" on-page-change="ReSearchData(newPageNumber)">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+
+                            <div id="employee-profile-form">
+                                <form>
+                                    <div class="timeline registration mt-3">
+                                        <!-- Timeline for  Permanent Address* -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Employee Detail <span style="color:red">*</span>
+                                            </span>
+                                        </div>
+                                        <div class="row ml-5">
+                                            <div class="col-md-9 ">
+                                                <div class="row">
+                                                    <div class="col-sm-4" hidden>
+                                                        <div class="form-group">
+                                                            <label>Employee Id</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.EmployeeNo" disabled>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Employee Code<span style="color:red">*</span></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.EmployeeCode" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Enroll Number</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newDet.EnrollNumber" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>First Name <span style="color:red">*</span></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.FirstName" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Middle Name</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.MiddleName" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Last Name <span style="color:red">*</span></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.LastName" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Gender <span style="color:red">*</span></label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.GenderId">
+                                                                <option ng-repeat="G in GenderColl" ng-value="G.text" ng-selected="G.GenderId == G.text">{{ G.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Blood Group</label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.BloodGroupId">
+                                                                <option ng-repeat="G in BloodGroupColl" ng-value="G.text" ng-selected="G.BloodGroupId == G.text">{{ G.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Religion <span style="color:red">*</span></label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.ReligionId" id="religionName">
+                                                                <option ng-repeat="G in ReligionColl" ng-value="G.id" ng-selected="G.ReligionId == G.id">{{ G.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Date of Birth (BS)</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.DobAD_TMP"
+                                                                   date-detail="newDet.DobADDet" after-days="0" confirm-action="updateDOB()" @*ng-blur="updateDOB(); updateRetirementDate()"*@>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Date of Birth (AD)</label>
+                                                            <input type="date" class="form-control form-control-sm" ng-model="newDet.DobAD_TMP" style="width:100%">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Marital Status <span style="color:red">*</span></label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.MaritalStatusId">
+                                                                <option ng-repeat="G in MaritalStatusColl" ng-value="G.id" ng-selected="G.MaritalStatusId == G.id">{{ G.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Nationality <span style="color:red">*</span></label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.NationalityId">
+                                                                <option ng-repeat="G in NationalityList" ng-value="G.NationalityId" ng-selected="newDet.NationalityId == G.NationalityId">{{G.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Pan Id</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.PanId" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Citizenship No</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.CitiNum" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Citizenship Issue Date</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.CitiIssueDate_TMP" date-detail="newDet.CitiIssueDateDet" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>CitizenShip Issue Place</label>
+                                                            <select class="form-control form-control-sm select2" id="cboDistrictCiti" style="width: 100%;" ng-model="newDet.CitiIssuePlaceId" data-placeholder="* select district *">
+                                                                <option ng-repeat="tdc in DistrictColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.CitiIssuePlaceId">
+                                                                    {{tdc.text}}
+                                                                </option>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Email Id</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.EmailId" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Office Contact No.</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.OfficeNum" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Personal Contact No.</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.PersonalNum" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Father Name <span style="color:red">*</span></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.FatherName" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Mother Name</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.MotherName" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Grand Father</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.GFatherName" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label for="">Spouse Name</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.SpouseName">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Anniversary Date</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.AnniversaryDate_TMP" date-detail="newDet.AnniversaryDateDet" style="width:100%">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Driving Licence No</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.DrivingLicNum" style="width:100%">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Licence Issue Place</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.LicIssuePlace" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Licence Issue Date</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.LicIssueDate_TMP" date-detail="newDet.LicIssueDateDet" style="width:100%">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Licence Expiry Date</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.LicExpiryDate_TMP" date-detail="newDet.LicExpiryDateDet" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Passport No</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.PassportNum" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Passport Issue Date</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.PassportIssueDate_TMP" date-detail="newDet.PassportIssueDateDet" style="width:100%">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Passport Expiry Date</label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.PassportExpiryDate_TMP" date-detail="newDet.PassportExpiryDateDet" style="width:100%">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Passport Issue Place</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.PassportIssuePlace" placeholder="* Enter Passport Issue Place *" style="width:100%">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 1 }:true">
+                                                        <div class="form-group">
+                                                            <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                            <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Employee Photo</label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{newDet.PhotoData || newDet.Photo }}" class="img-fluid" alt="" id="imgPhoto1" style="height:130px; width:165px; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-sfile" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Choose Photo</label>
+                                                    <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newDet.Photo_TMP" fileread="newDet.PhotoData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Citizenship Front</label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{newDet.CitiFrontImgData || newDet.CitiFrontImg }}" class="img-fluid" alt="" id="imgPhoto2" style="height:130px; width:165px; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-sfileF" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Choose Photo</label>
+                                                    <input id="choose-sfileF" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newDet.CitiFrontImg_Tmp" fileread="newDet.CitiFrontImgData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Citizenship Back</label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{newDet.CitiBackImgData || newDet.CitiBackImg }}" class="img-fluid" alt="" id="imgPhoto3" style="height:130px; width:165px; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-sfileB" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Choose Photo</label>
+                                                    <input id="choose-sfileB" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newDet.CitiBackImg_tmp" fileread="newDet.CitiBackImgData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- Timeline for  Official Detail* -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Official Detail <span style="color:red">*</span>
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Company Relationship</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.CompanyRelationshipId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in CompanyRelationshipList" ng-value="tdc.TranId" ng-selected="tdc.TranId==newDet.CompanyRelationshipId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Branch</label><span style="color: red">*</span>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.BranchId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in BranchList" ng-value="tdc.BranchId" ng-selected="tdc.BranchId==newDet.BranchId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Sub Branch</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.SubBranch" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in SubBranchList" ng-value="tdc.SubBranchId" ng-selected="tdc.SubBranchId==newDet.SubBranch"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Department</label><span style="color: red">*</span>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.DepartmentId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in DepartmentList" ng-value="tdc.CostCenterDepartmentId" ng-selected="tdc.CostCenterDepartmentId==newDet.DepartmentId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Designation<span style="color: red">*</span></label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.DesignationId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in DesignationList" ng-value="tdc.DesignationId" ng-selected="tdc.DesignationId==newDet.DesignationId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Category<span style="color: red">*</span></label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.CategoryId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in CategoryList" ng-value="tdc.CategoryId" ng-selected="tdc.CategoryId==newDet.CategoryId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Level</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.ELevelId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in LevelList" ng-value="tdc.LevelId" ng-selected="tdc.LevelId==newDet.ELevelId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Job Title</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm"
+                                                                       style="width: 100%" ng-model="newDet.JTitle" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Service Type</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.ServiceTypeId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in ServiceTypeList" ng-value="tdc.ServiceTypeId" ng-selected="tdc.ServiceTypeId==newDet.ServiceTypeId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Date of Joining<span style="color:red">*</span></label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.JoinDate_TMP" date-detail="newDet.JoinDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Date of Confirmation</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm"
+                                                                       date-picker ng-model="newDet.ConfirmDate_TMP" date-detail="newDet.ConfirmDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Date of Permanent</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm"
+                                                                       date-picker ng-model="newDet.PermanentDate_TMP" date-detail="newDet.PermanentDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Date of Retirement</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm"
+                                                                       date-picker ng-model="newDet.RetireDate_TMP" date-detail="newDet.RetireDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Head Quarter</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" ng-model="newDet.HeadQtr"
+                                                                       style="width: 100%" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Tax Rule As</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.TaxRullId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in TaxRullColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.TaxRullId"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Remote Area</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.RemoteAreaId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in AreaList" ng-value="tdc.AreaId" ng-selected="tdc.AreaId==newDet.RemoteAreaId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Disability</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.DisabilitesId" style="width: 100%;">
+                                                                    <option ng-repeat="D in DisabilitiesList" ng-value="D.DisabilitiesId" ng-selected="D.DisabilitiesId==newDet.DisabilitesId"> {{D.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Employee Group</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.EmployeeGroupId" style="width: 100%;">
+                                                                    <option ng-repeat="D in EmployeeGroupList" ng-value="D.EmployeeGroupId" ng-selected="D.EmployeeGroupId==newDet.EmployeeGroupId"> {{D.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Leave Applicable Date</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.LeaveApplicableDate_TMP" date-detail="newDet.LeaveApplicableDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label for="">Salary Applicable From</label>
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <select class="form-control form-control-sm select2" ng-model="newDet.SalaryApplicableYearId">
+                                                                            <option ng-value="A.id" ng-repeat="A in AcademicYearColl" ng-selected="A.id==newDet.SalaryApplicableYearId">{{A.text}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <select class="form-control form-control-sm select2" ng-model="newDet.SalaryApplicableMonthId">
+                                                                            <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newDet.SalaryApplicableMonthId">{{cl.text}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" id="AllowOTCheckbox11" ng-model="newDet.IsAllowOT" />
+                                                                    <label for="AllowOTCheckbox11" class="custom-control-label">
+                                                                        Allow OT
+                                                                    </label>
+                                                                </div>
+                                                                <div ng-show="newDet.IsAllowOT== true">
+                                                                    <select class="form-control form-control-sm select2" ng-model="newDet.OTCalculation" style="width: 100%;" data-placeholder="* OT Calculation *">
+                                                                        <option ng-repeat="ct in OTCalculationList track by ct.id" ng-value="{{ct.id}}" ng-selected="ct.id==newWorkingShift.OTCalculation">
+                                                                            {{ct.text}}
+                                                                        </option>
+                                                                    </select>
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 2 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+
+                                                        @*<div class="col-md-4">
+                            <div class="form-group">
+                                <label>Machine Master</label>
+                                <select class="form-control form-control-sm select2" ng-model="newDet.MachineMasterId" style="width: 100%;">
+                                    <option ng-repeat="D in EmployeeGroupList" ng-value="D.EmployeeGroupId" ng-selected="D.EmployeeGroupId==newDet.MachineMasterId"> {{D.Name}} </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Project</label>
+                                <select class="form-control form-control-sm select2" ng-model="newDet.ProjectId" style="width: 100%;">
+                                    <option ng-repeat="D in EmployeeGroupList" ng-value="D.ProjectId" ng-selected="D.EmployeeGroupId==newDet.ProjectId"> {{D.Name}} </option>
+                                </select>
+                            </div>
+                        </div>*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!-- Timeline for  Permanent Address* -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Permanent Address <span style="color:red">*</span>
+                                            </span>
+                                        </div>
+
+
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Country</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.PCountryId" ng-change="clearP" style="width: 100%;" data-placeholder="* select Country *">
+                                                                    <option ng-repeat="tdc in CountryColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.PCountryId"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" ng-hide="newDet.PCountryId == 2">
+                                                                <label>State</label>
+                                                                <select class="form-control form-control-sm select2" id="cboProvincePer"
+                                                                        style="width: 100%;" ng-model="newDet.PStateId" data-placeholder="* select State *">
+                                                                    <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newDet.PStateId">
+                                                                        {{cl.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group" ng-show="newDet.PCountryId == 2">
+                                                                <label>State</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PStateName" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" ng-hide="newDet.PCountryId == 2">
+                                                                <label>District</label>
+                                                                <select class="form-control form-control-sm select2" id="cboDistrictPer"
+                                                                        style="width: 100%;" ng-model="newDet.PDistrictId" data-placeholder="* select district *">
+                                                                    <option ng-repeat="tdc in DistrictColl | filter: { stateId: newDet.PStateId }:true" ng-value="tdc.id" ng-selected="tdc.id==newDet.PDistrictId">
+                                                                        {{tdc.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group" ng-show="newDet.PCountryId == 2">
+                                                                <label>District</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PDistrictName" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" ng-hide="newDet.PCountryId == 2">
+                                                                <label>Municipality/VDC</label>
+                                                                <select class="form-control form-control-sm select2" id="cboAreaPer"
+                                                                        style="width: 100%;" ng-model="newDet.P_LocalLevelId" data-placeholder="* select Municipality/VDC *">
+                                                                    <option ng-repeat="tdc in VDCColl| filter: { districtId: newDet.PDistrictId }:true" ng-value="tdc.id" ng-selected="tdc.id==newDet.P_LocalLevelId">
+                                                                        {{tdc.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group" ng-show="newDet.PCountryId == 2">
+                                                                <label>Municipality/VDC</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.P_LocalLevelName" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>City</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PCity" style="width:100%">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Ward</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.PWard" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Street</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PStreet" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>House No</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PHouseNum" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Full Address <span style="color:red">*</span></label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.PFullAddr" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 3 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!-- Timeline for  Temporary Address* -->
+
+                                        <div class="time-label d-flex">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Temporary Address
+                                            </span>
+                                            <div class="ml-2 mt-2">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox" id="samePerAdd" ng-value="true" ng-model="newDet.IsSameAsPermanentAddress" ng-change="SamePAddress()">
+                                                    <label for="samePerAdd" class="custom-control-label" style="font-size:17px">
+                                                        Same as Permanent Address
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Country</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.TCountryId" ng-disabled="newDet.IsSameAsPermanentAddress" ng-change="clearTemp()" style="width: 100%;" data-placeholder="* select Country *">
+                                                                    <option ng-repeat="tdc in CountryColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.TCountryId"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" ng-hide="newDet.TCountryId == 2">
+                                                                <label>State</label>
+                                                                <select class="form-control form-control-sm select2" id="cboProvinceTmp"
+                                                                        style="width: 100%;" ng-model="newDet.TStateId" data-placeholder="* select State *" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                                    <option ng-repeat="cl in ProvinceColl" ng-value="cl.id" ng-selected="cl.id==newDet.TStateId">
+                                                                        {{cl.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group" ng-show="newDet.TCountryId == 2">
+                                                                <label>State</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TStateName" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" ng-hide="newDet.TCountryId == 2">
+                                                                <label>District</label>
+                                                                <select class="form-control form-control-sm select2" id="cboDistrictTmp"
+                                                                        style="width: 100%;" ng-model="newDet.TDistrictId" data-placeholder="* select district *" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                                    <option ng-repeat="tdc in DistrictColl | filter: { stateId: newDet.TStateId }:true" ng-value="tdc.id" ng-selected="tdc.id==newDet.TDistrictId">
+                                                                        {{tdc.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+
+                                                            <div class="form-group" ng-show="newDet.TCountryId == 2">
+                                                                <label>District</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TDistrictName" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group" ng-hide="newDet.TCountryId == 2">
+                                                                <label>Municipality/VDC</label>
+                                                                <select class="form-control form-control-sm select2" id="cboAreaTmp"
+                                                                        style="width: 100%;" ng-model="newDet.Temp_LocalLevelId" data-placeholder="* select Municipality/VDC *" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                                    <option ng-repeat="tdc in VDCColl| filter: { districtId: newDet.TDistrictId }:true" ng-value="tdc.id" ng-selected="tdc.id==newDet.Temp_LocalLevelId">
+                                                                        {{tdc.text}}
+                                                                    </option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group" ng-show="newDet.TCountryId == 2">
+                                                                <label>Municipality/VDC</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Temp_LocalLevelName" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>City</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TCity" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Ward</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.TWard" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Street</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TStreet" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>House No</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.THouseNum" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Full Address</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.TFullAddr" style="width:100%" ng-disabled="newDet.IsSameAsPermanentAddress">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 4 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timeline for  Emergency Contact -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Emergency Contact
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Person Name</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.ContactPer" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Relationship</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.ContactRelation" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in RelationshipColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.ContactRelation"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Address</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.ContactAddr" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Phone</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.ContactPhone" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Mobile</label>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.ContactMobile" style="width:100%">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 5 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!-- Timeline for  Provident Fund -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Provident Fund
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>PF Account No.</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm"
+                                                                       style="width: 100%" ng-model="newDet.PfAccNum" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Nominee</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" ng-model="newDet.PfNominee"
+                                                                       style="width: 100%" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Relationship</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.PfRelation" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in RelationshipColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.PfRelation"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>ID Type</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.PfID" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in IDTypeColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.PfID"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>ID No.</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" ng-model="newDet.PfIDNum"
+                                                                       style="width: 100%" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Entry Date</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm"
+                                                                       style="width: 100%" date-picker ng-model="newDet.PfEntryDate_TMP" date-detail="newDet.PfEntryDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Issuing Office</label>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" ng-model="newDet.PfIssueOffice"
+                                                                       style="width: 100%" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Issuing Place</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.PfIssuePlace" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-flex">Attachment</label>
+                                                                <input id="choose-PFfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.PfAtt_TMP" fileread="newDet.PfAttData" />
+                                                                <img ng-src="{{newDet.PfAtt ||newDet.PfAttData}}" class="img-fluid mt-2" id="imgPhotoPF" style="max-height:100px; max-width:100px;">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 6 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timeline for  SSF -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;" class="ml-3">
+                                                SSF
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>AccessionNo</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.AccessNum">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>SSF No</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.SsfNum">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-flex">Attachment</label>
+                                                                <input id="choose-Ssffile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.SsfAtt_TMP" fileread="newDet.SsfAttData" />
+                                                                <img ng-src="{{newDet.SsfAtt || newDet.SsfAttData}}" class="img-fluid mt-2" id="imgPhotossf" style="max-height:100px; max-width:100px;">
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 7 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timeline for  CIT -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;" class="ml-3">
+                                                CIT
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>CIT Code</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.CitCode">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>CIT Ac.No</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.CitAccNum">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Amount</label>
+                                                                <input type="number" class="form-control form-control-sm" style="width:100%" ng-model="newDet.CitAmt">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Nominee</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.CitNominee">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Relationship </label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.CitRelationId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in RelationshipColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.CitRelationId"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>ID Type </label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.CitIdType" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in IDTypeColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.CitIdType"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>ID No. </label>
+                                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.CitIdNum">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Entry Date</label>
+                                                                <input type="text" date-picker ng-model="newDet.CitEntryDate_TMP" date-detail="newDet.CitEntryDateDet" class="form-control form-control-sm" style="width:100%">
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-flex">Attachment</label>
+                                                                <input id="choose-citfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.CitAtt_TMP" fileread="newDet.CitAttData" />
+                                                                <img ng-src="{{ newDet.CitAtt || newDet.CitAttData}}" class="img-fluid mt-2" id="imgPhotoCIT" style="max-height:100px; max-width:100px;">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 8 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--TimeLine for Gratuity-->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6"> Gratuity </span>
+                                        </div>
+                                        <div>
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Gratuity Code</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.GratCode" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Gratuity AC.No</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.GratAccNum" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Nominee</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.GratNominee" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Relationship</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.GratRelation" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in RelationshipColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.GratRelation"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>ID Type</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.GratIdType" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in IDTypeColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.GratIdType"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>ID No.</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.GratIdNum" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Entry Date</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" date-picker ng-model="newDet.GratEntryDate_TMP" date-detail="newDet.GratEntryDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Issuing Office</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.GratIssueOffice" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Issuing Place</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.GratIssuePlace" />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-flex">Attachment</label>
+                                                                <input id="choose-gratfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.GratAtt_TMP" fileread="newDet.GratAttData" />
+                                                                <img ng-src="{{newDet.GratAtt ||newDet.GratAttData}}" class="img-fluid mt-2" id="imgPhotoGrat" style="max-height:100px; max-width:100px;">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 9 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timeline for  Bank Account -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Bank Account
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="mt-2">
+                                                        <!-- table input start  -->
+                                                        <div class="table-responsive">
+                                                            <div class="card table-scroll-x-y" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                                                <table id="main-table" class="main-table table table-sm table-bordered">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width: 56px; background-color: #ececec !important; z-index:2;">SNo.</th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;">Bank Name</th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;">Account Name</th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;"> Account No.</th>
+                                                                            <th style="width: 180px; background-color: #ececec !important; z-index: 2;">Branch</th>
+                                                                            <th style="width: 90px; background-color: #ececec !important; z-index: 2;">ForPayroll</th>
+                                                                            <th style="width: 56px; background-color: #ececec !important; z-index: 2;">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="E in newDet.EmpBankAccColl">
+                                                                            <td>{{$index+1}}</td>
+                                                                            <td>
+                                                                                <select class="form-control form-control-sm select2" ng-model="E.BankNameId" style="width: 100%;">
+                                                                                    <option ng-repeat="tdc in BankList" ng-value="tdc.BankId" ng-selected="tdc.BankId==E.BankNameId"> {{tdc.Name}} </option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="E.AccName" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm mb-2" ng-model="E.AccNum" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="E.Branch" />
+                                                                            </td>
+                                                                            <td class="align-middle text-center">
+                                                                                <div class="custom-control custom-checkbox">
+                                                                                    <input class="custom-control-input" type="checkbox" ng-model="E.ForPayroll"
+                                                                                           id="customCheckbox{{$index}}">
+                                                                                    <label for="customCheckbox{{$index}}"
+                                                                                           class="custom-control-label">
+                                                                                    </label>
+                                                                                </div>
+                                                                            </td>
+
+                                                                            <td class="align-middle text-center">
+                                                                                <div class="btn-group btn-group-sm">
+                                                                                    <a class="btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Row" ng-click="AddbankDet($index)"><i class="fas fa-plus"></i></a>
+                                                                                    <a class="btn btn-danger text-white ml-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Row." ng-click="DelBankDet($index)"><i class="fas fa-trash"></i></a>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <!-- tabel input end -->
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 10 }:true">
+                                                    <div class="form-group">
+                                                        <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                        <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!--TimeLine for Life Insurance-->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6"> Life Insurance </span>
+                                        </div>
+                                        <div>
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Insurance Company</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.LInsuComp" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Name</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.LPolicyName" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy No.</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.LPolicyNum" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Amount</label>
+                                                                <input type="number" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.LPolicyAmt" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Start Date</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.LPolicySDate_TMP" date-detail="newDet.LPolicySDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Last Date</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.LPolicyLDate_TMP" date-detail="newDet.LPolicyLDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Premium Amount</label>
+                                                                <input type="number" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.LPremiumAmt" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Payment Term</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.LPaymentType" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in PaymentTypeColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.LPaymentType"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Start Month</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.LStartMonth" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in StartMonthColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.LStartMonth"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group d-flex">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" id="DeductSalaryCheckbox11" ng-model="newDet.LDedSalary" />
+                                                                    <label for="DeductSalaryCheckbox11" class="custom-control-label">
+                                                                        Is Deducted From Salary
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Remarks</label>
+                                                                <textarea class="form-control form-control-sm" rows="1" name="Remarks" id="ntxtRemarks" ng-model="newDet.LRemarks"></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Insurance Type</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.LInsuTypeId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in InsuranceTypeList" ng-value="tdc.InsuranceId" ng-selected="tdc.InsuranceId==newDet.LInsuTypeId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-flex">Attachment</label>
+                                                                <input id="choose-LIfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.LiAtt_TMP" fileread="newDet.LiAttData" />
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 11 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <!--TimeLine for Health Insurance-->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6"> Health Insurance </span>
+                                        </div>
+                                        <div>
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Insurance Company</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.HInsuComp" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Name</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.HPolicyName" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy No.</label>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.HPolicyNum" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Amount</label>
+                                                                <input type="number" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.HPolicyAmt" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Start Date</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.HPolicySDate_TMP" date-detail="newDet.HPolicySDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Policy Last Date</label>
+                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newDet.HPolicyLDate_TMP" date-detail="newDet.HPolicyLDateDet" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Premium Amount</label>
+                                                                <input type="number" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.HPremiumAmt" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Payment Term</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.HPaymentType" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in PaymentTypeColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.HPaymentType"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Start Month</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.HStartMonth" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in StartMonthColl" ng-value="tdc.id" ng-selected="tdc.id==newDet.HStartMonth"> {{tdc.text}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group d-flex">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox" id="DeductSalaryCheckbox" ng-model="newDet.HDedSalary" />
+                                                                    <label for="DeductSalaryCheckbox" class="custom-control-label">
+                                                                        Is Deducted From Salary
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Remarks</label>
+                                                                <textarea class="form-control form-control-sm" rows="1" name="Remarks" id="ntxtRemarks" ng-model="newDet.HRemarks"></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Insurance Type</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.HInsuTypeId" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in InsuranceTypeList" ng-value="tdc.InsuranceId" ng-selected="tdc.InsuranceId==newDet.LInsuTypeId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-flex">Attachment</label>
+                                                                <input id="choose-Hifile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.HiAtt_TMP" fileread="newDet.HiAttData" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 12 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timeline for Account Details -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6"> Account Detail</span>
+                                        </div>
+                                        <div>
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        @*<div class="col-md-4">
+                            <div class="form-group">
+                                <label>Ledger</label>
+                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.AccLedger" />
+                            </div>
+                        </div>*@
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Cost Center</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.CostCenterId" style="width: 100%;" data-placeholder="* select Cost Center *">
+                                                                    <option ng-repeat="tdc in CostCenterList" ng-value="tdc.CostCenterId" ng-selected="tdc.CostCenterId==newDet.CostCenterId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Brand</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.BrandId" style="width: 100%;" data-placeholder="* Select Brand *">
+                                                                    <option ng-repeat="tdc in ProductBrandList" ng-value="tdc.ProductBrandId" ng-selected="tdc.ProductBrandId==newDet.BrandId"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 13 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                        @*<div class="col-md-4">
+                            <div class="form-group">
+                                <label>OT Ledger</label>
+                                <input type="text" class="form-control form-control-sm" style="width: 100%" ng-model="newDet.OTLedger" />
+                            </div>
+                        </div>*@
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Timeline for  Academic Qualification -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Academic Qualification
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="mt-2">
+                                                        <!-- table input start  -->
+                                                        <div class="table-responsive">
+                                                            <div class="card table-scroll-x-y" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                                                <table id="main-table" class="main-table table table-sm table-bordered">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width: 56px; background-color: #ececec !important; z-index:2;">SNo.</th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;">Degree Name</th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;"> Board University</th>
+                                                                            <th style="width: 90px; background-color: #ececec !important; z-index: 2;">Passed Year</th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;">Grade Percentage</th>
+                                                                            <th style="width: 160px; background-color: #ececec !important; z-index: 2;">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="Q in newDet.AcaQualificationColl">
+                                                                            <td>{{$index+1}}</td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="Q.DegreeName" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm mb-2" ng-model="Q.BoardUni" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="Q.PassedYr" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="Q.GradePer" />
+                                                                            </td>
+
+                                                                            <td class="align-middle text-center">
+                                                                                <div class="btn-group btn-group-sm">
+                                                                                    <a class="btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Row" ng-click="AddQualDet($index)"><i class="fas fa-plus"></i></a>
+                                                                                    <a class="btn btn-danger text-white ml-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Row." ng-click="DelQualDet($index)"><i class="fas fa-trash"></i></a>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <!-- tabel input end -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 14 }:true">
+                                                    <div class="form-group">
+                                                        <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                        <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Timeline for  Work Experience -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Work Experience
+                                            </span>
+                                        </div>
+                                        <div class="">
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="mt-2">
+                                                        <!-- table input start  -->
+                                                        <div class="table-responsive">
+                                                            <div class="card table-scroll-x-y" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                                                <table id="main-table" class="main-table table table-sm table-bordered">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="width: 56px; background-color: #ececec !important; z-index:2;">SNo.</th>
+                                                                            <th style="width: 150px; background-color: #ececec !important; z-index: 2;">Organization</th>
+                                                                            <th style="width: 150px; background-color: #ececec !important; z-index: 2;"> Department</th>
+                                                                            <th style="width: 150px; background-color: #ececec !important; z-index: 2;">Job Title</th>
+                                                                            <th style="width: 150px; background-color: #ececec !important; z-index: 2;">Start Date </th>
+                                                                            <th style="width: 150px; background-color: #ececec !important; z-index: 2;">End Date </th>
+                                                                            <th style="width: 200px; background-color: #ececec !important; z-index: 2;"> Remarks</th>
+                                                                            <th style="width: 56px; background-color: #ececec !important; z-index: 2;">Action</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="W in newDet.WorkExpColl">
+                                                                            <td>{{$index+1}}</td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" ng-model="W.Org" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <select class="form-control form-control-sm select2" ng-model="W.DepartmentId" style="width: 100%;">
+                                                                                    <option ng-repeat="tdc in DepartmentList" ng-value="tdc.CostCenterDepartmentId" ng-selected="tdc.CostCenterDepartmentId==W.DepartmentId"> {{tdc.Name}} </option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm mb-2" ng-model="W.JobTitle" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="W.StartDate_TMP" date-detail="W.StartDateDet" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="W.EndDate_TMP" date-detail="W.EndDateDet" />
+                                                                            </td>
+                                                                            <td>
+                                                                                <textarea class="form-control form-control-sm" rows="1" name="Remarks" ng-model="W.Remarks"></textarea>
+                                                                            </td>
+
+                                                                            <td class="align-middle text-center">
+                                                                                <div class="btn-group btn-group-sm">
+                                                                                    <a class="btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="" ng-click="AddWorkDet($index)" data-original-title="Add Row"><i class="fas fa-plus"></i></a>
+                                                                                    <a class="btn btn-danger text-white ml-2" data-toggle="tooltip" data-placement="top" title="" ng-click="DelWorkDet($index)" data-original-title="Delete Row."><i class="fas fa-trash"></i></a>
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                            <!-- tabel input end -->
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 15 }:true">
+                                                    <div class="form-group">
+                                                        <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                        <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Timeline for Supervisor -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6"> Supervisor</span>
+                                        </div>
+                                        <div>
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>First Level</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.EFirstLevel" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in EmployeeList" ng-value="tdc.EmployeeId" ng-selected="tdc.EmployeeId==newDet.EFirstLevel"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Second Level</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.ESecondLevel" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in EmployeeList" ng-value="tdc.EmployeeId" ng-selected="tdc.EmployeeId==newDet.ESecondLevel"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label>Third Level</label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newDet.EThirdLevel" style="width: 100%;">
+                                                                    <option ng-repeat="tdc in EmployeeList" ng-value="tdc.EmployeeId" ng-selected="tdc.EmployeeId==newDet.EThirdLevel"> {{tdc.Name}} </option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 16 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Timeline for UDF -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6"> UDF</span>
+                                        </div>
+                                        <div>
+                                            <div class="row ml-5">
+                                                <div class="col-md-12">
+                                                    <div class="row">                                                       
+                                                        <div class="col-sm-{{uf.ColWidth}}" ng-repeat="uf in UDFFeildsColl | filter: { FieldAfter: 17 }:true">
+                                                            <div class="form-group">
+                                                                <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                                <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <!-- Timeline for  Document -->
+                                        <div class="time-label">
+                                            <span style="border: 2px solid #dee2e6;">
+                                                Document Attachment
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <div class="ml-5">
+                                                <div class="pb-2 add-more-than-one-form-block">
+                                                    <form class="mb-0">
+                                                        <article>
+                                                            <div class="row">
+                                                                <div class="col-sm-2">
+                                                                    <div class="form-group">
+                                                                        <label>Type Of Document</label>
+                                                                        <select class="form-control form-control-sm select2" ng-model="docType">
+                                                                            <option ng-value="dc" ng-repeat="dc in DocumentList">{{dc.Name}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-4">
+                                                                            <div class="form-group">
+                                                                                <label class="d-flex">Attach Document</label>
+                                                                                <input type="file" id="flMoreFiles" file-model ng-model="attachFile">
+
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label>Description</label>
+                                                                                <input type="text" class="form-control form-control-sm"
+                                                                                       ng-model="docDescription"
+                                                                                       placeholder="">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-2">
+                                                                            <div class="d-flex">
+                                                                                <div>
+                                                                                    <label class="invisible d-block">for height</label>
+                                                                                    <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFilesReceived(attachFile,docType,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                    </form>
+                                                </div>
+                                                <div class="pb-3">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col" style="width: 20px">S.No.</th>
+                                                                    <th scope="col" style="width: 40%">Document Type</th>
+                                                                    <th scope="col">Attachment</th>
+                                                                    <th scope="col">Description</th>
+                                                                    <th scope="col" style="width: 100px">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="ac in newDet.AttachmentColl">
+                                                                    <th scope="row">{{$index+1}}</th>
+                                                                    <td>{{(DocumentList | findById:'DocumentTypeId':ac.DocumentTypeId).Name}}</td>
+                                                                    <td>{{ac.Name}}</td>
+                                                                    <td>{{ac.Description}}</td>
+                                                                    <td>
+
+                                                                        <div>
+                                                                            <a class="p-1" href="" data-toggle="tooltip" data-placement="top" title="" ng-click="ShowPersonalImg(ac)" data-original-title="View doc">
+                                                                                <i class="fas fa-eye text-secondary"></i>
+                                                                            </a>
+                                                                            <a ng-hide="ac.DocPath==null" class="p-1" href="{{ac.DocPath}}" download="" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc.">
+                                                                                <i class="fas fa-download  text-info"></i>
+                                                                            </a>
+                                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentDoc($index)">
+                                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                @* modal------------ *@
+                                                <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                                                    <div class="modal-dialog modal-lg" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-body mb-0 p-2">
+                                                                <iframe ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                                                                <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                                                            </div>
+                                                            <div class="modal-footer p-2">
+                                                                <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                                                                <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" ng-click="ClearEmpProfile()">Cancel</button>
+                                        <button type="button" class="btn btn-secondary" id="back-to-employee-list">Back to List</button>
+
+                                        <button type="button" class="btn btn-primary" ng-click="SaveEmployeeProfile()">Save</button>
+                                    </div>
+
+                                </footer>
+                            </div>
+
+
+                            <div id="Doc-View">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Employee Photo</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{ DocView.Photo }}" class="img-fluid" alt="" data-toggle="modal" data-target="#EmpPhoto1" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Citizen Front Photo</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.CitiFrontImgData || DocView.CitiFrontImg }}" class="img-fluid" alt="" data-toggle="modal" data-target="#CitizenFront" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Citizen Back Photo</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.CitiBackImgData || DocView.CitiBackImg }}" class="img-fluid" alt="" data-toggle="modal" data-target="#CitizenBack" style="height:200px; width:auto; ">
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Provident Fund</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.PfAttData || DocView.PfAtt }}" class="img-fluid" alt="" data-toggle="modal" data-target="#PfAtt" style="height:200px; width:auto; ">
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">SSF</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.SsfAttData || DocView.SsfAtt }}" class="img-fluid" alt="" data-toggle="modal" data-target="#SSF" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">CIT</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.CitAttData || DocView.CitAtt }}" class="img-fluid" alt="" data-toggle="modal" data-target="#CIT" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Gratuity</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.GratAttData || DocView.GratAtt }}" class="img-fluid" alt="" data-toggle="modal" data-target="#Gratuity" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Life Insurance</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.LiAttData || DocView.LiAtt }}" class="img-fluid" alt="" data-toggle="modal" data-target="#LIFEIns" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 text-center">
+                                                <label style=" font-weight: 700;">Health Insurance</label>
+                                                <div class="img-wrap mx-auto">
+                                                    <img ng-src="{{DocView.HiAttData || DocView.HiAtt }}" class="img-fluid" alt="" data-toggle="modal" data-target="#HealthIns" style="height:200px; width:auto; ">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 text-center my-3" style="background-color: #1f5d9e30;">
+                                                <h3> Document Attachment</h3>
+                                            </div>
+                                            <div class="col-md-4 mb-5 text-center" ng-repeat="A in DocView.AttachmentColl">
+                                                <div class="img-wrap mx-auto">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" ng-show="A.Extension == '.pdf'" ng-click="ShowDocPdf(A)" style="max-height: 190px; padding: 16px; " />
+                                                    <img ng-src="{{A.DocPath}}" ng-hide="A.Extension == '.pdf'" ng-click="ShowDocPdf(A)" style="height:200px; width:auto; " />
+
+                                                </div>
+                                                <label style=" font-weight: 700;">{{D.DocumentTypeName}}</label>
+                                            </div>
+
+                                            @* modal- for View Employee photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="EmpPhoto1" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.Photo}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.Photo}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View Citizenship Front photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="CitizenFront" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.CitiFrontImg}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.CitiFrontImg}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View Citizenship Back photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="CitizenBack" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.CitiBackImg}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.CitiBackImg}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View PF photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PfAtt" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.PfAtt}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.PfAtt}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View SSF photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="SSF" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.SsfAtt}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.SsfAtt}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View CIT photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="CIT" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.CitAtt}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.CitAtt}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View Gratuity photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="Gratuity" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.GratAtt}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.GratAtt}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View Life Insurance photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="LIFEIns" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.LiAtt}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.LiAtt}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View Health Insurance photo----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="HealthIns" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <img ng-src="{{DocView.HiAtt}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{DocView.HiAtt}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* modal- for View Attachment----------- *@
+                                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="DocView" role="dialog" tabindex="-1">
+                                                <div class="modal-dialog modal-lg" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-body mb-0 p-2">
+                                                            <iframe ng-hide="viewImg1.FileType === 'image'" id="pdfViewer1" style="width: 100%; height: 700px; border: none;"></iframe>
+                                                            <img ng-show="viewImg1.FileType === 'image'" ng-src="{{viewImg1.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                                                        </div>
+                                                        <div class="modal-footer p-2">
+                                                            <div><a href="{{viewImg1.ContentPath}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                            <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-secondary" id="back-to-list">Back to List</button>
+                                    </div>
+
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+</div>
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

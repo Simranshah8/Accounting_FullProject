@@ -1,0 +1,670 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<style>
+
+    #dropdownMenuButton + .dropdown-menu {
+        transform: translateX(-30px); /* Adjust -50px to move more/less to the left */
+        min-width: auto;
+        width: max-content;
+    }
+    /* Selected tags */
+    .select2-container .select2-selection--multiple .select2-selection__choice {
+        background: #007bff !important; /* Tag background color */
+        color: white !important; /* Tag text color */
+        border: none !important; /* Remove border */
+        border-radius: 6px !important; /* Rounded tag */
+        padding: 2px 8px !important;
+        margin-top: 4px !important;
+        font-size: 12px;
+    }
+
+    /* Remove button inside tag */
+    .select2-container .select2-selection--multiple .select2-selection__choice__remove {
+        color: white !important; /* X icon color */
+        margin-right: 6px;
+    }
+</style>
+
+
+
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/Lab/Report/FinalReports.js"></script>
+<div ng-app="myApp" ng-controller="FinalReport" ng-init="" ng-cloak>
+
+    <div class="box-body"></div>
+    <div class="content">
+        <div class="p-1"></div>
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+
+                            <div id="ChooseDate">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="cstm-wrap-date-range-picker">
+                                            <div class="d-inline-block">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">From:</span>
+                                                    </div>
+                                                    <input type="text" placeholder="" date-picker ng-model="newDet.FromDate_TMP" date-detail="newDet.FromDate" class="form-control form-control-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">To:</span>
+                                                    </div>
+                                                    <input type="text" placeholder="" date-picker ng-model="newDet.ToDate_TMP" date-detail="newDet.ToDate" class="form-control form-control-sm">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="dropdown btn-group-sm p-1 mr-1">
+                                        <button class="btn btn-info dropdown-toggle"
+                                                type="button"
+                                                id="dropdownMenuButton"
+                                                data-toggle="dropdown"
+                                                aria-haspopup="true"
+                                                aria-expanded="false">
+                                            ....
+                                        </button>
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="" ng-click="ShowToday()">Today</a>
+                                            <a class="dropdown-item" href="" ng-click="ShowWeek()">Last 1 Week </a>
+                                            <a class="dropdown-item" href="" ng-click="ShowMonth()">Last 1 Month</a>
+                                            <a class="dropdown-item" href="" ng-click="Show3Months()">Last 3 Months</a>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-4">
+                                        <div class="form-group d-flex align-items-center">
+                                            <label class=" mb-0" style=" width: 65px;">Category</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newDet.Category" multiple>
+                                                <option ng-value="pp.id" ng-repeat="pp in CategoryColl" ng-selected="pp.id==newDet.Category">{{pp.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class=" btn-group-sm p-1">
+                                        <button type="button" id="load" class="btn  btn-md d-flex align-items-center justify-content-center  text-white" ng-click="loadDummy()" style="background-color:#068ABF;">
+                                            <i class="fas fa-sync-alt mr-1"></i>
+                                            Load
+                                        </button>
+                                    </div>
+                                </div>
+
+                                @*<div class="row pl-2" id="verificationStatus">
+                    <div class="form-group">
+                        <div class="d-flex gap-4">
+                            <label class="form-label fw-semibold pr-3">Verification Status:</label>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="all" checked>
+                                <label class="form-check-label pr-3" for="all">All</label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="pending">
+                                <label class="form-check-label pr-3" for="pending">Pending</label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="mode" id="preverified">
+                                <label class="form-check-label pr-3" for="preverified">Pre-verified</label>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>*@
+
+
+                            </div>
+
+
+                            <header class="row" id="SearchFunction">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.FinalReport">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="loadDummy()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'FinalReport'" report-name="'FinalReport'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'FinalReport',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'FinalReport'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="search-toolbar mb-3 mt-2" id="datatable">
+                                <div>
+                                    <div id="FinalReportTypeData" style="height: calc(100vh - 9rem); width: 100%;" class="ag-theme-alpine"></div>
+                                </div>
+
+
+                            </div>
+
+                            @*******************View Details Start*************************@
+
+
+                            <div id="View_Detail_Table">
+
+                                <div>
+
+                                    <!-- Top Bar -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <button type="button" class="btn btn-primary" id="BackToList"> Back To List</button>
+
+                                        <div class="d-flex align-items-center gap-3">
+                                            @*<div class="form-check mb-0">
+                                <input class="form-check-input" type="checkbox" id="headerImage">
+                                <label class="form-check-label pr-2" for="headerImage">Show Header Image</label>
+                            </div>*@
+                                            <button type="button" class="btn btn-primary " ng-click="EditResult()"> Edit Result</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Patient + Report Header -->
+                                    <div class="border p-3 rounded mb-4">
+                                        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 10px; border: 1px solid #000;">
+                                            <!-- Left Section -->
+                                            <div style="flex: 1;">
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                    <strong>Name :</strong> Sanjay Chaurasiya
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                    <strong>Address :</strong> Maharashtra
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                    <strong>Contact :</strong> 5565432165
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                    <strong>Prescriber Name:</strong> Mr.. test User @*<i class="fas fa-external-link-alt" style="font-size: 9px; color: #007bff;"></i>*@
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                    <strong>Referred By :</strong> WWW
+                                                </p>
+                                                <p style="margin: 0; font-size: 13px; line-height: 1.5;">
+                                                    <strong>Lab No :</strong> 8/7
+                                                </p>
+                                            </div>
+
+                                            <!-- Right Section (Combined Middle + Barcode) -->
+                                            <div style="display: flex; align-items: flex-start; padding-left: 20px;">
+                                                <!-- Patient Info -->
+                                                <div style="margin-right: 0;">
+                                                    <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                        <strong>Patient No. :</strong> 2511000167 (OP)
+                                                    </p>
+                                                    <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                        <strong>Age/Sex :</strong> 65Y/Male
+                                                    </p>
+                                                    <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                        <strong>Receiving Date :</strong> 2025-11-13 12:15 PM
+                                                    </p>
+                                                    <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                        <strong>Testing Date :</strong> 2025-11-13 02:45 PM
+                                                    </p>
+                                                    <p style="margin: 0; font-size: 13px; line-height: 1.5;">
+                                                        <strong>Reporting Date :</strong>
+                                                    </p>
+                                                </div>
+
+                                                <!-- Barcode Section -->
+                                                <div style="text-align: center; margin-left: 15px;">
+                                                    <img src="~/wwwroot/dist/img/PrintTemplate/barcode.png" alt="Barcode" style="height: 65px; width: auto; display: block;" />
+                                                    <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 500;">1008064</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Table -->
+                                    <table class="main-table table table-bordered  table-hover table-sm">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 27%">Test(s)</th>
+                                                <th style="width: 27%">Finding(s)</th>
+                                                <th style="width: 10%">Unit</th>
+                                                <th style="width: 36%">Ref. Range</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody>
+
+                                            <tr>
+                                                <td><input type="checkbox" name="selectTest" value="Lipid Profile"> Complete Blood Picture</td>
+                                                <td>500</td>
+                                                <td>/ccum</td>
+                                                <td> 4000-11000</td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" name="selectTest" value="Lipid Profile"> TOTAL WBC COUNT</td>
+                                                <td>500</td>
+                                                <td>/ccum</td>
+                                                <td> 4000-11000</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="selectTest" value="Test Component">  5000
+                                                    HEMOGLOBIN
+                                                </td>
+                                                <td>Result</td>
+                                                <td>Unit</td>
+                                                <td>Reference Range</td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" name="selectTest" value="HDL - CHOLESTEROL"> POLYMORPHONUCLEAR CELL</td>
+                                                <td>40</td>
+                                                <td>mg/dl</td>
+                                                <td>35–65</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td><input type="checkbox" name="selectTest" value="LDL - CHOLESTEROL"> LYMPHOCYTE</td>
+                                                <td>10</td>
+                                                <td>mg/dl</td>
+                                                <td>&lt;150</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td><input type="checkbox" name="selectTest" value="TOTAL CHOLESTEROL"> EOSINOPHILS </td>
+                                                <td>160</td>
+                                                <td>mg/dl</td>
+                                                <td>150–230</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="selectTest" value="TRIGLYCERIDES"> MONOCYTES
+                                                </td>
+                                                <td>100</td>
+                                                <td>mg/dl</td>
+                                                <td>&lt;150</td>
+                                            </tr>
+                                            <tr>
+                                                <td><input type="checkbox" name="selectTest" value="VLDL - CHOLESTEROL"> RBC</td>
+                                                <td>5</td>
+                                                <td>mg/dl</td>
+                                                <td>5–35</td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="selectTest" value="VLDL - CHOLESTEROL">
+                                                    PCV
+                                                </td>
+                                                <td>5</td>
+                                                <td>mg/dl</td>
+                                                <td>5–35</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="selectTest" value="VLDL - CHOLESTEROL">
+                                                    PLATLETS
+                                                </td>
+                                                <td>5</td>
+                                                <td>mg/dl</td>
+                                                <td>5–35</td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="selectTest" value="VLDL - CHOLESTEROL">
+                                                    ERYTHROCYTE SEDIMENTATION RATE (ESR)
+                                                </td>
+                                                <td>5</td>
+                                                <td>mg/dl</td>
+                                                <td>5–35</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+
+
+                                    <!-- Signature -->
+                                    @*<div class="text-start mt-5" style="width: 200px;">
+                        <hr class="fw-bold mb-1">
+                        <p class="fw-bold small mb-0">Mr. Harish Name</p>
+                    </div>*@
+
+
+
+                                    <!-- Notes -->
+                                    @*<div class="mt-4">
+                        <p><strong>Note:</strong><i>This is preliminary text.</i> </p>
+                        <p class="">
+                            <input type="checkbox" name="selectTest" value="Disclaimer">
+                            The laboratory report must be interpreted in conjunction with clinical history of the patient by a clinician.
+                        </p>
+
+                    </div>*@
+
+                                    <!-- Footer Buttons -->
+                                    <div class="text-center mt-2">
+                                        <button type="button" class="btn btn-primary" id="BackToList"> Upload To Patient Portal</button>
+                                        <button type="button" class="btn btn-primary">Print</button>
+                                        @*<button type="button" class="btn btn-primary" id="BackToList"> Print Priliminary Report</button>
+                        <button type="button" class="btn btn-primary" id="BackToList"> Edit Signatories</button>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--Edit Result-->
+                        <div class="modal fade" id="EditResult" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                                <div class="modal-content" style="width:calc(100vw - 2rem)">
+                                    <div class="modal-header p-2">
+                                        <h6 class="modal-title">Edit Result</h6>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="container-fluid p-0">    
+                                            <div class="d-flex justify-content-between align-items-center p-1border-bottom">
+                                                <div>
+                                                    <span><strong>Ward :</strong> Patient Name, Patient Id, Age/Sex, Address</span>
+                                                </div>
+                                                <div>
+                                                    <span><strong>Prescribed By :</strong>DR. ABC </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Biochemistry Section -->
+                                        <div class="bg-light text-center py-1 font-weight-bold border-bottom">
+                                            Biochemistry
+                                        </div>
+
+                                        <!-- Table -->
+                                        <table class="main-table table table-bordered table-sm mb-0">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th width="30%">Component</th>
+                                                    <th width="20%">Value</th>
+                                                    <th width="20%">Unit</th>
+                                                    <th width="20%">Range</th>
+                                                    <th width="10%">Completed</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="4">
+                                                        <div class="row">
+                                                            <div class="col-4"><strong>1. Lipid Profile</strong></div>
+                                                            <div class="  col-4 ">
+                                                                <strong>Requested On:</strong> 2025-11-13 12:14 PM
+                                                            </div>
+
+                                                            <div class=" col-4 ">
+                                                                <strong>Sample Collected By:</strong> admin admin
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        <div class="icheck-primary d-inline">
+                                                            <input type="checkbox" id="checkboxPrimary2" ng-model="beData.isActive">
+                                                            <label for="checkboxPrimary2"></label>
+                                                        </div>
+
+                                                    </td>
+                                                </tr>
+
+                                                <!-- HDL - CHOLESTEROL -->
+                                                <tr>
+                                                    <td>HDL - CHOLESTEROL</td>
+                                                    <td>
+                                                        <input type="text" class="form-control">
+                                                    </td>
+                                                    <td>mg/dl</td>
+                                                    <td>35-65</td>
+                                                    <td class="text-center">
+                                                        <input type="checkbox">
+                                                    </td>
+                                                </tr>
+
+                                                <!-- LDL - CHOLESTEROL -->
+                                                <tr>
+                                                    <td>LDL - CHOLESTEROL</td>
+                                                    <td>
+                                                        <input type="text" class="form-control">
+                                                    </td>
+                                                    <td>mg/dl</td>
+                                                    <td>&lt;150</td>
+                                                    <td class="text-center">
+                                                        <input type="checkbox">
+                                                    </td>
+                                                </tr>
+
+                                                <!-- TOTAL CHOLESTEROL (Red Row) -->
+                                                <tr class="table-danger">
+                                                    <td>TOTAL CHOLESTEROL</td>
+                                                    <td>
+                                                        <input type="text" class="form-control" value="100">
+                                                    </td>
+                                                    <td>mg/dl</td>
+                                                    <td>&lt;200</td>
+                                                    <td class="text-center">
+                                                        <input type="checkbox" checked>
+                                                    </td>
+                                                </tr>
+
+                                                <!-- TRIGLYCERIDES -->
+                                                <tr>
+                                                    <td>TRIGLYCERIDES</td>
+                                                    <td>
+                                                        <input type="text" class="form-control border-primary shadow-sm">
+                                                    </td>
+                                                    <td>mg/dl</td>
+                                                    <td>&lt;150</td>
+                                                    <td class="text-center">
+                                                        <input type="checkbox">
+                                                    </td>
+                                                </tr>
+
+                                                <!-- VLDL - CHOLESTEROL -->
+                                                <tr>
+                                                    <td>VLDL - CHOLESTEROL</td>
+                                                    <td>
+                                                        <input type="text" class="form-control">
+                                                    </td>
+                                                    <td>mg/dl</td>
+                                                    <td>5-35</td>
+                                                    <td class="text-center">
+                                                        <input type="checkbox">
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="sampleModal" tabindex="-1" role="dialog" aria-labelledby="sampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Print Lab Sticker</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class=" col-8">
+                                                <div class="row mb-2">
+                                                    <div class="col-md-12"><strong>Patient Name:</strong> {{patient.name}}</div>
+
+                                                </div>
+
+                                                <table class="table table-bordered table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Test Name</th>
+                                                            <th>Requested On</th>
+                                                            <th>Pescriber Name</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="test in patient.tests">
+                                                            <td>{{test.name}}</td>
+                                                            <td>{{test.runNumber}}</td>
+                                                            <td>{{test.barcode}}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-4  d-flex flex-column">
+
+                                                @*<img src="~/wwwroot/dist/img/PrintTemplate/barcode.png" style="width:200px; height:100px;" class="m-auto" />*@
+                                                <div style="text-align: center; font-family: Arial, sans-serif; border: 2px dotted; padding: 2px; display: inline-block; background: white; max-width: 220px; margin-left: 50px;">
+                                                    <div style="font-size: 9px; margin-bottom: 1px;">PATIENT Id:200AEF </div>
+
+                                                    <!-- Patient Info -->
+                                                    <div style="font-size: 10px; margin-bottom: 1px; line-height: 1.2;">
+                                                        <strong>Sanjay Chaurasia 65Y/M</strong>
+                                                    </div>
+
+                                                    <!-- Barcode -->
+                                                    @*<div style="font-size: 8px; margin-bottom: 1px;">HOSPITAL NO</div>*@
+                                                    <img src="~/wwwroot/dist/img/PrintTemplate/barcode.png"
+                                                         alt="Barcode"
+                                                         style="max-width: 100%; width:200px; height:80px;" class="m-auto">
+                                                    @*<div style="font-size: 11px; margin-top: 1px; font-weight: bold;">2607000069</div>*@
+
+                                                    <!-- Record Info -->
+                                                    <div style="font-size: 11px; margin-top: 1px;">
+
+                                                        RN: 9/4 | 2025-07-27 08:19 PM
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-2 mb-2">
+                                                    <label>No. of copies:</label>
+                                                    <input type="number" class="form-control d-inline-block w-50" ng-model="printCopies" min="1">
+                                                </div>
+
+                                                <div class="text-center">
+                                                    <button class="btn btn-primary btn" ng-click="PrintSample()">Print <i class="fas fa-print"></i></button>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="row mt-3">
+                                            <div class="col-md-12 d-flex justify-content-center align-items-center">
+
+                                                <label class="me-2 mb-0 mr-2">Select Printer</label>
+
+                                                <select class="form-control form-control-sm me-3 mr-2"
+                                                        style="width: 120px;"
+                                                        ng-model="newDet.Specimen">
+                                                    <option ng-value="pp.id" ng-repeat="pp in SpecimenColl"
+                                                            ng-selected="pp.id==newDet.Specimen">
+
+                                                        {{pp.text}}
+                                                    </option>
+                                                </select>
+
+                                                <button class="btn btn-primary btn btn-sm px-2 py-1 ">OK</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="modal fade" id="resetRunNumberModal" tabindex="-1" role="dialog" aria-labelledby="resetRunNumberModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+
+
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="resetRunNumberModalLabel">
+                                            <strong>Confirm Your Action</strong>
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Body -->
+                                    <div class="modal-body">
+                                        <div class="alert alert-light text-dark" role="alert">
+                                            <strong>Clicking on 'Confirm' will revert the report to Pending Stage. Are you sure you want to proceed?</strong>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Modal Footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary">Confirm</button>
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+

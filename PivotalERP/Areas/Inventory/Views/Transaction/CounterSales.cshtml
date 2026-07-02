@@ -1,0 +1,845 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+
+
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js" integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="~/jslib/global/WebSocketEx.js"></script>
+
+
+<script>
+    var RecVoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.Receipt)";
+    var VoucherType = "@ViewBag.VoucherType";
+    var EntityId = "@ViewBag.EntityId";
+    var EntityDE="@ViewBag.EntityDE";
+	var TranId=@ViewBag.TranId;
+	 var DefaultKeyValues = "@ViewBag.DefaultKeyValues";
+</script>
+
+<style>
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .sale-page-wrap .content-wrapper-new {
+        padding-left: 0px;
+    }
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+
+    #ndp-nepali-box {
+        left: calc(92% - 9rem) !important;
+    }
+</style>
+
+<style>
+    .table-scroll-x-y table thead th {
+        background-color: #e8eef4 !important;
+    }
+
+    input::placeholder {
+        font-weight: 400; /* Adjust to your desired weight */
+    }
+</style>
+
+
+<style>
+    .input-box, .input-number-box {
+        position: relative;
+    }
+
+    .numeric-keypad-box1 {
+        display: none;
+        position: absolute;
+        z-index: 999;
+        left: 0;
+        right: 0;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .number-box {
+        position: absolute;
+        right: 0; /* Align the box to the right */
+        left: auto; /* Prevent it from stretching to the left */
+        flex-wrap: wrap;
+        /*  justify-content: center;*/
+        /*  width: auto;*/
+        width: 685px;
+        height: auto;
+        padding: 5px;
+        background-color: #a1cfe1;
+        border: 2px #4ea1d3 solid;
+        border-radius: 4px;
+        color: white;
+        z-index: 999;
+    }
+
+
+    .num-btn {
+        width: 55px;
+        height: 35px;
+        padding: 0px;
+        border-radius: 0;
+        border-color: transparent;
+        background-color: white;
+        color: black;
+        margin-left: 3px;
+        margin-right: 3px;
+        margin-bottom: 4px;
+        font-size: 21px;
+        box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    }
+
+    .input-number-box .number-box {
+        /* right: 23rem;*/
+        width: 320px;
+        /* top: 100%; */
+        bottom: 100%;
+        /* right: 23rem; */
+        transform: translateY(20%);
+        right: 105%;
+    }
+
+
+    .num-btn-clear {
+        background-color: #025a58;
+        color: white;
+    }
+
+    .num-btn-delete {
+        padding-left: 0;
+        padding-right: 0;
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .num-btn-back {
+        padding-left: 0;
+        padding-right: 0;
+        background-color: #44CEF6;
+        color: white;
+    }
+
+    .num-btn-abc {
+        display: block; /* Make sure the ABC button is always displayed */
+        width: 50px; /* Adjust width */
+        height: 30px;
+        padding: 0;
+        background-color: #76be4e; /* Color for the ABC button */
+        color: white;
+        margin-left: 3px;
+        margin-right: 3px;
+        margin-bottom: 4px;
+        border-radius: 5px;
+    }
+
+    .num-btn-123 {
+        display: none; /* Hide 123 button by default */
+        width: 50px; /* Adjust width */
+        height: 30px;
+        padding: 0;
+        background-color: #76be4e; /* Color for the 123 button */
+        color: white;
+        margin-left: 3px;
+        margin-right: 3px;
+        margin-bottom: 4px;
+        border-radius: 5px;
+    }
+
+    .num-btn:hover, .num-btn:hover {
+        background-color: #5a8d2b; /* Hover effect */
+        color: white;
+    }
+
+    .num-btn:active, .num-btn:active {
+        background-color: #4c7b22; /* Active effect */
+        color: white;
+    }
+
+    .num-btn-abc {
+        display: block; /* Make sure ABC button is visible when it's the active mode */
+        width: 50px;
+        height: 30px;
+        padding: 0;
+        background-color: #76be4e; /* Color for ABC button */
+        color: white;
+        margin-left: 3px;
+        margin-right: 3px;
+        margin-bottom: 4px;
+        border-radius: 5px;
+    }
+
+    .num-btn-123 {
+        display: none; /* 123 button is initially hidden */
+        width: 50px;
+        height: 30px;
+        padding: 0;
+        background-color: #76be4e; /* Color for 123 button */
+        color: white;
+        margin-left: 3px;
+        margin-right: 3px;
+        margin-bottom: 4px;
+        border-radius: 5px;
+    }
+
+        .num-btn-abc:hover, .num-btn-123:hover {
+            background-color: #5a8d2b; /* Hover effect */
+            color: white;
+        }
+
+        .num-btn-abc:active, .num-btn-123:active {
+            background-color: #4c7b22; /* Active effect */
+            color: white;
+        }
+</style>
+
+
+<script src="~/jslib/inventory/transaction/CounterSales.js?v=20250701"></script>
+
+
+<div ng-app="myApp" ng-controller="CounterSalesController" ng-init="LoadData()">
+
+
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <!-- Page Content  -->
+            <div class="content-wrapper-new1 px-2">
+                <div class="card mt-1 bodypart1">
+                    <div class="demo-container1">
+                        <div class="demo-header">
+                            <div class="card-header header-corner-triangle overflow-hidden py-1" ng-hide="HideShow.CostClass==true && HideShow.VoucherType==true">
+                                <div class="row">
+                                    <h3 class="card-title">{{SelectedVoucher && SelectedVoucher.VoucherName ? SelectedVoucher.VoucherName : 'Sales Invoice'}}</h3>
+                                    <div class="col-sm-4" ng-hide="HideShow.VoucherType==true">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-sm-5 text-nowarp">Voucher Type<span style="color:red">*</span></label>
+                                            <div class="col-sm-7">
+                                                <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.VoucherId" ng-change="getVoucherNo()" ng-disabled="beData.TranId>0">
+                                                    <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == beData.VoucherId">
+                                                        {{vt.VoucherName}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4" ng-hide="HideShow.CostClass==true">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-sm-4 text-nowrap">For Year<span style="color:red">*</span></label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="getVoucherNo()" ng-disabled="beData.TranId>0">
+                                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                                        {{cc.Name}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body px-3 py-2">
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <div class="form-group">
+                                            <div class="d-flex">
+                                                @*<label for="inputEmail3" style="min-width: 120px;">Product</label>*@
+                                                <select class="form-control form-control-sm" ng-model="SelectOtion" style="width: 100px; margin-right:0;">
+                                                    <option ng-repeat="S in SelectionColl" ng-value="S.id">{{S.text}}</option>
+                                                </select>
+                                                <input ng-if="SelectOtion === 2" barcode-scanner on-barcode-scan="barcodeScanned(barcode)" type="text" class="form-control form-control-sm" data-ng-model="beData.ProductBarCode" id="txtBarcode" name="txtBarcode" onfocus="this.select();" autocomplete="off" />
+
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" ng-if="SelectOtion === 1" all-product ng-model="beData.ProductId" style="width:100%" @*ng-paste="PasteData('product',0)" onpaste="return false"*@
+                                                        placeholder="** Select Product  **" showdetails="true" @*confirm-action="ProductSelectionChange(itemDet,$index)"*@ product-detail="beData.productDetail" side-bar-data="beData.sideBarData" voucher-id="SelectedVoucher.VoucherId" ledger-id="beData.PartyLedgerId" company-id="beData.ProductCompanyId" vouchertype="14" ng-disabled="beData.ReadOnlyQty==true" godown-id="beData.GodownId" godown-change="GodownChange" rate-type="beData.RateTypeId"></select>
+
+                                                <input type="number" class="form-control form-control-sm" ng-if="SelectOtion === 1"
+                                                       ng-model="beData.Qty"
+                                                       placeholder="Qty"
+                                                       style="width: 60px;" />
+
+                                                <!-- Add Button -->
+                                                <button type="button" class="btn px-2 btn-sm btn-outline-info nofocus" ng-if="SelectOtion === 1" ng-click="addProduct(beData.productDetail)" style="width:40px;margin-left:-1px;"><i class="fas fa-plus"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Bill No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" ng-model="beData.AutoManualNo" disabled />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Ref No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" ng-model="beData.RefNo" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex" id="dvDTVoucher">
+                                            <label for="inputEmail3" style="min-width: 100px;">{{SelectedVoucher.VoucherDateLabel ? SelectedVoucher.VoucherDateLabel : 'Invoice Date'}}<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm float-right serial hideSideBar" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly()" title="{{(SelectedVoucher.DateStyle==1 ? beData.VoucherDateDet.dateBS : (beData.VoucherDateDet.dateAD |dateFormat))}}" date-style="SelectedVoucher.DateStyle" id="dtVoucherDate" voucherid="SelectedVoucher.VoucherId">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:106px;">Customer</label>
+                                            <select autoShowHide="true" class="select2 serial form-control form-control-sm" all-ledger ng-model="beData.PartyLedgerId" id="cboParty1" style="width:95%" ledgertype="3" fortransaction="true"
+                                                    placeholder="** Select Party Name **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="beData.PartyLedger" side-bar-data="beData.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="14"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end form fiels -->
+                        <div class="row">
+                            <div class="col-sm-9">
+                                <div class="table-scroll-x-y mb-1 table-container" style="height: calc(100vh - 10rem)!important;">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th rowspan="2" class="text-center align-middle cstm-sticky" style="width: 40px;left:0;z-index:3">S.No</th>
+                                                <th rowspan="2" class="align-middle cstm-sticky" style="width: 250px;left:40px;z-index:3">Particulars</th>
+                                                <th rowspan="2" class="align-middle" style="width: 95px;">Closing Stock</th>
+                                                <th colspan="2" class="text-center" style="width: 125px;">Quantity</th>
+                                                <th rowspan="2" class="text-center align-middle" style="width: 80px;">Free Qty</th>
+                                                <th rowspan="2" class="text-center align-middle" style="width: 70px;">Rate</th>
+                                                <th colspan="2" class="text-center" style="width: 140px;">Discount</th>
+                                                <th rowspan="2" class="text-center align-middle" style="width: 80px;">Amount</th>
+                                                <th rowspan="2" class="text-center align-middle" style="width: 53px;">Action</th>
+                                            </tr>
+                                            <tr>
+                                                <th scope="col" class="text-center cstm-sticky" style="top: 29px">Actual</th>
+                                                <th scope="col" class="text-center cstm-sticky" style="top: 29px">Unit</th>
+                                                <th scope="col" class="text-center cstm-sticky" style="top: 29px">Per(%)</th>
+                                                <th scope="col" class="text-center cstm-sticky" style="top: 29px">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="itemDet in beData.ItemDetailsColl  | filter: { RowType: 'P' } track by $index">
+                                                <td class="text-center cstm-sticky" style="width: 40px;left:0;z-index:2;background-color:#ffffff!important"><b>{{$index+1}}</b></td>
+                                                <td class="cstm-sticky" style="width: 250px; left: 40px; z-index: 2; background-color: #ffffff !important" ng-show="1==2">
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId" style="width:100%" ng-paste="PasteData('product',0)" onpaste="return false"
+                                                            placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet,$index)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData" voucher-id="SelectedVoucher.VoucherId" ledger-id="beData.PartyLedgerId" company-id="beData.ProductCompanyId" vouchertype="14" ng-disabled="itemDet.ReadOnlyQty==true" godown-id="itemDet.GodownId" godown-change="GodownChange" rate-type="beData.RateTypeId"></select>
+                                                </td>
+                                                <td class="cstm-sticky" style="width: 250px; left: 40px; z-index: 2; background-color: #ffffff !important">
+                                                    <b>{{itemDet.productDetail.Name}}</b>
+                                                </td>
+                                                <td align="center"><b>{{itemDet.ClosingQty}}</b></td>
+                                                <td class="text-center"><b>{{itemDet.ActualQty |number:2}}</b></td>
+                                                <td class="text-center"><b>{{itemDet.UnitName}}</b></td>
+                                                <td class="text-center"><b>{{itemDet.FreeQty |number:2}}</b></td>
+                                                <td class="text-center"><b>{{itemDet.Rate |number:2}}</b></td>
+                                                <td><input type="text" class="form-control  form-control-sm" style="text-align:center" number-input ng-model="itemDet.DiscountPer" ng-change="ChangeItemRowValue(itemDet,'disPer')" positive="true"></td>
+                                                <td><input type="text" class="form-control form-control-sm" style="text-align:right" number-input ng-model="itemDet.DiscountAmt" ng-change="ChangeItemRowValue(itemDet,'disAmt')" positive="true"></td>
+                                                <td class="text-right"><b>{{itemDet.Amount |number:3}}</b></td>
+                                                <td class="project-actions no-print text-center">
+                                                    <div class="btn-group-sm">
+                                                        <a class="btn btn-danger" ng-click="delRowFromItemDetails($index)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="row" style="margin-bottom:60px;">
+                                    <div class="col-sm-12 input-box">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:100px;">Buyer Name</label>
+                                            <input type="text" class="form-control form-control-sm" data-ng-model="beData.SalesInvoiceDetail.Buyes" list="lstBuyers" ng-change="ChangeBuyerSelection()" onfocus="this.select();" ng-readonly="IsRefPartyDet==true || SelectedVoucher.EditablePartyDetail==false">
+                                            <datalist id="lstBuyers">
+                                                <option data-ng-repeat="ttl in CashPartyColl" value="{{ttl.Buyes}}">
+                                            </datalist>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-12 input-box">
+                                        <div class="form-group  d-flex">
+                                            <label for="inputEmail3" style="min-width:100px;">Address</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="Address" ng-model="beData.SalesInvoiceDetail.Address" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 input-number-box">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:100px;">PAN No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="PanNo" ng-model="beData.SalesInvoiceDetail.SalesTaxNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 input-number-box">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:100px;">Mobile No</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="MobileNo" ng-model="beData.SalesInvoiceDetail.PhoneNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:100px;">Remarks</label>
+                                            <input type="text" list="lstNarration" class="form-control hideSideBar" rows="3" placeholder="Remarks" ng-model="beData.Narration">
+                                            <datalist id="lstNarration">
+                                                <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                                            </datalist>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:100px; font-size:22px;font-weight:700;font-size:16px">SUB TOTAL :</label>
+                                            <input type="text" number-input class="form-control px-1" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="" ng-model="beData.ItemSubTotal" noofdecimal="2" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12" ng-repeat="acc in beData.ItemDetailsColl  | filter: { RowType: 'L' } track by $index">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:100px; font-size:22px;font-weight:700;font-size:16px">{{acc.costLedgerDetail.Name}}:</label>
+                                            <!--New Field Added-->
+                                            <input type="text" number-input class="form-control px-1 mr-1" style="text-align: right; font-size: 28px; font-weight: 700;width:65%" placeholder="%" ng-model="acc.Rate" noofdecimal="2" ng-disabled="acc.CanEditRate==false" ng-change="ChangeAdditionalRate(acc,'rate',$index)">
+                                            <!--Ends-->
+                                            <input type="text" number-input class="form-control px-1" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="Nrs" ng-model="acc.Amount" noofdecimal="2" ng-disabled="acc.CanEditRate==false" ng-change="ChangeAdditionalRate(acc,'amt',$index)">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group  d-flex">
+                                            <label for="inputEmail3" style="min-width:100px; font-size:22px;font-weight:700;font-size:16px">Grand Total:</label>
+                                            <input type="text" noofdecimal="SelectedVoucher.NoOfDecimalPlaces" number-input class="form-control px-1" style="text-align: right; font-size: 29px; font-weight: 700;height:36px;color:green;" placeholder="" ng-model="beData.TotalAmount" noofdecimal="2" disabled>
+                                        </div>
+                                    </div>
+                                    <!--New Field Added by suresh on 14 Magh-->
+                                    <div class="col-md-12 input-number-box">
+                                        <div class="form-group  d-flex">
+                                            <label for="inputEmail3" style="min-width:140px; font-size:22px;font-weight:700;font-size:16px">Available Points:</label>
+                                            <input type="text" number-input class="form-control px-1" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="" ng-model="beData.AvailablePoints" noofdecimal="2">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:140px; font-size:22px;font-weight:700;font-size:16px">Redeem Points:</label>
+                                            <input type="text" number-input class="form-control px-1 mr-1" style="text-align: right; font-size: 28px; font-weight: 700;width:65%"  ng-model="acc.Rate" noofdecimal="2">
+                                            <input type="text" number-input class="form-control px-1" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="Nrs" ng-model="acc.Amount" noofdecimal="2">
+                                        </div>
+                                    </div>
+                                    <!--Ends-->
+                                    <div class="col-md-12 input-number-box">
+                                        <div class="form-group  d-flex">
+                                            <label for="inputEmail3" style="min-width:100px; font-size:22px;font-weight:700;font-size:16px">Tender:</label>
+                                            <input type="text" number-input class="form-control px-1" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="" ng-model="beData.ReceivedAmount" ng-change="ChangeTenderAmt()" noofdecimal="2">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12" style="margin-bottom:60px">
+                                        <div class="form-group  d-flex">
+                                            <label for="inputEmail3" style="min-width:100px; font-size:22px;font-weight:700;font-size:16px">Change:</label>
+                                            <input type="text" number-input class="form-control px-1" style="text-align: right; font-size: 29px; font-weight: 700; height: 36px; color: red;" placeholder="" ng-model="beData.ChangeAmt" noofdecimal="2" disabled>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+
+    <footer class="main-footer control-btns py-0">
+        <div class="secondary-footer mt-2 ">
+
+            <div class="row pb-3 pt-2" style="background-color: #c2e0fb">
+
+                <div class="col-md-12 text-right">
+                    <button type="button" class="btn btn-default" data-toggle="modal" ng-click="GenerateFonepayQR()">
+                        Show QR
+                    </button>
+                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentPaymentTerm">
+                        Receipt As
+                    </button>
+                    <button type="button" class="btn btn-default ml-1" ng-click="SearchData()">Search</button>
+                    <button type="button" class="btn btn-default ml-1" ng-click="Print()" ng-show="lastTranId>0 && lastVoucherId>0">Re-Print</button>
+                    <button type="button" class="btn btn-default ml-1" ng-click="Clear()">Reset</button>
+                    <button type="button" class="btn btn-primary ml-1" ng-click="SaveSalesInvoice()" ng-hide="loadingstatus=='running'">Save</button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!--  Search Voucher right button Modal demo -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Search Sales Invoice Voucher</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions">{{asp.text}}</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <form class="float-right">
+                                <div class="form-row align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                        <input type="text" ng-model="paginationOptions.pageSize" class="form-control input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <table id="main-table" class="main-table table table-sm table-striped table-bordered text-nowrap" style="table-layout: auto;">
+                            <thead>
+                                <tr>
+                                    <th class="cstm-sticky">Invoice</th>
+                                    <th>Date</th>
+                                    <th>Miti</th>
+                                    <th>Days</th>
+                                    <th>Ref. No.</th>
+                                    <th>Party Ledger</th>
+                                    <th>Amount</th>
+                                    <th>Voucher</th>
+                                    <th>CostClass</th>
+                                    <th class="cstm-sticky">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows" ng-class="{'bg-red': sd.IsCancel === true}">
+                                    <td class="cstm-sticky" align="center">{{sd.VoucherNo}}</td>
+                                    <td align="center">{{sd.VoucherDate |dateFormat}}</td>
+                                    <td align="center">{{sd.VoucherMiti}}</td>
+                                    <td align="center">{{sd.Days}}</td>
+                                    <td>{{sd.RefNo}}</td>
+                                    <td>{{sd.PartyLedger}}</td>
+                                    <td align="right">
+                                        {{sd.Amount |number:2}}
+                                    </td>
+                                    <td>{{sd.VoucherName}}</td>
+                                    <td>{{sd.CostClass}}</td>
+                                    <td class="cstm-sticky">
+
+                                        <a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                            <i class="fas fa-print text-primary"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="documentPaymentTerm" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document" style="max-width: 700px !important;">
+            <div class="modal-content">
+                <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Payment  Details</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row" ng-show="RecVoucherTypeColl.length>0">
+                        <div class="col-sm-8">
+                            <div class="form-group row">
+                                <label class="col-lg-5 col-form-label">Receipt Voucher</label>
+                                <div class="col-lg-7">
+                                    <select class="form-control form-control-sm  hideSideBar" style="width: 100%;" ng-model="beData.SalesInvoiceDetail.ReceiptVoucherId">
+                                        <option ng-repeat="vt in RecVoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == beData.SalesInvoiceDetail.ReceiptVoucherId">
+                                            {{vt.VoucherName}}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group row">
+                                <label class="form-control form-control-sm">Invoice Amount:<b>  {{beData.TotalAmount |number:2}}</b> </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: -10px">
+                        <div class="table-responsive">
+                            <div class="table-scroll-x-y mt-1" style="height: 350px!important">
+                                <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th style="width: 50px;  z-index: 3; background-color: #fff !important; ">S.No.</th>
+                                            <th style="width: 200px;  z-index: 3; background-color: #fff !important;">Particular's</th>
+                                            <th style="width: 120px;  z-index: 3; background-color: #fff !important;">Amount</th>
+                                            <th style="width: 160px;   z-index: 3; background-color: #fff !important;">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="pt in beData.PaymentTermColl">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td>
+                                                {{pt.Name}}
+                                            </td>
+                                            <td><input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pt.Amount" ng-change="ChangeReceiptAmt()"></td>
+                                            <td><input type="text" onfocus="this.select();" class="form-control form-control-sm" ng-model="pt.Remarks"></td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center">{{beData.PaymentTermColl.length+1}}</td>
+                                            <td>
+                                                <select class="form-control form-control-sm serial select2" style="width: 100%; background-color: #fff" ng-model="beData.SelectedBank">
+                                                    <option ng-value="x1" ng-repeat="x1 in PaymentTermColl_Bank">{{x1.Name}}</option>
+                                                </select>
+                                            </td>
+                                            <td><input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="beData.BankAmount" ng-change="ChangeReceiptAmt()"></td>
+                                            <td><input type="text" onfocus="this.select();" class="form-control form-control-sm" ng-model="beData.BankRemarks"></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td align="center" colspan="2">TOTAL :- </td>
+                                            <td align="right">
+                                                <h4>
+                                                    {{(beData.PaymentTermColl | sumOfValue:'Amount') |number:SelectedVoucher.NoOfDecimalPlaces}}
+                                                </h4>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer" style="padding: 3px; ">
+                    <button type="button" class="btn btn-sm btn-success" data-dismiss="modal" style="min-width:90px">Ok</button>
+                    @*<button type="button" class="btn btn-sm btn-success" ng-click="OkCostCenterModal()" style="min-width:90px">Ok</button>*@
+                </div>
+            </div>
+        </div>
+        @*</div>*@
+
+    </div>
+    @RenderPage("~/Global/_ReportTemplates.cshtml")
+    @RenderPage("~/Views/Global/_IsValidTran.cshtml")
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmFonePayQry" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document" style="max-width: 700px !important;">
+            <div class="modal-content">
+                <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">QR  Details</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-md-3"></div>
+                        <div class="col-md-6">
+                            <div class="signature-img-wrap text-center">
+                                <div class="img-wrap">
+                                    <img ng-src="{{beData.QRImage}}" class="img-fluid" alt="" id="imgSignature1">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+                <div class="modal-footer" style="padding: 3px; ">
+                    <button type="button" class="btn btn-sm btn-success" @*data-dismiss="modal"*@ style="min-width:90px" ng-click="FonepayQRStatus()">Check Status</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    var isUppercase = true; // Default uppercase mode
+
+    $(function () {
+        // Function to build the numeric keypad for both types of input
+        function buildKeypad(inputBoxClass, isAlpha) {
+            var drop = '';
+            var i = 1;
+
+            // Clear (C) button changed to CL
+            drop += '<button class="btn num-btn num-btn-clear">CL</button>';
+
+            // Numbers (1-9) for both input boxes
+            for (i; i < 10; i++) {
+                drop += '<button class="btn num-btn">' + i + '</button>';
+            }
+
+            // Place the 0 button after 9
+            drop += '<button class="btn num-btn">0</button>';
+
+            // Alphabet buttons for regular input box only (QWERTY format)
+            if (isAlpha) {
+                var qwertyRows = [
+                    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '@@'],
+                    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '/'],
+                    ['↑', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?'] // Moved '↑' before 'Z'
+                ];
+
+                // Render QWERTY alphabetic rows
+                for (var row = 0; row < qwertyRows.length; row++) {
+                    for (var col = 0; col < qwertyRows[row].length; col++) {
+                        drop += '<button class="btn num-btn num-btn-alpha" data-letter="' + qwertyRows[row][col] + '">' + qwertyRows[row][col] + '</button>';
+                    }
+                    drop += '<br>'; // Line break after each row
+                }
+
+                // Special characters (only for text inputs)
+                var specialChars = ['#', '$', '%', '&', '*', '(', ')', '-', '=', '+', '|', '\\', ';', '.', '_', '~'];
+                for (var k = 0; k < specialChars.length; k++) {
+                    drop += '<button class="btn num-btn special-char">' + specialChars[k] + '</button>';
+                }
+            }
+
+            // Other buttons including (., -, DEL)
+            drop = '<div class="numeric-keypad-box ' + inputBoxClass + '" style="display: none;"><div class="number-box">' + drop +
+                '<button class="btn num-btn">.</button>' +
+                '<button class="btn num-btn">-</button>' +
+
+                // Shift button (for regular input fields, removed for numeric)
+                (isAlpha ? '<button class="btn num-btn num-btn-space">⎵</button>' : '') +
+                (isAlpha ? '<button class="btn num-btn num-btn-shift" style="font-weight: bold;">↑</button>' : '') +
+                '<button class="btn num-btn num-btn-delete">DEL</button>' +
+
+                // Close button to hide the keypad
+                '<button class="btn num-btn num-btn-close"><i class="fas fa-times-circle text-danger"></i></button>' +
+                '</div></div>';
+
+            // Append the keypad to the input box
+            $('.' + inputBoxClass).append(drop);
+        }
+
+        // Build keypads for both input boxes
+        buildKeypad('input-box', true); // Alphabet + Special chars for the regular text input
+        buildKeypad('input-number-box', false); // Numeric only keypad (no alphabet or special chars)
+
+        // Keep track of the last focused input field
+        var lastInput = null;
+        $('input[type="text"]').on('focus', function () {
+            lastInput = this;
+        });
+
+        // Show/hide the numeric keypad on clicking the input box
+        $('input[type="text"]').click(function (e) {
+            e.stopPropagation();
+            var keypad = $(this).closest('.input-box, .input-number-box').find('.numeric-keypad-box');
+
+            // Hide all other keypads except the one for the clicked input
+            $('.numeric-keypad-box').not(keypad).hide();
+            keypad.toggle();
+        });
+
+        // Button click logic for both keypads
+        $(document).on('click', '.num-btn', function () {
+            var input = lastInput;
+            if (!input) return;  // Prevent if no input field is focused
+            var str = $(input).val();
+
+            switch ($(this).text()) {
+                case 'CL':
+                    $(input).val("");
+                    break;
+
+                case '0':
+                    if (str == '0' || str == '-0') {
+                        console.log('0 has exist at first');
+                    } else {
+                        $(input).val(str + "0");
+                    }
+                    break;
+
+                case 'DEL':
+                    if (str != '') {
+                        $(input).val(str.substring(0, str.length - 1));
+                    }
+                    break;
+
+                case '↑': // Shift button functionality (only for text input)
+                    isUppercase = !isUppercase; // Toggle state
+                    updateAlphabetCase(); // Update case of letters
+                    break;
+
+                case '⎵': // Space button functionality (only for text input)
+                    $(input).val(str + " ");
+                    break;
+
+                default:
+                    // For special characters and other buttons
+                    var char = $(this).text();
+                    if (isUppercase && (char === "'" || char === '"')) {
+                        $(input).val(str + char); // No modification for these special characters on case toggle
+                    } else {
+                        $(input).val(str + $(this).text());
+                    }
+            }
+        });
+
+        // Function to update alphabet buttons (uppercase/lowercase toggle)
+        function updateAlphabetCase() {
+            $('.num-btn-alpha').each(function () {
+                var letter = $(this).data('letter'); // Get the letter from data-attribute
+                $(this).text(isUppercase ? letter.toUpperCase() : letter.toLowerCase()); // Update the button text
+            });
+        }
+
+        // Close button functionality
+        $(document).on('click', '.num-btn-close', function () {
+            $(this).closest('.numeric-keypad-box').hide(); // Hide the keypad
+        });
+
+        // Hide the keypad when clicking outside
+        $(document).click(function (e) {
+            if (!$(e.target).closest('.input-box').length && !$(e.target).closest('.input-number-box').length) {
+                $('.numeric-keypad-box').hide();
+            }
+        });
+    });
+</script>
+

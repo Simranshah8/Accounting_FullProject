@@ -1,0 +1,242 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/appcms/videos.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="VideosController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content" id="table-listing">
+                    <!-- Second Tab Content -->
+                    <div class="card p-2">
+                        <header class="row mb-2">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Videos">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Videos">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.Videos">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file">
+                                    <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                        <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                    </div>
+                                    <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-success"
+                                            id="open-form-btn" style="font-size: 14px;">
+                                        <i class="fas fa-plus w-t"></i> Add Videos
+                                    </button>
+                                </div>
+                            </div>
+
+
+                            
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 100px);">
+                                <table id="main-table"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px">S.No.</th>
+                                            <th style="width: 450px">Title</th>
+                                            <th class="text-center" style="width: 60px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="cl in VideosList | filter:searchData.Videos | itemsPerPage: perPage.Videos" current-page="currentPages.Videos" pagination-id="VideosPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.Title}}</td>
+                                            <td class="text-center">
+                                                @*<a class="p-1" href="#">
+                                                        <i class="fas fa-eye text-secondary"></i>
+                                                    </a>*@
+                                                <a class="p-1" href="#" ng-click="GetVideosById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelVideosById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- table end -->
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="VideosPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+                <!-- form area starts -->
+                <div id="notice-form">
+                    <!-- The time line -->
+                    <!-- timeline item -->
+                    <div>
+                        <!-- <i class="fas fa-envelope bg-blue"></i> -->
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="timeline-item">
+                                    
+                                            <div class="row">
+                                                <!-- select for others -->
+                                                <div class="col-md-4" id="meet-others">
+                                                    <div class="form-group">
+                                                        <label for="">Title</label>
+                                                        <input type="text"
+                                                               class="form-control form-control-sm" ng-model="newVideos.Title" />
+                                                    </div>
+                                                </div>
+                                                <!-- fields after clicking radio button ends -->
+                                                <div class="col-md-8">
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control form-control-sm" ng-model="newVideos.Description"
+                                                                  rows="1"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Order No.</label>
+                                                        <input type="number"
+                                                               class="form-control form-control-sm" ng-model="newVideos.OrderNo" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- table starts -->
+                                                <!-- Table Ends -->
+                                                @*<div class="col-md-4">
+                            <div class="form-group">
+                                <label for="">Attach File</label>
+                                <input class="form-control form-control-sm p-0" id="documents" type="file" style="padding: 1px" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newVideos.Files_TMP" />
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Content</label>
+                                <textarea class="textarea" placeholder="Place some text here"
+                                          style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" html-editor ng-model="newVideos.Content"></textarea>
+                            </div>
+                        </div>*@
+
+                                            </div>
+                                            <div class="table-scroll-x-y table-scroll">
+                                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr class="text-nowrap">
+                                                            <th class="text-center"
+                                                                style="width: 80px">
+                                                                S.No.
+                                                            </th>
+                                                            <th class="text-center"
+                                                                style="width: 650px">
+                                                                URL
+                                                            </th>
+                                                            <th class="text-center table-action" style="width: 120px">
+                                                                Action
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="etg in newVideos.UrlColl1">
+                                                            <td>
+                                                                {{$index+1}}
+                                                            </td>
+                                                            <td>
+                                                                <input type="text"
+                                                                       class="form-control form-control-sm" ng-model="etg.AddUrl" />
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <a class="p-1" ng-click="AddNewUrl($index)">
+                                                                    <i class="fas fa-plus text-primary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="delURL($index)">
+                                                                    <i class="fas fa-trash-alt w-t text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        
+                                </div>
+                                <div class="time-label mt-3">
+                                    <span class="d-block border-0 p-3 text-center">
+                                        <button type="button"
+                                                class="btn  btn-info"
+                                                id="back-to-list"
+                                                style="min-width: 90px">
+                                            Back to List
+                                        </button>
+                                        <button type="button" class="btn  btn-default" style="min-width: 90px;" ng-click="ClearVideos()">Reset</button>
+                                        <button type="button" class="btn btn-success" style="min-width: 90px;" ng-click="SaveUpdateVideos()">{{newVideos.Mode}}</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- END timeline item -->
+                    <!-- timeline time label -->
+                    <!-- /.timeline-label -->
+
+                </div>
+                <!-- form area ends -->
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+</div>
+

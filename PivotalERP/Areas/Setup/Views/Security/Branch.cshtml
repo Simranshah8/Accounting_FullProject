@@ -1,0 +1,348 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+      var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Branch)";    
+</script>
+<script src="~/jslib/Setup/Branch.js"></script>
+<div ng-app="myApp" ng-controller="Branch" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllBranch()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Branch</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Branch">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Branch">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Branch">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                            <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align: center;  width: 90px;">
+                                                        S.No
+                                                        <span class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+
+                                                    <th ng-click="sort('Name')" style="text-align:left;width: 200px ;">
+                                                        BranchName
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+
+                                                    <th ng-click="sort('Address')" style="text-align: left; width: 120px; ">
+                                                        Address
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='Alias'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+                                                    <th ng-click="sort('Code')" style="text-align:left;width: 120px;">
+
+                                                        Code
+                                                        <span class="glyphicon sort-icon" ng-show="sortKey=='Code'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                    </th>
+
+                                                    <th style="text-align: center;  width:90px;" class="no-print">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="beData in BranchColl | orderBy:sortKey:reverse | filter:searchData.Branch | itemsPerPage:perPage.Branch" current-page="currentPages.Branch" pagination-id="BranchPagination">
+
+                                                    <td style="text-align:center;">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td style="text-align:left;">
+                                                        {{beData.Name}}
+                                                    </td>
+
+                                                    <td style="text-align:left;">
+                                                        {{beData.Address}}
+                                                    </td>
+                                                    <td style="text-align:left;">
+                                                        {{beData.Code}}
+                                                    </td>
+                                                    <td class="project-actions no-print" style="text-align:center;">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info" ng-click="getBranchById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-danger" ng-click="deleteBranch(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                            <a href="#" class="btn btn-info" title="Create Master" ng-click="CreateMaster(beData,$index)"><i class="fas fa-baseball-ball"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="BranchPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Branch Name<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Name">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Address</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Address">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Code</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Code" />
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Contact Person</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ContactPerson">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Contact No</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ContactNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>State</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.FaxNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>PanVatNo</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.PanNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Email</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.EmailId">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Credit Limit Amount</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" placeholder="" ng-model="beData.CreditLimitAmt">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Godown<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.GodownId">
+                                                        <option ng-value="cl.GodownId" ng-repeat="cl in GodownList" ng-selected="cl.GodownId==beData.GodownId">{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Customer Ledger</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.LedgerId" ledgertype="1"
+                                                            placeholder="** Select Customer Ledger **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="beData.SalesLedgerInfo" side-bar-data="beData.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Vendor Ledger</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.VendorId" ledgertype="1"
+                                                            placeholder="** Select Vendor Ledger **" showdetails="true" confirm-action="PartySelectionChange(beData)" ledger-detail="beData.PurchaseLedgerInfo" side-bar-data="beData.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Purchase Order</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.POVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:7 }:true" ng-selected="cl.VoucherId==beData.POVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Receipt Note</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.GRNVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:6 }:true" ng-selected="cl.VoucherId==beData.GRNVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Purchase Invoice</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.PIVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:8 }:true" ng-selected="cl.VoucherId==beData.PIVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Purchase Return</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.PRVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:10 }:true" ng-selected="cl.VoucherId==beData.PRVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Sales Order</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.SOVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:13 }:true" ng-selected="cl.VoucherId==beData.SOVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Delivery Note</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.DNVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:12 }:true" ng-selected="cl.VoucherId==beData.DNVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Sales Invoice</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.SIVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:14 }:true" ng-selected="cl.VoucherId==beData.SIVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Sales Return</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.SRVoucherId">
+                                                        <option ng-value="cl.VoucherId" ng-repeat="cl in VoucherList | filter:{ VoucherType:16 }:true" ng-selected="cl.VoucherId==beData.SRVoucherId">{{cl.VoucherName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Purchase Ledger</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.PurchaseLedgerId" @*style="width:95%"*@ ledgertype="1"
+                                                            placeholder="** Select Purchase Name **" showdetails="false" confirm-action="PartySelectionChange(beData)" ledger-detail="newProduct.PurchaseLedgerInfo" side-bar-data="newProduct.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Sales Ledger</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.SalesLedgerId" @*style="width:95%"*@ ledgertype="1"
+                                                            placeholder="** Select Sales Name **" showdetails="false" confirm-action="PartySelectionChange(beData)" ledger-detail="newProduct.SalesLedgerInfo" side-bar-data="newProduct.partySideBarData"></select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label>Block Transaction</label>
+                                                    <input type="checkbox"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="" ng-model="beData.BlockTransaction" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-sm-{{vUF.ColWidth}}" ng-repeat="uf in UDFFeildsColl">
+                                                <div class="form-group">
+                                                    <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                    <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearFields()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="AddNewBranch()">Save </button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

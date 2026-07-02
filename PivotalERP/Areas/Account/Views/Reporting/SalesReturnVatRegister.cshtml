@@ -1,0 +1,406 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.AccountSalesReturnRegister)";
+</script>
+<style>
+    .full_modal-dialog {
+        width: 98% !important;
+        height: 92% !important;
+        min-width: 98% !important;
+        min-height: 92% !important;
+        max-width: 98% !important;
+        max-height: 92% !important;
+        padding: 0 !important;
+    }
+
+    .full_modal-content {
+        height: 99% !important;
+        min-height: 99% !important;
+        max-height: 99% !important;
+    }
+    .table-sm td {
+        padding: 0.4rem !important;
+    }
+</style>
+<link href="~/pivot-orb/orb.css" rel="stylesheet" />
+<script src="~/pivot-orb/react-0.12.2.js"></script>
+<script src="~/pivot-orb/orb.js?v=2"></script>
+<script src="~/jslib/account/reporting/SalesReturnVatRegister.js?v=20250701"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="SalesReturnVatRegister">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div>
+                                                <select class="form-control form-control-sm text-dark input-sm" ng-model="SalesVatRegister.PeriodOPT" style="background-color: #e9ecef" ng-change="ChangePeriodOption()">
+                                                    <option ng-value="poc.id" ng-repeat="poc in PeriodOptColl">{{poc.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="input-group-prepend" ng-show="SalesVatRegister.PeriodOPT==1">
+                                                <span class="input-group-text">From:</span>
+                                            </div>
+                                            <input ng-show="SalesVatRegister.PeriodOPT==1" class="form-control text-dark input-sm" type="text" date-picker ng-model="SalesVatRegister.DateFrom_TMP" style="max-width:100px" date-detail="SalesVatRegister.DateFromDet" />
+                                            <div class="input-group-prepend" ng-show="SalesVatRegister.PeriodOPT==1">
+                                                <span class="input-group-text">To:</span>
+                                            </div>
+                                            <input ng-show="SalesVatRegister.PeriodOPT==1" class="form-control text-dark input-sm" type="text" date-picker ng-model="SalesVatRegister.DateTo_TMP" style="max-width:100px" date-detail="SalesVatRegister.DateToDet" />
+
+                                            <div class="input-group-prepend" ng-show="SalesVatRegister.PeriodOPT==2">
+                                                <span class="input-group-text">Year:</span>
+                                            </div>
+                                            <select class="form-control form-control-sm" ng-show="SalesVatRegister.PeriodOPT==2" style="width:100px" ng-model="SalesVatRegister.RptCostClassId" ng-change="GetPeriodMonths(SalesVatRegister.RptCostClassId)">
+                                                <option ng-value="rCC.CostClassId" ng-repeat="rCC in RptCostClassColl" ng-selected="rCC.CostClassId==SalesVatRegister.RptCostClassId">{{rCC.Name}}</option>
+                                            </select>
+                                            <div class="input-group-prepend" ng-show="SalesVatRegister.PeriodOPT==2">
+                                                <span class="input-group-text">Month:</span>
+                                            </div>
+                                            <select class="form-control form-control-sm" ng-show="SalesVatRegister.PeriodOPT==2" style="width:100px" ng-model="SalesVatRegister.SelectedMonth" ng-change="ChangePeriodMonth(SalesVatRegister.SelectedMonth)">
+                                                <option ng-value="RptM" ng-repeat="RptM in PeriodMonthColl" ng-selected="RptM.SNo==SalesVatRegister.RptMonthSNo">{{RptM.MonthName}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-sm-3">
+                                    <div class="form-group row" ng-show="BranchList.length>1">
+                                        <label for="inputEmail3" class="col-lg-3">Branch</label>
+                                        <div class="col-lg-9">
+                                            <select class="form-control form-control-sm hideSideBar" active-select2 style="width: 100%;" ng-model="SalesVatRegister.BranchId" ng-change="GetSalesVatRegister()" placeholder="*select branch*">
+                                                <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId">
+                                                    {{vt.Name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-2">
+                                    <div class="d-flex">
+                                        <div class="dropdown">
+
+                                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">
+                                                <span class="dropdown-text"> Include Voucher </span>
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu p-2" style="width: 260px;">
+                                                <li class="dropdown-header">
+                                                    <label class="pt-2">
+                                                        <input type="checkbox" class="selectall" ng-model="SalesVatRegister.IncludeVouchers" ng-change="SelectedInclude()" />
+                                                        <span class="select-text">Select</span> All
+                                                    </label>
+                                                </li>
+                                                <li class="p-0">
+                                                    <ul class="dropdown-options p-0">
+                                                        <li ng-repeat="r in IncludeVouchers"><a href="#"><label><input name='options[]' type="checkbox" class="option justone" ng-model="r.IsSelected" /> {{r.text}}</label></a></li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-right">
+                                    <button type="button" class="btn btn-primary load px-1" " ng-click="GetSalesVatRegister()"><i class="fas fa-download"> &nbsp;</i>Load</button>
+                                    <button type="button" class="btn btn-primary load mr-1" " ng-click="ShowAnalysis()"><i class="fas fa-pie-chart"> &nbsp;</i>Analysis</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2" ng-show="SalesVatRegister.selectTable=='true' || SalesVatRegister.selectTable==true">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Find:</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control pr-0"
+                                                        id="exampleFormControlSelect1">
+                                                    <option>Contain</option>
+                                                    <option>Prefix</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="input-group input-group-sm mr-sm-2" ng-show="SalesVatRegister.selectTable=='false' || SalesVatRegister.selectTable==false">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SalesVatRegister">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SalesVatRegister">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="input-group input-group-sm" style="width: 150px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchData.SalesVatRegister">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+
+                                        <!--Switch added by suresh on 20 jestha-->
+                                        <div class="switch-field mr-2">
+                                            <input type="radio" id="switch_left" name="switch_2" ng-value="false" ng-model="SalesVatRegister.selectTable" />
+                                            <label for="switch_left">NEP</label>
+                                            <input type="radio" id="switch_right" name="switch_2" ng-value="true" ng-model="SalesVatRegister.selectTable" />
+                                            <label for="switch_right">ENG</label>
+                                        </div>
+                                        <!--Ends-->
+
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Format:</span>
+                                            </div>
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm pr-0" ng-model="SalesVatRegister.ReportType" ng-change="GetSalesVatRegister()">
+                                                    <option ng-value="rp.id" ng-repeat="rp in ReportFormatColl" ng-selected="rp.id==SalesVatRegister.ReportType">{{rp.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        @*<div class="input-group input-group-sm mr-sm-2">
+            <div class="input-group-prepend">
+                <span class="input-group-text cstm">Search By:</span>
+            </div>
+            <select class="form-control pr-0" id="exampleFormControlSelect1">
+                <option>Date(A.D.)</option>
+                <option>Date(B.S.)</option>
+                <option>Particulars</option>
+                <option>Voucher Type</option>
+                <option>Voucher No.</option>
+                <option>Ref.No.</option>
+                <option>Debit Amount</option>
+                <option>Credit Amount</option>
+                <option>Cost Class</option>
+                <option>User</option>
+                <option>Verify Mode</option>
+                <option>Verify Remarks</option>
+                <option>Reject Remarks</option>
+                <option>Entry Date</option>
+                <option>Creation At</option>
+                <option>Post At</option>
+                <option>Address</option>
+                <option>Cheque Date</option>
+                <option>Cheque No</option>
+                <option>Cheque Remarks</option>
+                <option>Clearance Date</option>
+                <option>Clearance Remarks</option>
+                <option>Limit Cross Amt</option>
+                <option>Limit Cross Days</option>
+                <option>Narration</option>
+                <option>PanVat No</option>
+                <option>PartyName</option>
+                <option>Ref.Voucher.RefNo</option>
+                <option>RefVoucher No</option>
+                <option>Transaction Amt</option>
+                <option>Modify By</option>
+
+            </select>
+        </div>
+        <div class="input-group input-group-sm" style="width: 150px;">
+            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-default">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>*@
+                                        <div class="dropdown dnld-file ml-2">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a class="btn btn-secondary btn-light btn-sm ml-2" title="Add Custom Columns" ng-click="ShowCustomColumns()">
+                                            <i class="fas fa-magnet"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                    </form>
+
+                                </div>
+
+                            </header>
+                            <div ng-show="SalesVatRegister.selectTable=='true' || SalesVatRegister.selectTable==true">
+                                <div id="datatable" style="height: calc(100vh - 11rem); width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                <div id="myGridBottom" style="height: 50px;" class="ag-theme-alpine"></div>
+                            </div>
+
+                            <div ng-show="SalesVatRegister.selectTable=='false' || SalesVatRegister.selectTable==false">
+
+                                <div class="table-scroll-x-y table-scroll" style="height:auto!important;max-height:calc(100vh - 9rem)!important">
+                                    <table id="ELeaveRequest"
+                                           class="main-table table table-sm table-bordered bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center align-middle" colspan="7" style="width: 650px; background-color: #e9ecef !important;">बीजक</th>
+                                                <th class="text-center align-middle" rowspan="2" style="width: 90px; background-color: #e9ecef !important;">जम्मा फिर्ता (रु)</th>
+                                                <th class="text-center align-middle" rowspan="2" style="width: 100px; background-color: #e9ecef !important;">स्थानीय कर छुटको फिर्ता  मूल्य (रु)</th>
+                                                <th class="text-center align-middle" colspan="2" style="width: 180px; background-color: #e9ecef !important;">करयोग्य फिर्ता</th>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important;top:28px" ng-click="toggleSort('VoucherDate_AD')">मिति</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('VoucherNo')">बीजक नम्बर</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('PartyName')">खरिदकर्ताको नाम</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('PanVat')">खरिदकर्ताको स्थायी लेखा नम्बर</th>
+
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('ProductName')">वस्तु वा सेवाको नाम</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('ActualQty')">वस्तु वा सेवाको परिमाण</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('Unit')">वस्तु वा सेवाको एकाई</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('TaxableSales')">मूल्य (रु)</th>
+                                                <th class="text-center align-middle" style="background-color: #e9ecef !important; top: 28px" ng-click="toggleSort('ProductVatAmount')">कर (रु)</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="V in RptDataColl | filter:searchData.SalesVatRegister | itemsPerPage: perPage.SalesVatRegister" current-page="currentPages.SalesVatRegister" pagination-id="SaleVRPaging">
+                                                <td>{{V.VoucherDate_BS}}</td>
+                                                <td class="align-middle cstm-sticky clickcursor" style="background-color:#ffffff!important;z-index:2;left:125px" ng-click="ShowVoucher(V)">{{V.VoucherNo}}</td>
+                                                <td>{{V.PartyName}}</td>
+                                                <td>{{V.PanVat}}</td>
+                                                <td>{{V.ProductName}}</td>
+                                                <td class="text-center">{{V.ActualQty |number:2}}</td>
+                                                <td class="text-center">{{V.Unit}}</td>
+                                                <td class="text-right">{{V.ProductAmount |number:2}}</td>
+                                                <td class="text-right">{{V.NonTaxableSales |number:2}}</td>
+                                                <td class="text-right">{{V.TaxableSales |number:2}}</td>
+                                                <td class="text-right">{{V.ProductVatAmount |number:2}}</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot style="position: -webkit-sticky; position: sticky; bottom: 0; z-index: 4;">
+                                            <tr>
+                                                <th colspan="5" class="text-right" style="background: #e9ecef !important; color: #000000 !important;">जम्मा :</th>
+                                                <th class="text-center" style="background: #e9ecef !important; color: #000000 !important;">{{Summary.ActualQty |number:2}}</th>
+                                                <th class="text-right" style="background: #e9ecef !important; color: #000000 !important;"></th>
+                                                <th class="text-right" style="background: #e9ecef !important; color: #000000 !important;">{{Summary.ProductAmount |number:2}}</th>
+                                                <th class="text-right" style="background: #e9ecef !important; color: #000000 !important;">{{Summary.NonTaxableSales |number:2}}</th>
+                                                <th class="text-right" style="background: #e9ecef !important; color: #000000 !important;">{{Summary.TaxableSales |number:2}}</th>
+                                                <th class="text-right" style="background: #e9ecef !important; color: #000000 !important;">{{Summary.ProductVatAmount |number:2}}</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="SaleVRPaging" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- Add ReportTemplates Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Analysis  Modal Dailog -->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal full_modal-dialog" id="frmRptAnalysis" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl full_modal-dialog" role="document">
+            <div class="modal-content" style="width:98%">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Analysis</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div id="dtAnalysis"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    @RenderPage("~/Views/Global/_EditTran.cshtml")
+@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+</div>
+
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

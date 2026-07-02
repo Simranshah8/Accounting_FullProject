@@ -1,0 +1,164 @@
+﻿
+@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto;
+    }
+</style>
+<script src="~/jslib/inventory/transaction/MissingPurchaseRequest.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="MissingPurchaseReqController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="d-inline-block">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">From:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="MissingPurchase.DateFrom_TMP" style="max-width:100px" date-detail="MissingPurchase.DateFromDet" />
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">To:</span>
+                                            </div>
+                                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="MissingPurchase.DateTo_TMP" style="max-width:100px" date-detail="MissingPurchase.DateToDet" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <a href="#" class="btn btn-primary load" style="float: right; " data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetPendingLocation()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/.card-->
+                        <div class="card p-2 ">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.MissingPurchase">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.MissingPurchase">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.MissingPurchase">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+
+                                        <a class="bg-info btn btn-sm" data-toggle="tooltip" data-placement="top" title="Post" ng-click=">
+                                            <i class="fa fa-check" aria-hidden="true"></i>  Push Selected
+                                        </a>
+                                        <div class="dropdown dnld-file ml-2">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="s">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           title="Print" ng-click="Print()">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-target="#itemAllocationForModal" title="Filter">
+                                            <i class="fas fa-filter"></i>
+                                        </a>
+                                    </form>
+                                </div>
+                            </header>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="table-scroll-x-y mb-1" style="height: calc(100vh - 7rem)!important">
+                                        <table id="datatable" class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr style="text-align: center;">
+                                                    <th style="width: 80px;z-index:4;background-color:#ececec!important">
+                                                        <input type="checkbox" class="form-control" ng-model="selectAll" style="max-height: 17px;" ng-click="toggleAll(selectAll)" />
+                                                    </th>
+
+                                                    <th style=" width: 56px;z-index:4;background-color:#ececec!important">S.N.</th>
+                                                    <th style=" z-index: 4; width: 90px; background-color: #ececec !important ">Swastik Code</th>
+                                                    <th style=" width: 200px; background-color: #ececec !important ">Purchase Order</th>
+                                                    <th style="width: 250px; width: 200px; background-color: #ececec !important ">Dealer Name</th>
+                                                    <th class="text-center" style="width: 112px; background-color: #ececec !important ">
+                                                        Action &nbsp; &nbsp
+                                                        
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr style="text-align: center;" dir-paginate="C in MissingPurchaseList | orderBy:sortKey:reverse | filter:searchData.MissingPurchase | itemsPerPage: perPage.MissingPurchase" current-page="currentPages.MissingPurchase" pagination-id="MissingPurchasePagination">
+                                                    <td><input type="checkbox" class="form-control" style="max-height: 17px;" ng-model="C.selected" /> </td>
+                                                    <td class="text-center">{{$Index + 1}}</td>
+                                                    <td>{{C.Code}}</td>
+                                                    <td>{{C.Sales_order}}</td>
+                                                    <td>{{C.Party_Name}}</td>
+                                                    <td class="text-center">
+                                                        <a class="bg-info btn btn-sm" data-toggle="tooltip" data-placement="top" title="Post" ng-click=">
+                                                            <i class="fa fa-check" aria-hidden="true"></i>  Push
+                                                        </a>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="MissingPurchasePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--/.card-->
+                    </div>
+                </div>
+                <!--/. Tab-Content-->
+            </section>
+            <!-- /. section -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+</div>

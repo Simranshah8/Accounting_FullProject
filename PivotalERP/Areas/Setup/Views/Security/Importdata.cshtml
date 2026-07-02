@@ -1,0 +1,241 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y{
+        height:auto!important;
+    }
+</style>
+<script src="~/jslib/Setup/importData.js?v=1"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="importDataController" ng-init="LoadData()">
+    <!-- Main content -->
+
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <!-- form area starts -->
+                    <div id="allow-branch-form">
+                        <div class="card card-default">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Entity </label>
+                                                    <select class="form-control form-control-sm select2" ng-model="ImportData.SelectedEntity">
+                                                        <option ng-value="cl" ng-repeat="cl in EntityColl">{{cl.text}}</option>
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="ImportData.SelectedEntity.IsUpdate==true">
+                                                <div class="form-group">
+                                                    <label for="">Update By </label>
+                                                    <select class="form-control form-control-sm select2" ng-model="ImportData.UpdateBy">
+                                                        <option ng-value="cl.Value" ng-repeat="cl in UpdateByColumns">{{cl.Text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2 mt-4 ">
+                                                <div class="btn btn-default btn-file">
+                                                    <i class="fa fa-file-excel-o"></i> Select Excel File
+                                                    <input class="form-control form-control-sm p-0" id="documents" type="file" style="padding: 1px" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" file-model ng-model="ImportData.Files_TMP" after-selected="UploadToSrv()" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2 mt-4">
+                                                <button type="button" class="btn load btn-default" style="min-width: 90px;" ng-click="ClearFields()">Clear</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <!-- model form for table input -->
+    <div class="modal fade"
+         id="AddNewExcel"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true"
+         @*style="margin-top:0px;margin-left: 60px;"*@>
+        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title text-primary" id="exampleModalLabel">
+                        Import Data
+                    </h5>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close">
+                        <div aria-hidden="true">&times;</div>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Select Sheet Name <span id="ErrName" style="color:red;"></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-info mr-2 mt-2"></i></span>
+                                <select ng-model="SelectedSheet" class="form-control form-control-sm" ng-change="LoadProperties()">
+                                    <option ng-repeat="ttl in SheetColl" value="{{ttl}}">{{ttl}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="tblPart">
+                        <div class="box-body scroller">
+                            <div class="table-scroll-x-y card" style="max-height:calc(100vh - 16rem)!important;">
+                                <table  class="main-table table table-sm table-bordered bg-white table-head-fixed" id="clientTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Target Fields Name</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Source Fields Name</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Default Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="tablerow0" ng-repeat="newBeData in PropertiesColl ">
+                                            <td class="col1">
+                                                {{$index+1}}
+                                            </td>
+                                            <td class="col3">
+                                                {{newBeData.PropertyName}}
+                                            </td>
+                                            <td class="col4">
+                                                <select ng-model="newBeData.Id" class="form-control form-control-sm">
+                                                    <option ng-repeat="cl in ColumnColl track by cl.Id" ng-value="cl.Id" ng-selected="cl.Id==newBeData.Id">
+                                                        {{cl.Name}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newBeData.DefaultValue" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-2 text-center">
+                        <button type="button" class="btn load btn-danger" style="min-width: 70px;" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn load btn-success" style="min-width: 70px;" ng-click="ImportDataExcel()">Import Data</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal form for table input close -->
+    <!-- model form for table input -->
+    <div class="modal fade"
+         id="UpdateNewExcel"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="exampleModalLabel"
+         aria-hidden="true"
+         @*style="margin-top:0px;margin-left: 60px;"*@>
+        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h5 class="modal-title text-primary" id="exampleModalLabel">
+                        Update Data
+                    </h5>
+                    <button type="button"
+                            class="close"
+                            data-dismiss="modal"
+                            aria-label="Close">
+                        <div aria-hidden="true">&times;</div>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">
+                                Select Sheet Name <span id="ErrName" style="color:red;"></span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-addon"><i class="fa fa-info"></i></span>
+                                <select ng-model="SelectedSheet" class="form-control form-control-sm" ng-change="LoadProperties()">
+                                    <option ng-repeat="ttl in SheetColl" value="{{ttl}}">{{ttl}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="tblPart">
+                        <div class="box-body scroller">
+                            <div class="table-scroll-x-y table-scroll" style="max-height:calc(100vh - 16rem)!important;">
+                                <table cellpadding="12" class="main-table table table-sm table-bordered bg-white table-head-fixed" id="clientTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Target Fields Name</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Source Fields Name</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Default Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="tablerow0" ng-repeat="newBeData in SelectedPropertiesColl ">
+                                            <td class="col1">
+                                                <label class="col-sm-12">
+                                                    {{$index+1}}
+                                                </label>
+                                            </td>
+                                            <td class="col3">
+                                                <div class="editor-field">
+                                                    <select ng-model="newBeData.PropertyName" class="form-control form-control-sm">
+                                                        <option ng-repeat="et in PropertiesColl" value="{{et.PropertyName}}">
+                                                            {{et.PropertyName}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                            <td class="col4">
+                                                <select ng-model="newBeData.Id" class="form-control form-control-sm">
+                                                    <option ng-repeat="cl in ColumnColl track by cl.Id" value="{{cl.Id}}">
+                                                        {{cl.Name}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-success btn-sm" ng-click="addrow($index)"><i class="fa fa-plus"></i></a>
+                                                <a class="btn btn-danger btn-sm" ng-click="delete($index)"><i class="fa fa-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-2 text-center">
+                        <button type="button" class="btn load btn-danger" style="min-width: 70px;" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn load btn-success" style="min-width: 70px;" ng-click="UpdateDataExcel()">ImportData</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- modal form for table input close -->
+</div>

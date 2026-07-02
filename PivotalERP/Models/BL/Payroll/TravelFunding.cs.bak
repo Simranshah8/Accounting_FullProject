@@ -1,0 +1,85 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace Dynamic.BL.Payroll
+{
+
+	public class TravelFunding
+	{
+
+		Dynamic.DA.Payroll.TravelFundingDB db = null;
+
+		int _UserId = 0;
+
+		public TravelFunding(int UserId, string hostName, string dbName)
+		{
+			this._UserId = UserId;
+			db = new Dynamic.DA.Payroll.TravelFundingDB(hostName, dbName);
+		}
+		public ResponeValues SaveFormData(Dynamic.BE.Payroll.TravelFunding beData)
+		{
+			bool isModify = beData.TravelFundingId > 0;
+			ResponeValues isValid = IsValidData(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdate(beData, isModify);
+			else
+				return isValid;
+		}
+		public Dynamic.BE.Payroll.TravelFundingCollections GetAllTravelFunding(int EntityId)
+		{
+			return db.getAllTravelFunding(_UserId, EntityId);
+		}
+		public Dynamic.BE.Payroll.TravelFunding GetTravelFundingById(int EntityId, int TravelFundingId)
+		{
+			return db.getTravelFundingById(_UserId, EntityId, TravelFundingId);
+		}
+		public ResponeValues DeleteById(int EntityId, int TravelFundingId)
+		{
+			return db.DeleteById(_UserId, EntityId, TravelFundingId);
+		}
+		public ResponeValues IsValidData(ref Dynamic.BE.Payroll.TravelFunding beData, bool IsModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			try
+			{
+				if (beData == null)
+				{
+					resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
+				}
+				else if (IsModify && beData.TravelFundingId == 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Modify";
+				}
+				else if (!IsModify && beData.TravelFundingId != 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Save";
+				}
+				else if (beData.CUserId == 0)
+				{
+					resVal.ResponseMSG = "Invalid User for CRUD";
+				}
+				else if (string.IsNullOrEmpty(beData.Name))
+				{
+					resVal.ResponseMSG = "Please ! Enter Name ";
+				}
+				else
+				{
+					resVal.IsSuccess = true;
+					resVal.ResponseMSG = "Valid";
+				}
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			return resVal;
+		}
+	}
+
+}
+

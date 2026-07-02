@@ -1,0 +1,794 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+
+    .switch-field {
+        display: flex;
+        overflow: hidden;
+    }
+
+        .switch-field input {
+            position: absolute !important;
+            clip: rect(0, 0, 0, 0);
+            height: 1px;
+            width: 1px;
+            border: 0;
+            overflow: hidden;
+        }
+
+        .switch-field label {
+            background-color: #e4e4e4;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+            line-height: 1;
+            text-align: center;
+            padding: 8px 16px;
+            margin-right: -1px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease-in-out;
+        }
+
+            .switch-field label:hover {
+                cursor: pointer;
+            }
+
+        .switch-field input:checked + label {
+            background-color: #127dc2;
+            box-shadow: none;
+            color: #ffff !important
+        }
+
+        .switch-field label:first-of-type {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .switch-field label:last-of-type {
+            border-radius: 0 4px 4px 0;
+        }
+</style>
+<script>
+    var SalesmanEntity =@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.SalesMan);
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.SalesMan)";
+</script>
+
+
+<script src="~/jslib/account/creation/SalesMan.js?v=20250701"></script>
+<div ng-app="myApp" ng-controller="SalesMan" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllSalesMan()" ng-cloak>
+    <div class="container-fluid">
+
+        <div class="card card-primary card-outline card-outline-tabs">
+            <div class="card-header p-0 border-bottom-0">
+                <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Salesman</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="custom-tabs-four-tabContent">
+                    <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                        <header class="row">
+                            <div class="col-md-6">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Salesman">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Salesman">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.Salesman">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-6 text-right">
+                                <div class="form-inline float-right">
+                                    <div class="switch-field ml-1 mr-2">
+                                        <input type="radio" id="all" ng-model="newFilter.Status" name="statuschoose" ng-value="true" ng-change="GetAllSalesMan()" />
+                                        <label class="px-1" for="all">Active</label>
+                                        <input type="radio" id="open" ng-model="newFilter.Status" name="statuschoose" ng-value="false" ng-change="GetAllSalesMan()" />
+                                        <label class="px-1" for="open">Inactive</label>
+                                    </div>
+
+                                    <div class="dropdown dnld-file" title="Download File">
+
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllSalesMan()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                title="Create Multiple Data" ng-click="ShowMultipleModal()">
+                                            <i class="fas fa-file-import"></i>
+                                        </button>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'Salesman'" report-name="'List Of Salesman'" ignore-column="'10'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'Salesman',ignoreColumn:'10' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'List Of Salesman'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-primary load float-right" style="min-width: 90px;" ng-click="GenerateUser()">Generate User</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </header>
+                        <div class="search-toolbar mt-2">
+                            <div class="">
+
+                                <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align: center; width: 60px;">
+                                                S.No
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='AreaMasterId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+
+                                            <th ng-click="sort('Name')" style="text-align: left; width: 200px;">
+                                                Name
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('Code')" style="text-align: left; width: 120px;">
+                                                Code
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Code'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('Address')" style="text-align: left; width: 130px;">
+                                                Address
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Address'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('Mobile')" style="text-align: left; width: 130px;">
+                                                Mobile No.
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Mobile'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+
+                                            <th ng-click="sort('ParentAgent')" style="text-align: left; width: 130px;">
+                                                Parent
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='ParentAgent'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('Designation')" style="text-align: left; width: 130px;">
+                                                Designation
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Designation'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('BranchName')" style="text-align: left; width: 130px;">
+                                                Level
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='BranchName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('BranchName')" style="text-align: left; width: 130px;">
+
+                                                Branch
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='BranchName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('UserName')" style="text-align: left; width: 130px;">
+
+                                                User
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='UserName'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('Status')" style="text-align: left; width: 130px;">
+                                                Is Active
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Status'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th style="text-align: center; width: 180px;" class="noprint">Action</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="beData in AgentList|orderBy:sortKey:reverse|filter:searchData.Salesman|itemsPerPage:perPage.Salesman" current-page="currentPages.Salesman" pagination-id="AreaMasterPagination">
+
+                                            <td style="text-align:center;margin:auto">
+                                                {{$index+1}}
+                                            </td>
+                                            <td style="margin: auto; text-align: left">
+                                                {{beData.Name}}
+                                            </td>
+                                            <td style="margin: auto; text-align: left">
+                                                {{beData.Code}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.Address}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.Mobile}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.ParentAgent}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.Designation}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.Level}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.BranchName}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.UserName}}
+                                            </td>
+                                            <td style="margin:auto;text-align:left">
+                                                {{beData.IsActive |yesNoFormat}}
+                                            </td>
+                                            <td class="project-actions text-center noprint" style="text-align:center">
+                                                <div class="btn-group-sm">
+                                                    <a href="#" class="btn btn-info" title="Show Route Plan" ng-click="ShowRoutePlan(beData)"><i class="fas fa-map-marked-alt"></i></a>
+                                                    <a href="#" class="btn btn-info" title="DateWise Route Plan" ng-click="ShowDateWiseRoutePlan(beData)"><i class="fas fa-calendar"></i></a>
+                                                    <a href="#" class="btn btn-info" title="Edit Salesman" ng-click="getSalesmanById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                    <a href="#" class="btn btn-danger" title="Delete Salesman" ng-click="deleteSalesman(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                    <a href="#" class="btn btn-info" title="Reset Password" ng-click="ShowPwdReset(beData)"><i class="fa fa-key"></i></a>
+                                                    <a href="#" class="btn btn-info" title="Replace Agent" ng-click="ShowAgentForReplace(beData)"><i class="fa fa-exchange-alt" aria-hidden="true"></i></a>
+                                                    <a href="#" class="btn btn-danger" title="Clear Start/End Route of Today" ng-click="ClearRouteStartEnd(beData,$index)"><i class="fas fa-mobile-alt"></i></a>
+                                                    <a href="#" class="btn btn-danger" title="Clear App Login/Logout of Today" ng-click="ClearAppLogin(beData,$index)"><i class="fas fa-globe"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="AreaMasterPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                        <div class="p-3">
+                            <form>
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Name<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Name" title="{{beData.AgentId>0 ? beData.AgentId : ''}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Alias</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Alias">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Code</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Code">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Designation</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Designation">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Level</label>
+                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="beData.Level">
+                                                <option ng-value="pg.id" ng-repeat="pg in LevelList" ng-selected="pg.id==beData.Level">{{pg.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Parent salesman</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.ParentAgentId">
+                                                @*<option ng-value="pg.AgentId" ng-repeat="pg in AgentList  | filter: greaterThan('LevelId', beData.Level)" ng-selected="pg.AgentId==beData.ParentAgentId">{{pg.Name}}</option>*@
+                                                <option ng-value="pg.AgentId" ng-repeat="pg in AgentList" ng-selected="pg.AgentId==beData.ParentAgentId">{{pg.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Mobile No.<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Mobile">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>PhoneNo</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.PhoneNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>CitizenshipNo</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.CitizenshipNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>PAN</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.PanVatNo">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Radius</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="beData.Radius">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Max. Waiting Minutes</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="beData.MaxWaiting">
+                                        </div>
+                                    </div>
+                                    @*<div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label for="chkIsActive">Is Active</label>
+                                                <input id="chkIsActive" type="checkbox" class="form-control form-control-sm" ng-model="beData.IsActive">
+                                            </div>
+                                        </div>*@
+
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkIsActive" ng-model="beData.IsActive">
+                                            <label for="chkIsActive"
+                                                   class="custom-control-label">
+                                                Is Active
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkActiveSelfi" ng-model="beData.ActiveSelfi">
+                                            <label for="chkActiveSelfi"
+                                                   class="custom-control-label">
+                                                Active Selfi
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkActiveSelfiR" ng-model="beData.ActiveSelfiRemarks">
+                                            <label for="chkActiveSelfiR"
+                                                   class="custom-control-label">
+                                                Active Selfi Remarks
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkShowTodayRoute" ng-model="beData.ShowTodayRoute">
+                                            <label for="chkShowTodayRoute"
+                                                   class="custom-control-label">
+                                                Show Today Route
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkAllowOffRoute" ng-model="beData.AllowOffRoute">
+                                            <label for="chkAllowOffRoute"
+                                                   class="custom-control-label">
+                                                Allow Off Route
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkAllowOfflineOrder" ng-model="beData.AllowOfflineOrder">
+                                            <label for="chkAllowOfflineOrder"
+                                                   class="custom-control-label">
+                                                Allow Offline Order
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkAllowRouteMapping" ng-model="beData.AllowRouteMapping">
+                                            <label for="chkAllowRouteMapping"
+                                                   class="custom-control-label">
+                                                Allow Route Mapping
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkPrintOrderAfterSave" ng-model="beData.PrintOrderAfterSave">
+                                            <label for="chkPrintOrderAfterSave"
+                                                   class="custom-control-label">
+                                                Print Order After Save
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 my-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="chkAllowGpsTrack" ng-model="beData.AllowGpsTrack">
+                                            <label for="chkAllowGpsTrack"
+                                                   class="custom-control-label">
+                                                Allow Gps Track
+                                            </label>
+                                        </div>
+                                    </div>
+                                    @*<div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label for="chkActiveSelfi">Active Selfi</label>
+                                                <input id="chkActiveSelfi" type="checkbox" class="form-control form-control-sm" ng-model="beData.ActiveSelfi">
+                                            </div>
+                                        </div>*@
+                                    @*<div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label for="chkActiveSelfiR">Active Selfi Remarks</label>
+                                                <input id="chkActiveSelfiR" type="checkbox" class="form-control form-control-sm" ng-model="beData.ActiveSelfiRemarks">
+                                            </div>
+                                        </div>*@
+                                    @*<div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label for="chkAllowOffRoute">Allow Off Route</label>
+                                                <input id="chkAllowOffRoute" type="checkbox" class="form-control form-control-sm" ng-model="beData.AllowOffRoute">
+                                            </div>
+                                        </div>*@
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>EmailId</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Email">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Address<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Address">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Area</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.AreaId">
+                                                <option ng-value="pg.AreaId" ng-repeat="pg in AreaMasterList">{{pg.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>For Branch</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.BranchId" data-placeholder="** Select Branch **">
+                                                <option ng-value="cl.BranchId" ng-repeat="cl in BranchList" ng-selected="cl.BranchId==beData.BranchId">{{cl.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Commission per (%)</label>
+                                            <input type="text" number-input class="form-control form-control-sm" ng-model="beData.CommissionRate">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-2">
+                                        <div class="form-group">
+                                            <label>Opening Amount</label>
+                                            <input type="text" number-input class="form-control form-control-sm" ng-model="beData.Opening">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <div class="form-group">
+                                            <label>DRCR</label>
+                                            <select id="inputState" class="form-control form-control-sm rounded-0" ng-model="beData.DrCr">
+                                                <option ng-value="d.id" ng-repeat="d in DrCrList" ng-selected="d.id==beData.DrCr">{{d.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Select User</label>
+                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.UserId">
+                                                <option ng-value="pg.id" ng-repeat="pg in UserList" ng-selected="pg.UserId==beData.UserId">{{pg.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="form-group">
+                                            <label>Brand</label>
+                                            @*<select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.TmpBrandIdColl" data-placeholder="** Select Brand **" multiple id="cboBrand">
+                                                    <option value="{{cl.ProductBrandId}}" ng-repeat="cl in ProductBrandColl">{{cl.Name}}</option>
+                                                </select>*@
+                                            <multi-select-option style="width: 100%;" ng-model="beData.TmpBrandIdColl" data="ProductBrandColl" label="Name" value="ProductBrandId"></multi-select-option>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-{{vUF.ColWidth}}" ng-repeat="uf in UDFFeildsColl">
+                                        <div class="form-group">
+                                            <label>{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                            <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </form>
+                            <footer class="main-footer">
+                                <div class="text-right control-btns">
+                                    <button type="button" class="btn btn-default" ng-click="ClearFields()">Reset</button>
+                                    <button type="button" class="btn btn-primary" ng-click="SaveAgentMode()">Save</button>
+                                </div>
+
+                            </footer>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+
+    </div>
+
+
+    <!--TDS Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmRoutePlan">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Route Plan For {{ CurAgent.Name }}- {{CurAgent.Code}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-2">
+                    <datalist id="lstBuyers">
+                        <option data-ng-repeat="ttl in CashPartyColl" value="{{ttl.Buyes}}">
+                    </datalist>
+                    <div class="table-scroll-x-y table-scroll" style="height:300px!important;overflow-y:auto">
+                        <table id="main-table" class="main-table table table-sm  table-head-fixed table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="cstm-sticky" style="left:0px;width: 120px;z-index:3;background-color:#ececec!important">S.No.</th>
+                                    <th class="cstm-sticky" style="left: 120px; width: 130px; z-index: 3;background-color:#ececec!important">Day</th>
+                                    <th style="width: 180px; z-index: 2;background-color:#ececec!important ">Route</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ts in CurPlanColl">
+                                    <td class="cstm-sticky" style="left: 0px; width: 120px; z-index: 2;background-color:#fff!important" align="center">
+                                        <a href="#" class="btn btn-danger" ng-click="delRoutePlan(ts,$index)"><i class="fas fa-trash"></i>  {{$index+1}}</a>
+                                    </td>
+                                    <td align="center">
+                                        {{ts.DayId |dayFormat}}
+                                    </td>
+                                    <td class="cstm-sticky" style="left: 120px; width: 130px; z-index: 2; background-color: #fff !important">
+                                        <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="ts.RouteId">
+                                            <option ng-repeat="vt in CurRouteColl" ng-value="{{vt.RouteId}}" ng-selected="vt.RouteId == ts.RouteId">
+                                                {{vt.Name}}
+                                            </option>
+                                        </select>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-2 float-right">
+                            <button type="button" class="btn load btn-success" style="min-width: 70px;" data-dismiss="modal" aria-label="Close" ng-click="SaveRoutePlan()">Ok</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+    <!--Date Wise Route Plan Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmDateWiseRoutePlan">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Route Plan For {{ CurAgent.Name }}- {{CurAgent.Code}}</h6>
+                    @*<a generate-pdf pdf-target="pdfContent" pdf-filename="DateWiseRoutePlan.pdf" class="btn btn-secondary btn-light btn-sm wait"
+           title="Print">
+            <i class="fas fa-print"></i>
+        </a>*@
+                    <a class="btn btn-secondary btn-light btn-sm wait" export-excel table-id="'#datewise-table'" sheet-name="'Salesman'" report-name="'DateWise Route Plan of'" ignore-column="'10'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+
+                </div>
+                <div class="modal-body py-2"  id="pdfContent">
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="d-inline-block">
+                                <div class="input-group input-group-sm">
+                                    <div>
+                                        <select class="form-control form-control-sm text-dark input-sm" ng-model="CurAgent.PeriodOPT" style="background-color: #e9ecef" disabled>
+                                            <option ng-value="poc.id" ng-repeat="poc in PeriodOptColl">{{poc.text}}</option>
+                                        </select>
+                                    </div>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">From:</span>
+                                    </div>
+                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="CurAgent.DateFrom_TMP" style="max-width:100px" date-detail="CurAgent.DateFromDet" />
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">To:</span>
+                                    </div>
+                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="CurAgent.DateTo_TMP" style="max-width:100px" date-detail="CurAgent.DateToDet" />
+
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" ng-click="ShowDateWiseRoutePlan(CurAgent)">Get Data</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-scroll-x-y table-scroll" style="height:300px!important;overflow-y:auto">
+                        <table id="datewise-table" class="main-table table table-sm  table-head-fixed table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="cstm-sticky" style="left:0px;width: 90px;z-index:3;background-color:#ececec!important">S.No.</th>
+                                    <th class="cstm-sticky" style="left: 90px; width: 90px; z-index: 3;background-color:#ececec!important;text-align:center">Date</th>
+                                    <th class="cstm-sticky" style="left: 180px; width: 100px; z-index: 3; background-color: #ececec !important; text-align: center">Miti</th>
+                                    <th class="cstm-sticky" style="left: 280px; width: 100px; z-index: 3; background-color: #ececec !important; text-align: center">Day</th>
+                                    <th style="width: 180px; z-index: 2;background-color:#ececec!important ">Route</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ts in CurPlanColl">
+                                    <td class="cstm-sticky" style="left: 0px; width: 90px; z-index: 2;background-color:#fff!important" align="center">
+                                        <a href="#" class="btn btn-danger" ng-click="delRoutePlan(ts,$index)"><i class="fas fa-trash"></i>  {{$index+1}}</a>
+                                        
+                                    </td>
+                                    <td align="center">
+                                        {{ts.ForDate |dateFormat}}
+                                    </td>
+                                    <td align="center">
+                                        {{ts.ForMiti}}
+                                    </td>
+                                    <td align="center">
+                                        {{ts.DayId |dayFormat}}
+                                    </td>
+                                    <td>
+                                        <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="ts.RouteId">
+                                            <option ng-repeat="vt in CurRouteColl" ng-value="{{vt.RouteId}}" ng-selected="vt.RouteId == ts.RouteId">
+                                                {{vt.Name}}
+                                            </option>
+                                        </select>                                        
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-2 float-right">
+                            <button type="button" class="btn load btn-success" style="min-width: 70px;" data-dismiss="modal" aria-label="Close" ng-click="SaveDWRoutePlan()">Ok</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+    <!--Password Reset Modal Starts-->
+    <div class="modal fade" id="frmPwdReset">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Password Reset For {{ CurAgentUser.Name }}- {{CurAgentUser.UserName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-2">
+                    <div class="form-group">
+                        <label for="">User</label>
+                        <input type="text"
+                               class="form-control form-control-sm" ng-model="CurAgentUser.UserName" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="">New Password</label>
+                        <input type="password"
+                               class="form-control form-control-sm" ng-model="CurAgentUser.NewPassword" />
+                    </div>
+                    <div class="form-group">
+                        <label for="">Confirm Password</label>
+                        <input type="password" class="form-control form-control-sm" ng-model="CurAgentUser.ConfirmPassword" />
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateResetPassword()">Update</button>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+    <!--Agent Replace Reset Modal Starts-->
+    <div class="modal fade" id="frmReplaceAgent">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Replace Agent </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-2">
+                    <div class="form-group">
+                        <label for="">User</label>
+                        <input type="text"
+                               class="form-control form-control-sm" ng-model="CurAgentForReplace.UserName" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="">From salesman</label>
+                        <input type="text"
+                               class="form-control form-control-sm" ng-model="CurAgentForReplace.Name" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label>To salesman</label>
+                        <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="CurAgentForReplace.ToAgentId">
+                            <option ng-value="pg.AgentId" ng-repeat="pg in AgentList  | filter: CurAgentForReplace.LevelId">{{pg.Name}}-{{pg.Code}}</option>
+                        </select>
+                    </div>
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="ReplaceAgent()">Replace</button>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+    @RenderPage("~/Views/Global/_ImportMultiple.cshtml")
+    @RenderPage("~/Views/Global/_IsValidMaster.cshtml")
+</div>
+

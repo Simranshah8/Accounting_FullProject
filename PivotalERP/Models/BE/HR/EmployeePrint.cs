@@ -1,0 +1,325 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.AccessControl;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace Dynamic.BE.HR
+{
+
+	public class EmployeePrint : ResponeValues
+	{
+
+		public int? EmployeeId { get; set; }
+		public int? EmployeeNo { get; set; }
+		public string EmployeeCode { get; set; } = "";
+		public long? EnrollNumber { get; set; }
+		public string Name { get; set; } = "";
+		public string Photo { get; set; } = "";
+		public byte[] PhotoB { get; set; }
+		public string GenderId { get; set; } = "";
+		public string BloodGroupId { get; set; } = "";
+		public string BloodGpName { get; set; } = "";
+		public string ReligionId { get; set; } = "";
+		public string ReligionName { get; set; } = "";
+		public string DobBS { get; set; } = "";
+		public DateTime? DobAD { get; set; }
+		public int? MaritalStatusId { get; set; }
+		public string MaritalStatusName { get; set; } = "";
+		public int? NationalityId { get; set; }
+		public string NationalityName { get; set; } = "";
+		public string PanId { get; set; } = "";
+		public string CitiNum { get; set; } = "";
+		public DateTime? CitiIssueDate { get; set; }
+		public string CitiIssueDateBS { get; set; } = "";
+		public string CitiIssuePlace { get; set; } = "";
+		public string EmailId { get; set; } = "";
+		public string OfficeNum { get; set; } = "";
+		public string PersonalNum { get; set; } = "";
+		public string FatherName { get; set; } = "";
+		public string GFatherName { get; set; } = "";
+		public string MotherName { get; set; } = "";
+		public string DrivingLicNum { get; set; } = "";
+		public DateTime? LicIssueDate { get; set; }
+		public string LicIssueDateBS { get; set; } = "";
+		public DateTime? LicExpiryDate { get; set; }
+		public string LicExpiryDateBS { get; set; } = "";
+		public string LicIssuePlace { get; set; } = "";
+		public string PassportNum { get; set; } = "";
+		public DateTime? PassportIssueDate { get; set; }
+		public string PassportIssueDateBS { get; set; } = "";
+		public DateTime? PassportExpiryDate { get; set; }
+		public string PassportExpiryDateBS { get; set; } = "";
+		public string PassportIssuePlace { get; set; } = "";
+		public int? PCountryId { get; set; }
+		public string PerCountry { get; set; } = "";
+		public string PStateName { get; set; } = "";
+		public string PDistrictName { get; set; } = "";
+		public string P_LocalLevelName { get; set; } = "";
+		public string PCity { get; set; } = "";
+		public int? PWard { get; set; }
+		public string PStreet { get; set; } = "";
+		public string PHouseNum { get; set; } = "";
+		public string PFullAddr { get; set; } = "";
+		public int? TCountryId { get; set; }
+		public string TempCountry { get; set; } = "";
+		public string TStateName { get; set; } = "";
+		public string TDistrictName { get; set; } = "";
+		public string Temp_LocalLevelName { get; set; } = "";
+		public string TCity { get; set; } = "";
+		public int? TWard { get; set; }
+		public string TStreet { get; set; } = "";
+		public string THouseNum { get; set; } = "";
+		public string TFullAddr { get; set; } = "";
+		public string ContactPer { get; set; } = "";
+		public int? ContactRelation { get; set; }
+		public string EmgRelation { get; set; } = "";
+		public string ContactAddr { get; set; } = "";
+		public string ContactPhone { get; set; } = "";
+		public string ContactMobile { get; set; } = "";
+		public int? CompanyId { get; set; }
+		public string CompanyName { get; set; } = "";
+		public int? BranchId { get; set; }
+		public string BranchName { get; set; } = "";
+		public int? SubBranch { get; set; } 
+		public string SubBranchName { get; set; }
+		public string BrandName { get; set; } = "";
+		public int? DepartmentId { get; set; }
+		public string DepartmentName { get; set; } = "";
+		public int? DesignationId { get; set; }
+		public string DesginationName { get; set; } = "";
+		public int? CategoryId { get; set; }
+		public string CategoryName { get; set; } = "";
+		public int? ELevelId { get; set; }
+		public string LevelName { get; set; } = "";
+		public string JTitle { get; set; } = "";
+		public int? ServiceTypeId { get; set; }
+		public string ServiceName { get; set; } = "";
+		public DateTime? JoinDate { get; set; }
+		public string JoinDateBS { get; set; } = "";
+		public DateTime? ConfirmDate { get; set; }
+		public string ConfirmDateBS { get; set; } = "";
+		public DateTime? PermanentDate { get; set; }
+		public string PermanentDateBS { get; set; } = "";
+		public DateTime? RetireDate { get; set; }
+		public string RetireDateBS { get; set; } = "";
+		public string HeadQtr { get; set; } = "";
+		public int? TaxRullId { get; set; }
+		public string TaxRullName { get; set; } = "";
+		public int? EmployeeGroupId { get; set; }
+		public string EmployeeGpName { get; set; } = "";
+		public int? ProjectId { get; set; }
+		public string ProjectName { get; set; } = "";
+		public int? RemoteAreaId { get; set; }
+		public string AreaName { get; set; } = "";
+		public int? DisabilitesId { get; set; }
+		public string DisabilitiesName { get; set; } = "";
+		public string PfAccNum { get; set; } = "";
+		public string PfNominee { get; set; } = "";
+		public int? PfRelation { get; set; }
+		public string PFRelationName { get; set; } = "";
+		public int? PfID { get; set; }
+		public string PfIdName { get; set; } = "";
+		public string PfIDNum { get; set; } = "";
+		public DateTime? PfEntryDate { get; set; }
+		public string PfEntryDateBS { get; set; } = "";
+		public string PfIssueOffice { get; set; } = "";
+		public string PfIssuePlace { get; set; } = "";
+		public string AccessNum { get; set; } = "";
+		public string SsfNum { get; set; } = "";
+		public string SsfAtt { get; set; } = "";
+		public string CitCode { get; set; } = "";
+		public string CitAccNum { get; set; } = "";
+		public double? CitAmt { get; set; }
+		public string CitNominee { get; set; } = "";
+		public int? CitRelationId { get; set; }
+		public string CITRelationName { get; set; } = "";
+		public int? CitIdType { get; set; }
+		public string CITIdName { get; set; } = "";
+		public string CitIdNum { get; set; } = "";
+		public DateTime? CitEntryDate { get; set; }
+		public string CitEntryDateBS { get; set; } = "";
+		public string GratCode { get; set; } = "";
+		public string GratAccNum { get; set; } = "";
+		public string GratNominee { get; set; } = "";
+		public int? GratRelation { get; set; }
+		public string GratRelationName { get; set; } = "";
+		public int? GratIdType { get; set; }
+		public string GratIdTName { get; set; } = "";
+		public string GratIdNum { get; set; } = "";
+		public DateTime? GratEntryDate { get; set; }
+		public string GratEntryDateBS { get; set; } = "";
+		public string GratIssueOffice { get; set; } = "";
+		public string GratIssuePlace { get; set; } = "";
+		public string LInsuComp { get; set; } = "";
+		public string LPolicyName { get; set; } = "";
+		public string LPolicyNum { get; set; } = "";
+		public double? LPolicyAmt { get; set; }
+		public DateTime? LPolicySDate { get; set; }
+		public string LPolicySDateBS { get; set; } = "";
+		public DateTime? LPolicyLDate { get; set; }
+		public string LPolicyLDateBS { get; set; } = "";
+		public double? LPremiumAmt { get; set; }
+		public int? LPaymentType { get; set; }
+		public string LIPaymentTName { get; set; } = "";
+		public int? LStartMonth { get; set; }
+		public string LStartMonthName { get; set; } = "";
+		public bool LDedSalary { get; set; }
+		public string LRemarks { get; set; } = "";
+		public int? LInsuTypeId { get; set; }
+		public string LInsuTypeName { get; set; } = "";
+		public string HInsuComp { get; set; } = "";
+		public string HPolicyName { get; set; } = "";
+		public string HPolicyNum { get; set; } = "";
+		public double? HPolicyAmt { get; set; }
+		public DateTime? HPolicySDate { get; set; }
+		public string HPolicySDateBS { get; set; } = "";
+		public DateTime? HPolicyLDate { get; set; }
+		public string HPolicyLDateBS { get; set; } = "";
+		public double? HPremiumAmt { get; set; }
+		public int? HPaymentType { get; set; }
+		public string HPaymentTypeName { get; set; } = "";
+		public int? HStartMonth { get; set; }
+		public string HStartMonthName { get; set; } = "";
+		public bool HDedSalary { get; set; }
+		public string HRemarks { get; set; } = "";
+		public int? HInsuTypeId { get; set; }
+		public string HInsuTypeName { get; set; } = "";
+		public string AccLedger { get; set; } = "";
+		public int? CostCenterId { get; set; }
+		public string CostCenterName { get; set; } = "";
+		public string OTLedger { get; set; } = "";
+		public int? EFirstLevel { get; set; }
+		public string FSName { get; set; } = "";
+		public int? ESecondLevel { get; set; }
+		public string SSName { get; set; } = "";
+		public int? EThirdLevel { get; set; }
+		public string TSName { get; set; } = "";
+		public string SpouseName { get; set; } = "";
+		public DateTime? AnniversaryDate { get; set; }
+		public string AnniversaryDateBS { get; set; } = "";
+		//add by prashnt chaitra 17
+
+		public int? SalaryApplicableYearId { get; set; }
+		public int? SalaryApplicableMonthId { get; set; }
+		public string SalaryApplicableMonth { get; set; } = "";
+		public bool IsAllowOT { get; set; }
+		public int OTCalculation { get; set; }
+		public string OTCalculationName { get; set; } = "";
+		public EmployeePrint()
+		{
+			EmpBankAccColl = new EmpBankCollections();
+			AcaQualificationColl = new QualificationCollections();
+			WorkExpColl = new WorkExpsCollections();
+			AttachmentColl = new Dynamic.BusinessEntity.GeneralDocumentCollections();
+		}
+		public EmpBankCollections EmpBankAccColl { get; set; }
+		public QualificationCollections AcaQualificationColl { get; set; }
+		public WorkExpsCollections WorkExpColl { get; set; }
+		public Dynamic.BusinessEntity.GeneralDocumentCollections AttachmentColl { get; set; }
+
+		public string CompanyRName { get; set; } = "";
+		public int? CompanyRId { get; set; }
+		public string CompanyAddress { get; set; } = "";
+		public string CompanyPhone { get; set; } = "";
+		public string CompanyEmail { get; set; } = "";
+		public string CompanyPan { get; set; } = "";
+
+    }
+	public class EmpBank
+	{
+
+		public int EmployeeId { get; set; }
+		public int? BankNameId { get; set; }
+		public string BankName { get; set; } = "";
+		public string AccName { get; set; } = "";
+		public string AccNum { get; set; } = "";
+		public string Branch { get; set; } = "";
+		public bool ForPayroll { get; set; }
+	}
+
+	public class EmpBankCollections : System.Collections.Generic.List<EmpBank>
+	{
+
+		public string ResponseMSG { get; set; } = "";
+
+		public bool IsSuccess { get; set; }
+
+	}
+
+	public class Qualification
+	{
+
+		public int EmployeeId { get; set; }
+		public string DegreeName { get; set; } = "";
+		public string BoardUni { get; set; } = "";
+		public string PassedYr { get; set; } = "";
+		public string GradePer { get; set; } = "";
+	}
+
+	public class QualificationCollections : System.Collections.Generic.List<Qualification>
+	{
+
+		public string ResponseMSG { get; set; } = "";
+
+		public bool IsSuccess { get; set; }
+
+	}
+
+	public class WorkExps
+	{
+
+		public int EmployeeId { get; set; }
+		public string Org { get; set; } = "";
+		public int? DepartmentId { get; set; }
+		public string DepartmentName { get; set; } = "";
+		public string JobTitle { get; set; } = "";
+		public DateTime? StartDate { get; set; }
+		public string StartDateBS { get; set; } = "";
+		public DateTime? EndDate { get; set; }
+		public string EndDateBS { get; set; } = "";
+		public string Remarks { get; set; } = "";
+	}
+
+	public class WorkExpsCollections : System.Collections.Generic.List<WorkExps>
+	{
+
+		public string ResponseMSG { get; set; } = "";
+
+		public bool IsSuccess { get; set; }
+
+	}
+
+	public class EmpDocuments
+	{
+
+		public int EmployeeId { get; set; }
+		public int? DocTypeId { get; set; }
+		public string DocumentTName { get; set; } = "";
+		public string DocAtt { get; set; } = "";
+		public string Description { get; set; } = "";
+	}
+
+	public class EmpDocumentsCollections : System.Collections.Generic.List<EmpDocuments>
+	{
+
+		public string ResponseMSG { get; set; } = "";
+
+		public bool IsSuccess { get; set; }
+
+	}
+	public class EmployeePrintCollections : System.Collections.Generic.List<EmployeePrint>
+	{
+		public EmployeePrintCollections()
+		{
+			ResponseMSG = "";
+		}
+		public string ResponseMSG { get; set; }
+		public bool IsSuccess { get; set; }
+	}
+
+
+}
+

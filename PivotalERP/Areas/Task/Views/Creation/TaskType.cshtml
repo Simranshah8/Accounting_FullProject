@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table th, .table td {
+        padding: 0.35rem;
+    }
+</style>
+<script src="~/jslib/Task/TaskType.js"></script>
+<div ng-app="myApp" ng-controller="TaskTypeController" ng-init="LoadData()">
+    <div>
+        <div class="container-fluid">
+
+            <div class="card card-primary card-outline card-outline-tabs">
+               
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearTaskType()" aria-controls="custom-tabs-four-profile" aria-selected="false">Task Type</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div class="">
+                                <header class="row">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                    <select class="form-select form-control border-left-0 border-right-0" ng-model="perPage.TaskType">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TaskType">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.TaskType">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-5 text-right">
+                                        <div class="dropdown dnld-file" data-toggle="tooltip"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#TaskType'" sheet-name="'TaskTypeList'"><img src="/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#TaskType').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#TaskType'" href="#" class="btn btn-secondary btn-light"
+                                               data-toggle="tooltip" data-placement="top" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                        </div>
+
+                                    </div>
+                                </header>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="table-scroll-x-y table-scroll" style="height:auto!important;max-height: calc(100vh - 8rem);">
+                                <table id="TaskType"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 60px;">S.No.</th>
+
+                                            <th style="width: 200px;">Task Type</th>
+                                            <th style="width: 90px;">Code</th>
+                                            <th style="width: 260px;">Description</th>
+
+                                            <th style="width: 60px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="V in TaskTypeList | filter:searchData.TaskType | itemsPerPage: perPage.TaskType" current-page="currentPages.TaskType" pagination-id="TaskTypePagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{V.Name}}</td>
+                                            <td>{{V.Code}}</td>
+                                            <td>{{V.Description}}</td>
+                                            <td>
+                                                <a class="p-1" ng-click="getTaskTypeById(V)" href="#">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="DelTaskTypesById(V)" href="#">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.card-body -->
+
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="TaskTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                </div>
+                            </footer>
+
+
+
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div class="p-2">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newTaskType.Name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Code</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newTaskType.Code">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Order No.</label>
+                                            <input type="number" ng-model="newTaskType.OrderNo"
+                                                   class="form-control form-control-sm"
+                                                   placeholder="" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="newTaskType.Description"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3 col-lg-3 col-md-3">
+                                        <div class="form-group">
+                                            <div class="custom-control custom-checkbox mt-4">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="customCheckbox1" value="option1" ng-model="newTaskType.IsActive">
+                                                <label for="customCheckbox1"
+                                                       class="custom-control-label">
+                                                    Is Active
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+
+                                        <button type="button" class="btn load btn-default" ng-click="ClearTaskType()" style="min-width: 90px;">Reset</button>
+                                        <button type="button" class="btn load btn-success" ng-click="SaveUpdateTaskType()" style="min-width: 90px;">{{newTaskType.Mode}}</button>
+                                    </div>
+
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+
+        </div> <!-- container-fluid -->
+    </div>
+</div>

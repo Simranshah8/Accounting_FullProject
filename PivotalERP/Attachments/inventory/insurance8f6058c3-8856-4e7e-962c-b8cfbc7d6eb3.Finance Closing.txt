@@ -1,0 +1,200 @@
+drop table tmpLedgerClosing
+
+declare @DateFrom date='2019-07-17';
+declare @DateTo date='2020-07-16';
+
+--select * from tbl_CompanyDetail
+declare  @tmpTran table(LedgerId int,DrAmount money,CrAmount money) ;
+
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationJournal LA 
+inner join tbl_TransactionJournal TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0 and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationContra LA 
+inner join tbl_TransactionContra TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationReceipt LA 
+inner join tbl_TransactionReceipt TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+
+
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationPayment LA 
+inner join tbl_TransactionPayment TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+
+declare @IncludeStudentReceipt bit=0;
+set @IncludeStudentReceipt=(select top 1 F.IncludeStudentReceipt from TBL_FEATURES F);
+
+if @IncludeStudentReceipt=1
+begin
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationStudentReceipt LA 
+inner join tbl_TransactionStudentReceipt TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0 
+group by LA.LedgerId,LA.DrCr; 
+
+end ;
+
+
+declare @IncludeInventory bit=0;
+set @IncludeInventory=(select top 1 F.IncludeInventoryInAccount from tbl_Features F);
+
+if @IncludeInventory=1
+begin
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationPurchase LA 
+inner join tbl_TransactionPurchase TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationDebitNote LA 
+inner join tbl_TransactionDebitNote TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationReceiptNote LA 
+inner join tbl_TransactionReceiptNote TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationSales LA 
+inner join tbl_TransactionSales TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationCreditNote LA 
+inner join tbl_TransactionCreditNote TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr; 
+insert into @tmpTran select LA.LedgerId,(case LA.DrCr when 1 then Sum(LA.Amount) else 0 end),(case LA.DrCr when 2 then Sum(LA.Amount) else 0 end) from tbl_LedgerAllocationDeliveryNote LA 
+inner join tbl_TransactionDeliveryNote TJ on LA.TranId=TJ.TranId
+where TJ.VoucherDate between @DateFrom and @DateTo and TJ.IsCancel=0  and TJ.IsPost=1
+group by LA.LedgerId,LA.DrCr;  
+
+end;
+
+with tbl_FLed
+as
+(
+select T.LedgerId,Sum(T.DrAmount) As DrAmount,Sum(T.CrAmount) as CrAmount from @tmpTran T group by T.LedgerId
+)
+select Led.LedgerId,Led.LedgerName,LG.LedgerGroupId,LG.GroupName,(case when Lo.Amt is null then 0 else Lo.Amt end) as Amt,(case when FL.DrAmount is null then 0 else FL.DrAmount end) as DrAmount,(case when FL.CrAmount is null then 0 else FL.CrAmount end) as CrAmount,Led.LedgerGroupId as LedgerGroupId1 into tmpLedgerClosing from TBL_LEDGER Led left outer join tbl_FLed FL on FL.LedgerId=Led.LedgerId left outer join f_GetLedgerOpeningBalance(@DateFrom,0) LO on Led.LedgerId=Lo.Id 
+inner join TBL_LEDGERGROUP LG on LG.LedgerGroupId=Led.LedgerGroupId
+order by Led.LedgerName;
+
+
+GO
+
+
+select * from tmpLedgerClosing
+
+alter table tmpLedgerClosing
+add
+Closing float
+
+update tmpLedgerClosing set Closing=Amt+DrAmount-CrAmount;
+
+delete from tmpLedgerClosing where Closing=0
+
+go
+
+select top 5 * from tbl_ledger
+
+update Dugar_db_7576.dbo.tbl_ledger set DrCr=1,Amount=0;
+
+declare @LedgerId int;
+declare @Amount float;
+declare cur cursor for select LedgerId,Closing from tmpLedgerClosing
+open cur
+fetch next from cur into @LedgerId,@Amount
+while @@Fetch_Status=0
+begin 
+if @Amount>0 
+update tbl_ledger set DrCr=1,Amount=@Amount where LedgerId=@LedgerId;
+else
+update tbl_ledger set DrCr=2,Amount=abs(@Amount) where LedgerId=@LedgerId;
+fetch next from cur into @LedgerId,@Amount
+end
+close cur
+deallocate cur
+
+
+use Dugar_db_7778
+
+
+delete from tbl_LedgerAllocationJournal
+truncate table tbl_TransactionJournalDocument
+delete from tbl_TransactionJournal
+
+delete from tbl_LedgerAllocationContra
+truncate table tbl_TransactionContraDocument
+delete from tbl_TransactionContra
+
+delete from tbl_LedgerAllocationReceipt
+truncate table tbl_TransactionReceiptDocument
+delete from tbl_TransactionReceipt
+
+delete from tbl_LedgerAllocationPayment
+truncate table tbl_TransactionPaymentDocument
+delete from tbl_TransactionPayment
+
+delete from tbl_LedgerAllocationSales
+truncate table tbl_TransactionSalesDocument
+delete from tbl_TransactionSales
+
+delete from tbl_LedgerAllocationPurchase
+truncate table tbl_TransactionPurchaseDocument
+delete from tbl_TransactionPurchase
+
+delete from tbl_LedgerAllocationDebitNote
+truncate table tbl_TransactionDebitNoteDocument
+delete from tbl_TransactionDebitNote
+
+delete from tbl_LedgerAllocationCreditNote
+truncate table tbl_TransactionCreditNoteDocument
+delete from tbl_TransactionCreditNote
+
+delete from tbl_SourceItemAllocationStockJournal;
+delete from tbl_TargetItemAllocationStockJournal;
+truncate table tbl_TransactionStockJournalDocument;
+delete from tbl_TransactionStockJournal
+
+
+dbcc checkident('tbl_TransactionJournal',reseed,1)
+dbcc checkident('tbl_LedgerAllocationJournal',reseed,1)
+
+dbcc checkident('tbl_TransactionContra',reseed,1)
+dbcc checkident('tbl_LedgerAllocationContra',reseed,1)
+
+dbcc checkident('tbl_TransactionReceipt',reseed,1)
+dbcc checkident('tbl_LedgerAllocationReceipt',reseed,1)
+
+dbcc checkident('tbl_TransactionPayment',reseed,1)
+dbcc checkident('tbl_LedgerAllocationPayment',reseed,1)
+
+dbcc checkident('tbl_TransactionPurchase',reseed,1)
+dbcc checkident('tbl_LedgerAllocationPurchase',reseed,1)
+dbcc checkident('tbl_ItemAllocationPurchase',reseed,1)
+
+dbcc checkident('tbl_TransactionSales',reseed,1)
+dbcc checkident('tbl_LedgerAllocationSales',reseed,1)
+dbcc checkident('tbl_ItemAllocationSales',reseed,1)
+
+
+dbcc checkident('tbl_TransactionDebitNote',reseed,1)
+dbcc checkident('tbl_LedgerAllocationDebitNote',reseed,1)
+dbcc checkident('tbl_ItemAllocationDebitNote',reseed,1)
+
+
+dbcc checkident('tbl_TransactionCreditNote',reseed,1)
+dbcc checkident('tbl_LedgerAllocationCreditNote',reseed,1)
+dbcc checkident('tbl_ItemAllocationCreditNote',reseed,1)
+
+
+dbcc checkident('tbl_TransactionStockJournal',reseed,1)
+dbcc checkident('tbl_SourceItemAllocationStockJournal',reseed,1)
+dbcc checkident('tbl_TargetItemAllocationStockJournal',reseed,1)
+
+update TBL_LEDGER set DrCr=1,Amount=0;
+
+select * from tbl_ledger

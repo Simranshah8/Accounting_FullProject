@@ -1,0 +1,410 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+@*<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />*@
+
+<script>
+    var VoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.Receipt)";
+	  var DefaultKeyValues = "";
+</script>
+<script src="~/jslib/service/transaction/JobWorkOrder.js"></script>
+<style>
+
+    .date-col {
+        max-width: 140px; /* controls column width */
+    }
+
+    .date-input {
+        width: 90px; /* reduce input width */
+    }
+
+    .date-label {
+        width: 120px; /* same as input width */
+        text-align: center; /* center label text */
+    }
+
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+
+    #DocView .modal-body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+<div id="ActionDiv" ng-app="myApp" ng-controller="JobWorkOrder" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active " id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form class="mb-0">
+                                    <div class="row">
+                                        @*<h3 class="card-title mr-4">{{SelectedVoucher && SelectedVoucher.VoucherName ? SelectedVoucher.VoucherName : 'Receipt'}}</h3>*@
+                                        <div class="col-md-3" ng-hide="HideShow.VoucherType==true">
+                                            <div class="form-group d-flex">
+                                                <label for="inputEmail3" style="min-width: 115px;">Voucher Type<span style="color:red">*</span></label>
+                                                <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.VoucherId" ng-change="GetAutoJobWorkOrderNo()" ng-disabled="beData.TranId>0">
+                                                    <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == beData.VoucherId">
+                                                        {{vt.VoucherName}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3" ng-hide="HideShow.CostClass==true">
+                                            <div class="form-group d-flex mb-0">
+                                                <label for="" class="col-form-label"  style="min-width: 115px;">Fiscal Year</label>
+                                                <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="GetAutoJobWorkOrderNo()" ng-disabled="beData.TranId>0">
+                                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                                        {{cc.Name}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-end">
+                                        <div class=" row col-md-12 pr-0">
+                                            <div class="col-md-3">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width: 115px;">Auto Number  </label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.AutoManualNo" disabled style="max-width:130px">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3"></div>
+                                            <div class="col-md-6 mt-0 float-right pr-0">
+                                                <div class="cstm-voucher-date-group-field d-flex float-right" style="width:auto!important">
+                                                    <label style="min-width:100px!important" title="Voucher Date">Voucher Date</label>
+                                                    <div id="dvDTVoucher">
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="beData.VoucherDate_TMP" style="max-width:100px" date-detail="beData.VoucherDateDet" id="dtVoucherDate" confirm-action="getVoucherNoOnly(2)" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:115px">Party Ledger <span class="text-danger">*</span></label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.PartyLedgerId" ledgertype="1"
+                                                        placeholder="** Select Party Ledger**" showdetails="true" confirm-action="ChangeParticularLedger(ledAllocation)" ledger-detail="ledAllocation.LedgerDetails" side-bar-data="ledAllocation.partySideBarData" style="width:100%"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:65px"> Name<span class="text-danger"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.PartyName">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:65px"> Address<span class="text-danger"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.Address">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:115px"> Contact No<span class="text-danger"></span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.ContactNo">
+                                            </div>
+                                        </div>
+                                   
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:65px">Job Card<span class="text-danger"></span></label>
+                                                @*<input type="number" class="form-control form-control-sm" ng-model="beData.JobCardId">*@
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.JobNo" ng-blur="getJobCardDetails()" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:65px">From Date<span class="text-danger"></span></label>
+                                                <input type="text" placeholder="" date-picker ng-model="beData.FromDate_TMP" date-detail="beData.FromDateDet" class="form-control form-control-sm" style="width:95px;">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:65px">To Date<span class="text-danger"></span></label>
+                                                <input type="text" placeholder="" date-picker ng-model="beData.ToDate_TMP" date-detail="beData.ToDateDet" class="form-control form-control-sm" style="width:95px;">
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group d-flex">
+                                                <label  style="width:128px">Remarks/Notes</label>
+                                                <textarea type="text" class="form-control form-control-sm" rows="1" ng-model="beData.Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentAttachModal">
+                                                Document Attach ({{ (beData.AttechFiles.length+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }} )
+                                            </button>
+                                        </div>
+                                        <div class="text-right control-btns col-sm-8">
+                                            <button type="button" class="btn btn-default btn" ng-click="GetAllJobWorkOrder()"> <span class="glyphicon glyphicon-remove"></span>Search</button>
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateJobWorkOrder()"><span class="glyphicon glyphicon-save"></span>{{beData.Mode}}</button>
+                                        </div>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade sales-invoice-page-modal document-attach-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="timeline-item">
+                            <div class="add-more-than-one-form-block">
+                                <form>
+                                    <article>
+                                        <div class="row">
+                                            @*UIUX code update: grid from col-sm-10 to col-sm-12*@
+                                            <div class="col-sm-12">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Attach Document</label>
+
+                                                            <div class="new-cstm-file-upload">
+                                                                <div class="drop-area" file-drop>
+                                                                    <div class="icon"></div>
+                                                                    <h3>Drag & Drop Files Here</h3>
+                                                                    <p>or <span>click to browse</span></p>
+                                                                    <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                    <div class="attached-list">
+                                                                        <ul class="file-list"></ul>
+                                                                        <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex flex-column h-100 justify-content-between">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div>
+                                                                    <label class="invisible d-none">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </form>
+                            </div>
+                            <div class="pb-3">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+                                                <th scope="col">File Name</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ac in beData.DocumentColl">
+                                                <th scope="row">{{$index+1}}</th>
+
+                                                <td>{{ac.Name}}</td>
+                                                <td>{{ac.Description}}</td>
+                                                <td>
+                                                    <div>
+                                                        <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                            <i class="fas fa-eye text-secondary"></i>
+                                                        </a>
+
+                                                        <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-add btn-outline-secondary dynamic-uiux-sm-btn" style="width:50px" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body mb-0 p-2">
+                        <iframe class="responsive-iframe1" ng-hide="viewImg1.FileType === 'image'" id="pdfViewer1" style="width: 100%; height: 700px; border: none;"></iframe>
+                        <img ng-show="viewImg1.FileType === 'image'" ng-src="{{viewImg1.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                    </div>
+                    <div class="modal-footer p-2">
+                        <div><a href="{{viewImg1.ContentPath}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="ApproveModal" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content" style="width:calc(100vw - 2rem)">
+                    <div class="modal-header p-2">
+                        <h6 class="modal-title" id="exampleModalCenterTitle"> JobWorkOrder</h6>
+                        <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-2">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.JobWorkOrder">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.JobWorkOrder">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.JobWorkOrder">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <div class="table-scroll-x-y table-scroll mt-1" style="height: 180px!important;">
+                                <table id="maintable" class="table table-bordered table-hover table-sm dynamic-uiux-table cstm-collapse-border">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:35px">S.N</th>
+                                            <th style="width:100px"> Voucher Name</th>
+                                            <th style="width: 60px;"> Voucher No.</th>
+                                            <th style="width: 150px;"> Party Name</th>
+                                            <th style="width:100px"> Address</th>
+                                            <th style="width:100px"> Contact</th>
+                                            <th style="width:60px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="pDet in JobWorkOrderList | filter:searchData.JobWorkOrder | itemsPerPage:perPage.JobWorkOrder" current-page="currentPages.JobWorkOrder" pagination-id="JobWorkOrderPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{pDet.VoucherName}}</td>
+                                            <td>{{pDet.AutoVoucherNo}}</td>
+                                            <td>{{pDet.PartyName}}</td>
+                                            <td>{{pDet.Address}}</td>
+                                            <td>{{pDet.ContactNo}}</td>
+                                            <td style="text-align:center;">
+                                                <a class="p-1" href="#" ng-click="GetJobWorkOrderById(pDet)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelJobWorkOrder(pDet,$index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="JobWorkOrderPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</div>
+
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+<script>
+    document.querySelector('.responsive-iframe1').onload = function () {
+        const iframeDocument1 = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument1.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+
+
+
+
+
+
+

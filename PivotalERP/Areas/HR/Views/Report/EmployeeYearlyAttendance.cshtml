@@ -1,0 +1,234 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    .ag-icon-menu{
+        display: none !important;
+    }
+    .ag-theme-alpine .ag-header-cell, .ag-theme-alpine .ag-header-group-cell {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+</style>
+@*<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Att_EmployeeWiseEmpAttendance)";
+</script>*@
+
+<script src="~/jslib/hr/Report/EmployeeYearlyAttendance.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="EmployeeYearlyAttendanceController" ng-init="LoadData()">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Add the required Contents of sidebar-->
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <section class="">
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card px-2 pt-2 pb-2">
+                                        <div class="row">
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Fiscal Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFilter.CostClassId">
+                                                        <option ng-repeat="C in CostClassList" ng-value="C.CostClassId" ng-selected="C.CostClassId==newFilter.CostClassId">{{C.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label>Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newFilter.YearId">
+                                                        <option ng-repeat="C in YearList" ng-value="C.id" ng-selected="C.id==newFilter.YearId">{{C.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>*@
+
+                                            <div class="col-md-5" id="selectStu">
+                                                <label class="" for="inlineFormInputGroup">Select Employee</label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0"
+                                                            style="outline: none;
+                                                            border-top-right-radius: unset;
+                                                            border-bottom-right-radius: unset;
+                                                            margin-right: -3px;
+                                                            z-index: 1;
+                                                            font-size: 13px;
+                                                    " ng-model="newFilter.SelectEmployee">
+
+                                                        <option ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newFilter.SelectEmployee">
+                                                            {{ss.text}}
+                                                        </option>
+
+                                                    </select>
+
+                                                    <select class="form-control select2 form-control-sm" all-employee ng-model="newFilter.UserId" employee-detail="newFilter.EmployeeDetails" side-bar-data="newFilter.EmpSideBarData" search-by="newFilter.SelectEmployee" style="width: 100%;" confirm-action="getEmpYearAttendanceLog(newFilter)">
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2"></div>
+                                            <div class="col-md-3 mt-4">
+                                                <div class="float-right form-inline">
+                                                    <button class="btn btn-sm btn-info load" style="min-width: 90px;" type="button" ng-click="getEmpYearAttendanceLog()">Load</button>
+                                                    <div class="dropdown dnld-file ml-2" data-toggle="tooltip"
+                                                         data-placement="top" title="Download File">
+                                                        <button class="btn btn-default btn-light btn-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download py-1"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon">
+                                                                CSV
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <a class="btn btn-default btn-light btn-sm ml-2"
+                                                       data-toggle="tooltip" data-placement="bottom" title="Print">
+                                                        <i class="fas fa-print py-1 px-2"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card p-2">
+
+                                            <div class="row">
+                                                <div class="col-md-4 col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width:110px">EnrollNo</label>
+                                                        <label class="text-nowrap font-weight-bold">: {{newEmp.EnrollNumber}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width: 110px">Branch </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{newEmp.BranchName}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width: 110px">Department </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{newEmp.Department}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width: 110px">Designation </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{newEmp.Designation}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width: 110px">Employee Group </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{newEmp.GroupName}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width: 110px">Level </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{newEmp.LevelName}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 col-sm-2">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width:90px">Total Days </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{SumTotalDays}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-sm-2 d-flex">
+                                                    <div class="col-md-3 p-0">
+                                                        <div class="form-group d-flex">
+                                                            <label>Present </label>
+                                                            <label class="text-nowrap font-weight-bold">: {{SumTotalPresent}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group d-flex">
+                                                            <label>Absent </label>
+                                                            <label class="text-nowrap font-weight-bold">: {{SumTotalAbsent}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group d-flex">
+                                                            <label>Leave</label>
+                                                            <label class="text-nowrap font-weight-bold">: {{SumTotalLeave}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group d-flex">
+                                                            <label>Weekend</label>
+                                                            <label class="text-nowrap font-weight-bold">: {{SumTotalWeekEnd}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group d-flex">
+                                                        <label>Holiday </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{SumTotalHoliday}}</label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2 col-sm-2">
+                                                    <div class="form-group d-flex">
+                                                        <label style="min-width: 90px">OT Hours </label>
+                                                        <label class="text-nowrap font-weight-bold">: {{TotalOTDuration}}</label>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div id="datatable3" style="height: calc(100vh - 13rem);width: 100%;" class="ag-theme-alpine"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- /.row -->
+                    </div>
+                    <!--/. container-fluid -->
+                </section>
+            </div>
+            <!-- /.content -->
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

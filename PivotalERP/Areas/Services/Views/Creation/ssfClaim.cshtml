@@ -1,0 +1,573 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll {
+        position: relative;
+        width: 100%;
+        z-index: 1;
+        margin: auto;
+        overflow: auto;
+        height: 300px;
+    }
+
+        .table-scroll table {
+            width: 100%;
+            margin: auto;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+    .table-wrap {
+        position: relative;
+    }
+
+    .table-scroll th,
+    .table-scroll td {
+        padding: 5px 10px;
+        border: 1px solid #dce0e3;
+        background: #fff;
+        vertical-align: top;
+    }
+
+    .table-scroll thead th {
+        background: #ececec;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+    }
+    
+    .table-scroll tfoot,
+    .table-scroll tfoot th,
+    .table-scroll tfoot td {
+        position: -webkit-sticky;
+        position: sticky;
+        bottom: 0;
+        background: #ececec;
+        color: #141515;
+        z-index: 4;
+    }
+    
+</style>
+<script src="~/jslib/inventory/transaction/SSFClaim.js?v=20220831"></script>
+<div ng-app="myApp" ng-controller="ssfClaimController" ng-class="{waiting: loadingstatus=='running'}" @*ng-init="GetAllSalesMan()"*@>
+    <div class="container-fluid">
+        <div class="content">
+            <div class="card1 py-2" style="min-height:1040px!important;">
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header py-1" style="background-color: #7abe5ad9; color: white;">
+                                <h5 class="mb-0">Patient Detail</h5>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Patient Id<span style="color:red">*</span></label>
+                                            <input type="text" class="form-control form-control-sm serial" ng-model="SearchPatientId" ng-blur="getPatientDet()" onfocus="this.select();">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Total Dues Amt.</label>
+                                            <label class="form-control form-control-sm">{{beData.ClosingAmt |number:2}}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Name</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Name" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Address</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Address" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>District</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.District" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Age/Gender</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Age" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Guardian</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.GuardianName" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Relation</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Relation" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Mobile No</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="beData.MobileNo" disabled>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-9">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>S.S.F. Id<span style="color:red">*</span></label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.SSFCode" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Regd. Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.OPDMiti" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Opd Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.OPDMiti" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>IPD Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.IPDMiti" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Discharge  Date</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="beData.DischageMiti" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Referred In</label>
+                                        <input type="text" class="form-control form-control-sm serial" ng-model="beData.ReferredIn" onfocus="this.select();">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Referred Out</label>
+                                        <input type="text" class="form-control form-control-sm serial" ng-model="beData.ReferredOut" onfocus="this.select();">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Doctor</label>
+                                        <input type="text" class="form-control form-control-sm serial" ng-model="beData.Doctor" onfocus="this.select();">
+                                    </div>
+                                </div>
+
+                                @*<div class="col-md-6">
+                            <div class="form-group">
+                                <label>Complaints<span style="color:red">*</span></label>
+                                <textarea class="form-control form-control-sm serial" id="complaints" rows="1"></textarea>
+                            </div>
+                        </div>*@
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Scheme Type<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2 serial" ng-model="beData.schemeType">
+                                            <option ng-repeat="st in SchemeTypeColl" ng-value="st.id" ng-selected="st.id==beData.schemeType">{{st.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Sub Product<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2 serial" ng-model="beData.subProduct">
+                                            <option ng-repeat="sp in SubProductCol |  filter: filterSubProduct() " ng-value="sp.id" ng-selected="sp.id==beData.subProduct">{{sp.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-9" ng-show="beData.schemeType==1">
+                                    <div class="form-group">
+                                        <label>Accident Description</label>
+                                        <textarea class="form-control form-control-sm serial" id="accidentdesc" rows="1" ng-model="beData.AccidentDescription"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3" ng-show="beData.schemeType==1">
+                                    <div class="form-group">
+                                        <label>Injured Body Part</label>
+                                        <input type="text" class="form-control form-control-sm serial" ng-model="beData.InjuredBodyPart">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <label>Reason of Sickness</label>
+                                        <textarea class="form-control form-control-sm serial" id="reasonofsickness" rows="1" ng-model="beData.ReasonOfSickness"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Discharge Type<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2 serial" ng-model="beData.DischargeType">
+                                            <option ng-repeat="dt in DischargeTypeColl" ng-value="dt.text" ng-selected="dt.text==beData.DischargeType">{{dt.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Discharge Summary<span style="color:red">*</span></label>
+                                        <textarea class="form-control form-control-sm serial" id="dischargesummary" rows="1" ng-model="beData.DischargeSummary"></textarea>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Wound Condition</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radioPrimary7" name="r4" ng-value="1" ng-model="beData.WoundCondition">
+                                                <label for="radioPrimary7">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radioPrimary8" name="r4" ng-value="2" ng-model="beData.WoundCondition">
+                                                <label for="radioPrimary8">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Is Disable</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radiodisable1" ng-value="1" name="disable" ng-model="beData.IsDisable">
+                                                <label for="radiodisable1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radiodisable2" ng-value="2" name="disable" ng-model="beData.IsDisable">
+                                                <label for="radiodisable2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Is Dead</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radiodead1" name="dead" ng-value="1" ng-model="beData.IsDead">
+                                                <label for="radiodead1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radiodead2" name="dead" ng-value="2" ng-model="beData.IsDead">
+                                                <label for="radiodead2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Cancer</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radiocancer1" name="cancer" ng-value="1" ng-model="beData.Cancer">
+                                                <label for="radiocancer1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radiocancer2" name="cancer" ng-value="2" ng-model="beData.Cancer">
+                                                <label for="radiocancer2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>HIV</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radiohiv1" name="hiv" ng-value="1" ng-model="beData.HIV">
+                                                <label for="radiohiv1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radiohiv2" name="hiv" ng-value="2" ng-model="beData.HIV">
+                                                <label for="radiohiv2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Heart Attack</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radioheartattack1" name="heartattack" ng-value="1" ng-model="beData.HeartAttack">
+                                                <label for="radioheartattack1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radioheartattack2" name="heartattack" ng-value="2" ng-model="beData.HeartAttack">
+                                                <label for="radioheartattack2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Hign Bp</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radiobp1" name="bp" ng-value="1" ng-model="beData.HighBp">
+                                                <label for="radiobp1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radiobp2" name="bp" ng-value="2" ng-model="beData.HighBp">
+                                                <label for="radiobp2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Diabetes</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radiDiabetesp1" name="Diabetes" ng-value="1" ng-model="beData.Diabetes">
+                                                <label for="radiDiabetesp1">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radioDiabetes2" name="Diabetes" ng-value="2" ng-model="beData.Diabetes">
+                                                <label for="radioDiabetes2">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header py-1" style="background-color: #7abe5ad9; color: white;">
+                                <h5 class="mb-0">Investigation</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-scroll-x-y" style="height:190px;">
+                                    <table id="main-table" class="table table-sm table-head-fixed table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-0 text-center" style="width: 40px; background-color: #ececec!important">S.No</th>
+                                                <th style="width: 200px; background-color: #ececec !important">Investigation</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ss in beData.ServiceList">
+                                                <td class="align-middle text-center px-0">{{$index+1}}</td>
+                                                <td>
+                                                    {{ss.TestName}} - {{ss.TestCode}}
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header py-1" style="background-color: #7abe5ad9; color: white;">
+                                <h5 class="mb-0">Provisional Diagnosis</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-scroll-x-y" style="height:190px;">
+                                    <table id="main-table" class="table table-sm table-head-fixed table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-0 text-center" style="width: 40px; background-color: #ececec!important">S.No</th>
+                                                <th style="width: 150px; background-color: #ececec !important">Diagnosis</th>
+                                                <th style="width: 100px; background-color: #ececec !important">ICD Code</th>
+                                                <th class="text-center px-0" style="width: 60px; background-color: #ececec !important">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="dl in beData.DiagnosisList">
+                                                <td class="align-middle text-center pl-0">{{$index+1}}</td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2" active-select2 ng-model="dl.DiagnosisId">
+                                                        <option ng-value="dd.DiagnosisId" ng-repeat="dd in DiagnosisColl" ng-selected="dd.DiagnosisId==dl.DiagnosisId">{{dd.Name}}</option>
+                                                    </select>
+                                                </td>
+                                                <td><input type="text" class="form-control form-control-sm" ng-model="dl.DiagnosisCode" onfocus="this.select();"></td>
+                                                <td class="text-center align-middle">
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a class="btn btn-info text-white" ng-click="AddDisgnosis()"><i class="fas fa-plus"></i></a>
+                                                        <a class="btn btn-info text-white ml-1" ng-click="delDisgnosis($index)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header py-1" style="background-color: #7abe5ad9; color: white;">
+                                <h5 class="mb-0">Treatment, Medicine</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-scroll-x-y" style="height:190px;">
+                                    <table id="main-table" class="table table-sm table-head-fixed table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-0 text-center" style="width: 40px; background-color: #ececec!important">S.No</th>
+                                                <th style="width: 200px; background-color: #ececec !important">Treatment,Medicine</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ss in beData.MedicineList">
+                                                <td class="align-middle text-center pl-0">{{$index+1}}</td>
+                                                <td>
+                                                    {{ss.ItemName}} - {{ss.ItemCode}}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div id="summarytable" class="card">
+                    <div id="table-scroll" class="table-scroll">
+                        <table id="main-table" class="table table-sm main-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 110px; background-color: #ececec!important">S.No.</th>
+                                    <th style="width: 100px; background-color: #ececec !important">Date</th>
+                                    <th style="width: 80px; background-color: #ececec !important">Bill No</th>
+                                    <th style="width: 150px; background-color: #ececec !important">Test Name</th>
+                                    <th class="text-center" style="width: 70px; background-color: #ececec !important">Qty</th>
+                                    <th class="text-center" style="width: 90px; background-color: #ececec !important">Amount</th>
+                                    <th style="width: 170px; background-color: #ececec !important">SSF Claim Amt.</th>
+                                    <th style="width: 170px; background-color: #ececec !important">SSF Code</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ss in beData.ServiceList">
+                                    <td class="text-center">{{$index+1}}</td>
+                                    <td>{{ss.BillMiti}}</td>
+                                    <td>{{ss.InvoiceNo}}</td>
+                                    <td>{{ss.TestName}}</td>
+                                    <td class="text-center">{{ss.Qty}}</td>
+                                    <td style="text-align:right">{{ss.Amount}}</td>
+                                    <td style="text-align:right">{{ss.SSFAmount}}</td>
+                                    <td>{{ss.SSFCode}}</td>
+                                </tr>
+
+                                
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" style="text-align:right"><b>Total</b></th>
+                                    <td class="text-center"><b>23123</b></td>
+                                    <td style="text-align:right"><b>12312</b></td>
+                                    <td style="text-align:right"><b>23123</b></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+                <div class="card mt-4" style="height:300px;margin-bottom:90px!important">
+                    <div id="table-scroll" class="table-scroll">
+                        <table id="main-table" class="table table-sm main-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 110px; background-color: #ececec!important">S.No.</th>
+                                    <th style="width: 100px; background-color: #ececec !important">Date</th>
+                                    <th style="width: 80px; background-color: #ececec !important">Bill No</th>
+                                    <th style="width: 150px; background-color: #ececec !important">Item Name</th>
+                                    <th class="text-center" style="width: 70px; background-color: #ececec !important">Qty</th>
+                                    <th class="text-center" style="width: 90px; background-color: #ececec !important">Amount</th>
+                                    <th style="width: 170px; background-color: #ececec !important">SSF Claim Amt.</th>
+                                    <th style="width: 170px; background-color: #ececec !important">SSF Code</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ss in beData.MedicineList">
+                                    <td class="text-center">{{$index+1}}</td>
+                                    <td>{{ss.BillMiti}}</td>
+                                    <td>{{ss.InvoiceNo}}</td>
+                                    <td>{{ss.ItemName}}</td>
+                                    <td class="text-center">{{ss.Qty}}</td>
+                                    <td style="text-align:right">{{ss.Amount}}</td>
+                                    <td style="text-align:right">{{ss.SSFAmount}}</td>
+                                    <td>{{ss.SSFCode}}</td>
+                                </tr>                               
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4"style="text-align:right"><b>Total</b></th>
+                                    <td class="text-center"><b>23123</b></td>
+                                    <td style="text-align:right"><b>12312</b></td>
+                                    <td style="text-align:right"><b>23123</b></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+                </div>
+                <footer class="main-footer">
+                    <div class="text-right control-btns">
+                        <button type="button" class="btn btn-default" ng-click="ClearFields()">Cancel</button>
+                        <button type="button" class="btn btn-primary" ng-click="SaveSSFClaim()">Save</button>
+                    </div>
+                </footer>
+
+            </div>
+        <!-- /.container-fluid -->
+    </div>
+</div>
+

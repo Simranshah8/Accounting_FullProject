@@ -1,0 +1,1257 @@
+
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+      var VoucherType = "@ViewBag.VoucherType";
+      var EntityId = "@ViewBag.EntityId";
+      var TranId=@ViewBag.TranId;
+    var DefaultKeyValues = "@ViewBag.DefaultKeyValues";
+    var EntityId1 = "@ViewBag.EntityId1";
+</script>
+<style>
+    .receipttbl {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/account/transaction/IncomingPayment.js"></script>
+ 
+<div ng-app="myApp" ng-controller="IncomingPaymentController" ng-init="LoadData()" ng-cloak>
+    <!-- Main content -->
+    <div class="container-fluid">
+        <div class="sale-page-wrap">
+            <div class="overflow-hidden">
+                @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+                @RenderPage("~/Views/Global/_LedgerDetails.cshtml")
+                <!-- Page Content  -->
+                <div class="content-wrapper-new">
+                    <div class="card mt-2 bodypart">
+                        <div class="demo-container">
+                            <div class="demo-header">
+                                <div class="card-header header-corner-triangle overflow-hidden py-1">
+                                    <div class="row">
+                                        <h3 class="card-title mr-4">{{SelectedVoucher && SelectedVoucher.VoucherName ? SelectedVoucher.VoucherName : 'Receipt'}}</h3>
+                                        <div class="col-md-3" ng-hide="HideShow.VoucherType==true">
+                                            <div class="form-group row">
+                                                <label class="col-md-4">Voucher Type</label>
+                                                <div class="col-md-8">
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.VoucherId" ng-change="getVoucherNo()" ng-disabled="beData.TranId>0">
+                                                        <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == beData.VoucherId">
+                                                            {{vt.VoucherName}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3" ng-hide="HideShow.CostClass==true">
+                                            <div class="form-group row">
+                                                <label for="" class="col-sm-4 col-form-label">Fiscal Year</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="getVoucherNo()" ng-disabled="beData.TranId>0">
+                                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3" ng-show="SelectedVoucher.ActiveProject==true">
+                                            <div class="form-group row">
+                                                <label for="" class="col-sm-4 col-form-label text-nowrap">Project</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control form-control-sm hideSideBar" active-select2 style="width: 100%;" ng-model="beData.ProjectId" data-placeholder="** select project **">
+                                                        <option ng-repeat="cc in ProjectColl track by cc.ProjectId" ng-value="cc.ProjectId" ng-selected="cc.ProjectId == beData.ProjectId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-body px-2 py-1">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2 row">
+                                                <label for="" class="col-md-6">Receipt No.</label>
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control form-control-sm serial" placeholder="" ng-model="beData.AutoManualNo" readonly ng-hide="HideShow.AutoVoucherNo==true" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+                                                    <input type="text" class="form-control form-control-sm serial hideSideBar" placeholder="" ng-model="beData.ManualVoucherNO" ng-hide="HideShow.AutoVoucherNo==false" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2 row">
+                                                <label for="" class="col-md-4">{{SelectedVoucher.RefNoName ? SelectedVoucher.RefNoName : 'Ref. No.'}}</label>
+                                                <div class="col-md-8">
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.RefNo" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="row" ng-show="SelectedVoucher.AllowMultipleCurrency==true && CurrencyColl.length>1">
+                                                <div class="col-sm-8">
+                                                    <div class="form-group d-flex">
+                                                        <label for="inputEmail3" style="min-width: 120px;">Currency</label>
+                                                        <select class=" form-control form-control-sm" style="width: 100%;" ng-model="beData.CurrencyId" ng-change="ChangeCurrency()">
+                                                            <option ng-repeat="curC in CurrencyColl" ng-value="curC.CurrencyId" ng-selected="curC.CurrencyId == beData.CurrencyId">
+                                                                {{curC.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group d-flex">
+                                                        <label for="inputEmail3" class="mr-2">Rate</label>
+                                                        <input type="number" class="form-control form-control-sm serial" placeholder="" ng-model="beData.CurRate" onfocus="this.select();">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2 row">
+                                                <label for="" class="col-md-5">Voucher Date</label>
+                                                <div class="col-md-7" @*ng-hide="SelectedVoucher.DateStyle==1"*@ id="dvDTVoucher">
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly()" title="{{(SelectedVoucher.DateStyle==1 ? beData.VoucherDateDet.dateBS : (beData.VoucherDateDet.dateAD |dateFormat))}}" date-style="SelectedVoucher.DateStyle" id="dtVoucherDate" voucherid="SelectedVoucher.VoucherId">
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="form-group mb-2 row">
+                                                @*<label for="" class="col-md-2">Select Cash/Bank</label>*@
+                                                <!--Added By Suresh on 15 baishakh 2082-->
+                                                <div class="col-md-2">
+                                                    <select class="form-control form-control-sm" ng-model="beData.ForCV">
+                                                        <option ng-repeat="cv in ForCustomerVendor" ng-selected="cv.id==beData.ForCV" ng-value="cv.id">{{cv.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <!--Ends-->
+                                                <div class="col-md-8" ng-show="beData.ForCV==1">
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.PartyLedgerId" ledgertype="3" fortransaction="true"
+                                                            placeholder="** Select Customer **" showdetails="true" confirm-action="ChangePartyLedger(beData)" ledger-detail="beData.PartyLedgerDetails" side-bar-data="beData.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="1"></select>
+                                                </div>
+                                                <div class="col-md-8" ng-show="beData.ForCV==2">
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.PartyLedgerId" ledgertype="2" fortransaction="true"
+                                                            placeholder="** Select Vendor **" showdetails="true" confirm-action="ChangePartyLedger(beData)" ledger-detail="beData.PartyLedgerDetails" side-bar-data="beData.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="1"></select>
+                                                </div>
+
+                                                <div class="col-md-2">
+                                                    <span>
+                                                        <b>
+                                                            {{beData.PartyLedgerDetails.Closing | formatNumberAC}}
+                                                        </b>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group row">
+                                                <label for="" class="col-sm-4 col-form-label text-nowrap">Cash/Bank</label>
+                                                <div class="col-sm-8">
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="beData.CashBankLedgerId" ledgertype="8" fortransaction="true"
+                                                            placeholder="** Select Cash/Bank **" showdetails="true" confirm-action="ChangeCashBankLedger(beData)" ledger-detail="beData.LedgerDetails" side-bar-data="beData.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="1"></select>
+                                                </div>
+                                            </div>
+                                            @*<div class="form-group row">
+                                                    <label for="" class="col-sm-4 col-form-label text-nowrap">Income</label>
+                                                    <div class="col-sm-8">
+                                                        <select class="form-control form-control-sm select2bs4" active-select2 style="width: 100%; background-color: #fff" ng-model="beData.IECostCenterId" data-placeholder="**Select Income**">
+                                                            <option ng-repeat="cc in AllCostCenterColl| filter: { DimensionId: 8 }:true track by cc.CostCenterId" ng-value="cc.CostCenterId" ng-selected="cc.CostCenterId == beData.IECostCenterId">
+                                                                {{cc.Name}}-{{cc.Code}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+                                        </div>
+                                        <div class="col-md-4" ng-show="SelectedVoucher.ActiveBranch==true">
+                                            <div class="form-group mb-2 row">
+                                                <label for="" class="col-md-5">For Branch</label>
+                                                <div class="col-md-7">
+                                                    <select class="form-control form-control-sm select2" style="width: 100%; background-color: #fff" ng-model="beData.ForBranchId" data-placeholder="**For Branch**">
+                                                        <option ng-repeat="cc in BranchColl track by cc.BranchId" ng-value="cc.BranchId" ng-selected="cc.BranchId == beData.ForBranchId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4" ng-show="SelectedVoucher.ActiveReceiptNo==true">
+                                            <div class="form-group mb-2 row">
+                                                <label for="" class="col-md-5">Received No.</label>
+                                                <div class="col-md-7">
+                                                    <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="beData.ReceiptId">
+                                                        <option ng-repeat="vt in PendingReceiptColl" ng-value="{{vt.ReceiptId}}" ng-selected="vt.ReceiptId == beData.ReceiptId">
+                                                            {{vt.DisplayReceiptNo}}-{{vt.AccountNo}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div class="row" ng-show="SelectedVoucher.ActiveUDF==true">
+                                        <div class="col-sm-3" ng-repeat="uf in beData.UDFFeildsColl | filter: { FieldAfter: 4 }:true">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width: 120px;">{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                <udf-field udf="uf" voucher="SelectedVoucher" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--new Panel  added by suresh on 15 baishakh 2082 starts-->
+                            <div class="accordion" id="billDetailsAccordion">
+                                <div class="card">
+                                    <div class="card-header text-center p-0" id="headingOne">
+                                        <h2 class="mb-0 position-relative">
+                                            <button class="btn btn-link w-100 py-1  collapsed"
+                                                    type="button"
+                                                    onclick="toggleAccordion(this)"
+                                                    style="background-color: #049bdb26; text-decoration: none;">
+                                                <b>Show Bill Details</b>
+                                                <i class="fas fa-angle-down arrow-icon ml-2"></i> <!-- FontAwesome arrow -->
+                                            </button>
+                                        </h2>
+                                    </div>
+
+                                    <div class="collapse" id="collapseOne" style="display: none;">
+                                        <div class="card-body p-0">
+
+                                            <div class="form-group d-flex">
+                                                <label for="inputEmail3" style="min-width: 80px;">
+                                                    Total Dues
+                                                </label>
+                                                <div class="col-sm-3 col-md-3">
+                                                    <label type="text" class="form-control form-control-sm">
+                                                        {{(CurBillRefColl | sumOfValue:'Amount') |number:2}}
+                                                    </label>
+                                                </div>
+                                                <label style="min-width: 80px;">
+                                                    Search
+                                                </label>
+                                                <div class="col-sm-3 col-md-3">
+                                                    <input type="text" class="form-control form-control-sm" data-ng-model="BillSearchData" onfocus="this.select();" autocomplete="off" />
+                                                </div>
+                                                <label style="min-width: 80px;" class="mt-1">
+                                                    No Bill Ref. <input type="checkbox" ng-model="beData.NoBillRef" />
+                                                </label>
+                                            </div>
+
+                                            <div class="table-scroll-x-y table-scroll" style="height:300px !important; overflow-y:auto">
+                                                <table id="main-table" class="main-table table-head-fixed table table-sm table-bordered bg-white">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="cstm-sticky" style="left:0px;width: 60px;z-index:3; background-color:#eee!important">S.No.</th>
+                                                            <th class="cstm-sticky" style="left: 60px; width: 130px; z-index: 3;background-color:#eee!important">Invoice No.</th>
+                                                            <th style="width: 120px; z-index: 2">Miti(Days)</th>
+                                                            <th style="width: 150px; z-index: 2">Dues Amt.</th>
+                                                            <th style="width: 150px; z-index: 2">Paid Amt.</th>
+                                                            <th style="width: 160px; z-index: 2">Voucher</th>
+                                                            <th style="width: 140px; z-index: 2">Branch</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="curItemA in CurBillRefColl  | filter:BillSearchData | orderBy:sortKey:reverse | itemsPerPage:perPage.PendingBill" current-page="currentPages.PendingBill" pagination-id="PendingBillPagination">
+                                                            <td align="center">
+                                                                {{$index+1}}
+                                                            </td>
+                                                            <td class="cstm-sticky" style="left: 0px; width: 60px; z-index: 2;background-color:#fff!important">
+                                                                {{curItemA.InvoiceNo}}
+                                                            </td>
+                                                            <td class="cstm-sticky" style="left: 60px; width: 130px; z-index: 2; background-color: #fff !important">
+                                                                {{curItemA.VoucherDateBS}} ({{curItemA.Days}})
+                                                            </td>
+                                                            <td align="right">
+                                                                {{curItemA.Amount |number:2}}
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="curItemA.PaidAmt" ng-change="ChangeBillWiseAmt('paidAmt')" positive="true" />
+                                                            </td>
+                                                            <td>
+                                                                {{curItemA.VoucherName}}
+                                                            </td>
+                                                            <td>
+                                                                {{curItemA.Branch}}
+                                                            </td>
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+                                                <div class="col-md-12">
+                                                    <dir-pagination-controls pagination-id="PendingBillPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                    </dir-pagination-controls>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--Ends-->
+
+                            <div class="table-scroll-x-y mb-1 table-container">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead class="text-center">
+                                        <tr>
+                                            <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                            <th style="width: 60px; background-color: #ececec !important;z-index:3">DrCr</th>
+                                            <th style="width: 200px;background-color:#ececec!important;z-index:3">Particulars</th>
+                                            <th ng-repeat="ud in SelectedVoucher.VoucherProductUDFColl  | filter: { FieldAfter: 1 }:true" rowspan="2" class="text-center align-middle" style="width: 120px;background-color:#ececec!important;">{{ud.Label}}</th>
+                                            <th ng-show="SelectedVoucher.ActiveBranch==true" style="width: 150px;background-color:#ececec!important">For Branch</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Current Bal.</th>
+                                            <th ng-repeat="ud in SelectedVoucher.VoucherProductUDFColl  | filter: { FieldAfter: 5 }:true" rowspan="2" class="text-center align-middle" style="width: 120px;background-color:#ececec!important;">{{ud.Label}}</th>
+                                            <th style="width: 180px; background-color: #ececec !important" ng-show="SelectedVoucher.UseSubLedger==true">Sub Ledger</th>
+                                            <th style="width: 180px; background-color: #ececec !important" ng-show="SelectedVoucher.ActiveMultipleReceiptNo==true">Received No.</th>
+                                            <th style="width: 150px;background-color:#ececec!important">Amount</th>
+                                            <th style="width: 350px; background-color: #ececec !important" ng-show="SelectedVoucher.ProfitCenter1==true">{{AllDimensionColl[0].Description}}</th>
+                                            <th style="width: 350px; background-color: #ececec !important" ng-show="SelectedVoucher.ProfitCenter2==true">{{AllDimensionColl[1].Description}}</th>
+                                            <th style="width: 350px; background-color: #ececec !important" ng-show="SelectedVoucher.ProfitCenter3==true">{{AllDimensionColl[2].Description}}</th>
+                                            <th style="width: 350px; background-color: #ececec !important" ng-show="SelectedVoucher.ProfitCenter4==true">{{AllDimensionColl[3].Description}}</th>
+                                            <th style="width: 350px; background-color: #ececec !important" ng-show="SelectedVoucher.ProfitCenter5==true">{{AllDimensionColl[4].Description}}</th>
+                                            <th ng-show="SelectedVoucher.EachNarrationEntry==true" style="width: 150px;background-color:#ececec!important">Narration</th>
+                                            <th ng-repeat="ud in SelectedVoucher.VoucherProductUDFColl  | filter: { FieldAfter: 0 }:true" rowspan="2" class="text-center align-middle" style="width: 120px;background-color:#ececec!important;">{{ud.Label}}</th>
+                                            <th class="text-center align-middle" style="width: 70px;background-color:#ececec!important">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="ledAllocation in beData.LedgerAllocationColl">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td>
+                                                <select class="form-control form-control-sm rounded-0" ng-model="ledAllocation.DrCr" ng-change="ChangeDrCr(ledAllocation)">
+                                                    <option ng-value="d.id" ng-repeat="d in DrCrList" ng-selected="d.id==ledAllocation.DrCr">{{d.text}}</option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="ledAllocation.DrCr==1">
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="ledAllocation.LedgerId" ledgertype="1" fortransaction="true"
+                                                        placeholder="** Select Cash/Bank **" showdetails="true" confirm-action="ChangeParticularLedger(ledAllocation)" ledger-detail="ledAllocation.LedgerDetails" side-bar-data="ledAllocation.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="2"></select>
+
+                                            </td>
+                                            <td ng-show="ledAllocation.DrCr==2">
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="ledAllocation.LedgerId" ledgertype="1" fortransaction="true"
+                                                        placeholder="** Select Income **" showdetails="true" confirm-action="ChangeParticularLedger(ledAllocation)" ledger-detail="ledAllocation.LedgerDetails" side-bar-data="ledAllocation.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="2"></select>
+
+                                            </td>
+                                            <td ng-repeat="uf in ledAllocation.UDFFeildsColl | filter: { FieldAfter: 1 }:true ">
+                                                <udf-field udf="uf" voucher="SelectedVoucher"></udf-field>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.ActiveBranch==true">
+                                                <select class="form-control form-control-sm select2" style="width: 100%; background-color: #fff" ng-model="ledAllocation.ForBranchId" data-placeholder="**For Branch**">
+                                                    <option ng-repeat="cc in BranchColl track by cc.BranchId" ng-value="cc.BranchId" ng-selected="cc.BranchId == ledAllocation.ForBranchId">
+                                                        {{cc.Name}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td><h5> {{ledAllocation.CurrentBal |accountFormat}}</h5></td>
+                                            <td ng-repeat="uf in ledAllocation.UDFFeildsColl | filter: { FieldAfter: 5 }:true ">
+                                                <udf-field udf="uf" voucher="SelectedVoucher"></udf-field>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.UseSubLedger==true">
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-cost-center ng-model="ledAllocation.SubLedgerId" fortransaction="true"
+                                                        placeholder="** Select Sub Ledger **" showdetails="false" costcenter-detail="ledAllocation.SubLedgerDetails" side-bar-data="ledAllocation.subLedgerSideBarData" ledger-id="ledgerAllocation.LedgerId"></select>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.ActiveMultipleReceiptNo==true">
+                                                <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="ledAllocation.ReceiptId">
+                                                    <option ng-repeat="vt in PendingReceiptColl" ng-value="{{vt.ReceiptId}}" ng-selected="vt.ReceiptId == ledAllocation.ReceiptId">
+                                                        {{vt.DisplayReceiptNo}}-{{vt.AccountNo}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="ledAllocation.DrCr==1">
+                                                <input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="ledAllocation.DrAmount" ng-blur="AddRowInLedgerAllocation($index,true)" ng-change="ChangeCrAmount(ledAllocation)" positive="true" ng-style="ledAllocation.IsNegativeBudget==true && { 'color' : 'red' }">
+                                            </td>
+                                            <td ng-show="ledAllocation.DrCr==2">
+                                                <input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="ledAllocation.CrAmount" ng-blur="AddRowInLedgerAllocation($index,true)" ng-change="ChangeCrAmount(ledAllocation)" positive="true" ng-style="ledAllocation.IsNegativeBudget==true && { 'color' : 'red' }">
+                                            </td>
+
+                                            <td ng-show="SelectedVoucher.ProfitCenter1==true">
+                                                <select class="form-control form-control-sm select2bs4" active-select2 style="width: 100%; background-color: #fff" ng-model="ledAllocation.Dimension1" data-placeholder="**Select**">
+                                                    <option ng-repeat="cc in AllCostCenterColl| filter: { DimensionId: 1 }:true track by cc.CostCenterId" ng-value="cc.CostCenterId" ng-selected="cc.CostCenterId == ledAllocation.Dimension1">
+                                                        {{cc.Name}}-{{cc.Code}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.ProfitCenter2==true">
+                                                <select class="form-control form-control-sm select2bs4" active-select2 style="width: 100%; background-color: #fff" ng-model="ledAllocation.Dimension2" data-placeholder="**Select**">
+                                                    <option ng-repeat="cc in AllCostCenterColl| filter: { DimensionId:2 }:true track by cc.CostCenterId" ng-value="cc.CostCenterId" ng-selected="cc.CostCenterId == ledAllocation.Dimension2">
+                                                        {{cc.Name}}-{{cc.Code}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.ProfitCenter3==true">
+                                                <select class="form-control form-control-sm select2bs4" active-select2 style="width: 100%; background-color: #fff" ng-model="ledAllocation.Dimension3" data-placeholder="**Select**">
+                                                    <option ng-repeat="cc in AllCostCenterColl| filter: { DimensionId: 3 }:true track by cc.CostCenterId" ng-value="cc.CostCenterId" ng-selected="cc.CostCenterId == ledAllocation.Dimension3">
+                                                        {{cc.Name}}-{{cc.Code}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.ProfitCenter4==true">
+                                                <select class="form-control form-control-sm select2bs4" active-select2 style="width: 100%; background-color: #fff" ng-model="ledAllocation.Dimension4" data-placeholder="**Select**">
+                                                    <option ng-repeat="cc in AllCostCenterColl| filter: { DimensionId: 4 }:true track by cc.CostCenterId" ng-value="cc.CostCenterId" ng-selected="cc.CostCenterId == ledAllocation.Dimension4">
+                                                        {{cc.Name}}-{{cc.Code}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.ProfitCenter5==true">
+                                                <select class="form-control form-control-sm select2bs4" active-select2 style="width: 100%; background-color: #fff" ng-model="ledAllocation.Dimension5" data-placeholder="**Select**">
+                                                    <option ng-repeat="cc in AllCostCenterColl| filter: { DimensionId: 5 }:true track by cc.CostCenterId" ng-value="cc.CostCenterId" ng-selected="cc.CostCenterId == ledAllocation.Dimension5">
+                                                        {{cc.Name}}-{{cc.Code}}
+                                                    </option>
+                                                </select>
+                                            </td>
+                                            <td ng-show="SelectedVoucher.EachNarrationEntry==true"><input type="text" onfocus="this.select();" class="form-control form-control-sm" ng-model="ledAllocation.Narration"></td>
+                                            <td ng-repeat="uf in ledAllocation.UDFFeildsColl | filter: { FieldAfter:0 }:true ">
+                                                <udf-field udf="uf" voucher="SelectedVoucher"></udf-field>
+                                            </td>
+                                            <td class="text-center">
+                                                <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInLedgerAllocation($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowLedgerAllocation($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        @*<div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label>Narration</label>
+                                        <input type="text" list="lstNarration" class="form-control form-control-sm hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                                        <datalist id="lstNarration">
+                                            <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                                        </datalist>
+                                    </div>
+                                </div>
+                            </div>*@
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <footer class="main-footer control-btns pt-0">
+            <div class="secondary-footer mb-2 mt-2">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="form-group">
+                            <input type="text" list="lstNarration" class="form-control form-control-sm hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                            <datalist id="lstNarration">
+                                <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class=" col-md-3">
+                        <div class="form-group row">
+                            <label for="" class="col-md-2">Total</label>
+                            <label class="form-control form-control-sm col-md-9">
+                                {{ beData.Amount |number:SelectedVoucher.NoOfDecimalPlaces }}
+                            </label>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row ">
+
+                    <div class="col-md-4 mt-2">
+                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentAttachModal">
+                            Document Attach ({{ (beData.AttechFiles.length+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }} )
+                        </button>
+
+                    </div>
+                    <div class="col-md-8 mt-2">
+                        <span class="d-block text-right">
+                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="SearchData()">Search</button>
+                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="Print()">Re-Print</button>
+                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="Clear()">Reset</button>
+                            <button type="button" class="btn btn-primary" style="min-width: 90px;" ng-click="SaveReceipt()" ng-disabled="loadingstatus=='running' || (ButtonED.IRD == true && beData.TranId>0)">{{beData.Mode}}</button>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+
+        <div class="modal fade sales-quotation-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content" style="min-width:1000px">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Search Receipt</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                    <div class="col-sm-10">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                    <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions">{{asp.text}}</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                                            <div class="input-group-append">
+                                                <div class="input-group-text">
+                                                    <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <form class="float-right">
+                                    <div class="form-row align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                            <input type="text" ng-model="paginationOptions.pageSize" class="form-control form-control-sm input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="table-scroll-x-y mb-1 table-container card" style="height:auto !important;">
+                            <table id="main-table" class="main-table table table-sm table-bordered bg-white text-nowrap table-hover" style="table-layout: auto;">
+                                <thead>
+                                    <tr>
+                                        <th style="z-index: 3; background-color: #ececec !important;">Receipt No</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">RefNo</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">Date</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">Miti</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">Voucher Name</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">CostClass</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">Party</th>
+                                        <th style="z-index: 3; background-color: #ececec !important;">Amount</th>
+                                        <th class="cstm-sticky" style="right: 0; z-index: 4; background-color: #ececec !important;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows" ng-class="{'bg-red': sd.IsCancel === true}">
+                                        <td align="center">{{sd.VoucherNo}}</td>
+
+                                        <td>{{sd.RefNo}}</td>
+                                        <td align="center">{{sd.VoucherDate |dateFormat}}</td>
+                                        <td align="center">{{sd.VoucherMiti}}</td>
+                                        <td>{{sd.VoucherName}}</td>
+                                        <td>{{sd.CostClass}}</td>
+
+                                        <td>{{sd.PartyName}}</td>
+                                        <td align="right">{{sd.Amount |number:3}}</td>
+                                        <td class="cstm-sticky" style="right: 0; z-index: 3; background-color: white !important;">
+                                            <a class="p-1" href="#" ng-click="GetTransactionById(sd)" ng-hide="ButtonED.IRD==true">
+                                                <i class="fas fa-edit text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="GetTransactionById(sd)" ng-hide="ButtonED.IRD==false">
+                                                <i class="fa fa-eye text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="DelTransactionById(sd)" ng-hide="ButtonED.IRD==true">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                                <i class="fas fa-print text-primary"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer justify-content-between align-items-center py-2">
+                        <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                        <div class="">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- /.row -->
+        @*file-upload modal*@
+        <div class="modal fade sales-invoice-page-modal document-attach-modal" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="exampleModalCenterTitle">Document Attach</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="timeline-item">
+                            <div class="add-more-than-one-form-block">
+                                <form>
+                                    <article>
+                                        <div class="row">
+
+                                            <div class="col-sm-10">
+                                                <div class="row">
+                                                    <div class="col-sm-4">
+                                                        <div class="form-group">
+                                                            <label>Attach Document</label>
+                                                            <div class="form-group">
+                                                                <input type="file" id="flMoreFiles" class="form-control-file border p-0 bg-white" file-model ng-model="attachFile">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <input type="text" class="form-control form-control-sm"
+                                                                   ng-model="docDescription"
+                                                                   placeholder="">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-2">
+                                                        <div class="d-flex">
+                                                            <div>
+                                                                <label class="invisible d-block">for height</label>
+                                                                <button type="button" class="btn btn-sm btn-outline-secondary light-btn" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </form>
+                            </div>
+                            <div class="pb-3">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+
+                                                <th scope="col">File Name</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ac in beData.DocumentColl">
+                                                <th scope="row">{{$index+1}}</th>
+
+                                                <td>{{ac.Name}}</td>
+                                                <td>{{ac.Description}}</td>
+                                                <td>
+                                                    <div>
+                                                        <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                            <i class="fas fa-eye text-secondary"></i>
+                                                        </a>
+
+                                                        <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-add btn-outline-secondary" style="width:50px" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--New Modal Adde by Suresh Starts on 31 Shrawan 2080-->
+        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body mb-0 p-2">
+                        <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                        <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                    </div>
+                    <div class="modal-footer p-2">
+                        <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Ends-->
+        <!-- Add ReportTemplates Modal Dailog -->
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmCostCentersModel" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                        <h6 class="modal-title" id="exampleModalCenterTitle"><b>Cost Center Details For <b>{{ CurLedgerAllocation.LedgerDetails.Name }}</b></b></h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row" style="margin-top: -10px">
+                            <div class="table-responsive">
+                                <div class="table-scroll-x-y mt-1" style="height: 350px!important">
+                                    <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                                <th style="width: 220px; background-color: #ececec !important ">CostCenter</th>
+                                                <th style="width: 160px; background-color: #ececec !important ">Cost Category</th>
+                                                <th style="width: 120px; background-color: #ececec !important ">Current Bal.</th>
+                                                <th style="width: 120px; background-color: #ececec !important ">Amount</th>
+                                                <th style="width: 180px; background-color: #ececec !important ">Department</th>
+                                                @*Added Column by suresh form MVDuggad*@
+                                                <th style="width: 180px; background-color: #ececec !important ">Brand</th>
+                                                @*Added Column by suresh form MVDuggad*@
+                                                <th class="text-center align-middle;" style="width: 70px; background-color: #ececec !important ">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ccAllocation in CurLedgerAllocation.CostCenterColl">
+                                                <td align="center">{{$index+1}}</td>
+                                                <td>
+                                                    <select parentId="frmCostCentersModel" autoShowHide="true" class="form-control form-control-sm select2 serial" all-cost-center ng-model="ccAllocation.CostCenterId" fortransaction="true"
+                                                            placeholder="** Select CostCeter Name **" showdetails="true" confirm-action="ChangeParticularCostCenter(ccAllocation)" costcenter-detail="ccAllocation.CostCenterDetails" side-bar-data="ccAllocation.partySideBarData" ledger-id="CurLedgerAllocation.LedgerId"></select>
+                                                </td>
+                                                <td>
+                                                    {{ccAllocation.CostCenterDetails.Category}}
+                                                </td>
+                                                <td><h5> {{ccAllocation.CurrentBal |number:2}}</h5></td>
+                                                <td><input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="ccAllocation.CrAmount" ng-blur="AddRowInCostCenterAllocation($index,true)" ng-change="ChangeCostCenterAmount()"></td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2" active-select2 ng-model="ccAllocation.DepartmentId">
+                                                        <option>**select department**</option>
+                                                        <option ng-value="dp.CostCenterDepartmentId" ng-repeat="dp in CostDepartmentColl" ng-selected="dp.CostCenterDepartmentId==ccAllocation.DepartmentId">{{dp.Name}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2" active-select2 ng-model="ccAllocation.ProductBrandId">
+                                                        <option>**select Brand**</option>
+                                                        <option ng-value="dp.ProductBrandId" ng-repeat="dp in BrandColl" ng-selected="dp.ProductBrandId==costAllotcation.ProductBrandId">{{dp.Name}}</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInCostCenterAllocation($index)">
+                                                        <i class="fas fa-plus text-info"></i>
+                                                    </a>
+                                                    <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowCostCenterAllocation($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+
+                                                </td>
+                                            </tr>
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer p-2" style="padding: 3px;  ">
+                        <button type="button" class="btn load btn-primary" style="min-width: 70px;"> <i class="fas fa-file-import mr-2"></i>Import</button>
+                        <button type="button" class="btn load btn-outline-secondary" data-dismiss="modal" style="min-width:70px">Cancel</button>
+                        <button type="button" class="btn load btn-success" ng-click="OkCostCenterModal()" style="min-width:70px">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!--Cheque Detail Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="chequedetailCashBank">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Cheque Details For : {{SelectedCashBank.LedgerName}} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Cheque No</label>
+                        </div>
+                        <div class="col-md-8">
+                            @*<input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.CheckDetails.ChequeNo" />*@
+                            <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="SelectedCashBank.CheckDetails.ChequeId" ng-change="ChequeNoSelect(SelectedCashBank)">
+                                <option ng-repeat="vt in SelectedCashBank.PendingChequeColl" ng-value="{{vt.ChequeId}}" ng-selected="vt.ChequeId == ts.ChequeId">
+                                    {{vt.DisplayChequeNo}}-{{vt.BranchName}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Cheque Date</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text"
+                                   class="form-control form-control-sm" date-picker ng-model="SelectedCashBank.CheckDetails.ChequeDate_TMP" date-detail="SelectedCashBank.CheckDetails.ChequeDateDet">
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Cheque Type</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="SelectedCashBank.CheckDetails.CheckType">
+                                <option ng-repeat="vt in ChequeTypeColl" ng-value="{{vt.id}}" ng-selected="vt.id == ts.TdsVatType">
+                                    {{vt.text}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Account No</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="SelectedCashBank.CheckDetails.AccountNo" readonly />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Party</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="SelectedCashBank.CheckDetails.PartyName" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Remarks</label>
+                        </div>
+                        <div class="col-md-8">
+                            <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedCashBank.CheckDetails.Remarks"></textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                            @*<button type="button" class="btn btn-sm btn-success" style="min-width: 70px;">Save</button>*@
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--Cheque Detail Modal Ends-->
+    <!--Cheque Detail Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="chequedetail">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Cheque Details For : {{CurLedgerAllocation.LedgerName}} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Cheque No</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.CheckDetails.ChequeNo" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Cheque Date</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text"
+                                   class="form-control form-control-sm" date-picker ng-model="CurLedgerAllocation.CheckDetails.ChequeDate_TMP" date-detail="CurLedgerAllocation.CheckDetails.ChequeDateDet">
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Cheque Type</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="CurLedgerAllocation.CheckDetails.CheckType">
+                                <option ng-repeat="vt in ChequeTypeColl" ng-value="{{vt.id}}" ng-selected="vt.id == ts.TdsVatType">
+                                    {{vt.text}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Account No</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.CheckDetails.AccountNo" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Remarks</label>
+                        </div>
+                        <div class="col-md-8">
+                            <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurLedgerAllocation.CheckDetails.Remarks"></textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                            @*<button type="button" class="btn btn-sm btn-success" style="min-width: 70px;">Save</button>*@
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--Cheque Detail Modal Ends-->
+    <!--Fund Transfer Detail Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="fundtransferdetail">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Fund Transfer Details For : {{CurLedgerAllocation.LedgerDetails.Name}} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Transfer Type</label>
+                        </div>
+                        <div class="col-md-8">
+                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="CurLedgerAllocation.FundDetails.FundTransferTypeId">
+                                <option ng-repeat="vt in FundTransferTypeColl" ng-value="{{vt.id}}" ng-selected="vt.id == CurLedgerAllocation.FundDetails.FundTransferTypeId">
+                                    {{vt.text}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Ref. No.</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.FundDetails.TransactionRefNo" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>To Account</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.FundDetails.ToAccount" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Beneficiary Name</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.FundDetails.BeneficiaryName" />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label>Beneficiary Bank</label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.FundDetails.BeneficiaryBankName" />
+                        </div>
+                    </div>
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--Fund Detail Modal Ends-->
+    <!--TDS Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="tds">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">{{ (CurLedgerAllocation.LedgerDetails.IsVat==true ? "VAT" : "TDS") }} Detail For : {{CurLedgerAllocation.LedgerDetails.Name}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-2">
+                    <datalist id="lstBuyers">
+                        <option data-ng-repeat="ttl in CashPartyColl" value="{{ttl.Buyes}}">
+                    </datalist>
+                    <div class="table-scroll-x-y table-scroll" style="height:300px!important;overflow-y:auto">
+                        <datalist id="lstExpenses">
+                            <option ng-repeat="x1 in ExpensesLedgerColl track by $index" value="{{x1.Name}}">
+                        </datalist>
+                        <table id="main-table" class="main-table table table-sm  table-head-fixed table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="cstm-sticky" style="left:0px;width: 120px;z-index:3;background-color:#ececec!important">Bill No</th>
+                                    <th class="cstm-sticky" style="left: 120px; width: 130px; z-index: 3;background-color:#ececec!important">Date</th>
+                                    <th style="width: 180px; z-index: 2;background-color:#ececec!important ">Party Ledger</th>
+                                    <th style="width: 180px; z-index: 2;background-color:#ececec!important ">Party Name</th>
+                                    <th style="width: 150px; z-index: 2;background-color:#ececec!important">Expenses Heading</th>
+                                    <th style="width: 120px; z-index: 2;background-color:#ececec!important">PAN/Vat</th>
+                                    <th style="width: 120px; z-index: 2;background-color:#ececec!important" ng-show="CurLedgerAllocation.LedgerDetails.IsVat==true">Type</th>
+                                    <th style="width: 120px; z-index: 2;background-color:#ececec!important" ng-show="CurLedgerAllocation.LedgerDetails.IsTDS==true">Payment</th>
+                                    <th style="width: 100px; z-index: 2;background-color:#ececec!important">Amount</th>
+                                    <th style="width: 100px; z-index: 2;background-color:#ececec!important">Rate</th>
+                                    <th style="width: 100px; z-index: 2;background-color:#ececec!important">{{ (CurLedgerAllocation.LedgerDetails.IsVat==true ? "VAT" : "TDS") }}</th>
+                                    <th class="text-center align-middle" style="width: 70px; z-index: 2; background-color: #ececec !important">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ts in CurLedgerAllocation.TDSVatDetailColl">
+                                    <td class="cstm-sticky" style="left: 0px; width: 120px; z-index: 2;background-color:#fff!important">
+                                        <input type="text" class="form-control form-control-sm" ng-model="ts.BillNo" />
+                                    </td>
+                                    <td class="cstm-sticky" style="left: 120px; width: 130px; z-index: 2; background-color: #fff !important">
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="ts.BillDate_TMP" date-detail="ts.BillDateDet">
+                                    </td>
+                                    <td>
+                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="ts.PartyLedgerId" ledgertype="1" fortransaction="true"
+                                                placeholder="** Select Party **" showdetails="true" confirm-action="ChangeVatTDSParty(ts)" ledger-detail="ts.VTLedgerDetails" side-bar-data="ts.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="3"></select>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm" data-ng-model="ts.PartyName" list="lstBuyers" ng-change="ChangeBuyerSelection()" onfocus="this.select();">
+                                    </td>
+                                    <td>
+                                        <input type="text" list="lstExpenses" class="form-control form-control-sm hideSideBar" placeholder="Expenses Heading" ng-model="ts.OtherHeading">
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control form-control-sm" ng-model="ts.PANVat" />
+                                    </td>
+                                    <td ng-show="CurLedgerAllocation.LedgerDetails.IsVat==true">
+                                        <select class="form-control form-control-sm" style="width: 100%;" ng-model="ts.TdsVatType">
+                                            <option ng-repeat="vt in VatTypeColl" ng-value="{{vt.id}}" ng-selected="vt.id == ts.TdsVatType">
+                                                {{vt.text}}
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td ng-show="CurLedgerAllocation.LedgerDetails.IsTDS==true">
+                                        <input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.Payment" ng-change="CalculateTDS(ts,'payment')" />
+                                    </td>
+                                    <td>
+                                        <input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.AccessableValue" ng-change="CalculateTDS(ts,'access')" />
+                                    </td>
+                                    <td>
+                                        <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.Rate" ng-change="CalculateTDS(ts,'rate')" />
+                                    </td>
+                                    <td>
+                                        <input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.Amount" ng-change="CalculateTDS(ts,'amt')" />
+                                    </td>
+                                    <td style="z-index: 1">
+                                        <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInTDSDetails($index)">
+                                            <i class="fas fa-plus text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowFromTDSDetails($index)">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-2 float-right">
+                            <button type="button" class="btn load btn-primary" style="min-width: 70px;"> <i class="fas fa-file-import mr-2"></i>Import</button>
+                            <button type="button" class="btn load btn-success" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                            @*<button type="button" class="btn btn-sm btn-success" style="min-width: 70px;">Save</button>*@
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+
+    @RenderPage("~/Views/Global/_IsValidTran.cshtml")
+
+    <!--Ledger Wise UDF Detail Modal Starts-->
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="ledgerUDF">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Details For : {{CurLedgerAllocation.LedgerDetails.Name}} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-2" ng-repeat="uf in CurLedgerAllocation.LedgerUDFColl">
+                        <div class="col-md-4">
+                            <label>{{uf.Name}}<span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                        </div>
+                        <div class="col-md-8">
+                            <udf-field udf="uf" voucher="SelectedVoucher"></udf-field>
+                        </div>
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--Cheque Detail Modal Ends-->
+
+</div>
+<script>
+
+    $(function () {
+        $("#wrapper").toggleClass("toggled");
+        $("#sidebar-wrapper").css("overflow-y", "hidden");
+
+
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+            $("#sidebar-wrapper").css("overflow-y", "auto");
+        });
+
+
+    });
+
+</script>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+        };
+        fullHeight();
+
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>
+
+<script>
+
+    $(document).ready(function () {
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                //var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                //if (key == 13) {
+                //    e.preventDefault();
+                //    var inputs = $(this).closest('form').find(':input:visible');
+                //    inputs.eq(inputs.index(this) + 1).focus();
+                //}
+
+                var index = $('.serial').index(this) + 1;
+                $('.serial').eq(index).focus();
+            }
+        });
+    });
+</script>
+
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+<script>
+    function toggleAccordion(button) {
+        var collapse = document.getElementById('collapseOne');
+        var icon = button.querySelector('.arrow-icon');
+
+        if (collapse.style.display === "none" || collapse.style.display === "") {
+            collapse.style.display = "block"; // Show
+            icon.classList.remove('fa-angle-down');
+            icon.classList.add('fa-angle-up');
+        } else {
+            collapse.style.display = "none"; // Hide
+            icon.classList.remove('fa-angle-up');
+            icon.classList.add('fa-angle-down');
+        }
+    }
+</script>

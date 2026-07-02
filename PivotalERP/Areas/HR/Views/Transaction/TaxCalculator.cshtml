@@ -1,0 +1,157 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script src="~/jslib/hr/transaction/TaxCalculator.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="TaxCalculatorController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="pb-1"></div>
+                <div class="card p-2">
+
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="card p-1" style="background-color: aliceblue ">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Branch</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newTaxCalculator.BranchId">
+                                                <option ng-value="0">**Select All**</option>
+                                                <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newTaxCalculator.BranchId">{{B.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Department</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newTaxCalculator.DepartmentId">
+                                                <option ng-value="0">**Select All**</option>
+                                                <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newTaxCalculator.DepartmentId">{{c.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Category</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newTaxCalculator.CategoryId">
+                                                <option ng-value="0">**Select All**</option>
+                                                <option ng-value="c.CategoryId" ng-repeat="c in CategoryList" ng-selected="c.CategoryId==newTaxCalculator.CategoryId">{{c.Name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Gender</label>
+                                            <select class="form-control form-control-sm" ng-model="newTaxCalculator.GenderId">
+                                                <option value="1">Male</option>
+                                                <option value="2">Female</option>
+                                                <option value="3">Others</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Marital Status</label>
+                                            <select class="form-control form-control-sm" ng-model="newTaxCalculator.MaritalStatusId">
+                                                <option ng-repeat="M in MaritalCol" ng-value="M.id" ng-selected="newTaxCalculator.MaritalStatusId==M.id">{{M.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="">Resident</label>
+                                            <select class="form-control form-control-sm" ng-model="newTaxCalculator.ResidentId">
+                                                <option ng-repeat="R in ResidentCol" ng-value="R.id" ng-selected="newTaxCalculator.ResidentId==R.id">{{R.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="Earning">Earning</label>
+                                            <input type="number" disabled class="form-control form-control-sm" ng-model="newTaxCalculator.Earning">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="Deduction">Deduction</label>
+                                            <input type="number" disabled class="form-control form-control-sm" ng-model="newTaxCalculator.Deduction">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="GrossPayable">GrossPayable</label>
+                                            <input type="number" disabled class="form-control form-control-sm" ng-model="newTaxCalculator.GrossPayable">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="col-md-7">
+
+                            <div>
+                                <div class="table-scroll-x-y card table-scroll" style="max-height:calc(100vh - 6rem)!important">
+                                    <table id="TaxCalculator"
+                                           class="main-table table table-sm table-bordered table-hover bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center" style="width: 60px; z-index: 2; background-color: #fff">S.No.</th>
+                                                <th class="align-middle" style="width: 200px; z-index: 2; background-color: #fff;">PayHeading</th>
+                                                <th class="text-center" style="width: 100px; z-index: 2; background-color: #fff">Is Allow</th>
+                                                <th class="text-center" style="width: 130px">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="P in PayHeadingList">
+                                                <td class="text-center">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td>
+                                                    {{P.Name}}
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox"
+                                                               id="customCheckbox1" value="option1" ng-model="P.IsAllow">
+                                                        <label for="customCheckbox1"
+                                                               class="custom-control-label">
+                                                        </label>
+                                                    </div>
+                                                </td>
+                                                <td><input type="number" class="form-control form-control-sm text-right" style="height: calc(2px + 1.5rem); padding: 0.15rem 0.4rem; font-size: 0.95rem; line-height: 1.5; font-weight: 700;" ng-model="P.Amount"></td>
+                                            </tr>
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </section>
+        </div>
+    </section>
+
+</div>

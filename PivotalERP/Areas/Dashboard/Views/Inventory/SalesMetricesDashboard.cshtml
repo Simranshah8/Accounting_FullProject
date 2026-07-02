@@ -1,0 +1,213 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+
+<style>
+    .button-group-pills {
+        display: flex;
+        justify-content: center;
+        gap: 2px;
+    }
+
+        .button-group-pills .btn {
+            border-radius: 8px;
+            border: 1px solid #007BBB;
+            background-color: #007BBB;
+            color: #fff;
+            font-size: 11px;
+            padding: 4px 0px;
+            min-width: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            position: relative;
+        }
+
+            /* Hide the checkbox input */
+            .button-group-pills .btn input[type="checkbox"] {
+                position: absolute;
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            /* Active (selected) state styling */
+            .button-group-pills .btn.active {
+                background-color: #7abe5a;
+                border-color: #7abe5a;
+                color: #fff;
+            }
+
+            /* Hover effect */
+            .button-group-pills .btn:hover {
+                background-color: #7abe5a;
+                border-color: #7abe5a;
+                color: #fff;
+            }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        background-color: rgb(0 123 187) !important;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        color: rgb(255 255 255) !important;
+    }
+
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: rgb(255 255 255) !important;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<script src="~/jslib/dashboard/inventory/SalesMetricesDashboard.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="SalesMetricesDashboard" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content teacher_dashboard admin_dashboard">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="container-fluid">
+
+                    <div class="card shadow-sm mb-2" style="border:1px solid #ecececec">
+                        <div class="card-body p-1">
+                            <div class="row">
+                                <div class="col-md-1">
+                                    <label class="form-label">Fiscal year</label>
+                                    <multi-select-option ng-model="newFilter.FiscalYear" data="FiscalYearList" label="Name" value="ID"></multi-select-option>
+                                </div>
+                                <div class="col-md-2" ng-show="newFilter.FiscalYear && newFilter.FiscalYear.length == 1 ">
+                                    <div class="form-group">
+                                        <label class="form-label d-block text-center">Quarter</label>
+                                        <div class="button-group-pills text-center" data-toggle="buttons">
+                                            <label class="btn" ng-repeat="quarter in QuarterList">
+                                                <input type="checkbox" name="quarter" ng-model="newFilter.selectedQuarters[quarter.ID]" ng-value="quarter.ID" ng-change="selectQuarter(quarter)">
+                                                {{quarter.Name}}
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Month selection -->
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label class="form-label">Month</label>
+                                        <multi-select-option ng-model="newFilter.Month" data="MonthList" label="Name" value="ID" ng-change="validateAndUpdateMonthSelection()"></multi-select-option>
+                                    </div>
+                                </div>
+
+                                <!-- Type, Size selection -->
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label class="form-label">Type, Size</label>
+                                        <multi-select-option ng-model="newFilter.ProductType" data="ProductTypeList" label="Name" value="ID"></multi-select-option>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Group, Product</label>
+                                        <multi-select-option ng-model="newFilter.ProductGroup" data="ProductGroupList" label="Name" value="ID"></multi-select-option>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="form-label">Area, Address</label>
+                                        <multi-select-option ng-model="newFilter.LedgerGroup" data="LedgerGroupList" label="Name" value="ID"></multi-select-option>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <div class="form-group">
+                                        <label class="form-label">Distributor</label>
+                                        <multi-select-option ng-model="newFilter.Distributor" data="DistributorList" label="Name" value="ID"></multi-select-option>
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-right">
+                                    <button class="btn btn-sm btn-info load mt-4 mr-1" title="Reset to Default" ng-click="ResetToDefault()"><i class="fas fa-sync-alt py-1"></i></button>
+                                    <button class="btn btn-sm btn-primary load mt-4" style="min-width: 70px;" ng-click="GetSalesMatricesDashboard()">Load</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header p-2">
+                            <h3 class="mb-0">Revenue Comparision</h3>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card p-2 bluecard" style=" border-radius: 12px; color: #1f5d9e;">
+                                        <label><b>Previous Year Total Amount:</b></label>
+                                        <label class="statnum"><strong>{{bedata.PreviousYearTotalAmount}}</strong></label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card p-2 bluecard" style="background-color: #d7ecfb; border-radius: 12px; color: #1f5d9e;">
+                                        <label><b>This Year Total Amount:</b></label>
+                                        <label class="statnum"><strong>{{bedata.ThisYearTotalAmount}}</strong></label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card p-2 bluecard" style="background-color: #f0fdf4; border-radius: 12px; color: #15803d; ">
+                                        <label><b>Overall YoYGrowth Percentage:</b></label>
+                                        <label class="statnum"><strong>{{bedata.OverallYoYGrowthPercentage}}</strong></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="card shadow-sm mb-1" style="border:1px solid #ecececec">
+                                <div class="card-header p-2" style="border: none;">
+                                    <h5 class="card-title">Product Contribution</h5>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="Product-Contribution-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2">
+                                    <h5 class="card-title">Distributor Growth Chart</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                                        <canvas id="distributor-growth-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card shadow-sm" style="border:1px solid #ecececec">
+                                <div class="card-header p-2" style="border: none;">
+                                    <h5 class="card-title">Fiscal Year@*: {{newDet.FiscalYear}}*@   </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 400px; width: 100%;  ">
+                                        <canvas id="Sales-Bar-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </section>
+</div>

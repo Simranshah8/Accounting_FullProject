@@ -1,0 +1,258 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_Holiday)";
+</script>
+
+
+<script src="~/jslib/hr/Master/Holiday.js"></script>
+<div ng-app="myApp" ng-controller="HolidayController" ng-init="LoadData()">
+    <div class="content">
+        <div class="p-1"></div>
+        <div class="container-fluid">
+            <div class="card card-primary card-outline card-outline-tabs">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearHoliday()" aria-controls="custom-tabs-four-profile" aria-selected="false">Add Holiday</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-7">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Holiday">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Holiday">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search" ng-model="searchData.Holiday"
+                                                       aria-label="Search">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'HolidayList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+
+                                        <a print-tbl table-id="'#leaveQuota'" href="#" class="btn btn-secondary btn-light btn-sm" title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        @*<button type="button" class="btn btn-sm btn-primary" id="add-Holiday"
+                                                    style="min-width: 90px;font-size:12px;">
+                                                <i class="fas fa-plus w-t"></i> Add Holiday
+                                            </button>*@
+                                    </div>
+                                </div>
+                            </header>
+                            <div>
+                                <div class="table-scroll-x-y table-scroll">
+                                    <table id="main-table"
+                                           class="main-table table table-sm table-bordered bg-white">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th style="width: 70px">S.No</th>
+                                                <th style="width: 110px">Name</th>
+                                                <th style="width: 160px">Date From</th>
+                                                <th style="width: 160px">Date To</th>
+                                                <th class="text-center" style="width: 90px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in HolidayList | filter:searchData.Holiday | itemsPerPage: perPage.Holiday" current-page="currentPages.Holiday" pagination-id="HolidayPagination">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{cl.Name}}</td>
+                                                <td>{{cl.DateFromBS}}</td>
+                                                <td>{{cl.DateToBS}}</td>
+                                                <td class="project-actions" style="text-align:center">
+                                                    <div class="btn-group-sm text-white">
+                                                        <a class="btn btn-info" ng-click="GetHolidayById(cl, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-danger" ng-click="DelHolidayById(cl)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="HolidayPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div class="p-2">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for=""><b>Holiday Name</b></label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="Enter Name" ng-model="newHoliday.Name">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for=""><b>Code</b></label>
+                                            <input type="text" class="form-control form-control-sm" placeholder="Enter Code" ng-model="newHoliday.Code">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for=""><b>Date From</b></label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newHoliday.DateFrom_TMP" date-detail="newHoliday.DateFromDet" confirm-action="calculateTotalDays()">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for=""><b>Date To</b></label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="newHoliday.DateTo_TMP" date-detail="newHoliday.DateToDet" confirm-action="calculateTotalDays()">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for=""><b>Total Days</b></label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newHoliday.TotalDays" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr style="height:3px;border-width:0;color:gray;background-color:gray">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="Company"><b>Company</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.CompanyId" data="CompanyList" label="Name" value="CompanyId"></multi-select-option>
+                                               @* <select class="form-control form-control-sm" size="10" style="width:180px;" ng-model="newHoliday.CompanyId" multiple ng-options="company.CompanyId as company.Name for company in CompanyList"> </select>*@
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="Branch"><b>Branch</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.BranchId" data="BranchList" label="Name" value="BranchId"></multi-select-option>
+                                               @* <select class="form-control form-control-sm" size="10" style="width:180px;" ng-model="newHoliday.BranchId" multiple ng-options="branch.BranchId as branch.Name for branch in BranchList"> </select>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="Department"><b>Department</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.DepartmentId" data="DepartmentList" label="Name" value="CostCenterDepartmentId"></multi-select-option>
+                                               @* <select class="form-control form-control-sm" size="10" style="width:180px;" ng-model="newHoliday.DepartmentId" multiple ng-options="deg.CostCenterDepartmentId as deg.Name for deg in DepartmentList"> </select>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="Designation"><b>Designation</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.DesignationId" data="DesignationList" label="Name" value="DesignationId"></multi-select-option>
+                                                @*<select class="form-control form-control-sm" size="10" style="width:180px;" ng-model="newHoliday.DesignationId" multiple ng-options="deg.DesignationId as deg.Name for deg in DesignationList"> </select>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="ServiceType"><b>ServiceType</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.ServiceTypeId" data="ServiceTypeList" label="Name" value="ServiceTypeId"></multi-select-option>
+                                                @*<select class="form-control form-control-sm" size="10" style="width:180px;" ng-model="newHoliday.ServiceTypeId" multiple ng-options="ser.ServiceTypeId as ser.Name for ser in ServiceTypeList"> </select>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="Employee"><b>Employee</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.EmployeeId" data="EmployeeList" label="Name" value="EmployeeId"></multi-select-option>
+                                                <!--<input type="text" ng-model="searchEmp" class="form-control form-control-sm" placeholder="Search">
+    <select class="form-control form-control-sm" size="9" multiple ng-model="newHoliday.EmployeeId">
+        <option ng-value="0">All</option>
+        <option ng-value="pp.EmployeeId" ng-repeat="pp in EmployeeList |filter:searchEmp" ng-selected="pp.EmployeeId==newHoliday.EmployeeId">{{pp.Name}}</option>
+    </select>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="Gender"><b>Gender</b></label>
+                                            <div>
+                                                <multi-select-option ng-model="newHoliday.GenderId" data="GenderList" label="text" value="id"></multi-select-option>
+                                                <!--<select class="form-control form-control-sm" size="3" style="width:180px;" multiple ng-model="newHoliday.GenderId">
+        <option ng-value="pp.id" ng-repeat="pp in GenderList" ng-selected="pp.id==newHoliday.GenderId">{{pp.text}}</option>
+    </select>-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="ClearHoliday()">Reset</button>
+                                        <button type="button" class="btn btn-primary" style="min-width: 90px;" ng-click="SaveUpdateHoliday()">{{newHoliday.Mode}}</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.card -->
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+</div>

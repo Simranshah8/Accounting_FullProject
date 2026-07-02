@@ -1,0 +1,183 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.HR_Disabilities)";
+</script>
+
+
+<script src="~/jslib/hr/master/Disabilities.js"></script>
+<div ng-app="myApp" ng-controller="DisabilitiesController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllDisabilities()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card my-1 card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearDisabilities()" aria-controls="custom-tabs-four-profile" aria-selected="false">Disabilities</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Disabilities">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Disabilities">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Disabilities">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#Disabilities'" sheet-name="'DisabilitiesList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#Disabilities').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#Disabilities'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="Disabilities">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align: center; width: 60px; ">
+                                                        S.No
+                                                    </th>
+                                                    <th style="text-align: center; width: 200px; ">
+                                                        Name
+                                                    </th>
+                                                    <th style="text-align: center; width: 150px; ">
+                                                        Code
+                                                    </th>
+                                                    <th style="text-align: center; width: 80px;">Action</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="D in DisabilitiesList | filter:searchData.Disabilities | itemsPerPage: perPage.Disabilities" current-page="currentPages.Disabilities" pagination-id="DisabilitiesPagination">
+                                                    <td style="text-align:center;margin:auto">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td style="text-align:left;margin:auto">
+                                                        {{D.Name}}
+                                                    </td>
+                                                    <td style="text-align:left;margin:auto">
+                                                        {{D.Code}}
+                                                    </td>
+                                                    <td class="project-actions" style="text-align:center">
+                                                        <div class="btn-group-sm text-white">
+                                                            <a class="btn btn-info" ng-click="getDisabilitiesById(D, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a class="btn btn-danger" ng-click="DelDisabilitiesById(D)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="DisabilitiesPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Disabilities Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.Name">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Code</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.Code">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Order No</label>
+                                                    <input type="number" class="form-control form-control-sm" style="width:100%" ng-model="newDet.OrderNo">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearDisabilities()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveDisabilities()">{{newDet.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

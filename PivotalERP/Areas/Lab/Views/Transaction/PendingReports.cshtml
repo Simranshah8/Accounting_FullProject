@@ -1,0 +1,641 @@
+
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    @@media print {
+        button {
+            display: none !important;
+        }
+    }
+</style>
+<style>
+    @@media print {
+        /* added by rabin*/
+        .table td, .table th, body, table, th, td, p, label, div {
+            font-size: 25px !important;
+        }
+
+        h3 {
+            font-size: 30px;
+            font-weight: bold !important;
+        }
+
+        h4 {
+            font-size: 29px !important;
+        }
+
+        h5 {
+            font-size: 27px !important;
+        }
+
+        h6 {
+            font-size: 25px !important;
+        }
+        * {
+            background-color: #fff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .table-danger {
+            background-color: #f5c6cb !important;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+            /* For older browsers */
+            .table-danger tr.table-danger,
+            .table-danger td,
+            .table-danger th {
+                background-color: #f5c6cb !important;
+            }
+
+        .badge {
+            border: none !important
+        }
+        /* added by yubaraj*/
+
+        #printFooter {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        #printSignature {
+            position: fixed;
+            bottom: 120px;
+            width: 100%;
+        }
+
+        .print-padding {
+            padding-bottom: var(--footer-height);
+        }
+    }
+</style>
+<script src="~/jslib/Lab/Report/PendingReports.js"></script>
+<div ng-app="myApp" ng-controller="PendingReport" ng-init="LoadData()" ng-cloak>
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div id="ChooseDate" ng-show="showChooseDate">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="cstm-wrap-date-range-picker">
+                                            <div class="d-inline-block">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend"> <span class="input-group-text">From:</span> </div>
+                                                    <input type="text" placeholder="" date-picker ng-model="newFilter.FromDate_TMP" date-detail="newFilter.FromDateDet" class="form-control form-control-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">To:</span>
+                                                    </div>
+                                                    <input type="text" placeholder="" date-picker ng-model="newFilter.ToDate_TMP" date-detail="newFilter.ToDateDet" class="form-control form-control-sm">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown btn-group-sm p-1 mr-1">
+                                        <button class="btn btn-info dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            ....
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="javascript:void(0);" ng-click="DateChange(1,1)">Today</a>
+                                            <a class="dropdown-item" href="javascript:void(0);" ng-click="DateChange(2,1)">Last 1 Week </a>
+                                            <a class="dropdown-item" href="javascript:void(0);" ng-click="DateChange(3,1)">Last 1 Month</a>
+                                            <a class="dropdown-item" href="javascript:void(0);" ng-click="DateChange(4,1)">Last 3 Months</a>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex gap-4 mt-1">
+                                        <label class="form-label fw-semibold pr-3">Verification Status:</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" ng-model="newFilter.StatusId" ng-value="1" name="mode" id="pending" ng-change="GetAllPendingReport()" checked>
+                                            <label class="form-check-label pr-3" for="pending">Pending</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="mode" id="Verified" ng-value="2" ng-model="newFilter.StatusId" ng-change="GetAllPendingReport()">
+                                            <label class="form-check-label pr-3" for="Verified">Verified</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="mode" id="all" ng-value="0" ng-model="newFilter.StatusId" ng-change="GetAllPendingReport()">
+                                            <label class="form-check-label pr-3" for="all">All</label>
+                                        </div>
+                                    </div>
+
+                                    <div class=" btn-group-sm p-1">
+                                        <button type="button" id="load" class="btn  btn-md d-flex align-items-center justify-content-center  text-white" ng-click="GetAllPendingReport(1)" style="background-color:#068ABF;">
+                                            <i class="fas fa-sync-alt  mr-1 "></i>
+                                            Load
+                                        </button>
+                                    </div>
+
+                                </div>
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Add Result'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                <i class="fas fa-save"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </header>
+                                <div class="search-toolbar  mt-1 ">
+                                    <div>
+                                        <div id="PendingReportTypeData" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="PrintResult" ng-show="PrintResult" class="print-padding" ng-style="{'--footer-height': (config.FooterHeight || 100) + 'px'}">
+                            <div style="margin-bottom:100px;">
+                                <div class="position-relative text-center mb-2 p-1" @*ng-style="{'height': (config.HeaderHeight && config.HeaderHeight >= 90 ? config.HeaderHeight : 100) + 'px'}"*@ style="height:contain;">
+                                    <div ng-if="config.IsHeader !== false">
+                                        <div class="position-absolute start-0 top-50 translate-middle-y">
+                                            <img ng-src="{{CompanyDet.CompanyLogoPath}}" alt="CompanyLogo" style="height:60px; width:180px;" ng-if="CompanyDet.CompanyLogoPath">
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-1">{{CompanyDet.Name || 'Hospital Name (Fallback)'}}</h3>
+                                            <h4 class="mb-1">{{CompanyDet.Address || 'Hospital Address (Fallback)'}}</h4>
+                                            <h5 class="mb-1">{{CompanyDet.PhoneNo || 'Phone No'}}, {{CompanyDet.EmailId || 'Email'}}</h5>
+                                            <h6 class="mb-0">{{CompanyDet.PanVatNo || 'PAN/VAT'}}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-1 mb-4">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 10px; border: 1px solid #000;">
+                                        <div style="flex: 1;">
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsPatientId !== false">
+                                                <label style="min-width:80px;"><b>Patient ID</b> </label> : {{newData.PatientId}}
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsPatientName !== false">
+                                                <label style="min-width:80px;"><b>Name</b></label> : {{newData.PatientName}}
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsAge !== false || config.IsGender !== false">
+                                                <label style="min-width:80px;"><b><span ng-if="config.IsAge !== false">Age</span><span ng-if="config.IsGender !== false && config.IsAge !== false">/</span><span ng-if="config.IsGender !== false">Gender</span></b></label>:
+                                                <span ng-if="config.IsAge !== false">{{newData.Age}}</span>
+                                                <span ng-if="config.IsGender !== false && config.IsAge !== false"> / </span>
+                                                <span ng-if="config.IsGender !== false">{{newData.Gender}}</span>
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                <label style="min-width:80px;"><b>Address</b></label>: {{newData.PatientAddress}}
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                <label style="min-width:80px;"><b>Contact No</b></label>: {{newData.MobileNo}}
+                                            </p>
+                                            <p style="margin: 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsSampleCollectionAt !== false">
+                                                <label><b>Sample Collection At</b></label>: {{newData.CollectionDate}}
+                                            </p>
+                                        </div>
+                                        <div style="display: flex; align-items: flex-start; padding-left: 20px;">
+                                            <div style="margin-right: 0;">
+                                                <p style="margin: 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsSampleNo !== false">
+                                                    <label style="min-width:85px;"><b>Sample No</b></label>: {{newData.AutoNumber}}
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsReferredBy !== false">
+                                                    <label style="min-width:85px;"><b>Referred By</b></label>: {{newData.DoctorName}}
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsReportingDate !== false">
+                                                    <label><b>Reporting Date</b></label>: {{beData.CollectionMitti }}
+                                                </p>
+                                            </div>
+                                            <!-- Barcode Section -->
+                                            <div style="text-align: center; margin-left: 1px;" ng-if="config.IsBarCode !== false">
+                                                <img src="{{BarCodeImg}}" alt="{{newData.BarCode}}" style="height:40px; width:110px;" class="m-auto" ng-if="BarCodeImg">
+                                                <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 500;" ng-if="!BarCodeImg">[Barcode Placeholder]</p>
+                                                <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 500;">{{newData.BarCode}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <table class="table table-bordered table-sm mb-1">
+                                    <thead class="thead-light">
+                                        <tr>
+                                            <th style="width:140px" class="py-1">{{TempConfig.InvestigationName}}</th>
+                                            <th style="width:140px" class="py-1">{{TempConfig.ResultName}}</th>
+                                            <th style="width:110px" class="py-1" ng-if="TempConfig.IsUnitCol">{{TempConfig.UnitColName}}</th>
+                                            <th style="width:250px" class="py-1" ng-if="TempConfig.IsReferenceRange">{{TempConfig.RefRangeColName}}</th>
+                                            <th style="width:120px" class="py-1" ng-if="TempConfig.IsMethod">{{TempConfig.MethodColName}}</th>
+                                            <th style="width:180px" class="py-1" ng-if="TempConfig.IsRemark">{{TempConfig.RemarkColName}}</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody class="compact-table" ng-show="TempConfig.IsTestNameOrComponent">
+                                        <tr ng-repeat-start="grp in AddResultList" id="height">
+                                            <td ng-if="TempConfig.IsGroupRow" colspan="{{ getColSpan() }}" class="font-weight-bold bg-light text-center ">
+                                                {{ grp.TestGroupName }}
+                                            </td>
+                                        </tr>
+                                        <tr ng-repeat-start="test in grp.ChieldColl" id="height">
+                                            <td colspan="{{ getColSpan() }}" class="bg-light" style="font-weight:600;">
+                                                {{ test.TestName }}
+                                            </td>
+                                        </tr>
+                                        <tr ng-repeat="beData in test.ChieldColl"
+                                            ng-class="{'table-danger': TempConfig.IsAbnormalRow && isOutOfRange(beData)} ">
+                                            <td class="py-0 px-1 pl-2 align-middle  ">
+                                                {{ beData.Component }}
+                                            </td>
+                                            <td class="py-0 px-1">
+                                                <div ng-switch="beData.TypeId">
+                                                    <input ng-switch-when="1" type="number" ng-init="beData.Value = +beData.Value" ng-model="beData.Value" class="form-control form-control-sm py-0" />
+                                                    <select ng-switch-when="3" ng-model="beData.Value" ng-options="v for v in beData.ValuesNameList" class="form-control form-control-sm py-0">
+                                                        <option value="">-- Select --</option>
+                                                    </select>
+                                                    <input ng-switch-when="2" type="text" ng-model="beData.Value" class="form-control form-control-sm py-0" />
+                                                    <input ng-switch-default type="text" ng-model="beData.Value" class="form-control form-control-sm py-0" />
+                                                </div>
+                                            </td>
+                                            <td ng-if="TempConfig.IsUnitCol" class="py-0 px-1 align-middle"> {{ beData.UnitName }}  </td>
+                                            <td class="py-0 px-1 align-middle" ng-if="TempConfig.IsReferenceRange">   {{ beData.NormalLow }} - {{ beData.NormalHigh }}  </td>
+                                            <td ng-if="TempConfig.IsMethod" class="py-0 px-1 align-middle">  {{ beData.MethodName }} </td>
+                                            <td ng-if="TempConfig.IsRemark" class="py-0 px-1">
+                                                <input type="text" ng-model="beData.Remarks" class="form-control form-control-sm py-0" />
+                                            </td>
+                                        </tr>
+
+
+                                        <tr ng-if="config.ShowNotes && test.Description">
+                                            <td colspan="{{ getColSpan() }}" class="py-1 px-2 ">
+                                                <i><b> CLINICAL IMPLICATIONS : </b></i><br />
+                                                <i>&nbsp;&nbsp;&nbsp;{{ test.Description }}</i>
+                                            </td>
+                                        </tr>
+
+                                        <tr ng-repeat-end></tr>
+                                        <tr ng-repeat-end></tr>
+                                    </tbody>
+                                    <tbody class="compact-table" ng-show="!TempConfig.IsTestNameOrComponent">
+                                        <!-- ================= GROUP ================= -->
+                                        <tr ng-repeat-start="grp in AddResultList" id="height">
+                                            <td ng-if="TempConfig.IsGroupRow" colspan="{{ getColSpan() }}"
+                                                class="font-weight-bold bg-light text-center">
+                                                {{ grp.TestGroupName }}
+                                            </td>
+                                        </tr>
+                                        <!-- ================= COMPONENT GROUP ================= -->
+                                        <tr ng-repeat-start="compGrp in grp.ChieldColl" id="height">
+                                            <td colspan="{{ getColSpan() }}" class="bg-light" style="font-weight:600;">
+                                                <span ng-if="compGrp.ComponentGroup"> </span> {{ compGrp.ComponentGroup }}
+                                            </td>
+                                        </tr>
+
+                                        <!-- ================= COMPONENT ROW ================= -->
+                                        <tr ng-repeat="beData in compGrp.ChieldColl" ng-class="{'table-danger': TempConfig.IsAbnormalRow && isOutOfRange(beData)}">
+                                            <!-- Component -->
+                                            <td class="py-0 px-1 pl-2 align-middle">   {{ beData.Component }} </td>
+                                            <!-- Value -->
+                                            <td class="py-0 px-1">
+                                                <input class="form-control form-control-sm py-0" ng-if="beData.TypeId == 1" type="number" ng-model="beData.Value" />
+                                                <input class="form-control form-control-sm py-0" ng-if="beData.TypeId == 2" type="text" ng-model="beData.Value" />
+                                                <select ng-if="beData.TypeId == 3" ng-model="beData.Value" ng-options="v for v in beData.ValuesNameList" class="form-control form-control-sm py-0">
+                                                    <option value="">-- Select --</option>
+                                                </select>
+                                            </td>
+
+                                            <!-- Unit -->
+                                            <td ng-if="TempConfig.IsUnitCol" class="py-0 px-1 align-middle">
+                                                {{ beData.UnitName }}
+                                            </td>
+
+                                            <!-- Range -->
+                                            <td ng-if="TempConfig.IsReferenceRange" class="py-0 px-1 align-middle">
+                                                {{ beData.NormalLow }} - {{ beData.NormalHigh }}
+                                            </td>
+
+                                            <!-- Method -->
+                                            <td ng-if="TempConfig.IsMethod" class="py-0 px-1 align-middle">
+                                                {{ beData.MethodName }}
+                                            </td>
+
+                                            <!-- Remarks -->
+                                            <td ng-if="TempConfig.IsRemark" class="py-0 px-1">
+                                                <input type="text" ng-model="beData.Remarks" class="form-control form-control-sm py-0" />
+                                            </td>
+                                        </tr>
+                                        <tr ng-repeat-end></tr> <!-- end ComponentGroup -->
+                                        <tr ng-repeat-end></tr> <!-- end Group -->
+                                    </tbody>
+
+                                </table>
+                                <div class="col-md-12">
+                                    <label>Verification Remarks </label>
+                                    <textarea class="form-control" rows="2" ng-model="beData.VerificationRemarks"></textarea>
+                                </div>
+                                <!-- Signature Section - Fixed -->
+                                <div style="display: table; width: 100%; margin-top: 30px; page-break-inside: avoid;" id="printSignature" ng-style="{'bottom': (config.FooterHeight || 100) + 'px'}" ng-if="config.IsAllSignature !== false">
+                                    <div class=" d-flex justify-content-between">
+                                        <!-- Doctor 1 - Left -->
+                                        <div style="display: table-cell; width: 33.33%; vertical-align: top; text-align: left; padding: 10px;">
+                                            <div style="margin-bottom: 5px;">
+                                                <img ng-src="{{Doctor1.DoctorSignData || Doctor1.DoctorSignature}}"
+                                                     alt="Signature"
+                                                     style="height: 60px; width: 165px; display: block;" ng-if="Doctor1.DoctorSignData || Doctor1.DoctorSignature">
+                                                <div style="height: 60px; width: 165px; display: block; border-bottom: 1px dashed #000;" ng-if="!(Doctor1.DoctorSignData || Doctor1.DoctorSignature)"></div>
+                                                <div class="mt-1" style="font-size: 12px;"><b>{{Doctor1.Name}}</b></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Doctor 2 - Center -->
+                                        <div style="display: table-cell; width: 33.33%; vertical-align: top; text-align: center; padding: 10px;" ng-if="config.IsSignature1 !== false">
+                                            <div style="margin-bottom: 5px;">
+                                                <img ng-src="{{Doctor2.DoctorSignData || Doctor2.DoctorSignature}}"
+                                                     alt="Signature"
+                                                     style="height: 60px; width: 165px; display: inline-block;" ng-if="Doctor2.DoctorSignData || Doctor2.DoctorSignature">
+                                                <div style="height: 60px; width: 165px; display: inline-block; border-bottom: 1px dashed #000;" ng-if="!(Doctor2.DoctorSignData || Doctor2.DoctorSignature)"></div>
+                                                <div class="mt-1" style="font-size: 12px;"><b>{{Doctor2.Name}}</b></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Doctor 3 - Right -->
+                                        <div style="display: table-cell; width: 33.33%; vertical-align: top; text-align: right; padding: 10px;" ng-if="config.IsSignature2 !== false">
+                                            <div style="margin-bottom: 5px;">
+                                                <img ng-src="{{Doctor3.DoctorSignData || Doctor3.DoctorSignature}}"
+                                                     alt="Signature"
+                                                     style="height: 60px; width: 165px; display: inline-block;" ng-if="Doctor3.DoctorSignData || Doctor3.DoctorSignature">
+                                                <div style="height: 60px; width: 165px; display: inline-block; border-bottom: 1px dashed #000; margin-left: auto;" ng-if="!(Doctor3.DoctorSignData || Doctor3.DoctorSignature)"></div>
+                                                <div class="mt-1" style="font-size: 12px;"><b>{{Doctor3.Name}}</b></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer Section start -->
+                                <div ng-show="config.IsFooter !== false" id="printFooter" ng-style="{'height': (config.FooterHeight || 100) + 'px'}">
+                                    <div class="text-center" ng-if="!config.FooterHeight" style="border-top: 1px solid #000; padding-top: 5px; margin-top: 10px;">
+                                        <b>This report is an electronically generated report.</b>
+                                    </div>
+                                </div>
+                                <!--end-->
+                            </div>
+                            <footer class="main-footer">
+                                <div class="text-right control-btns">
+                                    <button type="button" class="btn btn-default btn" id="BackToList" ng-click="BackToListInPrint()"> <span class="glyphicon glyphicon-remove"></span>Back To List</button>
+                                    <button type="button" class="btn btn-primary btn" ng-disabled="loadingstatus=='running'" ng-click="VerifyPendingReport(newData.AutoNumber)"><span class="glyphicon glyphicon-save"></span> Verify</button>
+                                </div>
+                            </footer>
+                        </div>
+
+                        <div id="ViewDetail" ng-show="ViewDetail" class="print-padding" ng-style="{'--footer-height': config.FooterHeight + 'px'}">
+                            <div style="margin-bottom:50px;">
+                                <!-- Patient + Report Header -->
+                                <div class="position-relative text-center mb-2 p-1" @*ng-style="{'height': (config.HeaderHeight && config.HeaderHeight >= 90 ? config.HeaderHeight : 100) + 'px'}"*@ style="height:contain">
+                                    <div ng-if="config.IsHeader !== false">
+                                        <div class="position-absolute start-0 top-50 translate-middle-y">
+                                            <img ng-src="{{CompanyDet.CompanyLogoPath}}"
+                                                 alt="CompanyLogo"
+                                                 style="height:60px; width:180px;" ng-if="CompanyDet.CompanyLogoPath">
+                                        </div>
+                                        <div>
+                                            <h3 class="mb-1">{{CompanyDet.Name}}</h3>
+                                            <h4 class="mb-1">{{CompanyDet.Address}}</h4>
+                                            <h5 class="mb-1">{{CompanyDet.PhoneNo}}, {{CompanyDet.EmailId}}</h5>
+                                            <h6 class="mb-0">{{CompanyDet.PanVatNo}}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-1 mb-4">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 10px; border: 1px solid #000;">
+                                        <div style="flex: 1;">
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsPatientId !== false">
+                                                <label style="min-width:80px;"><b>Patient ID</b> </label> : {{newData.PatientId}}
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsPatientName !== false">
+                                                <label style="min-width:80px;"><b>Name</b></label> : {{newData.PatientName}}
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsAge !== false || config.IsGender !== false">
+                                                <label style="min-width:80px;"><b><span ng-if="config.IsAge !== false">Age</span><span ng-if="config.IsGender !== false && config.IsAge !== false">/</span><span ng-if="config.IsGender !== false">Gender</span></b></label>:
+                                                <span ng-if="config.IsAge !== false">{{newData.Age}}</span>
+                                                <span ng-if="config.IsGender !== false && config.IsAge !== false"> / </span>
+                                                <span ng-if="config.IsGender !== false">{{newData.Gender}}</span>
+                                            </p>
+
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                <label style="min-width:80px;"><b>Address</b></label>: {{newData.PatientAddress}}
+                                            </p>
+                                            <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;">
+                                                <label style="min-width:80px;"><b>Contact No</b></label>: {{newData.MobileNo}}
+                                            </p>
+                                            <p style="margin: 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsSampleCollectionAt !== false">
+                                                <label><b>Sample Collection At</b></label>: {{newData.CollectionDate}}
+                                            </p>
+                                        </div>
+                                        <div style="display: flex; align-items: flex-start; padding-left: 20px;">
+                                            <div style="margin-right: 0;">
+                                                <p style="margin: 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsSampleNo !== false">
+                                                    <label style="min-width:85px;"><b>Sample No</b></label>: {{newData.AutoNumber}}
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsReferredBy !== false">
+                                                    <label style="min-width:85px;"><b>Referred By</b></label>: {{newData.DoctorName}}
+                                                </p>
+                                                <p style="margin: 0 0 3px 0; font-size: 13px; line-height: 1.5;" ng-if="config.IsReportingDate !== false">
+                                                    <label><b>Reporting Date</b></label>: {{beData.CollectionMitti }}
+                                                </p>
+                                            </div>
+                                            <!-- Barcode Section -->
+                                            <div style="text-align: center; margin-left: 1px;" ng-if="config.IsBarCode !== false">
+                                                <img src="{{BarCodeImg}}" alt="{{newData.BarCode}}" style="height:40px; width:110px;" class="m-auto" ng-if="BarCodeImg">
+                                                <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 500;" ng-if="!BarCodeImg">[Barcode Placeholder]</p>
+                                                <p style="margin: 2px 0 0 0; font-size: 11px; font-weight: 500;">{{newData.BarCode}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Table -->
+
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:140px" class="py-1">{{TempConfig.InvestigationName}}</th>
+                                            <th style="width:140px" class="py-1">{{TempConfig.ResultName}}</th>
+                                            <th style="width:140px" class="py-1" ng-if="TempConfig.IsUnitCol">{{TempConfig.UnitColName}}</th>
+                                            <th style="width:140px" class="py-1" ng-if="TempConfig.IsReferenceRange">{{TempConfig.RefRangeColName}}</th>
+                                            <th style="width:140px" class="py-1" ng-if="TempConfig.IsMethod">{{TempConfig.MethodColName}}</th>
+                                            <th style="width:180px" class="py-1" ng-if="TempConfig.IsRemark">{{TempConfig.RemarkColName}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody ng-show="TempConfig.IsTestNameOrComponent">
+                                        <!-- GROUP -->
+                                        <tr ng-repeat-start="grp in AddResultList">
+                                            <td ng-if="TempConfig.IsGroupRow" colspan="{{ getColSpan() }}" class="text-center font-weight-bold bg-light">
+                                                {{ grp.TestGroupName }}
+                                            </td>
+                                        </tr>
+
+                                        <!-- TEST -->
+                                        <tr ng-repeat-start="test in grp.ChieldColl">
+                                            <td class="font-weight-bold" colspan="{{ getColSpan() }}">
+                                                {{ test.TestName }}
+                                            </td>
+                                        </tr>
+
+                                        <!-- COMPONENT -->
+                                        <tr ng-repeat="beData in test.ChieldColl" ng-class="{'table-danger': TempConfig.IsAbnormalRow && isOutOfRange(beData)}">
+                                            <td class="pl-2">   {{ beData.Component }}</td>
+                                            <td>
+                                                {{ beData.Value }}  <span class="badge bg-danger ms-1 px-1" ng-if="TempConfig.FlagStyle &&  beData.TypeId==1 && beData.Value < beData.NormalLow ">L</span>
+                                                <span class="badge bg-danger ms-1 px-1" ng-if="TempConfig.FlagStyle &&  beData.TypeId==1  && beData.Value > beData.NormalHigh "> H </span>
+                                            </td>
+                                            <td ng-if="TempConfig.IsUnitCol">{{ beData.UnitName }}</td>
+                                            <td ng-if="TempConfig.IsReferenceRange">{{ beData.NormalLow }} - {{ beData.NormalHigh }}</td>
+                                            <td ng-if="TempConfig.IsMethod"> {{ beData.MethodName }}</td>
+                                            <td ng-if="TempConfig.IsRemark">{{ beData.Remarks }}</td>
+                                        </tr>
+
+                                        <tr ng-if="config.ShowNotes && test.Description">
+                                            <td colspan="{{ getColSpan() }}" class="py-1 px-2 ">
+                                                <i><b> CLINICAL IMPLICATIONS : </b></i><br />
+                                                <i>&nbsp;&nbsp;&nbsp;{{ test.Description }}</i>
+                                            </td>
+                                        </tr>
+
+                                        <tr ng-repeat-end></tr>
+                                        <tr ng-repeat-end></tr>
+                                    </tbody>
+                                    <tbody ng-show="!TempConfig.IsTestNameOrComponent">
+                                        <tr ng-repeat-start="grp in AddResultList">
+                                            <td ng-if="TempConfig.IsGroupRow" colspan="{{ getColSpan() }}" class="text-center font-weight-bold bg-light">
+                                                {{ grp.TestGroupName }}
+                                            </td>
+                                        </tr>
+                                        <tr ng-repeat-start="compGrp in grp.ChieldColl">
+                                            <td colspan="{{ getColSpan() }}" class="font-weight-bold">   {{ compGrp.ComponentGroup }}  </td>
+                                        </tr>
+                                        <tr ng-repeat="beData in compGrp.ChieldColl" ng-class="{'table-danger': TempConfig.IsAbnormalRow && isOutOfRange(beData)}">
+                                            <td class="pl-2">  {{ beData.Component }} </td>
+                                            <td>
+                                                {{ beData.Value }}  <span class="badge bg-danger ms-1 px-1" ng-if="TempConfig.FlagStyle && beData.TypeId==1 && beData.Value < beData.NormalLow">L</span>
+                                                <span class="badge bg-danger ms-1 px-1" ng-if="TempConfig.FlagStyle && beData.TypeId==1 && beData.Value > beData.NormalHigh"> H </span>
+                                            </td>
+                                            <td ng-if="TempConfig.IsUnitCol">  {{ beData.UnitName }}  </td>
+                                            <td ng-if="TempConfig.IsReferenceRange">   {{ beData.NormalLow }} - {{ beData.NormalHigh }}  </td>
+                                            <td ng-if="TempConfig.IsMethod"> {{ beData.MethodName }}   </td>
+                                            <td ng-if="TempConfig.IsRemark">  {{ beData.Remarks }}  </td>
+                                        </tr>
+                                        <tr ng-repeat-end></tr> <!-- end ComponentGroup -->
+                                        <tr ng-repeat-end></tr> <!-- end Group -->
+                                    </tbody>
+                                </table>
+                                <div class="col-md-12" ng-if="TempConfig.IsClinicalNotes">
+                                    <label>Lab Test Interpretation/Notes </label> <br />
+                                    <label>{{beData.VerificationRemarks}}</label>
+                                </div>
+                                <!-- Signature Section - Fixed -->
+                                <div style="display: table; width: 100%; margin-top: 30px; page-break-inside: avoid;" id="printSignature" ng-style="{'bottom': (config.FooterHeight || 100) + 'px'}" ng-if="config.IsAllSignature !== false">
+                                    <div class=" d-flex justify-content-between">
+                                        <!-- Doctor 1 - Left -->
+                                        <div style="display: table-cell; width: 33.33%; vertical-align: top; text-align: left; padding: 10px;" @*ng-if="config.IsSignature1"*@>
+                                            <div style="margin-bottom: 5px;">
+                                                <img ng-src="{{Doctor.DoctorSignature}}"
+                                                     alt="Signature"
+                                                     style="height: 60px; width: 165px; display: block;" ng-if="Doctor.DoctorSignature">
+                                                <div style="height: 60px; width: 165px; display: block; border-bottom: 1px dashed #000;" ng-if="!Doctor.DoctorSignature"></div>
+                                                <div class="mt-1" style="font-size: 12px;"><b>{{Doctor.DoctorName}}</b></div>
+                                            </div>
+                                            @*<div class="text-center" style="font-size: 13px; margin: 3px 0; width: 175px; ">{{Doctor.DoctorName}}</div>
+                                                <div class="text-center" style="font-size: 12px; width: 165px; margin: 3px 0px;">{{Doctor.DoctorDesignation}}</div>*@
+                                        </div>
+
+                                        <!-- Doctor 2 - Center -->
+                                        <div style="display: table-cell; width: 33.33%; vertical-align: top; text-align: center; padding: 10px;" ng-if="config.IsSignature1 !== false">
+                                            <div style="margin-bottom: 5px;">
+                                                <img ng-src="{{Doctor.DoctorSignature2}}"
+                                                     alt="Signature"
+                                                     style="height: 60px; width: 165px; display: inline-block;" ng-if="Doctor.DoctorSignature2">
+                                                <div style="height: 60px; width: 165px; display: inline-block; border-bottom: 1px dashed #000;" ng-if="!Doctor.DoctorSignature2"></div>
+                                                <div class="mt-1" style="font-size: 12px;"><b>{{Doctor.DoctorName2 || 'Signature 2'}}</b></div>
+                                            </div>
+                                            @*<div style="font-size: 13px; margin: 3px 0;">{{Doctor.DoctorName2}}</div>
+                                                <div style="font-size: 12px; margin: 3px 0;">{{Doctor.DoctorDesignation2}}</div>*@
+                                        </div>
+
+                                        <div style="display: table-cell; width: 33.33%; vertical-align: top; text-align: right; padding: 10px;" ng-if="config.IsSignature2 !== false">
+                                            <div style="margin-bottom: 5px;">
+                                                <img ng-src="{{Doctor.DoctorSignature3}}"
+                                                     alt="Signature"
+                                                     style="height: 60px; width: 165px; display: inline-block;" ng-if="Doctor.DoctorSignature3">
+                                                <div style="height: 60px; width: 165px; display: inline-block; border-bottom: 1px dashed #000; margin-left: auto;" ng-if="!Doctor.DoctorSignature3"></div>
+                                                <div class="mt-1" style="font-size: 12px;"><b>{{Doctor.DoctorName3 || 'Signature 3'}}</b></div>
+                                            </div>
+                                            @*<div class="text-center" style="font-size: 13px; margin: 3px 0; width: 175px; margin-left: auto !important ">{{Doctor.DoctorName3}}</div>
+                                                <div class="text-center" style="font-size: 12px; width: 165px; margin: 3px 0px; margin-left:auto!important">{{Doctor.DoctorDesignation3}}</div>*@
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Footer Section start -->
+                                <div ng-show="config.IsFooter !== false" id="printFooter" ng-style="{'height': (config.FooterHeight || 100) + 'px'}">
+                                    <div class="text-center" ng-if="!config.FooterHeight" style="border-top: 1px solid #000; padding-top: 5px; margin-top: 10px;">
+                                        <b>This report is an electronically generated report.</b>
+                                    </div>
+                                </div>
+                                <!--end-->
+                            </div>
+                            <div class="text-center mt-2">
+                                <button type="button" class="btn btn-default btn" id="BackToList" ng-click="BackToListInPrint()"> <span class="glyphicon glyphicon-remove"></span>Back To List</button>
+                                <button type="button" class="btn btn-primary btn" id="BackToList" ng-click="PrintPendingReport()"> <span class="glyphicon glyphicon-remove"></span><i class="fas fa-print mr-2"></i>Print</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

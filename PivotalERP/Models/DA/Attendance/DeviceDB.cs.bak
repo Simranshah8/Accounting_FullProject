@@ -1,0 +1,1105 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+namespace AcademicLib.DA.Attendance
+{
+    internal class DeviceDB
+    {
+        DataAccessLayer1 dal = null;
+        public DeviceDB(string hostName, string dbName)
+        {
+            dal = new DataAccessLayer1(hostName, dbName);
+        }
+        public ResponeValues SaveUpdate(BE.Attendance.Device beData, bool isModify)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@Name", beData.Name);
+            cmd.Parameters.AddWithValue("@MachineSerialNo", beData.MachineSerialNo);
+            cmd.Parameters.AddWithValue("@Location", beData.Location);
+            cmd.Parameters.AddWithValue("@UserId", beData.CUserId);
+            cmd.Parameters.AddWithValue("@EntityId", beData.EntityId);
+            cmd.Parameters.AddWithValue("@DeviceId", beData.DeviceId);
+
+            if (isModify)
+            {
+                cmd.CommandText = "usp_UpdateDevice";
+            }
+            else
+            {
+                cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+                cmd.CommandText = "usp_AddDevice";
+            }
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+            cmd.Parameters[6].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[7].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[8].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters.AddWithValue("@DeviceCompany", beData.DeviceCompany);
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    resVal.RId = Convert.ToInt32(cmd.Parameters[5].Value);
+
+                if (!(cmd.Parameters[6].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[6].Value);
+
+                if (!(cmd.Parameters[7].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[7].Value);
+
+                if (!(cmd.Parameters[8].Value is DBNull))
+                    resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[8].Value);
+
+                if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+                    resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
+
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues SaveUpdateOfflineAttendanceLog(int UserId, API.Attendance.AttendanceLogCollections dataColl)
+        {
+            ResponeValues resVal = new ResponeValues();
+            dal.OpenConnection(); 
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.Text;
+
+            try
+            { 
+                System.Data.DataTable dt = new System.Data.DataTable();
+                dt.TableName = "tbl_DeviceAttendanceLog";                
+                dt.Columns.Add(new System.Data.DataColumn("MachineSerialNo", typeof(string)));
+                dt.Columns.Add(new System.Data.DataColumn("EnrollNumber", typeof(int)));
+                dt.Columns.Add(new System.Data.DataColumn("EntryDateTime", typeof(DateTime)));
+                dt.Columns.Add(new System.Data.DataColumn("Mode", typeof(int)));
+                dt.Columns.Add(new System.Data.DataColumn("InOut", typeof(int)));
+                dt.Columns.Add(new System.Data.DataColumn("Events", typeof(int)));
+                foreach (var dc in dataColl)
+                {
+                    System.Data.DataRow dr = dt.NewRow();
+                    dr["MachineSerialNo"] = dc.MachineSerialNo;
+                    dr["EnrollNumber"] = dc.EnrollNumber;
+                    dr["EntryDateTime"] = dc.EntryDateTime;
+                    dr["Mode"] = dc.Mode;
+                    dr["InOut"] = dc.Inout;
+                    dr["Events"] = dc.Mode; 
+                    dt.Rows.Add(dr);
+                }
+                System.Data.SqlClient.SqlBulkCopy objbulk = new System.Data.SqlClient.SqlBulkCopy(dal.Connection, System.Data.SqlClient.SqlBulkCopyOptions.Default, dal.Transaction);
+                objbulk.DestinationTableName = "tbl_DeviceAttendanceLog";
+                foreach (System.Data.DataColumn column in dt.Columns)
+                {
+                    objbulk.ColumnMappings.Add(column.ToString(), column.ToString());
+                }
+
+
+                objbulk.WriteToServer(dt, System.Data.DataRowState.Added);
+ 
+                cmd.CommandText = "exec ups_DelDuplicateDeviceAttendanceLog 1";
+                cmd.ExecuteNonQuery();
+
+                // dal.CommitTransaction();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "Upload Attendance Data Saved";
+
+            }
+            catch (Exception ee)
+            {
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public ResponeValues QrAttendance(int UserId,string qrCode)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@QrCode", qrCode);       
+            cmd.CommandText = "usp_AddQrAttendance";
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@MSG", System.Data.SqlDbType.NVarChar,400);
+            cmd.Parameters.Add("@UserIdColl", System.Data.SqlDbType.NVarChar,400);
+            cmd.Parameters[2].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            try
+            {
+                cmd.ExecuteNonQuery();
+                
+                if (!(cmd.Parameters[2].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[2].Value);
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull) && resVal.IsSuccess)
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[4].Value);
+
+                if (!(cmd.Parameters[5].Value is DBNull) && resVal.IsSuccess)
+                    resVal.ResponseId = Convert.ToString(cmd.Parameters[5].Value);
+                 
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+        public BE.Attendance.DeviceCollections getAllDevice(int UserId, int EntityId)
+        {
+            BE.Attendance.DeviceCollections dataColl = new BE.Attendance.DeviceCollections();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.CommandText = "usp_GetAllDevice";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    BE.Attendance.Device beData = new BE.Attendance.Device();
+                    beData.DeviceId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.Location = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.Name = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.MachineSerialNo = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.DeviceCompany =(AcademicLib.BE.Attendance.DEVICECOMPANY) reader.GetInt32(4);
+                    dataColl.Add(beData);
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+        public BE.Attendance.Device getDeviceById(int UserId, int EntityId, int DeviceId)
+        {
+            BE.Attendance.Device beData = new BE.Attendance.Device();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@DeviceId", DeviceId);
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.CommandText = "usp_GetDeviceById";
+            try
+            {
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    beData = new BE.Attendance.Device();
+                    beData.DeviceId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.Location = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.Name = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.MachineSerialNo = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.DeviceCompany = (AcademicLib.BE.Attendance.DEVICECOMPANY)reader.GetInt32(4);
+                }
+                reader.Close();
+                beData.IsSuccess = true;
+                beData.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                beData.IsSuccess = false;
+                beData.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return beData;
+        }
+        public ResponeValues DeleteById(int UserId, int EntityId, int DeviceId)
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@EntityId", EntityId);
+            cmd.Parameters.AddWithValue("@DeviceId", DeviceId);
+            cmd.CommandText = "usp_DelDeviceById";
+            cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+            cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+            cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+            cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+            cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+            try
+            {
+                cmd.ExecuteNonQuery();
+
+                if (!(cmd.Parameters[3].Value is DBNull))
+                    resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[5].Value);
+
+                if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+                    resVal.ResponseMSG = resVal.ResponseMSG + " (" + resVal.ErrorNumber.ToString() + ")";
+
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+
+        public RE.Attendance.StudentDailyBIOAttendanceCollections getStudentDailyAttendance(int UserId, int AcademicYearId, DateTime? forDate,string ClassIdColl)
+        {
+            RE.Attendance.StudentDailyBIOAttendanceCollections dataColl = new RE.Attendance.StudentDailyBIOAttendanceCollections();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ForDate", forDate);
+            cmd.Parameters.AddWithValue("@ClassIdColl", ClassIdColl);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetStudentDailyBIOAttendance";
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    RE.Attendance.StudentDailyBIOAttendance beData = new RE.Attendance.StudentDailyBIOAttendance();
+                    beData.StudentId = reader.GetInt32(0);
+                    beData.SNo = sno;
+                    if (!(reader[1] is DBNull)) beData.RegdNo = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.Name = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.EnrollNo = reader.GetInt32(4);
+                    if (!(reader[5] is DBNull)) beData.CardNo = reader.GetInt32(5);
+                    if (!(reader[6] is DBNull)) beData.ClassName = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.SectionName = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.FatherName = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.ContactNo = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.Address = reader.GetString(10);
+                    if (!(reader[11] is DBNull)) beData.OnDutyTime = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.OffDutyTime = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.InTime = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.OutTime = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.LateIn = Convert.ToInt32(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.BeforeOut = Convert.ToInt32(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.TotalMinutes = Convert.ToInt32(reader[17]);
+                    if (!(reader[18] is DBNull)) beData.Attendance = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.Gender = reader.GetString(19);
+                    beData.WorkingHR = ConvertMinuteToHR(beData.TotalMinutes);
+                    beData.LateInStr = ConvertMinuteToHR(beData.LateIn);
+                    beData.BeforeOutStr = ConvertMinuteToHR(beData.BeforeOut);
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.StudentMonthlyBIOSummaryCollections getStudentMonthlyAttendance(int UserId, int AcademicYearId, int YearId,int MonthId,int ClassId,int? SectionId)
+        {
+            RE.Attendance.StudentMonthlyBIOSummaryCollections dataColl = new RE.Attendance.StudentMonthlyBIOSummaryCollections();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@YearId", YearId);
+            cmd.Parameters.AddWithValue("@MonthId", MonthId);
+            cmd.Parameters.AddWithValue("@ClassId", ClassId);
+            cmd.Parameters.AddWithValue("@SectionId", SectionId);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetStudentBIOAttendanceSummary";
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    RE.Attendance.StudentMonthlyBIOSummary beData = new RE.Attendance.StudentMonthlyBIOSummary();
+                    beData.SNo = sno;
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.RegNo = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.RollNo = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.ClassName = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.SectionName = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.Fathername = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.ContactNo = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.EnrollNo = reader.GetInt32(7);
+                    if (!(reader[8] is DBNull)) beData.CardNo = reader.GetInt32(8);
+                    if (!(reader[9] is DBNull)) beData.Day1 = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.Day2 = reader.GetString(10);
+                    if (!(reader[11] is DBNull)) beData.Day3 = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.Day4 = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.Day5 = reader.GetString(13);
+                    if (!(reader[14] is DBNull)) beData.Day6 = reader.GetString(14);
+                    if (!(reader[15] is DBNull)) beData.Day7 = reader.GetString(15);
+                    if (!(reader[16] is DBNull)) beData.Day8 = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.Day9 = reader.GetString(17);
+                    if (!(reader[18] is DBNull)) beData.Day10 = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.Day11 = reader.GetString(19);
+                    if (!(reader[20] is DBNull)) beData.Day12 = reader.GetString(20);
+                    if (!(reader[21] is DBNull)) beData.Day13 = reader.GetString(21);
+                    if (!(reader[22] is DBNull)) beData.Day14 = reader.GetString(22);
+                    if (!(reader[23] is DBNull)) beData.Day15 = reader.GetString(23);
+                    if (!(reader[24] is DBNull)) beData.Day16 = reader.GetString(24);
+                    if (!(reader[25] is DBNull)) beData.Day17 = reader.GetString(25);
+                    if (!(reader[26] is DBNull)) beData.Day18 = reader.GetString(26);
+                    if (!(reader[27] is DBNull)) beData.Day19 = reader.GetString(27);
+                    if (!(reader[28] is DBNull)) beData.Day20 = reader.GetString(28);
+                    if (!(reader[29] is DBNull)) beData.Day21 = reader.GetString(29);
+                    if (!(reader[30] is DBNull)) beData.Day22 = reader.GetString(30);
+                    if (!(reader[31] is DBNull)) beData.Day23 = reader.GetString(31);
+                    if (!(reader[32] is DBNull)) beData.Day24 = reader.GetString(32);
+                    if (!(reader[33] is DBNull)) beData.Day25 = reader.GetString(33);
+                    if (!(reader[34] is DBNull)) beData.Day26 = reader.GetString(34);
+                    if (!(reader[35] is DBNull)) beData.Day27 = reader.GetString(35);
+                    if (!(reader[36] is DBNull)) beData.Day28 = reader.GetString(36);
+                    if (!(reader[37] is DBNull)) beData.Day29 = reader.GetString(37);
+                    if (!(reader[38] is DBNull)) beData.Day30 = reader.GetString(38);
+                    if (!(reader[39] is DBNull)) beData.Day31 = reader.GetString(39);
+                    if (!(reader[40] is DBNull)) beData.Day32 = reader.GetString(40);
+                    if (!(reader[41] is DBNull)) beData.TotalDays = Convert.ToDouble(reader[41]);
+                    if (!(reader[42] is DBNull)) beData.TotalWeekend = Convert.ToDouble(reader[42]);
+                    if (!(reader[43] is DBNull)) beData.TotalHoliday = Convert.ToDouble(reader[43]);
+                    if (!(reader[44] is DBNull)) beData.PresentDays = Convert.ToDouble(reader[44]);
+                    if (!(reader[45] is DBNull)) beData.TotalLeave = Convert.ToDouble(reader[45]);                    
+                    if (!(reader[46] is DBNull)) beData.AbsentDays = Convert.ToDouble(reader[46]);
+                    if (!(reader[47] is DBNull)) beData.Name = reader.GetString(47);
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.StudentBIOAttendanceCollections getStudentBIOAttendance(int UserId,int AcademicYearId, int StudentId,DateTime? dateFrom,DateTime? dateTo,int? YearId,int? MonthId,int? SubjectId)
+        {
+            RE.Attendance.StudentBIOAttendanceCollections dataColl = new RE.Attendance.StudentBIOAttendanceCollections();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@StudentId", StudentId);
+            cmd.Parameters.AddWithValue("@DateFrom", dateFrom);
+            cmd.Parameters.AddWithValue("@DateTo", dateTo);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.Parameters.AddWithValue("@YearId", YearId);
+            cmd.Parameters.AddWithValue("@MonthId", MonthId);
+            cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+            cmd.CommandText = "usp_GetStudentBIOAttendanceDetails";
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    RE.Attendance.StudentBIOAttendance beData = new RE.Attendance.StudentBIOAttendance();
+                    beData.SNo = sno;
+                    beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.RegdNo = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.Name = reader.GetString(2);                                     
+                    if (!(reader[3] is DBNull)) beData.ClassName = reader.GetString(3);
+                    if (!(reader[4] is DBNull)) beData.SectionName = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.RollNo = reader.GetInt32(5);
+                    if (!(reader[6] is DBNull)) beData.DayName = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.EffectiveDate_AD = reader.GetDateTime(7);
+                    if (!(reader[8] is DBNull)) beData.EffectiveDate_BS = reader.GetString(8);
+                    if (!(reader[9] is DBNull)) beData.OnDutyTime = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.OffDutyTime = reader.GetString(10);
+                    if (!(reader[11] is DBNull)) beData.InTime = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.OutTime = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.LateIn = reader.GetInt32(13);
+                    if (!(reader[14] is DBNull)) beData.BeforeOut = reader.GetInt32(14);
+                    if (!(reader[15] is DBNull)) beData.TotalMin= reader.GetInt32(15);
+                    if (!(reader[16] is DBNull)) beData.AttendanceType = reader.GetString(16);
+                    if (!(reader[17] is DBNull)) beData.IsPresent = reader.GetBoolean(17);
+                    if (!(reader[18] is DBNull)) beData.IsWeekEnd = reader.GetBoolean(18);
+                    if (!(reader[19] is DBNull)) beData.IsHoliday = reader.GetBoolean(19);
+                    beData.TotalMinStr = ConvertMinuteToHR(beData.TotalMin);
+                    beData.LateInStr = ConvertMinuteToHR(beData.LateIn);
+                    beData.BeforeOutStr = ConvertMinuteToHR(beData.BeforeOut);
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.ClassWiseBIOSummaryCollections getClassWiseBIOAttendance(int UserId,int AcademicYearId, DateTime forDate)
+        {
+            RE.Attendance.ClassWiseBIOSummaryCollections dataColl = new RE.Attendance.ClassWiseBIOSummaryCollections();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);            
+            cmd.Parameters.AddWithValue("@DateFrom", forDate);            
+            cmd.Parameters.AddWithValue("@DateTo", forDate);
+            cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+            cmd.CommandText = "usp_GetAllClassBIOAttendanceSummary";
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    RE.Attendance.ClassWiseBIOSummary beData = new RE.Attendance.ClassWiseBIOSummary();
+                    beData.SNo = sno;                    
+                    if (!(reader[0] is DBNull)) beData.ClassName = reader.GetString(0);
+                    if (!(reader[1] is DBNull)) beData.SectionName = reader.GetString(1);
+                    if (!(reader[2] is DBNull)) beData.NoOfStudent = reader.GetInt32(2);
+                    if (!(reader[3] is DBNull)) beData.TotalDays = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.Present = reader.GetInt32(4);
+                    if (!(reader[5] is DBNull)) beData.Present_Per = Convert.ToDouble(reader[5]);
+                    if (!(reader[6] is DBNull)) beData.Leave = reader.GetInt32(6);
+                    if (!(reader[7] is DBNull)) beData.Leave_Per = Convert.ToDouble(reader[7]);
+                    beData.Absent = beData.NoOfStudent - beData.Present - beData.Leave;
+                    beData.Absent_Per = 100 - beData.Present_Per - beData.Leave_Per;
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.EmployeeDailyAttendanceCollections getEmpAbsentList(int UserId, DateTime forDate, string branchIdColl = "")
+        {
+            RE.Attendance.EmployeeDailyAttendanceCollections dataColl = new RE.Attendance.EmployeeDailyAttendanceCollections();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ForDate", forDate);
+            cmd.Parameters.AddWithValue("@BranchIdColl", branchIdColl);           
+            cmd.CommandText = "sp_GetDailyEmpAbsentList";
+
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    RE.Attendance.EmployeeDailyAttendance beData = new RE.Attendance.EmployeeDailyAttendance();
+                    beData.SNo = sno;
+                    if (!(reader[0] is DBNull)) beData.UserId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.EmployeeId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.EmpCode = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.EnrollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.Name = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.ContactNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Department = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.Designation = reader.GetString(7);                   
+                    if (!(reader[8] is DBNull)) beData.DateBS = reader.GetString(8);                
+                    if (!(reader[9] is DBNull)) beData.Attendance = reader.GetString(9);
+                    if (!(reader[10] is DBNull)) beData.Remarks = reader.GetString(10);                
+                    if (!(reader[11] is DBNull)) beData.Category = reader.GetString(11);
+                    if (!(reader[12] is DBNull)) beData.BranchName = reader.GetString(12);
+                    if (!(reader[13] is DBNull)) beData.BranchAddress = reader.GetString(13);
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.EmployeeDailyAttendanceCollections getEmpDailyAttendance(int UserId, DateTime forDate,string branchIdColl="",bool isManualOnly=false,int empType=1)
+        {
+            RE.Attendance.EmployeeDailyAttendanceCollections dataColl = new RE.Attendance.EmployeeDailyAttendanceCollections();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("@UserId", UserId);
+            cmd.Parameters.AddWithValue("@ForDate", forDate);
+            cmd.Parameters.AddWithValue("@BranchIdColl", branchIdColl);
+            cmd.Parameters.AddWithValue("@EmpType", empType);
+            //cmd.Parameters.AddWithValue("@IsManualOnly", isManualOnly);
+
+            if (isManualOnly)
+                cmd.CommandText = "sp_GetEmpManualDailyAttendanceRegister";
+            else
+                cmd.CommandText = "sp_GetDailyAttendanceRegister";
+
+            try
+            {
+                int sno = 1;
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    RE.Attendance.EmployeeDailyAttendance beData = new RE.Attendance.EmployeeDailyAttendance();
+                    beData.SNo = sno;
+                    if (!(reader[0] is DBNull)) beData.UserId = reader.GetInt32(0);
+                    if (!(reader[1] is DBNull)) beData.EmployeeId = reader.GetInt32(1);
+                    if (!(reader[2] is DBNull)) beData.EmpCode = reader.GetString(2);
+                    if (!(reader[3] is DBNull)) beData.EnrollNo = reader.GetInt32(3);
+                    if (!(reader[4] is DBNull)) beData.Name = reader.GetString(4);
+                    if (!(reader[5] is DBNull)) beData.ContactNo = reader.GetString(5);
+                    if (!(reader[6] is DBNull)) beData.Department = reader.GetString(6);
+                    if (!(reader[7] is DBNull)) beData.Designation = reader.GetString(7);
+                    if (!(reader[8] is DBNull)) beData.In1 = Convert.ToString(reader[8]);
+                    if (!(reader[9] is DBNull)) beData.Out1 = Convert.ToString(reader[9]);
+                    if (!(reader[10] is DBNull)) beData.In2 = Convert.ToString(reader[10]);
+                    if (!(reader[11] is DBNull)) beData.Out2 = Convert.ToString(reader[11]);
+                    if (!(reader[12] is DBNull)) beData.In3 = Convert.ToString(reader[12]);
+                    if (!(reader[13] is DBNull)) beData.Out3 = Convert.ToString(reader[13]);
+                    if (!(reader[14] is DBNull)) beData.In4 = Convert.ToString(reader[14]);
+                    if (!(reader[15] is DBNull)) beData.Out4 = Convert.ToString(reader[15]);
+                    if (!(reader[16] is DBNull)) beData.In5 = Convert.ToString(reader[16]);
+                    if (!(reader[17] is DBNull)) beData.Out5 = Convert.ToString(reader[17]);
+                    if (!(reader[18] is DBNull)) beData.DateBS = reader.GetString(18);
+                    if (!(reader[19] is DBNull)) beData.InTime = Convert.ToString(reader[19]);
+                    if (!(reader[20] is DBNull)) beData.OutTime = Convert.ToString(reader[20]);
+                    if (!(reader[21] is DBNull)) beData.Attendance = reader.GetString(21);
+                    if (!(reader[22] is DBNull)) beData.Remarks = reader.GetString(22);
+                    if (!(reader[23] is DBNull)) beData.InLocation = reader.GetString(23);
+                    if (!(reader[24] is DBNull)) beData.OutLocation = reader.GetString(24);
+                    if (!(reader[25] is DBNull)) beData.Category = reader.GetString(25);
+                    if (!(reader[26] is DBNull)) beData.Color = reader.GetString(26);
+                    if (!(reader[27] is DBNull)) beData.WorkingDuration = Convert.ToDouble(reader[27]);
+                    if (!(reader[28] is DBNull)) beData.OTDuration = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is DBNull)) beData.EarlyInMinutes = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is DBNull)) beData.LateInMiMinutes = Convert.ToDouble(reader[30]);
+                    if (!(reader[31] is DBNull)) beData.EarlyOutMinutes = Convert.ToDouble(reader[31]);
+                    if (!(reader[32] is DBNull)) beData.DelayOutMinutes = Convert.ToDouble(reader[32]);
+                    if (!(reader[33] is DBNull)) beData.WorkingMinuesAsInOut = Convert.ToDouble(reader[33]);
+
+                    if (!(reader[34] is DBNull)) beData.BranchName = reader.GetString(34);
+                    if (!(reader[35] is DBNull)) beData.BranchAddress = reader.GetString(35);
+
+                    if (!(reader[36] is DBNull)) beData.PhotoPath = reader.GetString(36);
+                    if (!(reader[37] is DBNull)) beData.AppliedLeave = Convert.ToBoolean(reader[37]);
+                    if (!(reader[38] is DBNull)) beData.LeaveReason = reader.GetString(38);
+                    try
+                    {
+                        if (!(reader[39] is DBNull)) beData.WorkingShift = reader.GetString(39);
+                    }
+                    catch { }
+
+                    beData.WorkingHR = ConvertMinuteToHR(Convert.ToInt32(beData.WorkingDuration));
+                    beData.LateInStr = ConvertMinuteToHR(Convert.ToInt32(beData.LateInMiMinutes));
+                    beData.BeforeOutStr = ConvertMinuteToHR(Convert.ToInt32(beData.EarlyOutMinutes));
+                    beData.WorkingHRAsInOut = ConvertMinuteToHR(Convert.ToInt32(beData.WorkingMinuesAsInOut));
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.EmpMonthlyAttendanceLogCollections getEmpMonthlyAttendance(int UserId, int YearId, int MonthId, string BranchIdColl,int empType)
+        {
+            RE.Attendance.EmpMonthlyAttendanceLogCollections dataColl = new RE.Attendance.EmpMonthlyAttendanceLogCollections();
+
+            dal.OpenConnection();
+
+            try
+            {
+                System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@YearId", YearId);
+                cmd.Parameters.AddWithValue("@MonthId", MonthId);
+                cmd.Parameters.AddWithValue("@BranchIdColl", BranchIdColl);             
+                cmd.Parameters.Add("@DateFrom", System.Data.SqlDbType.DateTime);
+                cmd.Parameters.Add("@DateTo", System.Data.SqlDbType.DateTime);
+                cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+                cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+
+                cmd.Parameters.AddWithValue("@EmpType", empType);
+                cmd.CommandText = "sp_GetEmpMonthlyAttendanceLog";
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+                int sno = 1;
+                while (reader.Read())
+                {
+                    RE.Attendance.EmpMonthlyAttendanceLog beData = new RE.Attendance.EmpMonthlyAttendanceLog();
+                    beData.SNo = sno;
+                    beData.EmployeeId = reader.GetInt32(0);
+                    if (!(reader[1] is System.DBNull)) beData.EnrollNumber = reader.GetInt32(1);
+                    if (!(reader[2] is System.DBNull)) beData.Name = reader.GetString(2);
+                    if (!(reader[3] is System.DBNull)) beData.Branch = reader.GetString(3);
+                    if (!(reader[4] is System.DBNull)) beData.Department = reader.GetString(4);
+                    if (!(reader[5] is System.DBNull)) beData.Designation = reader.GetString(5);
+                    if (!(reader[6] is System.DBNull)) beData.Day1 = reader.GetString(6);
+                    if (!(reader[7] is System.DBNull)) beData.Day2 = reader.GetString(7);
+                    if (!(reader[8] is System.DBNull)) beData.Day3 = reader.GetString(8);
+                    if (!(reader[9] is System.DBNull)) beData.Day4 = reader.GetString(9);
+                    if (!(reader[10] is System.DBNull)) beData.Day5 = reader.GetString(10);
+                    if (!(reader[11] is System.DBNull)) beData.Day6 = reader.GetString(11);
+                    if (!(reader[12] is System.DBNull)) beData.Day7 = reader.GetString(12);
+                    if (!(reader[13] is System.DBNull)) beData.Day8 = reader.GetString(13);
+                    if (!(reader[14] is System.DBNull)) beData.Day9 = reader.GetString(14);
+                    if (!(reader[15] is System.DBNull)) beData.Day10 = reader.GetString(15);
+                    if (!(reader[16] is System.DBNull)) beData.Day11 = reader.GetString(16);
+                    if (!(reader[17] is System.DBNull)) beData.Day12 = reader.GetString(17);
+                    if (!(reader[18] is System.DBNull)) beData.Day13 = reader.GetString(18);
+                    if (!(reader[19] is System.DBNull)) beData.Day14 = reader.GetString(19);
+                    if (!(reader[20] is System.DBNull)) beData.Day15 = reader.GetString(20);
+                    if (!(reader[21] is System.DBNull)) beData.Day16 = reader.GetString(21);
+                    if (!(reader[22] is System.DBNull)) beData.Day17 = reader.GetString(22);
+                    if (!(reader[23] is System.DBNull)) beData.Day18 = reader.GetString(23);
+                    if (!(reader[24] is System.DBNull)) beData.Day19 = reader.GetString(24);
+                    if (!(reader[25] is System.DBNull)) beData.Day20 = reader.GetString(25);
+                    if (!(reader[26] is System.DBNull)) beData.Day21 = reader.GetString(26);
+                    if (!(reader[27] is System.DBNull)) beData.Day22 = reader.GetString(27);
+                    if (!(reader[28] is System.DBNull)) beData.Day23 = reader.GetString(28);
+                    if (!(reader[29] is System.DBNull)) beData.Day24 = reader.GetString(29);
+                    if (!(reader[30] is System.DBNull)) beData.Day25 = reader.GetString(30);
+                    if (!(reader[31] is System.DBNull)) beData.Day26 = reader.GetString(31);
+                    if (!(reader[32] is System.DBNull)) beData.Day27 = reader.GetString(32);
+                    if (!(reader[33] is System.DBNull)) beData.Day28 = reader.GetString(33);
+                    if (!(reader[34] is System.DBNull)) beData.Day29 = reader.GetString(34);
+                    if (!(reader[35] is System.DBNull)) beData.Day30 = reader.GetString(35);
+                    if (!(reader[36] is System.DBNull)) beData.Day31 = reader.GetString(36);
+                    if (!(reader[37] is System.DBNull)) beData.Day32 = reader.GetString(37);
+                    if (!(reader[38] is System.DBNull)) beData.TotalDays = Convert.ToInt32(reader[38]);
+                    if (!(reader[39] is System.DBNull)) beData.TotalWeekend = Convert.ToInt32(reader[39]);
+                    if (!(reader[40] is System.DBNull)) beData.TotalPresent = Convert.ToInt32(reader[40]);
+                    if (!(reader[41] is System.DBNull)) beData.TotalLeave = Convert.ToInt32(reader[41]);
+                    if (!(reader[42] is System.DBNull)) beData.TotalHoliday = Convert.ToInt32(reader[42]);
+                    if (!(reader[43] is System.DBNull)) beData.EmpCode = Convert.ToString(reader[43]);
+
+                    if (!(reader[44] is System.DBNull)) beData.WeekendPresent = Convert.ToInt32(reader[44]);
+                    if (!(reader[45] is System.DBNull)) beData.HolidayPresent = Convert.ToInt32(reader[45]);
+                    if (!(reader[46] is System.DBNull)) beData.LeavePresent = Convert.ToInt32(reader[46]);
+                    if (!(reader[47] is System.DBNull)) beData.Category = reader.GetString(47);
+                    if (!(reader[48] is System.DBNull)) beData.ServiceType = reader.GetString(48);
+                    if (!(reader[49] is System.DBNull)) beData.Company = reader.GetString(49);
+
+                    if (!(reader[50] is System.DBNull)) beData.Day1_Color = reader.GetString(50);
+                    if (!(reader[51] is System.DBNull)) beData.Day2_Color = reader.GetString(51);
+                    if (!(reader[52] is System.DBNull)) beData.Day3_Color = reader.GetString(52);
+                    if (!(reader[53] is System.DBNull)) beData.Day4_Color = reader.GetString(53);
+                    if (!(reader[54] is System.DBNull)) beData.Day5_Color = reader.GetString(54);
+                    if (!(reader[55] is System.DBNull)) beData.Day6_Color = reader.GetString(55);
+                    if (!(reader[56] is System.DBNull)) beData.Day7_Color = reader.GetString(56);
+                    if (!(reader[57] is System.DBNull)) beData.Day8_Color = reader.GetString(57);
+                    if (!(reader[58] is System.DBNull)) beData.Day9_Color = reader.GetString(58);
+                    if (!(reader[59] is System.DBNull)) beData.Day10_Color = reader.GetString(59);
+                    if (!(reader[60] is System.DBNull)) beData.Day11_Color = reader.GetString(60);
+                    if (!(reader[61] is System.DBNull)) beData.Day12_Color = reader.GetString(61);
+                    if (!(reader[62] is System.DBNull)) beData.Day13_Color = reader.GetString(62);
+                    if (!(reader[63] is System.DBNull)) beData.Day14_Color = reader.GetString(63);
+                    if (!(reader[64] is System.DBNull)) beData.Day15_Color = reader.GetString(64);
+                    if (!(reader[65] is System.DBNull)) beData.Day16_Color = reader.GetString(65);
+                    if (!(reader[66] is System.DBNull)) beData.Day17_Color = reader.GetString(66);
+                    if (!(reader[67] is System.DBNull)) beData.Day18_Color = reader.GetString(67);
+                    if (!(reader[68] is System.DBNull)) beData.Day19_Color = reader.GetString(68);
+                    if (!(reader[69] is System.DBNull)) beData.Day20_Color = reader.GetString(69);
+                    if (!(reader[70] is System.DBNull)) beData.Day21_Color = reader.GetString(70);
+                    if (!(reader[71] is System.DBNull)) beData.Day22_Color = reader.GetString(71);
+                    if (!(reader[72] is System.DBNull)) beData.Day23_Color = reader.GetString(72);
+                    if (!(reader[73] is System.DBNull)) beData.Day24_Color = reader.GetString(73);
+                    if (!(reader[74] is System.DBNull)) beData.Day25_Color = reader.GetString(74);
+                    if (!(reader[75] is System.DBNull)) beData.Day26_Color = reader.GetString(75);
+                    if (!(reader[76] is System.DBNull)) beData.Day27_Color = reader.GetString(76);
+                    if (!(reader[77] is System.DBNull)) beData.Day28_Color = reader.GetString(77);
+                    if (!(reader[78] is System.DBNull)) beData.Day29_Color = reader.GetString(78);
+                    if (!(reader[79] is System.DBNull)) beData.Day30_Color = reader.GetString(79);
+                    if (!(reader[80] is System.DBNull)) beData.Day31_Color = reader.GetString(80);
+                    if (!(reader[81] is System.DBNull)) beData.Day32_Color = reader.GetString(81);
+
+                    if (!(reader[82] is System.DBNull)) beData.WorkingDuration = Convert.ToDouble(reader[82]);
+                    if (!(reader[83] is System.DBNull)) beData.OTDuration = Convert.ToDouble(reader[83]);
+                    if (!(reader[84] is System.DBNull)) beData.SinglePunchDeduction = Convert.ToDouble(reader[84]);
+                    if (!(reader[85] is System.DBNull)) beData.EarlyInMinutes = Convert.ToDouble(reader[85]);
+                    if (!(reader[86] is System.DBNull)) beData.LateInMinutes = Convert.ToDouble(reader[86]);
+                    if (!(reader[87] is System.DBNull)) beData.EarlyOutMinutes = Convert.ToDouble(reader[87]);
+                    if (!(reader[88] is System.DBNull)) beData.DelayOutMinutes = Convert.ToDouble(reader[88]);
+                    if (!(reader[89] is System.DBNull)) beData.SinglePunchCount = Convert.ToDouble(reader[89]);
+                    if (!(reader[90] is System.DBNull)) beData.EarlyInCount = Convert.ToDouble(reader[90]);
+                    if (!(reader[91] is System.DBNull)) beData.LateInCount = Convert.ToDouble(reader[91]);
+                    if (!(reader[92] is System.DBNull)) beData.EarlyOutCount = Convert.ToDouble(reader[92]);
+                    if (!(reader[93] is System.DBNull)) beData.DelayOutCount = Convert.ToDouble(reader[93]);
+
+                    if (!(reader[94] is System.DBNull)) beData.BranchName = Convert.ToString(reader[94]);
+                    if (!(reader[95] is System.DBNull)) beData.BranchAddress = Convert.ToString(reader[95]);
+
+                    try
+                    {
+                        if (!(reader[96] is System.DBNull)) beData.TotalAbsent = Convert.ToInt32(reader[96]);
+                        if (!(reader[97] is System.DBNull)) beData.WorkingShift = Convert.ToString(reader[97]);
+                    }
+                    catch { }
+
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+
+                DateTime? dateFrom = null, dateTo = null;
+                if (!(cmd.Parameters[4].Value is DBNull))
+                    dateFrom = Convert.ToDateTime(cmd.Parameters[4].Value);
+
+                if (!(cmd.Parameters[5].Value is DBNull))
+                    dateTo = Convert.ToDateTime(cmd.Parameters[5].Value);
+
+                if (dateFrom.HasValue && dateTo.HasValue)
+                {
+                    foreach (var v in dataColl)
+                    {
+                        v.DateFrom = dateFrom.Value;
+                        v.DateTo = dateTo.Value;
+                    }
+                }
+
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+                
+            }
+            catch (Exception ee)
+            {
+
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+        }
+
+        public RE.Attendance.EmployeeWiseAttendanceCollections getEmployeeWiseAttendance(int UserId, int? EmployeeId, DateTime? dateFrom, DateTime? dateTo,int? YearId,int? MonthId, ref int totalAbsent, ref double TotalWorkingHour)
+        {
+            RE.Attendance.EmployeeWiseAttendanceCollections dataColl = new RE.Attendance.EmployeeWiseAttendanceCollections();
+
+            dal.OpenConnection();
+
+            try
+            {
+                System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@EmployeeId", EmployeeId);
+                cmd.Parameters.AddWithValue("@DateFrom", dateFrom);
+                cmd.Parameters.AddWithValue("@DateTo", dateTo);
+                cmd.Parameters.AddWithValue("@YearId", YearId);
+                cmd.Parameters.AddWithValue("@MonthId", MonthId);
+                cmd.CommandText = "sp_GetEmployeeWiseAttendanceLog";
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+
+                int absentCount = 0;
+                int sno = 1;
+                while (reader.Read())
+                {
+                    RE.Attendance.EmployeeWiseAttendance beData = new RE.Attendance.EmployeeWiseAttendance();
+                    beData.SNO = sno;
+                    beData.EmployeeId = reader.GetInt32(0);
+                    if (!(reader[1] is System.DBNull)) beData.DateAD = reader.GetDateTime(1);
+                    if (!(reader[2] is System.DBNull)) beData.DateBS = reader.GetString(2);
+                    if (!(reader[3] is System.DBNull)) beData.InTime = reader.GetDateTime(3);
+                    if (!(reader[4] is System.DBNull)) beData.OutTime = reader.GetDateTime(4);
+                    if (!(reader[5] is System.DBNull)) beData.Attendance = reader.GetString(5);
+                    if (!(reader[6] is System.DBNull)) beData.Remarks = reader.GetString(6);
+                    if (!(reader[7] is System.DBNull)) beData.TotalDays = reader.GetInt32(7);
+                    if (!(reader[8] is System.DBNull)) beData.TotalWeekEnd = reader.GetInt32(8);
+                    if (!(reader[9] is System.DBNull)) beData.TotalPresent = reader.GetInt32(9);
+                    if (!(reader[10] is System.DBNull)) beData.TotalLeave = reader.GetInt32(10);
+                    if (!(reader[11] is System.DBNull)) beData.TotalHoliday = reader.GetInt32(11);
+                    if (!(reader[12] is System.DBNull)) beData.InLocation = reader.GetString(12);
+                    if (!(reader[13] is System.DBNull)) beData.OutLocation = reader.GetString(13);
+                    if (!(reader[14] is System.DBNull)) beData.WeekendPresent = reader.GetInt32(14);
+                    if (!(reader[15] is System.DBNull)) beData.HolidayPresent = reader.GetInt32(15);
+                    if (!(reader[16] is System.DBNull)) beData.LeavePresent = reader.GetInt32(16);
+                    if (!(reader[17] is System.DBNull)) beData.IsWeekEnd = Convert.ToBoolean(reader[17]);
+                    if (!(reader[18] is System.DBNull)) beData.IsHoliday = Convert.ToBoolean(reader[18]);
+                    if (!(reader[19] is System.DBNull)) beData.IsLeave = Convert.ToBoolean(reader[19]);
+                    if (!(reader[20] is System.DBNull)) beData.IsPresent = Convert.ToBoolean(reader[20]);
+                    if (!(reader[21] is System.DBNull)) beData.Color = reader.GetString(21);
+                    if (!(reader[22] is System.DBNull)) beData.OnDutyTime = reader.GetDateTime(22);
+                    if (!(reader[23] is System.DBNull)) beData.OffDutyTime = reader.GetDateTime(23);
+                    if (!(reader[24] is System.DBNull)) beData.WorkingDuration = Convert.ToDouble(reader[24]);
+                    if (!(reader[25] is System.DBNull)) beData.WorkingHour = reader.GetString(25);
+                    if (!(reader[26] is System.DBNull)) beData.OTDuration = Convert.ToDouble(reader[26]);
+                    if (!(reader[27] is System.DBNull)) beData.SinglePunchDeduction = Convert.ToDouble(reader[27]);
+                    if (!(reader[28] is System.DBNull)) beData.EarlyInMinutes = Convert.ToDouble(reader[28]);
+                    if (!(reader[29] is System.DBNull)) beData.LateInMinutes = Convert.ToDouble(reader[29]);
+                    if (!(reader[30] is System.DBNull)) beData.EarlyOutMinutes = Convert.ToDouble(reader[30]);
+                    if (!(reader[31] is System.DBNull)) beData.DelayOutMinutes = Convert.ToDouble(reader[31]);
+
+                    try
+                    {
+                        if (!(reader[32] is System.DBNull)) beData.Name = reader.GetString(32);
+                        if (!(reader[33] is System.DBNull)) beData.Code = reader.GetString(33);
+                        if (!(reader[34] is System.DBNull)) beData.Branch = reader.GetString(34);
+                        if (!(reader[35] is System.DBNull)) beData.Department = reader.GetString(35);
+                        if (!(reader[36] is System.DBNull)) beData.Designation = reader.GetString(36);
+                        if (!(reader[37] is System.DBNull)) beData.EnrollNumber = reader.GetInt32(37);
+                        if (!(reader[38] is System.DBNull)) beData.Address = reader.GetString(38);
+                        if (!(reader[39] is System.DBNull)) beData.ContactNo = reader.GetString(39);
+                        if (!(reader[40] is System.DBNull)) beData.DepOrderNo = reader.GetInt32(40);
+                        if (!(reader[41] is System.DBNull)) beData.WorkingShift = reader.GetString(41);
+                    }
+                    catch { }
+
+                    if (beData.Attendance == "A")
+                        absentCount++;
+
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                totalAbsent = absentCount;
+                TotalWorkingHour = dataColl.Sum(p1 => p1.WorkingDuration) / 60;
+                reader.Close();
+
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+
+        }
+
+
+        public API.Attendance.AttendanceSummaryCollections getClassWiseAttendanceSummary(int UserId,int? ClassId,int? SectionId,DateTime? DateFrom,DateTime? DateTo,int? AcademicYearId,int? YearId,int? MonthId,int? SubjectId,int? StudentId)
+        {
+            API.Attendance.AttendanceSummaryCollections dataColl = new API.Attendance.AttendanceSummaryCollections();
+
+            dal.OpenConnection();
+
+            try
+            {
+                System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+                cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@ClassId", ClassId);
+                cmd.Parameters.AddWithValue("@SectionId", SectionId);
+                cmd.Parameters.AddWithValue("@DateFrom", DateFrom);
+                cmd.Parameters.AddWithValue("@DateTo", DateTo);
+                cmd.Parameters.AddWithValue("@YearId", YearId);
+                cmd.Parameters.AddWithValue("@MonthId", MonthId);
+                cmd.Parameters.AddWithValue("@AcademicYearId", AcademicYearId);
+                cmd.Parameters.AddWithValue("@SubjectId", SubjectId);
+                cmd.Parameters.AddWithValue("@StudentId", StudentId);
+                cmd.CommandText = "usp_GetClassWiseAttendanceSummary";
+                System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+
+                int sno = 1;
+                while (reader.Read())
+                {
+                    API.Attendance.AttendanceSummary beData = new API.Attendance.AttendanceSummary();
+                    beData.SNo = sno;
+                    if (!(reader[0] is System.DBNull)) beData.StudentId = reader.GetInt32(0);
+                    if (!(reader[1] is System.DBNull)) beData.AutoNumber = reader.GetInt32(1);
+                    if (!(reader[2] is System.DBNull)) beData.RegNo = reader.GetString(2);
+                    if (!(reader[3] is System.DBNull)) beData.RollNo = reader.GetInt32(3);
+                    if (!(reader[4] is System.DBNull)) beData.ClassName = reader.GetString(4);
+                    if (!(reader[5] is System.DBNull)) beData.SectionName = reader.GetString(5);
+                    if (!(reader[6] is System.DBNull)) beData.HouseName = reader.GetString(6);
+                    if (!(reader[7] is System.DBNull)) beData.Name = reader.GetString(7);
+                    if (!(reader[8] is System.DBNull)) beData.Address = reader.GetString(8);
+                    if (!(reader[9] is System.DBNull)) beData.FatherName = reader.GetString(9);
+                    if (!(reader[10] is System.DBNull)) beData.ContactNo = reader.GetString(10);
+                    if (!(reader[11] is System.DBNull)) beData.PhotoPath = reader.GetString(11);
+                    if (!(reader[12] is System.DBNull)) beData.TotalDays = Convert.ToInt32(reader[12]);
+                    if (!(reader[13] is System.DBNull)) beData.SchoolDays = Convert.ToInt32(reader[13]);
+                    if (!(reader[14] is System.DBNull)) beData.Present = Convert.ToDouble(reader[14]);
+                    if (!(reader[15] is System.DBNull)) beData.Late = Convert.ToDouble(reader[15]);
+                    if (!(reader[16] is System.DBNull)) beData.Weekend = Convert.ToDouble(reader[16]);
+                    if (!(reader[17] is System.DBNull)) beData.Holiday = Convert.ToDouble(reader[17]);
+                    if (!(reader[18] is System.DBNull)) beData.Event = Convert.ToDouble(reader[18]);
+                    if (!(reader[19] is System.DBNull)) beData.Leave = Convert.ToDouble(reader[19]);
+                    if (!(reader[20] is System.DBNull)) beData.Absent = Convert.ToDouble(reader[20]);
+
+                    if (beData.SchoolDays > 0 && beData.Present > 0)
+                        beData.Present_Per =Math.Round((beData.Present / beData.SchoolDays) * 100,2);
+
+                    if (beData.SchoolDays > 0 && beData.Late > 0)
+                        beData.Late_Per = Math.Round((beData.Late / beData.SchoolDays) * 100, 2);
+
+                    if (beData.SchoolDays > 0 && beData.Absent > 0)
+                        beData.Absent_Per = Math.Round((beData.Absent / beData.SchoolDays) * 100, 2);
+
+                    if (beData.SchoolDays > 0 && beData.Leave > 0)
+                        beData.Leave_Per = Math.Round((beData.Leave / beData.SchoolDays) * 100, 2);
+                      
+                    dataColl.Add(beData);
+                    sno++;
+                }
+                reader.Close();
+
+                dataColl.IsSuccess = true;
+                dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return dataColl;
+
+        }
+
+        private string ConvertMinuteToHR(int minute)
+        {
+            if (minute == 0)
+                return "00:00";
+
+            int hours = (minute - minute % 60) / 60;
+            return hours.ToString().PadLeft(2,'0') + ":" + (minute - hours * 60).ToString().PadLeft(2,'0');
+        }
+    }
+}

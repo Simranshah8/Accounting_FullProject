@@ -1,0 +1,276 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/hr/transaction/SalarySheet.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="SalarySheetController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="card p-2">
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label>For Year</label>
+                                <select class="form-control form-control-sm" ng-model="newFilter.YearId">
+                                    <option ng-value="A.id" ng-repeat="A in AcademicYearColl" ng-selected="A.id==newFilter.YearId">{{A.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-2 col-md-2">
+                            <div class="form-group">
+                                <label for="">For Month</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.MonthId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newFilter.MonthId">{{cl.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Branch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.BranchId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newFilter.BranchId">{{B.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Department</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.DepartmentId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newFilter.DepartmentId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.CategoryId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.CategoryId" ng-repeat="c in CategoryList" ng-selected="c.CategoryId==newFilter.CategoryId">{{c.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button class="btn btn-sm btn-outline-secondary mt-4 btn-add float-right" ng-click="GetEmployeeForSalarySheet()"><i class="fas fa-redo-alt"></i> Load</button>
+                        </div>
+                    </div>
+                    <header class="row">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SalarySheet">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SalarySheet">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar"
+                                               type="search" placeholder="Search"
+                                               aria-label="Search" ng-model="searchData.SalarySheet">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0"
+                                                    type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file ml-2">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#SalarySheet'" sheet-name="'SalarySheetList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#SalarySheet').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+
+
+                                <button class="btn btn-sm btn-add btn-secondary"><i class="far fa-arrow-alt-circle-down mr-1"></i>Generate</button>
+                                <button class="btn btn-sm btn-add btn-info"><i class="fas fa-eye mr-1"></i>Show Closing</button>
+                                <button class="btn btn-sm btn-add btn-success" ng-click="SaveSalarySheet()"><i class="fas fa-save mr-1"></i>Save</button>
+                                <button class="btn btn-sm btn-add btn-danger" ng-click="DeleteSalarySheet()"><i class="far fa-trash-alt"></i> Delete</button>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 13rem);">
+                        <table id="SalarySheet"
+                               class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #fff" ng-click="sortEmpData('EmployeeCode')">Code</th>
+                                    <th class="text-center align-middle cstm-sticky" style="width: 80px; left: 70px; z-index: 3; background-color: #fff" ng-click="sortEmpData('EnrollNo')">Enroll No</th>
+                                    <th class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 3; background-color: #fff" ng-click="sortEmpData('EmployeeName')">Name</th>
+                                    <th class="text-center" style="width: 120px;z-index:2" ng-repeat="Ph in AttendanceTypeList">
+                                        {{Ph.Name}}
+                                    </th>
+                                    <th class="text-center" style="width: 120px;z-index:2" ng-repeat="Ph in PayHeadingList">
+                                        {{Ph.Name}}
+                                    </th>
+                                    <th class="text-center" style="width: 120px;z-index:2">
+                                        Earning
+                                    </th>
+                                    <th class="text-center" style="width: 120px;z-index:2">
+                                        Deduction
+                                    </th>
+                                    <th class="text-center" style="width: 120px;z-index:2">
+                                        Tax
+                                    </th>
+                                    <th class="text-center" style="width: 120px;z-index:2">
+                                        Net Payable
+                                    </th>
+                                    <th class="text-center cstm-sticky" style="width:62px;right:0;z-index:3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="cl in EmployeeListForSalarySheet  |orderBy:sortKeySS:reverseSS | filter:searchData.SalarySheet | itemsPerPage: perPage.SalarySheet" current-page="currentPages.SalarySheet" pagination-id="SalarySheetPagination">
+                                    <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 1; background-color: #fff">{{cl.EmployeeCode}}</td>
+                                    <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 1; background-color: #fff">{{cl.EnrollNo}}</td>
+                                    <td class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 1; background-color: #fff">{{cl.EmployeeName}}</td>
+                                    <td class="text-center" ng-repeat="AT in cl.AttendanceTypeColl">
+                                        <span ng-show="false">{{AT.Value}}</span>
+                                        <input type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="AT.Value" ng-change="ChangeAttendance(cl,AT)">
+                                    </td>
+                                    <td class="text-center" ng-repeat="Ph in cl.PayHeadColl">
+                                        <span ng-show="false">{{Ph.Amount |number:2}}</span>
+                                        <div class="input-group input-group-sm ">
+                                            <input ng-disabled="Ph.IsEditable==false" type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="Ph.Amount" ng-change="ChangeRate(cl,Ph)">
+                                            <div class="input-group-append" ng-show="Ph.PayheadType==4 || Ph.PayheadType==6">
+                                                <button class="btn btn-info" ng-click="ShowTaxDetails(cl,Ph)">
+                                                    ...
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Earning |number:2}}</span>
+                                        <input readonly type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Earning">
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Deduction |number:2}}</span>
+                                        <input readonly type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Deduction">
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Tax |number:2}}</span>
+                                        <input readonly type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Tax">
+                                    </td>
+                                    <td>
+                                        <span ng-show="false">{{cl.Netpayable |number:2}}</span>
+                                        <input readonly type="text" number-input noofdecimal="2" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="cl.Netpayable">
+                                    </td>
+                                    <td class="text-center cstm-sticky" style="width:62px;right:0;z-index:2;background-color:#ececec">
+                                        <a class="p-1 btn btn-sm btn-info" data-toggle="tooltip" title="Update" href="#" ng-click="UpdateDetailData(cl,$index)">
+                                            <i class="fas fa-save "></i>
+                                        </a>
+                                        <a class="p-1 btn btn-danger btn-sm" data-toggle="tooltip" title="Delete" href="#" ng-click="DelSalarySheetData(cl)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="{{AttendanceTypeList.length+3}}" align="center">
+                                        TOTAL :-
+                                    </td>
+                                    <td class="text-center" ng-repeat="Ph in PayHeadingList">
+                                        <span>{{Ph.GTAmount |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Earning |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Deduction |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Tax |number:2}}</span>
+                                    </td>
+                                    <td align="right">
+                                        <span>{{TotalRow.Netpayable |number:2}}</span>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="SalarySheetPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </div>
+
+        <div class="modal fade" id="detailmodel" style="margin-top:35px;">
+            <div class="modal-dialog modal-xl" style="max-width:680px!important">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Tax Calculation Detail</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-scroll-x-y sales-main-table table-scroll" style="max-height:430px!important">
+                            <table id="main-table"
+                                   class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th style="width: 40px">S.No.</th>
+                                        <th style="width: 110px">Amount</th>
+                                        <th style="width: 110px">Rate</th>
+                                        <th style="width: 100px">Tax</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="TD in CurTaxDetailsColl">
+                                        <td class="text-center">{{$index+1}}</td>
+                                        <td class="text-right">{{TD.Amount |number:2}}</td>
+                                        <td class="text-center">{{TD.Rate |number:2}}</td>
+                                        <td class="text-center">{{TD.Tax |number:2}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </section>
+</div>

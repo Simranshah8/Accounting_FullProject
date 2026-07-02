@@ -1,0 +1,636 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/setup/InventoryConfiguration.js"></script>
+<div ng-app="myApp" ng-controller="ctrlInventoryConfiguration" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+
+    <div class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header header-corner-triangle p-2">
+                    <h3 class="card-title">Inventory Configuration</h3>
+                </div>
+                <div class="card-body" style="margin-bottom:60px!important">
+                    <form>
+                        <div class="row">
+                            @*<div class="col-sm-6">
+            <div class="form-group">
+
+                <label>Select User</label>
+
+                <select class="form-control form-control-sm select2 " style="width:100%;" data-placeholder="**Select User**">
+                    <option>Admin</option>
+                    <option>Admin1</option>
+                    <option>Admin2</option>
+                </select>
+
+            </div>
+        </div>*@
+                            <div class="col-sm-4">
+
+                                <div class="form-group">
+
+                                    <label>Default apperance of GodownName in Report</label>
+                                    <select class="form-control form-control-sm  select2" style="width:100%;" ng-model="InvConfig.GodownAppearances">
+                                        <option ng-value="ap.id" ng-repeat="ap in AppearancesTypeColl" ng-selected="ap.id==InvConfig.GodownAppearances">{{ap.text}}</option>
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+
+                                <div class="form-group">
+
+                                    <label>Voucher Date</label>
+
+                                    <select class="form-control form-control-sm  select2" style="width:100%;" data-placeholder="**Select Date As**" ng-model="InvConfig.VoucherDate">
+                                        <option ng-value="ap.id" ng-repeat="ap in VoucherDateColl" ng-selected="ap.id==InvConfig.VoucherDate">{{ap.text}}</option>
+                                    </select>
+
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+
+                                <div class="form-group">
+
+                                    <label>Default apperance of ProductName in Report</label>
+                                    <select class="form-control form-control-sm  select2" style="width:100%;" ng-model="InvConfig.Appearances">
+                                        <option ng-value="ap.id" ng-repeat="ap in AppearancesTypeColl" ng-selected="ap.id==InvConfig.Appearances">{{ap.text}}</option>
+                                    </select>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Multiple Godown</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary1" name="r1" ng-value="true" ng-model="InvConfig.AllowMultipleGodown">
+                                            <label for="radioPrimary1">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary2" name="r1" ng-value="false" ng-model="InvConfig.AllowMultipleGodown">
+                                            <label for="radioPrimary2">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Multiple Unit</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary3" name="r2" ng-value="true" ng-model="InvConfig.AllowMultipleUnit">
+                                            <label for="radioPrimary3">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary4" name="r2" ng-value="false" ng-model="InvConfig.AllowMultipleUnit">
+                                            <label for="radioPrimary4">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-sm-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Billed Qty.</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary5" name="r3" ng-value="true" ng-model="InvConfig.AllowBilledQty">
+                                            <label for="radioPrimary5">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary6" name="r3" ng-value="false" ng-model="InvConfig.AllowBilledQty">
+                                            <label for="radioPrimary6">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Discount Per</label>
+
+                                    <div class="clearfix">
+                                        <div class="clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="radioPrimary7" name="r4" ng-value="true" ng-model="InvConfig.AllowDiscountPer">
+                                                <label for="radioPrimary7">Yes</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="radioPrimary8" name="r4" ng-value="false" ng-model="InvConfig.AllowDiscountPer">
+                                                <label for="radioPrimary8">No</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Discount Amt</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary9" name="r5" ng-value="true" ng-model="InvConfig.AllowDiscountAmount">
+                                            <label for="radioPrimary9">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary10" name="r5" ng-value="false" ng-model="InvConfig.AllowDiscountAmount">
+                                            <label for="radioPrimary10">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Multiple Currency</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary11" name="r6" ng-value="true" ng-model="InvConfig.AllowMultipleCurrency">
+                                            <label for="radioPrimary11">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary12" name="r6" ng-value="false" ng-model="InvConfig.AllowMultipleCurrency">
+                                            <label for="radioPrimary12">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Document Attachment</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary13" name="r7" ng-value="true" ng-model="InvConfig.AllowDocumentAttechment">
+                                            <label for="radioPrimary13">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary14" name="r7" ng-value="false" ng-model="InvConfig.AllowDocumentAttechment">
+                                            <label for="radioPrimary14">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Tracking Number</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary15" name="r8" ng-value="true" ng-model="InvConfig.AllowTrackingNumber">
+                                            <label for="radioPrimary15">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary16" name="r8" ng-value="false" ng-model="InvConfig.AllowTrackingNumber">
+                                            <label for="radioPrimary16">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Show Current Balance</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary17" name="r9" ng-value="true" ng-model="InvConfig.ShowCurrentBalance">
+                                            <label for="radioPrimary17">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary18" name="r9" ng-value="false" ng-model="InvConfig.ShowCurrentBalance">
+                                            <label for="radioPrimary18">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Active SalesMan(Agent)</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary19" name="r10" ng-value="true" ng-model="InvConfig.ActiveAgent">
+                                            <label for="radioPrimary19">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary20" name="r10" ng-value="false" ng-model="InvConfig.ActiveAgent">
+                                            <label for="radioPrimary20">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Active CostClass</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary21" name="r11" ng-value="true" ng-model="InvConfig.ActiveCostClass">
+                                            <label for="radioPrimary21">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary22" name="r11" ng-value="false" ng-model="InvConfig.ActiveCostClass">
+                                            <label for="radioPrimary22">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Active PostTransaction</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary23" name="r12" ng-value="true" ng-model="InvConfig.AutoPostTransaction">
+                                            <label for="radioPrimary23">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary24" name="r12" ng-value="false" ng-model="InvConfig.AutoPostTransaction">
+                                            <label for="radioPrimary24">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Show Ledger Photo</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary25" name="r13" ng-value="true" ng-model="InvConfig.ShowLedgerPhoto">
+                                            <label for="radioPrimary25">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary26" name="r13" ng-value="false" ng-model="InvConfig.ShowLedgerPhoto">
+                                            <label for="radioPrimary26">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Show Party Details</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary27" name="r14" ng-value="true" ng-model="InvConfig.ShowPartyDetails">
+                                            <label for="radioPrimary27">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary28" name="r14" ng-value="false" ng-model="InvConfig.ShowPartyDetails">
+                                            <label for="radioPrimary28">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Apperance of ProductAlias in Transaction</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary29" name="r15" ng-value="true" ng-model="InvConfig.ProductAlias">
+                                            <label for="radioPrimary29">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary30" name="r15" ng-value="false" ng-model="InvConfig.ProductAlias">
+                                            <label for="radioPrimary30">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Apperance of ProductCode in Transaction</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary31" name="r16" ng-value="true" ng-model="InvConfig.ProductCode">
+                                            <label for="radioPrimary31">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary32" name="r16" ng-value="false" ng-model="InvConfig.ProductCode">
+                                            <label for="radioPrimary32">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Apperance of Product PartNo in Transaction</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary33" name="r17" ng-value="true" ng-model="InvConfig.ProductPartNo">
+                                            <label for="radioPrimary33">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary34" name="r17" ng-value="false" ng-model="InvConfig.ProductPartNo">
+                                            <label for="radioPrimary34">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Multiple Product Rate System</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary35" name="r18" ng-value="true" ng-model="InvConfig.MultipleRateSystem">
+                                            <label for="radioPrimary35">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary36" name="r18" ng-value="false" ng-model="InvConfig.MultipleRateSystem">
+                                            <label for="radioPrimary36">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Auto select PartyWise SalesMan(Agent)</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary37" name="r19" ng-value="true" ng-model="InvConfig.AutoSelectPartyWiseAgent">
+                                            <label for="radioPrimary37">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary38" name="r19" ng-value="false" ng-model="InvConfig.AutoSelectPartyWiseAgent">
+                                            <label for="radioPrimary38">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>OpeningRate As ClosingRate</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary39" name="r20" ng-value="true" ng-model="InvConfig.OpeningRateAsBalanceRate">
+                                            <label for="radioPrimary39">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary40" name="r20" ng-value="false" ng-model="InvConfig.OpeningRateAsBalanceRate">
+                                            <label for="radioPrimary40">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Schame Per</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary41" name="r21" ng-value="true" ng-model="InvConfig.AllowSchamePer">
+                                            <label for="radioPrimary41">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary42" name="r21" ng-value="false" ng-model="InvConfig.AllowSchamePer">
+                                            <label for="radioPrimary42">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Schame Amt</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary43" name="r22" ng-value="true" ng-model="InvConfig.AllowSchameAmount">
+                                            <label for="radioPrimary43">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary44" name="r22" ng-value="false" ng-model="InvConfig.AllowSchameAmount">
+                                            <label for="radioPrimary44">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Allow Free Qty.</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="radioPrimary45" name="r23" ng-value="true" ng-model="InvConfig.AllowFreeQty">
+                                            <label for="radioPrimary45">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="radioPrimary46" name="r23" ng-value="false" ng-model="InvConfig.AllowFreeQty">
+                                            <label for="radioPrimary46">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Show Opening Stock As Period Wise</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="rboInv45" name="Inv45" ng-value="true" ng-model="InvConfig.ShowOpeningStockAsPeriodWise">
+                                            <label for="rboInv45">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="rboInv46" name="Inv45" ng-value="false" ng-model="InvConfig.ShowOpeningStockAsPeriodWise">
+                                            <label for="rboInv46">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Godown Wise Closing Stock</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="rboInv48" name="Inv48" ng-value="true" ng-model="InvConfig.GodownWiseClosingStock">
+                                            <label for="rboInv48">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="rboInv49" name="Inv48" ng-value="false" ng-model="InvConfig.GodownWiseClosingStock">
+                                            <label for="rboInv49">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Show Sales Return In Sales Register</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="rboInv47" name="Inv46" ng-value="true" ng-model="InvConfig.ShowSalesReturnInSalesRegister">
+                                            <label for="rboInv47">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="rboInv48" name="Inv46" ng-value="false" ng-model="InvConfig.ShowSalesReturnInSalesRegister">
+                                            <label for="rboInv48">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Generate Invoice On DeliveryNote Post</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="rboInv67" name="Inv65" ng-value="true" ng-model="InvConfig.GenerateInvoiceOnDeliveryPost">
+                                            <label for="rboInv67">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="rboInv68" name="Inv65" ng-value="false" ng-model="InvConfig.GenerateInvoiceOnDeliveryPost">
+                                            <label for="rboInv68">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+
+                                <div class="form-group">
+
+                                    <label>Generate Invoice On ReceiptNote Post</label>
+
+                                    <div class="clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="radio" id="rboInv69" name="Inv66" ng-value="true" ng-model="InvConfig.GenerateInvoiceOnReceiptNotePost">
+                                            <label for="rboInv69">Yes</label>
+                                        </div>
+                                        <div class="icheck-primary d-inline ml-3">
+                                            <input type="radio" id="rboInv70" name="Inv66" ng-value="false" ng-model="InvConfig.GenerateInvoiceOnReceiptNotePost">
+                                            <label for="rboInv70">No</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+
+                                <div class="form-group">
+                                    <button type="button" class="btn btn-default ml-1" ng-click="DelTransactionCon()">Delete All Shrinkage</button>
+                                    <button type="button" class="btn btn-default ml-1" ng-click="CalculateShrinkage(true)">Re-Calculate Shrinkage</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <footer class="main-footer">
+                        <div class="text-right control-btns">
+                            <button type="button" class="btn btn-primary" ng-click="CallSave()">Save</button>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+</div>

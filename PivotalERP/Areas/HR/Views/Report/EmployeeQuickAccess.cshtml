@@ -1,0 +1,1878 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.HR_EmployeeProfile)";
+</script>
+
+<script>
+    var EmployeeID=@ViewBag.EmployeeID;
+</script>
+
+<script src="~/wwwroot/plugins/chart.js/Chart.min.js"></script>
+<link href="~/wwwroot/dynamic-erp/css/quickaccess.0.css" rel="stylesheet" />
+<script src="~/jslib/hr/report/EmployeeQuickAccess.js"></script>
+<style>
+    .ui-grid-cell-contents {
+        height: auto !important;
+    }
+
+    .ui-grid-header {
+        height: 60px;
+    }
+
+    .ui-grid-filter-container .ui-grid-filter-button [class^="ui-grid-icon"] {
+        position: absolute;
+        top: 80%;
+    }
+
+    .numericAlignment {
+        text-align: right;
+    }
+
+    .headerAligment {
+        text-align: center;
+    }
+
+    .dateAlignment {
+        text-align: center;
+    }
+
+    .nav-pills .examnav.active, .nav-pills .show > .examnav {
+        color: #ffffff;
+        background-color: #025a58;
+    }
+
+    .nav-pills .examnav {
+        color: #6c757d;
+        background-color: #76be4e;
+        color: #fff;
+    }
+
+    .main-content-cards .card a:hover {
+        color: #2d3333 !important;
+    }
+
+    .nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+        color: #ffffff;
+        background-color: #035b59;
+    }
+
+    .nav-pills .nav-link:not(.active):hover {
+        color: #025a58;
+    }
+
+    .triangle-up {
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 15px solid #76be4e;
+    }
+
+    .table-scroll-x-y table thead th {
+        border: 1px solid #c1dacf !important;
+    }
+
+    .due_det .active {
+        background-color: #E9F2EE;
+        clip-path: polygon(0% 0%, 91% 0, 100% 50%, 91% 100%, 0% 100%);
+    }
+
+    .due_det div {
+        padding: 0.8rem 0.75rem;
+    }
+
+    .absent {
+        color: #FF6347; /* Optional: To make the text color contrast well with the red background */
+    }
+</style>
+
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="EmployeeQuickAccessController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="employee-quickaccess-section">
+                            <div class="row">
+                                <div class="col-sm-6 col-lg-6 col-md-6 pt-1">
+                                    <label class="sr-only" for="inlineFormInputGroup">Select Employee</label>
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset;
+                                                         margin-right: -3px; z-index: 1;" ng-model="newEQuickAccess.SelectEmployee">
+                                            <option ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value"
+                                                    ng-selected="ss.value==newEQuickAccess.SelectEmployee">
+                                                {{ss.text}}
+                                            </option>
+                                        </select>
+                                        <select class="form-control select2 form-control-sm" all-employee
+                                                ng-model="newEQuickAccess.EmployeeId" employee-detail="newEQuickAccess.EmployeeDetails"
+                                                side-bar-data="newEQuickAccess.SideBarData" search-by="newEQuickAccess.SelectEmployee" confirm-action="getEQuickAccess()" include-left="newEQuickAccess.ShowLeftEmployee"></select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 mt-2">
+                                    <div class="custom-control custom-checkbox">
+                                        <input class="custom-control-input" type="checkbox"
+                                               id="customCheckbox11" value="option1" ng-model="newEQuickAccess.ShowLeftEmployee">
+                                        <label for="customCheckbox11"
+                                               class="custom-control-label">
+                                            Show Left Employee
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="row float-right">
+                                        <div class="pt-1">
+                                            <!-- <div class="quick-btns"> -->
+                                            <button class="btn btn-sm btn-primary" style="min-width: 90px" data-toggle="modal"
+                                                    data-target="#send-msg">
+                                                <i class="far fa-comment-alt"></i>  Message
+                                            </button>
+                                        </div>
+                                        <div class="mx-2 pt-1">
+                                            <button class="btn btn-sm btn-primary" style="min-width: 90px" data-toggle="modal"
+                                                    data-target="#send-notification">
+                                                <i class="fas fa-bell"></i>  Notification
+                                            </button>
+                                        </div>
+                                        <div class="mr-2 pt-1">
+                                            <button class="btn btn-sm btn-primary" style="min-width: 90px" data-toggle="modal"
+                                                    data-target="#add-remark">
+                                                <i class="fas fa-comment-dots"></i> Remarks
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card pt-2 mt-2 mb-1">
+                                <div class="row ml-2">
+                                    <div class="col main-content-cards ml-0" style="max-width:70px;min-width:70px;">
+                                        <div class="card card-pe" id="card-pe">
+                                            <div class="content-icons">
+                                                <i class="fas fa-user iconbig"></i><br />
+                                                <a>Profile</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col main-content-cards" style="max-width:70px;min-width:70px;">
+                                        <div class="card card-1e" id="card-1e">
+                                            <div class="content-icons">
+                                                <i class="fas fa-calendar-alt iconbig"></i>
+                                                <a class="text-nowrap">Attendance</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col main-content-cards" style="max-width:70px;min-width:70px;">
+                                        <div class="card card-2e" id="card-2e">
+                                            <div class="content-icons">
+                                                <i class="fas fa-comment-dots iconbig"></i><br />
+                                                <a>Remarks</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col main-content-cards" style="max-width:70px;min-width:70px;">
+                                        <div class="card card-3e" id="card-3e">
+                                            <div class="content-icons">
+                                                <i class="fas fa-clipboard-list iconbig"></i>
+                                                <a class="text-nowrap">Payroll</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col main-content-cards" style="max-width:70px;min-width:70px;">
+                                        <div class="card card-9e" id="card-9e">
+                                            <div class="content-icons">
+                                                <i class="fas fa-file-word iconbig"></i>
+                                                <a class="text-nowrap">Documents</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="card border-green">
+                                        <div class="card-body p-2">
+                                            <div class="text-center">
+                                                <img ng-src="{{EmployeePF.PhotoData || EmployeePF.Photo}}" class="img-fluid profile-img mb-2" alt="Employee image" style="height: 120px;border-radius: 15px;"/>
+                                                @*<img ng-src="{{EmployeePF.SignaturePath || newEQuickAccess.SignaturePath}}" class="img-fluid profile-img mb-2" alt="image" style="width: 100%;border-radius: 15px;" />*@
+                                                <h6>{{EmployeePF.Name}}</h6>
+                                            </div>
+                                            <div class="h-divider"></div>
+                                            <div class="student-info">
+                                                <div class="row">
+                                                    <div class="col-md-12 col-sm-12">
+                                                        <span><b>Emp. Code :</b></span>
+                                                        <span class="s-text">{{EmployeePF.EmployeeCode}}</span>
+                                                    </div>
+                                                    <div class="h-divider"></div>
+
+                                                    <div class="col-md-12 col-sm-12">
+                                                        <span>
+                                                            <b>Department :</b>
+                                                            <span class="s-text">{{EmployeePF.DepartmentId}}</span>
+                                                        </span>
+                                                    </div>
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Designation :</b></span>
+                                                        <span class="s-text">{{EmployeePF.DesignationId}}</span>
+                                                    </div>
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Username :</b></span>
+                                                        <span class="s-text">{{EmployeePF.FirstName}}</span>
+                                                    </div>
+
+                                                    <!--New Field added by suresh on 6 jestha-->
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Password :</b></span>
+                                                        <span class="s-text">{{EmployeePF.Pwd}}</span>
+                                                    </div>
+                                                    <!--Ends-->
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Date Of Birth :</b></span><br />
+                                                        <span class="s-text">{{EmployeePF.DOB_AD |date:'yyyy-MM-dd'|dateFormat}} A.D</span><br />
+                                                        <span class="s-text">{{EmployeePF.DOB_BS}} B.S</span>
+                                                    </div>
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Age :</b></span>
+                                                        <span class="s-text">{{EmployeePF.AgeDet}}</span>
+                                                    </div>
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Date Of Joining :</b></span><br />
+                                                        <span class="s-text">{{EmployeePF.JoinDate_TMP | date:'yyyy-MM-dd'|dateFormat}} A.D</span><br />
+                                                        <span class="s-text">{{EmployeePF.JoinDate_BS|dateFormat}} B.S</span>
+                                                    </div>
+
+
+
+                                                    <div class="h-divider"></div>
+                                                    <div class="col-md-12">
+                                                        <span><b>Employee Status :</b></span><br />
+                                                        <span class="s-text">{{ (EmployeePF.IsLeft == 0) ? 'Active' : 'Deactive' }}</span><br />
+                                                        <span class="s-text" ng-hide="EmployeePF.IsLeft == 0">Left Date: {{EmployeePF.LeftDate_BS}}</span><br />
+                                                        <span class="s-text" ng-hide="EmployeePF.IsLeft == 0">Left Remarks:{{EmployeePF.LeftRemarks}} </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-10">
+                                    <!-- Profile start -->
+                                    <div class="profilee card" id="profilee">
+                                        <div class="card-header py-0" style="background-color: #068abf; color: aliceblue; border: 1px solid #068abf ">
+                                            <div class="row">
+                                                <div class="col-md-6 col-sm-6 col-lg-6">
+                                                    <h5 class="mt-1"> <i class="fas fa-user"></i> Profile</h5>
+                                                </div>
+                                                <div class="col-md-6 col-sm-6 col-lg-6">
+                                                    <div class="text-right mt-1 mr-2" ng-show="EmployeePF.EmployeeId != null">
+                                                        <button id="editbtn" class="btn btn-sm btn-secondary mb-1" ng-click="GetEmployeeById(EmployeePF)"> <i class="far fa-edit"></i> Edit</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body px-0" style="border: 1px solid #068abf ">
+                                            <div id="Eform-data">
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <div class="row" style="padding-left:2rem">
+                                                            <div class="col-md-4">
+                                                                <span><b>Employee Id</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.EmployeeId}}</span>
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <span><b>Employee Code</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.EmployeeCode}}</span>
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <span><b>Enroll No</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.EnrollNumber}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="h-divider"></div>
+                                                        <div class="row" style="padding-left:2rem">
+                                                            <div class="col-md-4">
+                                                                <span><b>Name</b></span><br />
+                                                                                        <span class="s-text">{{EmployeePF.FirstName}} {{EmployeePF.MiddleName}} {{EmployeePF.LastName}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Gender</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.GenderId}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Blood Group</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.BloodGroupId}}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="h-divider"></div>
+                                                        <div class="row" style="padding-left:2rem">
+                                                            <div class="col-md-4">
+                                                                <span><b>Religion</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.ReligionId}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Caste</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.LastName}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Permanent Address.</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.PFullAddr}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="h-divider"></div>
+                                                        <div class="row" style="padding-left:2rem">
+                                                            <div class="col-md-4">
+                                                                <span><b>Temporary Address.</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.TFullAddr}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Personal Contact No</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.PersonalNum}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Office Contact No</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.OfficeNum}}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="h-divider"></div>
+                                                        <div class="row" style="padding-left:2rem">
+                                                            <div class="col-md-4">
+                                                                <span><b>Personal Email</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.EmailId}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Office Email</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.OfficeEmailId}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Marital Status</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.MaritalStatusId}}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="h-divider"></div>
+                                                        <div class="row" style="padding-left:2rem">
+
+                                                            <div class="col-md-4">
+                                                                <span><b>Spouse Name</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.SpouseName}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Spouse Contact No</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.SpouseContactNo}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Father's Name</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.FatherName}}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="h-divider"></div>
+                                                        <div class="row" style="padding-left:2rem">
+                                                            <div class="col-md-4">
+                                                                <span><b>Father's Number</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.FatherContactNo}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Mother's Name</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.MotherName}}</span>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <span><b>Mother's Number</b></span><br />
+                                                                <span class="s-text">{{EmployeePF.MotherContactNo}}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="text-center">
+                                                            <div id="qrcode"></div>
+                                                            @*<img ng-src="{{EmployeePF.QrCode}}" class="img-fluid profile-img mb-2" alt="QRScan" style="height: 120px;border-radius: 15px;" />*@
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="h-divider"></div>
+                                                <div class="px-2" ng-show="EmployeePF.AcaQualificationColl.length > 0">
+                                                    <label><b>Qualification</b></label>
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 200px">Department</th>
+                                                                    <th style="width: 150px">University </th>
+                                                                    <th style="width: 150px">Passed  Year </th>
+                                                                    <th style="width: 150px">Graduate %</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="sb in EmployeePF.AcaQualificationColl">
+                                                                    <th>{{sb.DepartmentName}}</th>
+                                                                    <th>{{sb.BoardUni }}</th>
+                                                                    <th>{{sb.PassedYr}}</th>
+                                                                    <th>{{sb.GradePer}}</th>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                <div class="h-divider"></div>
+                                                <div class="px-2" ng-show="EmployeePF.WorkExpColl.length > 0">
+                                                    <label><b>Work Experience</b></label>
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 200px">Organization</th>
+                                                                    <th style="width: 150px">Job Title </th>
+                                                                    <th style="width: 150px">Job Duration </th>
+                                                                    <th style="width: 150px">Remarks</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="sb in EmployeePF.WorkExpColl">
+                                                                    <th>{{sb.Org}}</th>
+                                                                    <th>{{sb.JobTitle }}</th>
+                                                                    <th>{{sb.StartDateDet}} - {{sb.StartDateDet}}</th>
+                                                                    <th>{{sb.Remarks}}</th>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                                <div class="h-divider"></div>
+                                                <div class="px-2" ng-show="EmployeePF.BankDetailsColl.length > 0">
+                                                    <label><b>Bank Details</b></label>
+
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th style="width: 200px">Bank</th>
+                                                                    <th style="width: 150px">Account Name </th>
+                                                                    <th style="width: 150px">AccountNo </th>
+                                                                    <th style="width: 150px">Branch</th>
+                                                                    <th style="width: 150px">ForPayRoll</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="sb in EmployeePF.EmpBankAccColl">
+                                                                    <th>{{sb.BankName}}</th>
+                                                                    <th>{{sb.AccName }}</th>
+                                                                    <th>{{sb.AccNum}}</th>
+                                                                    <th>{{sb.Branch}}</th>
+                                                                    <th>
+                                                                        {{ (sb.ForPayRoll == 1) ? 'Yes' : 'No' }}
+                                                                    </th>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div id="Eform-edit">
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>Employee Id</b></label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.EmployeeId" readonly />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>Employee Code</b></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="updateEmployeePF.EmployeeCode" disabled>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>Enroll No</b></label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.EnrollNumber" disabled />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>First Name</b></label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.FirstName" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>Middle Name</b></label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.MiddleName" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>Last Name</b></label>
+                                                            <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.LastName" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label><b>Date Of Birth</b></label>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="updateEmployeePF.DOB_AD_TMP" date-detail="updateEmployeePF.DOB_ADDet">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Gender</b></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="updateEmployeePF.Gender">
+                                                            <option ng-value="gen.id" ng-repeat="gen in GenderColl" ng-selected="gen.id==updateEmployeePF.Gender">{{gen.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Blood Group</b></label>
+                                                        <input type="text" class="form-control-sm form-control" data-ng-model="updateEmployeePF.BloodGroup" list="lstBloodGroup">
+                                                        <datalist id="lstBloodGroup">
+                                                            <option data-ng-repeat="ttl in BloodGroupList" value="{{ttl}}">
+                                                        </datalist>
+                                                    </div>
+                                                </div>
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <label><b>Religion</b></label>
+                                                        <input type="text" class="form-control-sm form-control" data-ng-model="updateEmployeePF.Religion" list="lstReligion">
+                                                        <datalist id="lstReligion">
+                                                            <option data-ng-repeat="ttl in ReligionList" value="{{ttl}}">
+                                                        </datalist>
+                                                    </div>
+                                                    @*<div class="col-md-4">
+                                                    <label><b>{{'CAST_LNG' | translate}}</b></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="updateEmployeePF.CasteId">
+                                                    <option ng-value="c.CasteId" ng-repeat="c in CasteList" ng-selected="c.CasteId==updateEmployeePF.CasteId">{{c.Name}}</option>
+                                                    </select>
+                                                    </div>*@
+                                                    <div class="col-md-4">
+                                                        <label><b>Permanent Address</b></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="updateEmployeePF.PA_FullAddress">
+                                                    </div>
+
+                                                </div>
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <label><b>Temporary Address</b></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="updateEmployeePF.TA_FullAddress">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Personal Contact No</b></label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="updateEmployeePF.PersnalContactNo">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Office Contact No</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.OfficeContactNo" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <label><b>Personal Email</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.EmailId" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Office Email</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.OfficeEmailId" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Marital Status</b></label>
+                                                        <input list="lstMaritalStatus" type="text" class="form-control form-control-sm" ng-model="updateEmployeePF.MaritalStatus">
+                                                        <datalist id="lstMaritalStatus">
+                                                            <option data-ng-repeat="ttl in MaritalStatusList" value="{{ttl}}">
+                                                        </datalist>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <label><b>Spouse Name</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.SpouseName" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Spouse Contact No</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.SpouseContactNo" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Father's Name</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.FatherName" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="row" style="padding-left:2rem">
+                                                    <div class="col-md-4">
+                                                        <label><b>Father's Number</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.FatherContactNo" />
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label><b>Mother's Name</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.MotherName" />
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <label><b>Mother's Number</b></label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="updateEmployeePF.MotherContactNo" />
+                                                    </div>
+                                                </div>
+                                                <div class="time-label">
+                                                    <span class="d-block border-0 p-3 text-center">
+                                                        <button type="button" class="btn btn-sm btn-default" id="EBack" style="min-width: 90px;">Reset</button>
+                                                        <button class="btn btn-sm btn-success" ng-click="UpdateEmployee()" style="min-width: 90px;"> {{updateEmployeePF.Mode}}</button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- profile end -->
+                                    <!-- attendence-area start -->
+                                    <div class="attendancee" id="attendancee">
+                                        <div class="card-header py-0" style="background-color: #068abf; color: aliceblue;  ">
+                                            <div class="row">
+                                                <h5 class="mt-1"> <i class="fas fa-calendar-alt ml-2"></i> Attendance</h5>
+                                            </div>
+                                        </div>
+                                        <div class="attendance-content card" @*style="max-height:525px;overflow-y: auto;"*@ style="border: 1px solid #068abf;margin-bottom:0px !important">
+                                            <div class="tab-pane fade show active" id="pills-second" role="tabpanel"
+                                                 aria-labelledby="pills-second-tab">
+                                                <!-- if-page-have-nav-tabs -->
+                                                <header class="mb-2 down-tab nav-item">
+                                                    <div class="row main-section">
+                                                        <div class="col-md-12">
+                                                            <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                                            <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                                                <li class="nav-item" role="presentation">
+                                                                    <a class="nav-link active" id="Ehome-tab" data-toggle="tab" href="#Ehome" role="tab"
+                                                                       aria-controls="Ehome" aria-selected="true" style="padding:10px !important">Daily</a>
+                                                                </li>
+                                                                <li class="nav-item" role="presentation">
+                                                                    <a class="nav-link" id="Eboard-tab" data-toggle="tab" href="#Eboard" role="tab"
+                                                                       aria-controls="Eboard" aria-selected="false" style="padding:10px !important">Leave Taken</a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </header>
+                                                <!-- end if-page-have-nav-tabs -->
+                                                <div class="tab-content" id="myTabContent">
+                                                    <div class="tab-pane fade show active main-section" id="Ehome" role="tabpanel"
+                                                         aria-labelledby="home-tab">
+                                                        <div class="card mb-0 p-1" style="margin-bottom:0px !important">
+                                                            @*<div class="col-md-5 text-right ml-auto">
+                                                <div class="dropdown dnld-file" data-toggle="tooltip" data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/excel.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image" />
+                                                            Excel
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic/images/flaticons/csv.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image" />
+                                                            CSV
+                                                        </a>
+
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip"
+                                                   data-placement="bottom" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>*@
+                                                            <div class="row">
+                                                                <div class="col-md-9 col-sm-9">
+                                                                    <div class="row">
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <span>
+                                                                                    <select ng-model="newMonthly.YearId"
+                                                                                            ng-change="getEmpAttendance()"
+                                                                                            class="form-control form-control-sm"
+                                                                                            >
+                                                                                        <option value="">-- Select Year --</option>
+                                                                                        <option ng-repeat="y in YearList"
+                                                                                                ng-value="y.id"
+                                                                                                ng-selected="y.id == newMonthly.YearId">
+                                                                                            {{y.text}}
+                                                                                        </option>
+                                                                                    </select>
+
+                                                                                </span>
+                                                                            
+                                                                         </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box-1" style="background-color:#D3D3D3 !important;">T</div>
+                                                                                <span>
+                                                                                    Total :
+                                                                                    <span style="color: #76be4e">{{ newEmp.TotalDays }} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box text-center" style="background-color: #ADD8E6 !important;">O</div>
+                                                                                <span>
+                                                                                    Total OT Hours:  
+                                                                                    <span style="color: #76be4e">{{ newEmp.TotalOTHours || 0}} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box-4" style="background-color: #9370DB !important;">W</div>
+                                                                                <span>
+                                                                                    Weeks Off :
+                                                                                    <span style="color: #76be4e">{{newEmp.TotalWeekEnd}} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box-red text-center" style="background-color: #FFA500 !important;">H</div>
+                                                                                <span>
+                                                                                    Holiday :
+                                                                                    <span style="color: #76be4e">{{newEmp.TotalHoliday}} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box-1" style="background-color: #90EE90 !important;">P</div>
+                                                                                <span>
+                                                                                    Present :
+                                                                                    <span style="color: #76be4e">{{newEmp.TotalPresent || 0}} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box-1" style="background-color: #FFFF00 !important;">L</div>
+                                                                                <span>
+                                                                                    Leave :
+                                                                                    <span style="color: #76be4e">{{newEmp.TotalLeave || 0}} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div class="col-md-3">
+                                                                            <div class="d-flex mb-2">
+                                                                                <div class="box-1" style="background-color: #FF6347 !important;">A</div>
+                                                                                <span>
+                                                                                    Absents :
+                                                                                    <span style="color: #76be4e">{{newEmp.TotalAbsent}} Days</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-3 col-sm-3 mt-5">
+                                                                    <table class="table table-bordered mb-0" style="background-color: #e0f0d98c;">
+                                                                        <tbody>
+                                                                            <tr>
+                                                                                <th scope="row" style="padding: 0.1rem 0.7rem;">Present</th>
+                                                                                <th style="padding: 0.1rem 0.7rem;">{{newEmp.TotalPresent/ (newEmp.TotalDays - newEmp.TotalWeekEnd - newEmp.TotalHoliday) * 100  | number:2}}%</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th scope="row" style="padding: 0.1rem 0.7rem;">Absent</th>
+                                                                                <th style="padding: 0.1rem 0.7rem;">{{newEmp.TotalAbsent / (newEmp.TotalDays - newEmp.TotalWeekEnd - newEmp.TotalHoliday) * 100 | number:2}}%</th>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <th scope="row" style="padding: 0.1rem 0.7rem;">Leave</th>
+                                                                                <th style="padding: 0.1rem 0.7rem;">{{(newEmp.TotalLeave / (newEmp.TotalDays - newEmp.TotalWeekEnd - newEmp.TotalHoliday) * 100 | number:2) || 0 }}%</th>
+                                                                            </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="attendance-table-daily d-flex p-0">
+                                                                <table class="table table-bordered">
+                                                                    <tbody>
+                                                                        <tr class="bg-change">
+                                                                            <td class="first-td">Month/Date</td>
+                                                                            <td>01</td>
+                                                                            <td>02</td>
+                                                                            <td>03</td>
+                                                                            <td>04</td>
+                                                                            <td>05</td>
+                                                                            <td>06</td>
+                                                                            <td>07</td>
+                                                                            <td>08</td>
+                                                                            <td>09</td>
+                                                                            <td>10</td>
+                                                                            <td>11</td>
+                                                                            <td>12</td>
+                                                                            <td>13</td>
+                                                                            <td>14</td>
+                                                                            <td>15</td>
+                                                                            <td>16</td>
+                                                                            <td>17</td>
+                                                                            <td>18</td>
+                                                                            <td>19</td>
+                                                                            <td>20</td>
+                                                                            <td>21</td>
+                                                                            <td>22</td>
+                                                                            <td>23</td>
+                                                                            <td>24</td>
+                                                                            <td>25</td>
+                                                                            <td>26</td>
+                                                                            <td>27</td>
+                                                                            <td>28</td>
+                                                                            <td>29</td>
+                                                                            <td>30</td>
+                                                                            <td>31</td>
+                                                                            <td>32</td>
+                                                                            <td class="total-days">Total days</td>
+                                                                            <td style="color: #9370DB">W</td>
+                                                                            <td style="color: #28a546">P</td>
+                                                                            <td style="color: #FF6347">A</td>
+                                                                            <td>L</td>
+                                                                            <td style="color: #FFA500">H</td>
+                                                                            <td style="color: #28a546 ">P%</td>
+                                                                            <td style="color: #FF6347">A%</td>
+                                                                            <td>L%</td>
+                                                                        </tr>
+                                                                        <tr ng-repeat="D in EmployeeAttendanceColl">
+                                                                            <td class="first-td">{{D.MonthName}}</td>
+                                                                            <td ng-class="{'absent': D.Day1 === 'A'}">{{D.Day1}}</td>
+                                                                            <td ng-class="{'absent': D.Day2 === 'A'}">{{D.Day2}}</td>
+                                                                            <td ng-class="{'absent': D.Day3 === 'A'}">{{D.Day3}}</td>
+                                                                            <td ng-class="{'absent': D.Day4 === 'A'}">{{D.Day4}}</td>
+                                                                            <td ng-class="{'absent': D.Day5 === 'A'}">{{D.Day5}}</td>
+                                                                            <td ng-class="{'absent': D.Day6 === 'A'}">{{D.Day6}}</td>
+                                                                            <td ng-class="{'absent': D.Day7 === 'A'}">{{D.Day7}}</td>
+                                                                            <td ng-class="{'absent': D.Day8 === 'A'}">{{D.Day8}}</td>
+                                                                            <td ng-class="{'absent': D.Day9 === 'A'}">{{D.Day9}}</td>
+                                                                            <td ng-class="{'absent': D.Day10 === 'A'}">{{D.Day10}}</td>
+                                                                            <td ng-class="{'absent': D.Day11 === 'A'}">{{D.Day11}}</td>
+                                                                            <td ng-class="{'absent': D.Day12 === 'A'}">{{D.Day12}}</td>
+                                                                            <td ng-class="{'absent': D.Day13 === 'A'}">{{D.Day13}}</td>
+                                                                            <td ng-class="{'absent': D.Day14 === 'A'}">{{D.Day14}}</td>
+                                                                            <td ng-class="{'absent': D.Day15 === 'A'}">{{D.Day15}}</td>
+                                                                            <td ng-class="{'absent': D.Day16 === 'A'}">{{D.Day16}}</td>
+                                                                            <td ng-class="{'absent': D.Day17 === 'A'}">{{D.Day17}}</td>
+                                                                            <td ng-class="{'absent': D.Day18 === 'A'}">{{D.Day18}}</td>
+                                                                            <td ng-class="{'absent': D.Day19 === 'A'}">{{D.Day19}}</td>
+                                                                            <td ng-class="{'absent': D.Day20 === 'A'}">{{D.Day20}}</td>
+                                                                            <td ng-class="{'absent': D.Day21 === 'A'}">{{D.Day21}}</td>
+                                                                            <td ng-class="{'absent': D.Day22 === 'A'}">{{D.Day22}}</td>
+                                                                            <td ng-class="{'absent': D.Day23 === 'A'}">{{D.Day23}}</td>
+                                                                            <td ng-class="{'absent': D.Day24 === 'A'}">{{D.Day24}}</td>
+                                                                            <td ng-class="{'absent': D.Day25 === 'A'}">{{D.Day25}}</td>
+                                                                            <td ng-class="{'absent': D.Day26 === 'A'}">{{D.Day26}}</td>
+                                                                            <td ng-class="{'absent': D.Day27 === 'A'}">{{D.Day27}}</td>
+                                                                            <td ng-class="{'absent': D.Day28 === 'A'}">{{D.Day28}}</td>
+                                                                            <td ng-class="{'absent': D.Day29 === 'A'}">{{D.Day29}}</td>
+                                                                            <td ng-class="{'absent': D.Day30 === 'A'}">{{D.Day30}}</td>
+                                                                            <td ng-class="{'absent': D.Day31 === 'A'}">{{D.Day31}}</td>
+                                                                            <td ng-class="{'absent': D.Day32 === 'A'}">{{D.Day32}}</td>
+                                                                            <td class="bg-change">{{D.TotalDays}}</td>
+                                                                            <td class="bg-change">{{D.TotalWeekend}}</td>
+                                                                            <td class="bg-change" style="color: #28a546"><b>{{D.TotalPresent}} </b></td>
+                                                                            <td class="bg-change" style="color: #FF6347"><b>{{D.TotalAbsent}} </b></td>
+                                                                            <td class="bg-change">{{D.TotalLeave}}</td>
+                                                                            <td class="bg-change">{{D.TotalHoliday}}</td>
+                                                                            <td class="bg-change">{{D.TotalPresent / (D.TotalDays - D.TotalWeekEnd - D.TotalHoliday ) * 100 | number:2}}</td>
+                                                                            <td class="bg-change">{{D.TotalAbsent  / (D.TotalDays - D.TotalWeekEnd - D.TotalHoliday )  * 100| number:2}}</td>
+                                                                            <td class="bg-change">{{ D.TotalLeave  / (D.TotalDays - D.TotalWeekEnd - D.TotalHoliday )  * 100| number:2}}</td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="tab-pane fade main-section" id="Eboard" role="tabpanel"
+                                                         aria-labelledby="board-tab">
+                                                        <!-- leave-taken wise start -->
+                                                        <div class="leave-request-section card p-2" style="margin-bottom:0px !important">
+                                                            <header class="row mb-1">
+                                                                <div class="col-md-7">
+                                                                    <div class="clearfix">
+                                                                        <form class="form-inline">
+                                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                                <div class="input-group-prepend">
+                                                                                    <span class="input-group-text cstm">Show</span>
+                                                                                </div>
+                                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                                <select class="form-select border-left-0 border-right-0 pr-0" ng-model="perPage.ELeaveTaken">
+                                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ELeaveTaken">{{pp.text}}</option>
+                                                                                </select>
+                                                                                <div class="input-group-append">
+                                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="input-group input-group-sm table-search-filed">
+                                                                                <input class="form-control form-control-navbar" type="search"
+                                                                                       placeholder="Search" aria-label="Search" ng-model="searchData.ELeaveTaken">
+                                                                                <div class="input-group-append">
+                                                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                                                        <i class="fas fa-search"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <div class="d-flex">
+                                                                        <label class="mr-2 mt-1"> Status</label>
+                                                                        <select class="form-control form-control-sm" style="width:70%" ng-model="newLeaveTaken.EStatusId">
+                                                                            <option selected ng-value="">All</option>
+                                                                            <option ng-value="pp.id" ng-repeat="pp in StatusList" ng-selected="pp.id==newLeaveTaken.EStatusId">{{pp.text}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+
+                                                            </header>
+                                                            <div>
+                                                                <div class="table-scroll-x-y table-scroll mt-2" style="height:auto;max-height: calc(100vh - 15rem)!important;">
+                                                                    <table id="LeaveTaken" class="main-table table table-sm table-bordered bg-white">
+                                                                        <thead class=" text-nowrap text-center">
+                                                                            <tr>
+                                                                                <th style="width: 60px;">S.No.</th>
+                                                                                <th style="width: 100px;">Request Date</th>
+                                                                                <th style="width: 150px;">Leave Type</th>
+                                                                                <th style="width: 200px;">Leave ( DateFrom - DateTo )</th>
+                                                                                <th style="width: 80px;">No of Days</th>
+                                                                                <th style="width: 200px;">Leave Reason</th>
+                                                                                <th style="width: 120px;">Approved By</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr dir-paginate="lw in EmpLeaveTakenColl | filter:searchData.ELeaveTaken | itemsPerPage: perPage.ELeaveTaken" current-page="currentPages.ELeaveTaken" pagination-id="ELeaveTakenPagination">
+                                                                                <td>{{$index+1}}</td>
+                                                                                <td>{{lw.RequestMiti}}</td>
+                                                                                <td>{{lw.LeaveType}}</td>
+                                                                                <td>{{lw.FromMiti}} - {{lw.ToMiti}}</td>
+                                                                                <td>{{lw.TotalDays}}</td>
+                                                                                <td>{{lw.Remarks}}</td>
+                                                                                <td>{{lw.ApprovedByUser}}</td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                                <footer class="row align-items-center">
+                                                                    <div class="col-md-12">
+                                                                        <dir-pagination-controls pagination-id="ELeaveTakenPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                                        </dir-pagination-controls>
+                                                                    </div>
+                                                                </footer>
+                                                                <!-- table end -->
+                                                            </div>
+                                                           
+                                                        </div>
+                                                        <!-- leave-taken wise closed -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- attendance-area end -->
+                                    <!-- Remark-area start -->
+                                    <div class="remarkse" id="remarkse" >
+                                        <div class="card-header py-0" style="background-color: #068abf; color: aliceblue; border: 1px solid #068abf ">
+                                            <div class="row">
+                                                <h5 class="mt-1"> <i class="fas fa-comment-dots ml-2"></i> Remarks</h5>
+                                            </div>
+                                        </div>
+                                        <div style="border: 1px solid #068abf;padding:0px !important;margin-bottom:0px !important" class="card p-2">
+                                            <header class="down-tab nav-item">
+                                                <div class="row main-section">
+                                                    <div class="col-md-12">
+                                                        <!-- <h3 class="menu-title">Class Setup</h3> -->
+                                                        <ul class="nav nav-tabs cstm-nav-tabs-border-bottom-active" id="myTab" role="tablist">
+                                                            <li class="nav-item" role="presentation">
+                                                                <a class="nav-link active" id="Merit-tab" data-toggle="tab" href="#Merit" role="tab"
+                                                                   aria-controls="Merit" aria-selected="true" style="padding:10px !important">Merit</a>
+                                                            </li>
+                                                            <li class="nav-item" role="presentation">
+                                                                <a class="nav-link" id="Demerit-tab" data-toggle="tab" href="#Demerit" role="tab"
+                                                                   aria-controls="Demerit" aria-selected="false" style="padding:10px !important">Demerit</a>
+                                                            </li>
+                                                            <li class="nav-item" role="presentation">
+                                                                <a class="nav-link" id="Others-tab" data-toggle="tab" href="#Others" role="tab"
+                                                                   aria-controls="Others" aria-selected="false" style="padding:10px !important">Others</a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </header>
+
+                                            <div class="tab-content" id="myTabContent">
+                                                <div class="tab-pane fade show active main-section" id="Merit" role="tabpanel"
+                                                     aria-labelledby="Merit-tab">
+
+                                                    <div class="remarks-content p-2" @*style="max-height: 525px;overflow-y: auto;"*@>
+                                                        <header class="row">
+                                                            <div class="col-md-8 p-0">
+                                                                <div class="clearfix">
+                                                                    <form class="form-inline">
+                                                                        <div class="input-group input-group-sm">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text cstm">Show</span>
+                                                                            </div>
+                                                                            <select class="form-select border-left-0 border-right-0 pr-0" ng-model="perPage.EMeritRemarks">
+                                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EMeritRemarks">{{pp.text}}</option>
+                                                                            </select>
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="input-group input-group-sm table-search-filed ml-2">
+                                                                            <input class="form-control form-control-navbar" type="search"
+                                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.EMeritRemarks">
+                                                                            <div class="input-group-append">
+                                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                                    <i class="fas fa-search"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </header>
+                                                        <div class=" mt-2">
+                                                            <div class="row mb-1" style="border: 1px solid #76be4e" dir-paginate="sr in EmpMeritRemarksColl | filter:searchData.EMeritRemarks | itemsPerPage: perPage.EMeritRemarks" current-page="currentPages.EMeritRemarks" pagination-id="EMeritRemarksPagination">
+                                                                <div class="col-lg-1 col-sm-1">
+                                                                    <h6 class="mt-4" style="color: #025a58;font-size:12px;">{{sr.ForDate|dateFormat}} </h6>
+                                                                </div>
+                                                                <div class="col-lg-1 col-sm-1" style="background-color: #76be4e69">
+                                                                    <p class="mt-4 mb-0">{{sr.RemarksFor}}</p>
+                                                                    <p style="color: #025a58;font-size:18px;">{{sr.Point}}</p>
+                                                                </div>
+                                                                <div class="col-lg-10 col-sm-10" style="background-color: #ebf5e5;">
+                                                                    <div class=" p-2">
+                                                                        <div class="row">
+                                                                            <div class="col-md-8">
+                                                                                <h6 style="color: #025a58;">{{sr.RemarksType}}</h6>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label><i class="fas fa-user mr-1"></i><b><i>{{sr.CreateByName}} <i class="far fa-calendar-alt ml-2"></i> {{sr.CreateDate|dateFormat}} <i class="far fa-clock ml-2"></i> {{sr.CreateDate|timeFormat}}</i></b></label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10">
+                                                                                <p>{{sr.Remarks}}</p>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <img class="img-fluid" ng-src="{{sr.FilePath}}" data-toggle="modal" style="max-height:75px;" @*ng-click="ShowPersonalImg(sr)"*@ />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 p-0">
+                                                                <dir-pagination-controls pagination-id="EMeritRemarksPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                                </dir-pagination-controls>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="tab-pane fade main-section" id="Demerit" role="tabpanel"
+                                                     aria-labelledby="Demerit-tab">
+                                                    <div class="remarks-content p-2" style="max-height: 525px;overflow-y: auto;">
+                                                        <header class="row">
+                                                            <div class="col-md-8 p-0">
+                                                                <div class="clearfix">
+                                                                    <form class="form-inline">
+                                                                        <div class="input-group input-group-sm">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text cstm">Show</span>
+                                                                            </div>
+                                                                            <select class="form-select border-left-0 border-right-0 pr-0" ng-model="perPage.EDemeritRemarks">
+                                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EDemeritRemarks">{{pp.text}}</option>
+                                                                            </select>
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="input-group input-group-sm table-search-filed ml-2">
+                                                                            <input class="form-control form-control-navbar" type="search"
+                                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.EDemeritRemarks">
+                                                                            <div class="input-group-append">
+                                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                                    <i class="fas fa-search"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </header>
+                                                        <div class=" mt-2">
+                                                            <div class="row mb-1" style="border: 1px solid #76be4e" dir-paginate="sr in EmpDemeritRemarksColl | filter:searchData.EDemeritRemarks | itemsPerPage: perPage.EDemeritRemarks" current-page="currentPages.EDemeritRemarks" pagination-id="EDemeritRemarksPagination">
+                                                                <div class="col-lg-1 col-sm-1">
+                                                                    <h6 class="mt-4" style="color: #025a58;font-size:12px;">{{sr.ForDate|dateFormat}} </h6>
+                                                                </div>
+                                                                <div class="col-lg-1 col-sm-1" style="background-color: #76be4e69">
+                                                                    <p class="mt-4 mb-0">{{sr.RemarksFor}}</p>
+                                                                    <p style="color: #025a58;font-size:18px;">{{sr.Point}}</p>
+                                                                </div>
+                                                                <div class="col-lg-10 col-sm-10" style="background-color: #ebf5e5;">
+                                                                    <div class=" p-2">
+                                                                        <div class="row">
+                                                                            <div class="col-md-8">
+                                                                                <h6 style="color: #025a58;">{{sr.RemarksType}}</h6>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label><i class="fas fa-user mr-1"></i><b><i>{{sr.CreateByName}} <i class="far fa-calendar-alt ml-2"></i> {{sr.CreateDate|dateFormat}} <i class="far fa-clock ml-2"></i> {{sr.CreateDate|timeFormat}}</i></b></label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10">
+                                                                                <p>{{sr.Remarks}}</p>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <img class="img-fluid" ng-src="{{sr.FilePath}}" data-toggle="modal" style="max-height:75px;" @*ng-click="ShowPersonalImg(sr)"*@ />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 p-0">
+                                                                <dir-pagination-controls pagination-id="EDemeritRemarksPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                                </dir-pagination-controls>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+
+                                                <div class="tab-pane fade main-section" id="Others" role="tabpanel"
+                                                     aria-labelledby="Others-tab">
+
+                                                    <div class="remarks-content p-2" @*style="max-height: 525px;overflow-y: auto;"*@>
+                                                        <header class="row">
+                                                            <div class="col-md-8 p-0">
+                                                                <div class="clearfix">
+                                                                    <form class="form-inline">
+                                                                        <div class="input-group input-group-sm">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text cstm">Show</span>
+                                                                            </div>
+                                                                            <select class="form-select border-left-0 border-right-0 pr-0" ng-model="perPage.EOtherRemarks">
+                                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EOtherRemarks">{{pp.text}}</option>
+                                                                            </select>
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="input-group input-group-sm table-search-filed ml-2">
+                                                                            <input class="form-control form-control-navbar" type="search"
+                                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.EOtherRemarks">
+                                                                            <div class="input-group-append">
+                                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                                    <i class="fas fa-search"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </header>
+                                                        <div class=" mt-2">
+                                                            <div class="row mb-1" style="border: 1px solid #76be4e" dir-paginate="sr in EmpOthersRemarksColl | filter:searchData.EOtherRemarks | itemsPerPage: perPage.EOtherRemarks" current-page="currentPages.EOtherRemarks" pagination-id="EOtherRemarksPagination">
+                                                                <div class="col-lg-1 col-sm-1">
+                                                                    <h6 class="mt-4" style="color: #025a58;font-size:12px;">{{sr.ForDate|dateFormat}} </h6>
+                                                                </div>
+                                                                <div class="col-lg-1 col-sm-1" style="background-color: #76be4e69">
+                                                                    <p class="mt-4 mb-0">{{sr.RemarksFor}}</p>
+                                                                    <p style="color: #025a58;font-size:18px;">{{sr.Point}}</p>
+                                                                </div>
+                                                                <div class="col-lg-10 col-sm-10" style="background-color: #ebf5e5;">
+                                                                    <div class=" p-2">
+                                                                        <div class="row">
+                                                                            <div class="col-md-8">
+                                                                                <h6 style="color: #025a58;">{{sr.RemarksType}}</h6>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label><i class="fas fa-user mr-1"></i><b><i>{{sr.CreateByName}} <i class="far fa-calendar-alt ml-2"></i> {{sr.CreateDate|dateFormat}} <i class="far fa-clock ml-2"></i> {{sr.CreateDate|timeFormat}}</i></b></label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10">
+                                                                                <p>{{sr.Remarks}}</p>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <img class="img-fluid" ng-src="{{sr.FilePath}}" data-toggle="modal" style="max-height:75px;" @*ng-click="ShowPersonalImg(sr)"*@ />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12 p-0">
+                                                            <dir-pagination-controls pagination-id="EOtherRemarksPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                            </dir-pagination-controls>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- remarks area closed -->
+                                    <!-- payroll-area start -->
+                                    <div class="payrolle" id="payrolle">
+                                        <div class="card p-0">
+                                            <div class="card-header py-2" style="background-color: #068abf; color: aliceblue; border: 1px solid #068abf ">
+                                                <div class="row">
+                                                    <h5> <i class="fas fa-clipboard-list ml-2"></i>Payroll </h5>
+                                                </div>
+                                            </div>
+                                            <!-- end if-page-have-nav-tabs -->
+                                            <div class="tab-content" id="myTabContent" style="border: 1px solid #068abf">
+                                                <div class="tab-pane fade show active main-section" id="payrollt" role="tabpanel"
+                                                     aria-labelledby="payrollt-tab">
+                                                    <div class="card p-2" style="margin-bottom: 0px !important">
+                                                        <header class="row">
+                                                            <div class="col-md-8 p-0">
+                                                                <div class="clearfix">
+                                                                    <form class="form-inline">
+                                                                        <div class="input-group input-group-sm">
+                                                                            <div class="input-group-prepend">
+                                                                                <span class="input-group-text cstm">Show</span>
+                                                                            </div>
+                                                                            <select class="form-select border-left-0 border-right-0 pr-0" ng-model="perPage.Epayrolllist">
+                                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Epayrolllist">{{pp.text}}</option>
+                                                                            </select>
+                                                                            <div class="input-group-append">
+                                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="input-group input-group-sm table-search-filed ml-2">
+                                                                            <input class="form-control form-control-navbar" type="search"
+                                                                                   placeholder="Search" aria-label="Search" ng-model="searchData.Epayrolllist">
+                                                                            <div class="input-group-append">
+                                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                                    <i class="fas fa-search"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </header>
+                                                        <div class="">
+                                                            <div class="row mb-1" style="border: 1px solid #76be4e" dir-paginate="C in EmppayrollColl | filter:searchData.Epayrolllist | itemsPerPage: perPage.Epayrolllist" current-page="currentPages.Epayrolllist" pagination-id="EpayrolllistPagination">
+                                                                <div class="col-lg-1 col-sm-1">
+                                                                    <p class="mt-4" style="color: #025a58; font-size: 12px; font-weight: 700;">{{C.payrollDate|dateFormat}}</p>
+                                                                </div>
+                                                                <div class="col-lg-7 col-sm-7" style="background-color: #ebf5e5;">
+                                                                    <div class=" p-2">
+                                                                        <div class="row">
+                                                                            <div class="col-md-8">
+                                                                                <h6 style="color: #025a58;">{{C.payrollType}}</h6>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10">
+                                                                                <p>{{C.Remarks}}</p>
+                                                                            </div>
+                                                                            @*<div class="col-md-2">
+                                                                <img class="img-fluid" src="~/wwwroot/dynamic/images/question-paper-sample.jpg" data-toggle="modal" data-target="#modalIMG" style="max-height:75px;" />
+                                                            </div>*@
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-4 col-sm-4">
+                                                                    <p class="m-0" style="color: #025a58;"><b>Action Taken:</b></p>
+                                                                    <p>{{C.ActionRemarks}} </p>
+                                                                    <p class="mb-0" style="color: #025a58;"><i class="fas fa-user mr-1"></i> <i>Taken By:</i>{{C.ActionTakenByName}}</p>
+                                                                    <p class="mb-0" style="color: #025a58;"><i class="far fa-calendar-alt mr-1"></i> {{C.ActionDate|dateFormat}}</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-md-12 p-0">
+                                                                <dir-pagination-controls pagination-id="EpayrolllistPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                                </dir-pagination-controls>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane fade main-section" id="feedback" role="tabpanel"
+                                                     aria-labelledby="feedback-tab">
+                                                    <div class="card p-1" style="margin-top:25px;">
+                                                        <div class=" mt-2">
+                                                            <div class="row mb-1" style="border: 1px solid #76be4e">
+                                                                <div class="col-lg-1 col-sm-1">
+                                                                    <h6 class="mt-4" style="color: #025a58;">16 Poush</h6>
+                                                                    <p>2078</p>
+                                                                </div>
+                                                                <div class="col-lg-7 col-sm-7" style="background-color: #ebf5e5;">
+                                                                    <div class=" p-2">
+                                                                        <div class="row">
+                                                                            <div class="col-md-8">
+                                                                                <h6 style="color: #025a58;">Very poor Performance</h6>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label><i class="far fa-calendar-alt ml-2"></i> 2078-09-12 <i class="far fa-clock ml-2"></i> 14:49</i></b></label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10">
+                                                                                <p>Nullam sed rutrum turpis. Fusce interdum dictum posuere. Suspendisse et massa lacus. Cras imperdiet vestibulum orci at sodales.</p>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <img class="img-fluid" src="~/wwwroot/dynamic/images/question-paper-sample.jpg" data-toggle="modal" data-target="#modalIMG" style="max-height:75px;" />
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-4 col-sm-4">
+                                                                    <p class="m-0" style="color: #025a58;"><b>Replied Remarks:</b></p>
+                                                                    <p>nsoef sifg fis fudf sidsd siudc sdisd sodf dofndfvoddf dfvodfhndf </p>
+                                                                    <p style="color: #025a58;"><i class="fas fa-user mr-1"></i> <i>Replied By:</i> Ram Prashad Sharma</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row mb-1" style="border: 1px solid #76be4e">
+                                                                <div class="col-lg-1 col-sm-1">
+                                                                    <h6 class="mt-4" style="color: #025a58;">16 Poush</h6>
+                                                                    <p>2078</p>
+                                                                </div>
+                                                                <div class="col-lg-7 col-sm-7" style="background-color: #ebf5e5;">
+                                                                    <div class=" p-2">
+                                                                        <div class="row">
+                                                                            <div class="col-md-8">
+                                                                                <h6 style="color: #025a58;">Very poor Performance</h6>
+                                                                            </div>
+                                                                            <div class="col-md-4">
+                                                                                <label><i class="far fa-calendar-alt ml-2"></i> 2078-09-12 <i class="far fa-clock ml-2"></i> 14:49</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <div class="col-md-10">
+                                                                                <p>Nullam sed rutrum turpis. Fusce interdum dictum posuere. Suspendisse et massa lacus. Cras imperdiet vestibulum orci at sodales.</p>
+                                                                            </div>
+                                                                            <div class="col-md-2">
+                                                                                <img class="img-fluid" src="~/wwwroot/dynamic/images/question-paper-sample.jpg" data-toggle="modal" data-target="#modalIMG" style="max-height:75px;" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-lg-4 col-sm-4">
+                                                                    <p class="m-0" style="color: #025a58;"><b>Replied Remarks:</b></p>
+                                                                    <p>nsoef sifg fis fudf sidsd siudc sdisd sodf dofndfvoddf dfvodfhndf </p>
+                                                                    <p style="color: #025a58;"><i class="fas fa-user mr-1"></i> <i>Replied By:</i> Ram Prashad Sharma</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- payroll area closed -->
+                                    <!-- Document area start -->
+                                    <div class="documente" id="documente">
+                                        <div class="card p-0" style="border: 1px solid #068abf ">
+                                            <div class="card-header py-0" style="background-color: #068abf; color: aliceblue;">
+                                                <div class="row">
+                                                    <h5 class="mt-1">  <i class="fas fa-file-word ml-2"></i> Documents</h5>
+                                                </div>
+                                            </div>
+                                            <div class="card p-2" style="margin-bottom:0px !important">
+                                                <div class="document-content" style="max-height: 517px;overflow-y: auto;">
+
+                                                    <div class="card p-2">
+                                                        <div class="row">
+                                                            <!-- Profile Photo -->
+                                                            <div class="col-md-4" ng-if="EmployeePF.PhotoPath">
+                                                                <label><b>Profile Photo</b></label><br />
+                                                                <img ng-src="{{EmployeePF.PhotoData || EmployeePF.Photo}}" ng-click="ShowEmpDocPdf({DocPath: EmployeePF.Photo, Extension: '.img', FileType: 'image', ContentPath: EmployeePF.PhotoPath})"
+                                                                     class="img-fluid profile-img mb-2" alt="Profile Photo" style="height: 130px; width:auto; border:1px solid #ccc; " />
+                                                            </div>
+
+                                                            <!-- Citizen Front Photo -->
+                                                            <div class="col-md-4" ng-if="EmployeePF.CitiFrontImg">
+                                                                <label><b>Citizen Front Photo</b></label><br />
+                                                                <img ng-src="{{EmployeePF.CitiFrontImg}}" ng-click="ShowEmpDocPdf({DocPath: EmployeePF.CitiFrontImg, Extension: '.img', FileType: 'image', ContentPath: EmployeePF.CitiFrontImg})"
+                                                                     class="img-fluid mb-2" alt="Citizen Front Photo" style="height: 130px; width:auto; border:1px solid #ccc;" />
+                                                            </div>
+
+                                                            <!-- Citizen Back Photo -->
+                                                            <div class="col-md-4" ng-if="EmployeePF.CitiBackImg">
+                                                                <label><b>Citizen Back Photo</b></label><br />
+                                                                <img ng-src="{{EmployeePF.CitiBackImg}}" ng-click="ShowEmpDocPdf({DocPath: EmployeePF.CitiBackImg, Extension: '.img', FileType: 'image', ContentPath: EmployeePF.CitiBackImg})"
+                                                                     class="img-fluid mb-2" alt="Citizen Back Photo" style="height: 130px; width:auto; border:1px solid #ccc;" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12 text-center my-3" style="background-color: #1f5d9e30;">
+                                                            <h3> Document Attachment</h3>
+                                                        </div>
+                                                        <div class="row">
+                                                            <!-- Loop through other attachments -->
+                                                            <div class="col-md-4" ng-repeat="D in EmpAttachmentColl">
+                                                                <label>
+                                                                    <b>
+                                                                        {{$index + 1}}. 
+                                                                        {{
+                                                                            D.DocumentTypeId == 1 ? 'Citizenship' :
+                                                                            D.DocumentTypeId == 2 ? 'Pan Certificate' :
+                                                                            D.DocumentTypeId == 3 ? 'Company Registration' :
+                                                                            D.DocumentTypeId == 4 ? 'Tax Clearance' :
+                                                                            D.DocumentTypeId == 5 ? 'Audit Report' :
+                                                                            D.DocumentTypeId == 6 ? 'Others' : ''
+                                                                        }}
+                                                                    </b>
+                                                                </label><br />
+                                                                <!-- PDF Icon -->
+                                                                <img src="~/wwwroot/dynamic-erp/images/pdf.png" ng-show="D.Extension == '.pdf'" ng-click="ShowEmpDocPdf({DocPath: D.DocPath, Extension: D.Extension, FileType: 'pdf', ContentPath: D.DocPath})"
+                                                                     style="height: 130px; padding: 16px;" />
+                                                                <!-- Image -->
+                                                                <img ng-src="{{D.DocPath}}" ng-hide="D.Extension == '.pdf'" ng-click="ShowEmpDocPdf({DocPath: D.DocPath, Extension: D.Extension, FileType: 'image', ContentPath: D.DocPath})"
+                                                                     style="height:130px; width:auto; border:1px solid #ccc;" />
+                                                            </div>
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    
+                                        <!-- Modal for Viewing Attachment -->
+                                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="EmpDocView" role="dialog" tabindex="-1" style="margin-top:20px !important;">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-body mb-0 p-2">
+                                                        <iframe ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 500px; border: none;"></iframe>
+                                                        <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreview">
+                                                    </div>
+                                                    <div class="modal-footer p-2">
+                                                        <div><a href="{{viewImg.ContentPath}}" class="btn btn-sm load btn-success" download>Download</a></div>
+                                                        <button class="btn btn-danger btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- Document area ends -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!--Document Preview and Download modal starts-->
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="modalIMG" role="dialog" tabindex="-1">
+                            <div class="modal-dialog modal-md" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-body mb-0 p-0">
+                                        <img src="~/wwwroot/dynamic/images/question-paper-sample.jpg" class="img-fluid" style="height:500px;width: auto;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div><a href="~/wwwroot/dynamic/images/question-paper-sample.jpg" target="_blank" download>Download</a></div>
+                                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Document preview of notification file starts from here-->
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="notificationdoc" role="dialog" tabindex="-1">
+                            <div class="modal-dialog modal-md" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-body mb-0 p-0">
+                                        <img src="~/wwwroot/dynamic/images/attach-img.png" class="img-fluid" style="height:500px;width: auto;" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div><a href="~/wwwroot/dynamic/images/attach-img.png" target="_blank" download>Download</a></div>
+                                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Send Message -->
+                        <div class="modal fade" id="send-msg" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                             aria-hidden="true" style="margin-top: 30px">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding: 6px">
+                                        <h5 class="modal-title" id="exampleModalLongTitle" style="font-size: 16px">
+                                            Send Message
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="">
+                                            <label for=""> Mobile Number</label>
+                                            <input type="text" class="form-control form-control-sm" />
+                                            <br />
+                                            <label for="" class="d-flex">
+                                                Message &nbsp; &nbsp;
+
+                                                <div class="custom-control custom-checkbox checkbox-lg">
+                                                    <input type="checkbox" class="custom-control-input" id="checkbox-2" checked="" />
+                                                    <label class="custom-control-label" for="checkbox-2">(Unicode)</label>
+                                                </div>
+                                            </label>
+
+                                            <textarea name="message" id="" cols="30" rows="8" class="form-control form-control-sm"></textarea><br />
+                                            <label for="character">Total No. Of Characters : </label><br /><br />
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer" style="padding: 6px">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" style="min-width: 90px">
+                                            Close
+                                        </button>
+                                        <button class="btn btn-sm text-center btn-primary" style="min-width: 90px">
+                                            Send
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Send Notification -->
+                        <div class="modal fade" id="send-notification" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                             aria-hidden="true" style="margin-top:27px">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLongTitle" style="font-size: 16px">
+                                            Send Notification
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="">
+                                            <label for=""> Title</label>
+                                            <input type="text" class="form-control form-control-sm" />
+                                            <br />
+                                            <label for="">Description</label><br />
+                                            <textarea name="message" id="" cols="30" rows="6" class="form-control form-control-sm"></textarea><br />
+                                            <!-- <label for="">Attach Document (Optional)</label> -->
+                                            <!-- <input
+                          type="file"
+                          id="img"
+                          name="img"
+                          accept="image/*"
+                          class="form-control form-control-sm p-0"
+                        /> -->
+                                            <label for="fileupload" style="font-size: 16px;" class="">
+                                                <i class="fas fa-folder-open text-success"></i>
+                                                &nbsp; Attach Document (Optional)
+                                            </label>
+                                            <!-- attach file  -->
+                                            <div class="card-body" style="margin-top: -20px;">
+                                                <div id="actions" class="row actions">
+                                                    <div class="col-lg-3 mt-3">
+                                                        <div class="btn-group w-100">
+                                                            <span class="btn-add-file col fileinput-button">
+                                                                <span><i class="fas fa-plus-circle" style="margin-left: 7px;"></i></span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-9">
+                                                        <div class="d-flex flex-row mr-3 previews" id="previews">
+                                                            <div id="template" class="card template">
+                                                                <a data-dz-remove class="cancel float-right">
+                                                                    <i class="fas fa-times-circle float-right" style="  color:#28a745; font-size: 14px;"></i>
+                                                                </a>
+                                                                <span class="preview"><img src="data:," alt="" data-dz-thumbnail /></span>
+                                                                <div class="align-items-center" style="width: 150px;">
+                                                                    <p class="mb-0">
+                                                                        <span class="lead" data-dz-name style="font-size: 14px;"></span>
+                                                                        <!-- (<span data-dz-size></span>) -->
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <!-- attach file end -->
+                                            <br />
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer" style="padding: 6px">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" style="min-width: 90px">
+                                            Close
+                                        </button>
+                                        <button class="btn btn-sm text-center btn-primary" style="min-width: 90px">
+                                            Send
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Add Remarks -->
+                        <div class="modal fade" id="add-remark" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                             aria-hidden="true" style="margin-top:27px">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding: 6px">
+                                        <h5 class="modal-title" id="exampleModalLongTitle" style="font-size: 16px">
+                                            Add Remarks
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        @*<div class="form-group">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Remarks For :</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                               name="exampleRadios" id="exampleRadios1"
+                                               value="option1" checked>
+                                        <label class="form-check-label"
+                                               for="exampleRadios1">
+                                            Merit
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                               name="exampleRadios" id="exampleRadios2"
+                                               value="option2">
+                                        <label class="form-check-label"
+                                               for="exampleRadios2">
+                                            Demerit
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>*@
+
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Remarks For</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newRemark.RemarksFor">
+                                                        <option ng-value="0">**All**</option>
+                                                        <option ng-value="rl.id" ng-repeat="rl  in RemarksForList">{{rl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="newRemark.ToDate_TMP" date-detail="newRemark.ToDateDet" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="">Remarks Type</label>
+                                                    <select class="select2 form-control-sm" data-placeholder="Select Source" ng-model="newRemark.RemarksTypeId" style="width: 100%">
+                                                        <option ng-value="rl.RemarksTypeId" ng-repeat="rl  in RemarksTypeList">{{rl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Points</label>
+                                                    <input type="text" class="form-control form-control-sm">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="">Description</label>
+                                            <textarea name="message" id="" cols="30" rows="1" class="form-control form-control-sm"></textarea>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="">Attachment <span style="color:red">*</span></label>
+                                            <input id="choose-sfile5" type="file" accept=".jpg,.jpeg,.png" file-model ng-model="newRemark.FilePath_TMP" fileread="newRemark.FilePathData" /><br />
+                                            <img ng-src="{{newRemark.FilePathData || newRemark.DocFilePath}}" class="img-fluid mt-2" style="max-height:100px; max-width:100px;">
+                                        </div>
+
+                                        <!--<div class="form-group">
+                        <label for="fileupload" style="font-size: 16px;" class="mt-3"><i class="fas fa-folder-open text-success"></i> &nbsp; Attach Your files </label>-->
+                                        <!-- attach file  -->
+                                        <!--<div class="card-body" style="margin-top: -10px;">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="bg-white">
+                                            <div class="button-green">
+                                                <input class="file-upload" type="file" multiple file-model-resize ng-model="Files_TMP" after-selected="AfterChooseFile()" fileread="Files_Data" />
+                                                <span><i class="fas fa-plus-circle"></i></span>
+                                            </div>
+                                            <style>
+                                                .button-green {
+                                                    position: relative;
+                                                    border-radius: 5px;
+                                                    border: 2px dotted #28a745;
+                                                    width: 82px;
+                                                    height: 82px;
+                                                    padding: 30px 30px;
+                                                }
+
+                                                .file-upload {
+                                                    border-radius: 5px;
+                                                    border: 2px dotted #28a745;
+                                                    opacity: 0;
+                                                    top: 0;
+                                                    left: 0;
+                                                    width: 82px;
+                                                    height: 35px;
+                                                    position: absolute;
+                                                    padding: 30px 30px;
+                                                }
+
+                                                .button-green:hover {
+                                                    background-color: #ccc;
+                                                }
+                                            </style>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <c class="m-1" ng-show="(newQuickAccess.uploadFiles).length != 0">
+                                <div class=" row">
+                                    <div class="col-sm-2 " ng-repeat="FileImg in newQuickAccess.uploadFiles">
+                                        <div class="ba-0 ds-1">
+                                            <span style="margin: 3px ">
+                                                <a ng-click="DeleteAlbumPhoto($index)"><i class="fas fa-times"></i></a>
+                                            </span>
+                                            <span style="display:block;width:365%;">
+                                                <a class="lightbox"
+                                                   href="{{ FileImg.uploadFiles}}">
+                                                    <img ng-src="{{ FileImg.uploadFiles}}"
+                                                         id="FileImg{{$index+1}}" alt="" style=" height:10%;width:20%;object-fit:cover ;">
+                                                </a>
+                                            </span>
+                                            <label for="FileImg{{$index + 1}}" style=" max-width: 150px; word-wrap: break-word;">
+                                                {{$index + 1}}-{{FileImg.FileName}}
+                                            </label>
+                                            <br>
+                                        </div>
+                                    </div>
+                                </div>
+                            </c>
+                        </div>
+                    </div>-->
+                                    </div>
+                                    <div class="modal-footer" style="padding: 6px">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" style="min-width: 90px">
+                                            Close
+                                        </button>
+                                        <button class="btn btn-sm text-center btn-primary" style="min-width: 90px">
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Add payroll -->
+                        <div class="modal fade" id="add-payroll" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                             aria-hidden="true" style="margin-top:27px">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="padding: 6px">
+                                        <h5 class="modal-title" id="exampleModalLongTitle" style="font-size: 16px">
+                                            Add payroll
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="">
+                                            <label for="">payroll Date</label>
+                                            <input type="date" class="form-control form-control-sm" />
+                                            <br />
+                                            <label for="">payroll Type</label>
+                                            <select name="payroll type" class="form-control form-control-sm select2">
+                                                <option value="1">select...</option>
+                                                <option value="2">select...</option>
+                                                <option value="3">select...</option>
+                                                <option value="4">select...</option>
+                                            </select>
+                                            <br />
+                                            <label for="">Detail Description</label><br />
+                                            <textarea name="message" id="" cols="30" rows="1" class="form-control form-control-sm"></textarea>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer" style="padding: 6px">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal" style="min-width: 90px">
+                                            Close
+                                        </button>
+                                        <button class="btn btn-sm text-center btn-success" style="min-width: 90px">
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- End Modals -->
+                        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-body mb-0 p-0">
+                                        <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

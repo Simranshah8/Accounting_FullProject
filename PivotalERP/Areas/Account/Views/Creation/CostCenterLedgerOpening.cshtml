@@ -1,0 +1,1270 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+@*<script>
+    var VoucherType = "@ViewBag.VoucherType";
+            var EntityId = "@ViewBag.EntityId";
+            var TranId=@ViewBag.TranId;
+</script>*@
+
+<script src="~/jslib/account/creation/CostCenterLedgerOpening.js"></script>
+
+<div ng-app="myApp" ng-controller="CostCenterLedgerOpeningController" ng-init="LoadData()" ng-cloak>
+    <div class="container-fluid">
+        <!-- Main content -->
+        <div class="sale-page-wrap">
+            <div class="overflow-hidden">
+                @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+                @RenderPage("~/Views/Global/_LedgerDetails.cshtml")
+                <!-- Page Content  -->
+                <div class="content-wrapper-new">
+                    <div class="card mt-2 bodypart">
+                        <div class="demo-container">
+                            <div class="demo-header">
+                                <div class="card-header px-2  overflow-hidden py-1">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="name">Branch</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newBranchWiseLedgerOpening.BranchId" data-placeholder="**Select Branch**">
+                                                    <option ng-value="pl.BranchId" ng-repeat="pl in BranchList" ng-selected="pl.id==newBranchWiseLedgerOpening.BranchId">{{pl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="name">Ledger</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm" all-ledger ng-model="newBranchWiseLedgerOpening.LedgerId" ledgertype="1"
+                                                        placeholder="** Select Ledger Name **" showdetails="false" ledger-detail="newBranchWiseLedgerOpening.LedgerDetails" side-bar-data="newBranchWiseLedgerOpening.partySideBarData"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Currency</label>
+                                                <select class="form-control form-control-sm" ng-model="newBranchWiseLedgerOpening.SelectedCurrency" data-placeholder="**Select Currency**">
+                                                    <option ng-value="pl" ng-repeat="pl in CurrencyList">{{pl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Rate</label>
+                                                <input type="text" number-input class="form-control form-control-sm" ng-model="newBranchWiseLedgerOpening.CurRate">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="name">For Year</label>
+                                                <select class="form-control form-control-sm" ng-model="newBranchWiseLedgerOpening.CostClassId" data-placeholder="**Select Year**" ng-change="ChangeCostClass()">
+                                                    <option ng-value="pl.CostClassId" ng-repeat="pl in CostClassColl" ng-selected="pl.CostClassId==newBranchWiseLedgerOpening.CostClassId">{{pl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" ng-show="false">
+                                            <div class="form-group">
+                                                <label for="">Opening Date</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newBranchWiseLedgerOpening.VoucherDate_TMP" date-picker date-detail="newBranchWiseLedgerOpening.VoucherDateDet">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="table-scroll-x-y mb-1 table-container">
+                                <table class="table table-bordered table-head-fixed text-nowrap">
+                                    <thead class=" text-nowrap">
+                                        <tr>
+                                            <th style="width: 60px;">S.No.</th>
+                                            <th style="width: 200px;">CostCenter Name</th>
+                                            <th style="width: 100px;">Opening Amount</th>
+                                            <th style="width: 50px;">DrCr</th>
+                                            <th style="width: 100px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="op in newBranchWiseLedgerOpening.OpeningColl">
+                                            <td align="center">{{$index+1}}</td>
+                                            <td>
+                                                <select  autoShowHide="true" class="form-control form-control-sm select2 serial" all-cost-center ng-model="op.CostCenterId"
+                                                        placeholder="** Select CostCeter Name **" showdetails="true" confirm-action="ChangeParticularLedger(op)" costcenter-detail="op.CostCenterDetails" side-bar-data="op.partySideBarData"></select>
+                                            </td>
+                                            <td>
+                                                <input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="op.OpeningAmount" ng-change="ChangeDrCrAmount()">
+                                            </td>
+                                            <td>
+                                                <select class="form-control form-control-sm rounded-0" ng-model="op.DrCr" ng-change="ChangeDrCrAmount()">
+                                                    <option ng-value="d.id" ng-repeat="d in DrCrList" ng-selected="d.id==op.DrCr">{{d.text}}</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                @*<b> {{newBranchWiseLedgerOpening.SelectedCurrency.Name}} </b>*@
+                                                <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInOpening($index)">
+                                                    <i class="fas fa-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowOpening($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+
+                    </div>
+                    @*<div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Narration</label>
+                                    <input type="text" list="lstNarration" class="form-control form-control-sm hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                                    <datalist id="lstNarration">
+                                        <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                                    </datalist>
+                                </div>
+                            </div>
+                        </div>*@
+
+                </div>
+            </div>
+
+        </div>
+        <footer class="main-footer control-btns pt-0">
+            <div class="secondary-footer mb-2 mt-2">
+                <div class="row">
+                    @*<div class="col-md-8">
+                            <div class="form-group">
+                                <input type="text" list="lstNarration" class="form-control form-control-sm hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                                <datalist id="lstNarration">
+                                    <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                                </datalist>
+                            </div>
+                        </div>*@
+                    <div class=" col-md-4">
+
+                    </div>
+                    <div class=" col-md-2">
+                        <div class="form-group row">
+                            <label for="" class="col-md-2">DR.</label>
+                            <input type="text" class="form-control form-control-sm col-md-9" ng-model="newBranchWiseLedgerOpening.TotalDr" disabled="">
+
+                        </div>
+                    </div>
+                    <div class=" col-md-2">
+                        <div class="form-group row">
+                            <label for="" class="col-md-2">CR.</label>
+                            <input type="text" class="form-control form-control-sm col-md-9" ng-model="newBranchWiseLedgerOpening.TotalCr" disabled="">
+
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-4">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right">Closing Balance: {{newBranchWiseLedgerOpening.TotalDr-newBranchWiseLedgerOpening.TotalCr |formatNumberAC}}</label>
+
+                        </div>
+                    </div>
+                    @*<div class="col-md-4 col-xl-4">
+                            <div class="form-group row">
+                                <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right">Grand Total:</label>
+                                <div class="col-7 col-sm-6 col-md-6">
+                                    <input type="text" number-input class="form-control form-control-sm hideSideBar" style="text-align: right; font-size: x-large" placeholder="" readonly ng-model="beData.TotalAmount">
+                                </div>
+                            </div>
+                        </div>*@
+
+                </div>
+                <div class="row ">
+
+                    <div class="col-md-12 mt-2">
+                        <span class="d-block text-right">
+                            <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearBranchWiseLedgerOpening()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateBranchWiseLedgerOpening()">Save</button>
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+
+
+
+        <div class="modal fade sales-quotation-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document" style="min-width:1300px">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Search BranchWiseLedgerOpening</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                    <div class="col-sm-10">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                    <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions">{{asp.text}}</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal">
+                                            <div class="input-group-append">
+                                                <div class="input-group-text">
+                                                    <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <form class="float-right">
+                                    <div class="form-row align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                            <input type="text" ng-model="paginationOptions.pageSize" class="form-control input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="">
+                            <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Voucher No</th>
+                                        <th>RefNo</th>
+                                        <th>Voucher Date</th>
+                                        <th>Voucher Name</th>
+                                        <th>CostClass</th>
+                                        <th>Amount</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                        <td align="center">{{sd.VoucherNo}}</td>
+
+                                        <td>{{sd.RefNo}}</td>
+                                        <td align="center">{{sd.VoucherDate |dateFormat}}</td>
+                                        <td>{{sd.VoucherName}}</td>
+                                        <td>{{sd.CostClass}}</td>
+                                        <td>{{sd.Amount |number:3}}</td>
+                                        <td>
+                                            <a class="p-1" href="#" ng-click="GetTransactionById(sd)">
+                                                <i class="fas fa-edit text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="DelTransactionById(sd)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                                <i class="fas fa-print text-primary"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                            <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                     on-page-change="ReSearchData(newPageNumber)">
+                            </dir-pagination-controls>
+                        </div>
+
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer justify-content-between align-items-center py-2">
+                        <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                        <div class="">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- /.content -->
+        @*file-upload modal*@
+        <div class="modal fade sales-invoice-page-modal document-attach-modal" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="input-group" ng-repeat="fl in beData.DocumentColl">
+                            <a href="#"> <span class="text-danger mr-1" ng-click="RemoveAttachment(1,$index)"><i class="fas fa-times"></i></span> {{$index+1}}  -  {{fl.Name}}</a>
+                        </div>
+                        <div class="input-group" ng-repeat="fl in beData.AttechFiles">
+                            <a href="#"> <span class="text-danger mr-1" ng-click="RemoveAttachment(2,$index)"><i class="fas fa-times"></i></span> {{(($index+1)+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }}  -  {{fl.name}}</a>
+                        </div>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="exampleInputFile" multiple file-model="beData.AttechFiles" ng-model="beData.AttechFiles">
+                                <label class="custom-file-label" for="exampleInputFile">Choose file ({{beData.AttechFiles.length}} )</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Ok</button>
+                        @*<button type="button" class="btn btn-sm btn-primary">Ok</button>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add ReportTemplates Modal Dailog -->
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="frmCostCentersModel" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="padding: 1.5px; padding-left: 12px;">
+                        <h6 class="modal-title" id="exampleModalCenterTitle"><b>Cost Center Details</b></h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row" style="margin-top: -10px">
+                            <div class="table-responsive">
+                                <div class="table-scroll-x-y mt-1" style="height: 350px!important">
+                                    <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                        <thead class="text-center">
+                                            <tr>
+                                                <th style="width: 50px;background-color:#ececec!important">S.No.</th>
+                                                <th style="width: 200px; background-color: #ececec !important ">Cost Category</th>
+                                                @*Added Column by suresh form MVDuggad*@
+                                                <th style="width: 200px; background-color: #ececec !important ">CostCenter</th>
+                                                <th style="width: 120px; background-color: #ececec !important ">Current Bal.</th>
+                                                <th style="width: 120px; background-color: #ececec !important ">Amount</th>
+                                                <th style="width: 150px; background-color: #ececec !important ">Department</th>
+                                                @*Added Column by suresh form MVDuggad*@
+                                                <th style="width: 150px; background-color: #ececec !important ">Brand</th>
+                                                @*Added Column by suresh form MVDuggad*@
+                                                <th class="text-center align-middle;" style="width: 70px; background-color: #ececec !important ">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="costAllocation in CurLedgerAllocation.CostCenterColl">
+                                                <td align="center">{{$index+1}}</td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2">
+                                                        <option>Option 1</option>
+                                                        <option>Option 2</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select parentId="frmCostCentersModel" autoShowHide="true" class="form-control form-control-sm select2 serial" all-cost-center ng-model="costAllocation.CostCenterId"
+                                                            placeholder="** Select CostCeter Name **" showdetails="true" confirm-action="ChangeParticularCostCenter(costAllocation)" costcenter-detail="costAllocation.CostCenterDetails" side-bar-data="costAllocation.partySideBarData"></select>
+                                                </td>
+                                                <td><h5> {{costAllocation.CurrentBal |number:2}}</h5></td>
+                                                <td><input type="text" number-input noofdecimal="SelectedVoucher.NoOfDecimalPlaces" style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="costAllocation.Amount" ng-blur="AddRowInCostCenterAllocation($index,true)" ng-change="ChangeCostCenterAmount()"></td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2">
+                                                        <option>Dept 1</option>
+                                                        <option>Dept 2</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select class="form-control form-control-sm select2">
+                                                        <option>Brand 1</option>
+                                                        <option>Brand 2</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInCostCenterAllocation($index)">
+                                                        <i class="fas fa-plus text-info"></i>
+                                                    </a>
+                                                    <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowCostCenterAllocation($index)">
+                                                        <i class="fas fa-trash-alt text-danger"></i>
+                                                    </a>
+
+                                                </td>
+                                            </tr>
+
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer p-2" style="padding: 3px;  ">
+                        <button type="button" class="btn load btn-primary" style="min-width: 70px;"> <i class="fas fa-file-import mr-2"></i>Import</button>
+                        <button type="button" class="btn load btn-outline-secondary" data-dismiss="modal" style="min-width:70px">Reset</button>
+                        <button type="button" class="btn load btn-success" ng-click="OkCostCenterModal()" style="min-width:70px">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Modals Added by suresh on 4 kartik starts-->
+        <!--Item Detail Modal Starts-->
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="itemdetail" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true" style="margin-top:20px">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Item Detail For : {{CurLedgerAllocation.LedgerName}}</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-10">
+                                @*<label><b>Invoice No: </b></label>*@
+                            </div>
+                            <div class="col-md-2 float-right">
+                                <div class="d-flex">
+                                    <label class="mr-2"><b>InOut:</b></label>
+                                    <select class="form-control form-control-sm" ng-model="CurLedgerAllocation.InOut">
+                                        <option ng-value="o.id" ng-repeat="o in InOutColl" ng-selected="o.id==CurLedgerAllocation.InOut">{{o.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-scroll">
+                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 200px;">Product</th>
+                                        <th style="width: 180px;">Godown</th>
+                                        <th style="width: 120px;">Closing Stock</th>
+                                        <th style="width: 90px;">Quantity</th>
+                                        <th style="width: 120px;">Rate</th>
+                                        <th style="width: 120px;">Per</th>
+                                        <th style="width: 120px;">Amount</th>
+                                        <th class="text-center align-middle" style="width: 70px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="itemDet in CurLedgerAllocation.ItemDetailsCOll">
+                                        <td>
+                                            <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId" style="width:100%"
+                                                    placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData"></select>
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="itemDet.GodownId">
+                                                <option ng-repeat="cc in GodownColl track by cc.GodownId" ng-value="{{cc.GodownId}}" ng-selected="cc.GodownId == itemDet.GodownId">
+                                                    {{cc.Name}}
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            {{itemDet.productDetail.ClosingQty |number:2}} {{ itemDet.productDetail.BaseUnit}}
+                                        </td>
+                                        <td>
+                                            <input type="text" number-input class="form-control form-control-sm serial" name="ActualQty" style="text-align:center" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'aQty')" ng-model="itemDet.ActualQty" ng-style="itemDet.IsNegativeQty==true && { 'color' : 'red' }">
+                                        </td>
+                                        <td>
+                                            <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="Rate" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'rate')" ng-model="itemDet.Rate" @*ng-readonly="itemDet.CanEditRate==false"*@>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm hideSideBar" readonly name="Unit" ng-model="itemDet.productDetail.BaseUnit">
+                                        </td>
+                                        <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" name="Amount" ng-model="itemDet.Amount" readonly></td>
+                                        <td>
+                                            <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInItemDetails($index)">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowFromItemDetails($index)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                                @*<button type="button" class="btn btn-sm btn-success" style="min-width: 70px;">Save</button>*@
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Item Detail Modal Ends-->
+        <!--Billwise Detail Modal Starts-->
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal p-2" id="billwise">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Billwise Details</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-2">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label><b>Billwise Detail For:-ABC Ledger</b></label>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="float-right">
+                                    <label><b>Upto :- 100,000 Cr</b></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-scroll" style="max-height:340px;overflow-y:auto">
+                            <table id="main-table" class="main-table table table-head-fixed table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 130px;">Ref.Type</th>
+                                        <th style="width: 180px;">Name</th>
+                                        <th style="width: 90px;">Amount</th>
+                                        <th style="width: 70px;">DrCr</th>
+                                        <th style="width: 150px;">Remarks</th>
+                                        <th class="text-center" style="width: 80px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Advance</option>
+                                                <option value="2">AgstRef</option>
+                                                <option value="3">NewRef</option>
+                                                <option value="4">OnAccount</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm">
+                                                <option value="1">Dr</option>
+                                                <option value="2">Cr</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" />
+                                        </td>
+                                        <td class="text-center">
+                                            <a class="p-1" href="#" data-original-title="Add Row">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row.">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="time-label p-2">
+                            <span class="d-block border-0 p-1 float-right">
+                                <button type="button" class="btn load btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Close</button>
+                                <button type="button" class="btn load btn-success" style="min-width: 70px;">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Billwise Detail Modal Ends-->
+        <!--Cheque Detail Modal Starts-->
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="chequedetail">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-md">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">Cheque Details For : {{CurLedgerAllocation.LedgerName}} </h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label>Cheque No</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.CheckDetails.ChequeNo" />
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label>Cheque Date</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="CurLedgerAllocation.CheckDetails.ChequeDate_TMP" date-detail="CurLedgerAllocation.CheckDetails.ChequeDateDet">
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label>Cheque Type</label>
+                            </div>
+                            <div class="col-md-8">
+                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="CurLedgerAllocation.CheckDetails.CheckType">
+                                    <option ng-repeat="vt in ChequeTypeColl" ng-value="{{vt.id}}" ng-selected="vt.id == ts.TdsVatType">
+                                        {{vt.text}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label>Account No</label>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" class="form-control form-control-sm" ng-model="CurLedgerAllocation.CheckDetails.AccountNo" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-md-4">
+                                <label>Remarks</label>
+                            </div>
+                            <div class="col-md-8">
+                                <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="CurLedgerAllocation.CheckDetails.Remarks"></textarea>
+                            </div>
+                        </div>
+
+
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                                @*<button type="button" class="btn btn-sm btn-success" style="min-width: 70px;">Save</button>*@
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--Cheque Detail Modal Ends-->
+        <!--TDS Modal Starts-->
+        <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="tds">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title">{{ (CurLedgerAllocation.LedgerDetails.IsVat==true ? "VAT" : "TDS") }} Detail For : {{CurLedgerAllocation.LedgerName}}</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body py-2">
+
+                        <div class="table-scroll-x-y table-scroll" style="height:300px!important;overflow-y:auto">
+                            <table id="main-table" class="main-table table table-sm  table-head-fixed table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th class="cstm-sticky" style="left:0px;width: 120px;z-index:3;background-color:#ececec!important">Bill No</th>
+                                        <th class="cstm-sticky" style="left: 120px; width: 130px; z-index: 3;background-color:#ececec!important">Date</th>
+                                        <th style="width: 180px; z-index: 2;background-color:#ececec!important ">Party Name</th>
+                                        <th style="width: 150px; z-index: 2;background-color:#ececec!important">Expenses Heading</th>
+                                        <th style="width: 120px; z-index: 2;background-color:#ececec!important">PAN/Vat</th>
+                                        <th style="width: 120px; z-index: 2;background-color:#ececec!important" ng-show="CurLedgerAllocation.LedgerDetails.IsVat==true">Type</th>
+                                        <th style="width: 120px; z-index: 2;background-color:#ececec!important" ng-show="CurLedgerAllocation.LedgerDetails.IsTDS==true">Payment</th>
+                                        <th style="width: 100px; z-index: 2;background-color:#ececec!important">Amount</th>
+                                        <th style="width: 100px; z-index: 2;background-color:#ececec!important">Rate</th>
+                                        <th style="width: 100px; z-index: 2;background-color:#ececec!important">TDS</th>
+                                        <th class="text-center align-middle" style="width: 70px; z-index: 2; background-color: #ececec !important">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr @*ng-repeat="ts in CurLedgerAllocation.TDSVatDetailColl"*@>
+                                        <td class="cstm-sticky" style="left: 0px; width: 120px; z-index: 2;background-color:#fff!important">
+                                            <input type="text" class="form-control form-control-sm" ng-model="ts.BillNo" />
+                                        </td>
+                                        <td class="cstm-sticky" style="left: 120px; width: 130px; z-index: 2; background-color: #fff !important">
+                                            <input type="text"
+                                                   class="form-control form-control-sm" date-picker ng-model="ts.BillDate_TMP" date-detail="ts.BillDateDet">
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="ts.PartyName" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="ts.OtherHeading" />
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" ng-model="ts.PANVat" />
+                                        </td>
+                                        <td ng-show="CurLedgerAllocation.LedgerDetails.IsVat==true">
+                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="ts.TdsVatType">
+                                                <option ng-repeat="vt in VatTypeColl" ng-value="{{vt.id}}" ng-selected="vt.id == ts.TdsVatType">
+                                                    {{vt.text}}
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <td ng-show="CurLedgerAllocation.LedgerDetails.IsTDS==true">
+                                            <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.Payment" ng-change="CalculateTDS(ts,'payment')" />
+                                        </td>
+                                        <td>
+                                            <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.AccessableValue" ng-change="CalculateTDS(ts,'access')" />
+                                        </td>
+                                        <td>
+                                            <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.Rate" ng-change="CalculateTDS(ts,'rate')" />
+                                        </td>
+                                        <td>
+                                            <input type="text" number-input class="form-control form-control-sm serial" onfocus="this.select();" ng-model="ts.Amount" ng-change="CalculateTDS(ts,'amt')" />
+                                        </td>
+                                        <td style="z-index: 1">
+                                            <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRowInTDSDetails($index)">
+                                                <i class="fas fa-plus text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRowFromTDSDetails($index)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-2 float-right">
+                                <button type="button" class="btn load btn-primary" style="min-width: 70px;"> <i class="fas fa-file-import mr-2"></i>Import</button>
+                                <button type="button" class="btn load btn-success" style="min-width: 70px;" data-dismiss="modal" aria-label="Close">Ok</button>
+                                @*<button type="button" class="btn btn-sm btn-success" style="min-width: 70px;">Save</button>*@
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!-- /.modal-dialog -->
+        </div>
+        <!--TDS Modal Ends-->
+        <!--Modals Added by suresh on 4 kartik starts-->
+        @RenderPage("~/Global/_ReportTemplates.cshtml")
+
+        <div class="modal fade sales-invoice-page-modal document-attach-modal" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="input-group" ng-repeat="fl in beData.AttechFiles">
+                            <a href="#">{{$index+1}}  -  {{fl.name}}</a>
+                        </div>
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="exampleInputFile" multiple file-model="beData.AttechFiles" ng-model="beData.AttechFiles">
+                                <label class="custom-file-label" for="exampleInputFile">Choose file ({{beData.AttechFiles.length}} )</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Ok</button>
+                        @*<button type="button" class="btn btn-sm btn-primary">Ok</button>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(function () {
+        $("#wrapper").toggleClass("toggled");
+        $("#sidebar-wrapper").css("overflow-y", "hidden");
+
+
+        $("#menu-toggle").click(function (e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+            $("#sidebar-wrapper").css("overflow-y", "auto");
+        });
+
+
+    });
+
+</script>
+
+
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+        };
+        fullHeight();
+
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>
+
+<script>
+
+    $(document).ready(function () {
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                //var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                //if (key == 13) {
+                //    e.preventDefault();
+                //    var inputs = $(this).closest('form').find(':input:visible');
+                //    inputs.eq(inputs.index(this) + 1).focus();
+                //}
+
+                var index = $('.serial').index(this) + 1;
+                $('.serial').eq(index).focus();
+            }
+        });
+    });
+</script>

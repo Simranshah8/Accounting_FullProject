@@ -1,0 +1,169 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-sm td {
+        padding: 0.3rem;
+    }
+</style>
+
+<script src="~/jslib/hr/Report/SupervisorList.js"></script>
+<div ng-app="myApp" ng-controller="SupervisorListController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary">
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">Company</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newDet.CompanyRelationshipId" ng-change="GetSupervisorList()">
+                                        <option ng-value="">All</option>
+                                        <option ng-value="c.TranId" ng-repeat="c in CompanyRelationshipList" ng-selected="c.id==newDet.CompanyRelationshipId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">Branch</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newDet.BranchId" ng-change="GetSupervisorList()">
+                                        <option ng-value="">All</option>
+                                        <option ng-value="B.BranchId" ng-repeat="B in BranchList"  ng-selected="B.BranchId==newDet.BranchId"> {{B.Name}} </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label>Department</label>
+                                <select class="select2 form-control form-control-sm" data-placeholder="Select Source" style="width: 100%;" ng-model="newDet.DepartmentId" ng-change="GetSupervisorList()">
+                                    <option>All</option>
+                                    <option  ng-value="tdc.CostCenterDepartmentId" ng-repeat="tdc in DepartmentList"  ng-selected="tdc.CostCenterDepartmentId==newDet.DepartmentId"> {{tdc.Name}} </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="">Designation</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newDet.DesignationId" ng-change="GetSupervisorList()">
+                                        <option ng-value="">All</option>
+                                        <option ng-value="tdc.DesignationId" ng-repeat="tdc in DesignationList"  ng-selected="tdc.DesignationId==newDet.DesignationId"> {{tdc.Name}} </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                            </div>
+                        </div>
+                        <header class="row mb-1">
+                            <div class="col-md-8">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Supervisor" ng-change="GetSupervisorList()">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Supervisor">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed" style="margin-left:6px;">
+                                            <input class="form-control form-control-navbar" type="search"
+                                                   placeholder="Search" aria-label="Search" ng-model="searchData.Supervisor">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end col-md-8 -->
+                            <div class="col-md-4 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#SupervisorList'" sheet-name="'SupervisorList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#SupervisorList').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                    <a print-tbl table-id="'#SupervisorList'" class="btn btn-secondary btn-light btn-sm wait"
+                                       title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button class="btn btn-success btn-sm"  style="width:73px;height:32px;" ng-click="GetSupervisorList()"> Load</button>
+                                </div>
+
+                            </div>
+                        </header>
+                        <div class="card table-scroll-x-y " style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                            <table id="SupervisorList" cellpadding="12" class="main-table table table-sm table-bordered table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width: 60px;" title="S.N">S.N</th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important; width: 150px;" title="Employee Code">Code</th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important;  width: 250px;" title="Employee Name">Employee Name</th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important; width: 180px;" title="Branch">Branch </th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important; width: 180px;" title="Department">Department </th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important; width: 150px;" title="Designation">Designation </th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important; width: 180px;" title="HOD">HOD </th>
+                                        <th class="text-center align-middle" style=" background-color: #e9ecef !important; width: 150px;" title="Company">Company </th>
+                                        <th class="text-center align-middle" style="background-color: #e9ecef !important; width: 210px; ">1st Supervisor</th>
+                                        <th class="text-center align-middle " style="background-color: #e9ecef !important; width: 210px;">2nd Supervisor</th>
+                                        <th class="text-center align-middle " style="background-color: #e9ecef !important; width: 210px; ">3rd Supervisor</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="S in SupervisorList | filter:searchData.Supervisor |itemsPerPage:perPage.Supervisor" total-items="paginationOptions.TotalRows">
+                                        <td style="text-align:center;">{{$index+1}}</td>
+                                        <td>{{S.EmployeeCode}}</td>
+                                        <td>{{S.EmpName}}</td>
+                                        <td>{{S.BranchName}}</td>
+                                        <td>{{S.DepartmentName}}</td>
+                                        <td>{{S.DesignationName}}</td>
+                                        <td>{{S.HODName}}</td>
+                                        <td>{{S.CompanyName}}</td>
+                                        <td >
+                                            {{S.S_FirstLevel}}
+                                        </td>
+                                        <td >
+                                            {{S.S_SecondLevel}}
+                                        </td>
+                                        <td >
+                                            {{S.S_ThirdLevel}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <!-- table end -->
+                        </div>
+                        <div class="col-md-12">
+                            <dir-pagination-controls max-size="perPage.Supervisor" direction-links="true" boundary-links="true" on-page-change="ReSearchData(newPageNumber)">
+                            </dir-pagination-controls>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+
+
+
+
+

@@ -1,0 +1,279 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/setup/UDF.js"></script>
+<div ng-app="myApp" ng-controller="UDFController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllLedgerGroup()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Fields</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LedgerGroup">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LedgerGroup">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.LedgerGroup">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                            <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>`
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                        <thead>
+                                            <tr>
+                                                <th ng-click="sort('LedgerGroupId')" style="text-align: center; width: 10%;">
+
+                                                    S.No
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='LedgerGroupId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Name')" style="width: 30% ; text-align:left">
+                                                    Entity
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Name')" style="width: 30% ; text-align:left">
+                                                    Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('Code')" style="width: 20%;text-align:left">
+                                                    Display Name
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Code'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th ng-click="sort('ParentGroupName')" style="width: 30%;text-align:left">
+                                                    DataType
+                                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Code'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                                </th>
+                                                <th class="noprint" style="text-align:center;width: 15%;">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="ledGrp in LedgerGroupColl | orderBy:sortKey:reverse | filter:searchData.LedgerGroup | itemsPerPage:perPage.LedgerGroup" current-page="currentPages.LedgerGroup" pagination-id="LedgerGroupPagination">
+                                                <td style="text-align:center;margin:auto">
+                                                    {{ ledGrp.FieldNo }}
+                                                </td>
+                                                <td style="margin:auto;text-align:left">
+                                                    {{ledGrp.EntityId}}
+                                                </td>
+                                                <td style="margin:auto;text-align:left">
+                                                    {{ledGrp.Name}}
+                                                </td>
+                                                <td style="margin:auto;text-align:left">
+                                                    {{ledGrp.DisplayName}}
+                                                </td>
+                                                <td style="margin:auto;text-align:left">
+                                                    {{ledGrp.Type}}
+                                                </td>
+                                                <td class="project-actions text-center noprint">
+                                                    <div class="btn-group-sm">
+                                                        <a href="#" class="btn btn-sm  btn-info" ng-click="GetLedgerGroupById(ledGrp)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a href="#" class="btn btn-sm btn-danger" ng-click="DeleteLedgerGroup(ledGrp)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="LedgerGroupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>For Entity<span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.EntityId">
+                                                        <option ng-value="bg.id" ng-repeat="bg in EntityColl" ng-selected="bg.id==beData.EntityId">{{bg.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>S.No.<span style="color:red">*</span></label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="beData.FieldNo">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>Name<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Name">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>Label<span style="color:red">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.DisplayName">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Data Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="beData.Type">
+                                                        <option ng-repeat="dt in DataTypeColl" ng-value="dt.id" ng-selected="dt.id==EAC.Type">{{dt.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>Default Value</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.DefaultValue">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Field In</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="beData.FieldAfter">
+                                                        <option ng-value="0">**select field in**</option>
+                                                        <option ng-repeat="dt in FiledAfterColl | filter: { entityid: beData.EntityId }:true" ng-value="dt.id" ng-selected="dt.id==EAC.FieldAfter">{{dt.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>DropDown List</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.DropDownList">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Source</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Source">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Formula</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.Formula">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <div class="form-group">
+                                                    <label>Col Width</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="beData.ColWidth">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>References</label>
+                                                    <select class="form-control form-control-sm select2" active-select2 ng-model="beData.SelectedRefTable" ng-change="ChangeRefTable(beData)">
+                                                        <option ng-repeat="dt in PkTablesColl" ng-value="dt" ng-selected="dt.Table==beData.SelectedRefTable.TableName">{{dt.Table}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Text Col</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.TextColumn">
+                                                </div>
+                                            </div>
+                                            @*<div class="col-sm-12">
+            <div class="form-group">
+                <label>Select Options</label>
+                <textarea class="textarea form-control form-control-sm" rows="1" ng-model="beData.DropDownList"></textarea>
+            </div>
+        </div>*@
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary" ng-click="AddNewLedgerGroup()"><span class="glyphicon glyphicon-save"></span>Accept</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /.card -->
+                </div>
+
+
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+</div>
+
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

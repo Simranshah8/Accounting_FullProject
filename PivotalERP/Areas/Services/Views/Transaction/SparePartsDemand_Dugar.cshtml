@@ -1,0 +1,212 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/service/transaction/SparePartsDemand.js?v=2"></script>
+<div ng-app="myApp" ng-controller="SparePartsDemand" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-3" ng-hide="HideShow.Branch==true">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-4 col-form-label">Branch<span style="color:red">*</span></label>
+                            <div class="col-sm-8">
+                                <select class="form-control form-control-sm  hideSideBar" style="width: 100%;" ng-model="beData.BranchId" ng-change="getVoucherNo()">
+                                    <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId" ng-selected="vt.BranchId == beData.BranchId">
+                                        {{vt.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-3" ng-hide="HideShow.CostClass==true">
+                        <div class="form-group row">
+                            <label for="inputEmail3" class="col-sm-4 col-form-label">For Year<span style="color:red">*</span></label>
+                            <div class="col-sm-8">
+                                <select class="form-control  form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="getVoucherNo()">
+                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                        {{cc.Name}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="min-width: 120px!important">Job No.</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.JobNo" ng-blur="getJobCardDetails()" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-group d-flex">
+                            <label class="mt-1 text-nowrap" style="width:120px">Entry Date</label>
+                            <input type="text" class="form-control form-control-sm float-right serial hideSideBar" date-picker ng-model="beData.EntryDateTime_TMP" date-detail="beData.EntryDateTimeDet" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header py-1 header-primary" style="background-color: #068abf; color: #ffffff;" ng-click="ShowVehicleHistory(beData.VehicleEntryId)">
+                        <h5 class="mb-0">Job Card Details</h5>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:93px!important">Remarks</label>
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="beData.Remarks"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Engine No</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.EngineNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Ch.Srl.No.</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.ChassisNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Regd. No.</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.RegdNo" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Vin No.</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VinNo" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Model</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VehicleModelName" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="min-width:90px">Type</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VehicleTypeName" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="form-group d-flex">
+                                    <label class="mt-1 text-nowrap" style="width:120px">Party</label>
+                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.Party" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-scroll-x-y table-scroll mt-2" style="max-height: calc(100vh - 100px);">
+                            <table id="maintable" class="table table-bordered table-hover table-sm">
+                                <thead>
+                                    <tr>
+                                        <th style="width:200px; z-index: 3; background-color: #ececec !important">Product</th>
+                                        <th class="text-center" style="width:110px; z-index: 3; background-color: #ececec !important">Closing Stock</th>
+                                        <th class="text-center" style="width:110px; z-index: 3; background-color: #ececec !important">Demand Qty</th>
+                                        <th class="text-center" style="width: 110px; z-index: 3; background-color: #ececec !important">Unit</th>
+                                        <th class="text-center" style="width: 90px; z-index: 3; background-color: #ececec !important">Rate</th>
+                                        <th class="text-center" style="width: 90px; z-index: 3; background-color: #ececec !important">Amount</th>
+                                        <th class="text-center" style="width: 150px; z-index: 3; background-color: #ececec !important">Bill Type</th>
+                                        @*<th class="text-center" style="width: 100px; z-index: 3; background-color: #ececec !important">Is Under</th>*@
+                                        <th style="width: 250px; z-index: 3; background-color: #ececec !important">Remarks</th>
+                                        <th style="width: 250px; z-index: 3; background-color: #ececec !important">Mechanic</th>
+                                        <th class="text-center" style="width: 80px; z-index: 3; background-color: #ececec !important">Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr ng-repeat="sp in beData.SparePartsDemandColl">
+                                        <td>
+                                            <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="sp.ProductId" style="width:100%"
+                                                    placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(sp,$index)" product-detail="sp.productDetail" side-bar-data="sp.sideBarData"></select>
+                                        </td>
+                                        <td class="text-center">
+                                            {{sp.ClosingQty}}
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="text" number-input class="form-control form-control-sm" ng-model="sp.DemandQty" onfocus="this.select()" ng-change="ChangeItemRowValue(sp,'aQty')">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="text" class="form-control  form-control-sm" ng-model="sp.UnitName" disabled>
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="text" number-input class="form-control form-control-sm" ng-model="sp.Rate" onfocus="this.select()" ng-change="ChangeItemRowValue(sp,'rate')" ng-readonly="sp.CanEditRate==false">
+                                        </td>
+                                        <td class="text-center">
+                                            <input type="text" number-input class="form-control form-control-sm" ng-model="sp.Amount" onfocus="this.select()" ng-change="ChangeItemRowValue(sp,'amt')" ng-readonly="sp.CanEditRate==false">
+                                        </td>
+                                        <td>
+                                            <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="sp.JobCardTypeId" data-placeholder="** Bill Type **">
+                                                <option value="{{cl.id}}" ng-repeat="cl in JobCardTypeList" ng-selected="cl.id == sp.JobCardTypeId">{{cl.text}}</option>
+                                            </select>
+                                        </td>
+                                        @*<td class="text-center">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox{{$index}}" ng-model="sp.IsUnderWarrenty">
+                                                    <label for="customCheckbox{{$index}}"
+                                                           class="custom-control-label">
+                                                    </label>
+                                                </div>
+                                            </td>*@
+                                    <td>
+                                        <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="sp.Remarks" data-placeholder="** Remarks **">
+                                            <option value="{{cl.text}}" ng-repeat="cl in RemarkColl" ng-selected="cl.text == sp.Remarks">{{cl.text}}</option>
+                                        </select>
+                                    </td>
+                                        <td>
+                                            <select class="form-control form-control-sm select2" active-select2 ng-model="sp.MechanicId">
+                                                <option ng-repeat="jf in MechanicColl | filter: { BranchId: SelectedVoucher.BDId }:true" ng-value="jf.TranId" ng-selected="jf.TranId==sp.MechanicId">{{jf.Name}}</option>
+                                            </select>
+                                        </td>
+                                        <td class="text-center align-middle">
+                                            <div>
+                                                <a class="p-1" ng-click="AddSparePartDet()" data-original-title="View doc">
+                                                    <i class="fas fa-plus text-secondary"></i>
+                                                </a>
+
+                                                <a class="p-1" ng-click="delSparePartDet($index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <footer class="main-footer">
+                    <div class="text-right control-btns">
+                        <button type="button" class="btn btn-default btn" ng-click="ClearSparePartsDemand()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                        <button type="button" class="btn btn-primary btn" ng-click="AddSparePartsDemand()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Accept</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    @RenderPage("~/Views/Global/_EditTran.cshtml")
+</div>

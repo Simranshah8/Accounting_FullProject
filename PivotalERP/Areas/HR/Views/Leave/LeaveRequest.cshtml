@@ -1,0 +1,318 @@
+﻿
+
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Att_LeaveRequest)";
+</script>
+
+<script src="~/jslib/hr/leave/LeaveRequest.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LeaveRequestController" ng-init="LoadData()">
+    <!-- Main content -->
+    <div class="content">
+        <div class="container-fluid">
+            <div class="tab-content">
+                <!-- Third Tab Content -->
+                <div id="root">
+                    <div class="card-primary card-tabs card">
+                        <!--Employee Leave Request Tab Starts-->
+                        <div class="p-2">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Date From</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newEmployeeLeaveRequest.DateFrom_TMP" date-detail="newEmployeeLeaveRequest.DateFromDet">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="">Date To</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm" date-picker ng-model="newEmployeeLeaveRequest.DateTo_TMP" date-detail="newEmployeeLeaveRequest.DateToDet">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">For</label>
+                                        <select class="form-control form-control-sm" ng-model="newEmployeeLeaveRequest.EmployeeOrSalesman" style="width:100%;">
+                                            <option ng-value="pp.id" ng-repeat="pp in TypeColl" ng-selected="pp.id==newEmployeeLeaveRequest.EmployeeOrSalesman">{{pp.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">Status</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newEmployeeLeaveRequest.LeaveStatus">
+                                            <option ng-value="ls.id" ng-repeat="ls in LeaveStatusColl" ng-selected="newEmployeeLeaveRequest.LeaveStatus==ls.id">{{ls.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-sm btn-info mt-4 float-right load" style="min-width:70px;" ng-click="GetEmpLeaveReqList()">Load</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-2">
+                            <header class="row">
+                                <div class="col-md-6">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeeLeaveRequest">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EmployeeLeaveRequest">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar"
+                                                       type="search" placeholder="Search" ng-model="searchData.EmployeeLeaveRequest"
+                                                       aria-label="Search">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <form class="form-inline  float-right">
+                                        <div class="dropdown dnld-file ml-2" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+
+                                            </div>
+                                        </div>
+                                        <a print-tbl table-id="'#leaveQuota'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                           data-toggle="tooltip" data-placement="top" title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </form>
+                                </div>
+                            </header>
+                            <div>
+                                <div class="table-scroll-x-y" style="height:auto !important; max-height :calc(100vh - 10rem) !important;">
+                                    <table id="leaveQuota" class="main-table table table-bordered table-striped table-hover table-sm">
+                                        <thead class="text-nowrap">
+                                            <tr>
+                                                <th style="background-color: #e9ecef !important; width: 60px">S.No</th>
+                                                <th style="background-color: #e9ecef !important; width: 170px">Name</th>
+                                                <th style="background-color: #e9ecef !important; width: 120px">Leave Type</th>
+                                                <th style="background-color: #e9ecef !important; width: 180px">Leave Reason</th>
+                                                <th style="background-color: #e9ecef !important; width: 110px">Leave Duration</th>
+                                                <th style="background-color: #e9ecef !important; width: 170px">Leave Date ( From - To )</th>
+                                                <th style="background-color: #e9ecef !important; width: 60px">Doc.</th>
+                                                <th style="background-color: #e9ecef !important; width: 90px">Status</th>
+                                                <th style="background-color: #e9ecef !important; width: 150px">Approved By</th>
+                                                <th style="background-color: #e9ecef !important; width: 80px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="cl in EmpLeaveRequestColl | filter:searchData.EmployeeLeaveRequest | itemsPerPage: perPage.EmployeeLeaveRequest" current-page="currentPages.EmployeeLeaveRequest" pagination-id="EmployeeLeaveRequestPagination">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{cl.Name}}</td>
+                                                <td>{{cl.LeaveType}}</td>
+                                                <td>
+                                                    <span ng-if="!cl.showFull && cl.TruncatedRemarks">{{cl.TruncatedRemarks}}</span>
+                                                    <span ng-if="cl.showFull">{{cl.Remarks}}</span>
+                                                    <span ng-if="cl.Remarks && cl.TruncatedRemarks && !cl.showFull" style="color: blue; cursor: pointer;" ng-click="toggleFullRemarks(cl)">...</span>
+                                                </td>
+
+                                                <td>{{cl.LeaveDuration}}</td>
+                                                <td>{{cl.MitiFrom}} TO {{cl.MitiTo}} </td>
+                                                <td><i class="fas fa-file-pdf text-success" style="font-size:20px;" ng-click="ShowDocImg(cl)" ng-show="cl.DocumentColl.length>0"></i></td>
+                                                <td>{{cl.ApprovedType}}</td>
+                                                <td>{{cl.ApprovedBy}}</td>
+                                                <td>
+                                                    <button class="btn btn-success btn-sm" ng-click="ShowApprovedDialog(cl)" style="padding:0.5px 7px;">Action</button>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- table end -->
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="EmployeeLeaveRequestPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                </div>
+                            </footer>
+                        </div>
+
+                        <!--Employee Leave Request Tab Ends-->
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </div>
+    <!-- /.content -->
+    <!--Employee Leave Request Modal Starts-->
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Leave Request From ::  {{CurLeave.EmployeeCode}}-{{CurLeave.Name}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="">Leave Type</label><br />
+                                <label class="form-control form-control-sm">{{CurLeave.LeaveType}}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Leave Duration</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="CurLeave.LeaveDuration" disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Date From</label>
+                                <label class="form-control form-control-sm">{{CurLeave.MitiFrom}}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Date To</label>
+                                <label class="form-control form-control-sm">{{CurLeave.MitiTo}}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="">No of Days</label>
+                                <label class="form-control form-control-sm">{{CurLeave.TotalDays}}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <div class="form-group">
+                                <label for="">Leave Reason</label>
+                                    <textarea class="form-control form-control-sm" rows="1" ng-model="CurLeave.fullWord" disabled></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-2" ng-show="CurLeave.DocumentColl.length>0">
+                            <label>Attachment</label><br />
+                            <i class="fas fa-file-pdf text-success" style="font-size:25px;" ng-click="ShowDocImg(CurLeave)" ng-show="CurLeave.DocumentColl.length>0"></i>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Action</label>
+                            <select class="form-control form-control-sm select2" ng-model="CurLeave.LeaveStatus" ng-show="CurLeave.ApprovedTypeId<=1">
+                                <option ng-value="ls.id" ng-repeat="ls in ApprovedStatusColl" ng-selected="CurLeave.LeaveStatus==ls.id">{{ls.text}}</option>
+                            </select>
+                            @*<label class="form-control form-control-sm" ng-hide="CurLeave.ApprovedTypeId==1">{{CurLeave.ApprovedType}}</label>*@
+                        </div>
+                        <div class="col-md-9">
+                            <div class="form-group">
+                                <label>Remarks</label>
+                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="CurLeave.ApprovedRemarks"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label><b>Leave Details:</b></label>
+                        </div>
+                        <div class="col-md-3">
+                            <label><b>Total: {{EmpWiseRequestColl.length}}</b></label>
+                        </div>
+                        <div class="col-md-3">
+                            <label><b>Used: </b></label>
+                        </div>
+                        <div class="col-md-3">
+                            <label><b>Balance: </b></label>
+                        </div>
+                    </div>
+                    <div class="table-scroll-x-y" style="height:auto !important; max-height :calc(100vh - 6rem) !important;">
+                        <table id="leaveQuota" class="main-table table table-bordered table-striped table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th style="width: 140px;">Leave Type</th>
+                                    <th style="width: 140px;">Leave Duration</th>
+                                    <th style="width: 200px;">Leave Request(From- To)</th>
+                                    <th style="width: 120px;">Total Days</th>
+                                    <th style="width: 200px;">Reason</th>
+                                    @*<th style="width: 120px;">Status</th>*@
+                                    <th style="width: 150px;">Approve By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ew in EmpWiseRequestColl">
+                                    <td>{{ew.LeaveType}}</td>
+                                    <td>{{ew.LeaveDuration}}</td>
+                                    <td>{{ew.MitiFrom}} TO {{ew.MitiTo}}</td>
+                                    <td>{{ew.TotalDays}}</td>
+                                    <td>{{ew.Remarks}}</td>
+                                    @*<td>{{ew.ApprovedType}}</td>*@
+                                    <td>{{ew.ApprovedBy}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-info" data-dismiss="modal" style="min-width: 90px;">Back to List</button>
+                        @*<button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearEmployeeLeaveRequest()">Reset</button>*@
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="LeaveApproved()" ng-show="CurLeave.ApprovedTypeId<=1">Accept</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Employee Leave Request Modal ends-->
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>

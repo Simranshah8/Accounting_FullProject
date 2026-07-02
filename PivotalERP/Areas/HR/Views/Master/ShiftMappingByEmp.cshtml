@@ -1,0 +1,226 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_ShiftMappingByEmp)";
+</script>
+
+
+<script src="~/jslib/hr/Master/ShiftMappingByEmp.js"></script>
+<div ng-app="myApp" ng-controller="MappingByEmpController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllMappingList()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid py-1">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearMapping()" aria-controls="custom-tabs-four-profile" aria-selected="false">Shift Mapping</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Mapping">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Mapping">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Mapping">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllMappingList()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Delete Duplicate" ng-click="DelDuplicate()">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#Mapping'" sheet-name="'MappingList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#Mapping').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#Mapping'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="Mapping">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px ; background-color: #ececec !important; z-index:2;">S.No.</th>
+                                                    <th style="width: 200px; background-color: #ececec !important; z-index:2;">Department</th>
+                                                    <th style="width: 230px; background-color: #ececec !important; z-index:2;">Employee Name</th>
+                                                    <th style="width: 130px; background-color: #ececec !important; z-index:2;">Emp.Code</th>
+                                                    <th style="width: 150px; background-color: #ececec !important; z-index:2;">Working Shift</th>
+                                                    <th style="width: 130px; background-color: #ececec !important; z-index:2;">Date From</th>
+                                                    <th style="width: 130px; background-color: #ececec !important; z-index:2;">Date To</th>
+                                                    <th style="width: 80px ; background-color: #ececec !important; z-index:2;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in MappingList | filter:searchData.Mapping | itemsPerPage: perPage.Mapping" current-page="currentPages.Mapping" pagination-id="MappingPagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{cl.Department}}</td>
+                                                    <td>{{cl.EmpName}}</td>
+                                                    <td>{{cl.EmpCode}}</td>
+                                                    <td>{{cl.WorkingShiftName}}</td>
+                                                    <td>{{cl.DateFrom_BS}}</td>
+                                                    <td>{{cl.DateTo_BS}}</td>
+                                                    <td>
+                                                        @*<a class="p-1" href="#" ng-click="GetMappingById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>*@
+                                                        <a class="p-1" href="#" ng-click="DelMappingById(cl)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="MappingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="">
+                                    <div class="row">
+                                        <div class="col-sm-8 col-lg-8 col-md-8 mb-2"
+                                             id="meet-employee">
+                                            <label for="inlineFormInputGroup">Select Employee</label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newMapping.SelectEmployee">
+
+                                                    <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newMapping.EmployeeSearchBy">
+                                                        {{ss.text}}
+                                                    </option>
+                                                </select>
+                                                <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newMapping.UserId" ng-change="GetShiftMappingByEmp(newMapping)" employee-detail="newMapping.EmployeeDetails" side-bar-data="newMapping.EmpSideBarData" search-by="newMapping.EmployeeSearchBy">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mt-4 ml-2">
+                                                <input type="checkbox" id="chkUseSSL" ng-model="newMapping.IsMultipleShift">
+                                                <label class="ml-2" for="chkUseSSL">Enable Multiple shift in a day</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card" style="border:1px solid #cad8d2">
+                                        <div class="table-scroll-x-y table-scroll" style="height:auto !important;">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 80px">S.No.</th>
+                                                        <th style="width: 110px">Working Shift</th>
+                                                        <th style="width: 110px">Date From</th>
+                                                        <th style="width: 100px">Date To</th>
+                                                        <th style="width: 90px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="W in newMapping.WorkShiftColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="W.WorkingShiftId">
+                                                                <option ng-value="ws.WorkingShiftId" ng-selected="ws.WorkingShiftId==W.WorkingShiftId" ng-repeat="ws in WorkingShiftList">{{ws.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="W.DateFrom_TMP" date-detail="W.DateFromDet">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="W.DateTo_TMP" date-detail="W.DateToDet">
+                                                        </td>
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddWorkShift($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delWorkShift($index,W)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button" class="btn btn-sm btn-default load" style="min-width: 90px;" ng-click="ClearMapping()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-info load" style="min-width: 90px;" ng-click="SaveUpdateMapping()">{{newMapping.Mode}}</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>

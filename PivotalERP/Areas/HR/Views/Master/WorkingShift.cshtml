@@ -1,0 +1,539 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_WorkingShift)";
+</script>
+
+
+<script src="~/jslib/hr/Master/WorkingShift.js"></script>
+<div ng-app="myApp" ng-controller="WorkingShiftController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllCreateList()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid py-1">
+                <dv class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="home-tab" data-toggle="pill" href="#home" role="tab" aria-controls="home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="profile-tab" data-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Working Shift</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="pills-tabContent">
+                            <!-- end if-page-have-nav-tabs -->
+                            <div class="tab-content" id="myTabContent">
+                                <!--Create Shift Tab Starts-->
+                                <div class="tab-pane fade show active main-section" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="">
+                                        <header class="row">
+                                            <div class="col-md-7">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Create">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Create">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="input-group input-group-sm table-search-filed">
+                                                            <input class="form-control form-control-navbar"
+                                                                   type="search" placeholder="Search" ng-model="searchData.Create"
+                                                                   aria-label="Search">
+                                                            <div class="input-group-append">
+                                                                <button class="btn btn-default border-left-0" type="submit">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <!-- end col-md-8 -->
+                                            <div class=" col-md-5">
+                                                <div class=" float-right form-inline">
+
+                                                    <div class="dropdown dnld-file" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#createShift'" sheet-name="'createShiftList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#createShift').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                        </div>
+                                                        <a print-tbl table-id="'#createShift'" class="btn btn-secondary btn-light btn-sm wait"
+                                                           title="Print">
+                                                            <i class="fas fa-print"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </header>
+                                        <div class="search-toolbar mt-2">
+
+                                            <div class="">
+                                                <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="createShift">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 60px ; background-color: #ececec !important; z-index:2;">S.No.</th>
+                                                            <th style="width: 200px; background-color: #ececec !important; z-index:2;">Name</th>
+                                                            <th style="width: 130px; background-color: #ececec !important; z-index:2;">Code</th>
+                                                            <th style="width: 130px; background-color: #ececec !important; z-index:2;">OnDuty Time</th>
+                                                            <th style="width: 130px; background-color: #ececec !important; z-index:2;">OffDuty Time</th>
+                                                            <th style="width: 130px; background-color: #ececec !important; z-index:2;">Shift Duration(minute)</th>
+                                                            <th style="width: 80px ; background-color: #ececec !important; z-index:2;">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr dir-paginate="cl in WorkingShiftList | filter:searchData.Create | itemsPerPage: perPage.Create" current-page="currentPages.Create" pagination-id="CreatePagination">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>{{cl.Name}}</td>
+                                                            <td>{{cl.Code}}</td>
+                                                            <td>{{cl.OnDutyTime |timeFormat}}</td>
+                                                            <td>{{cl.OffDutyTime |timeFormat}}</td>
+                                                            <td>{{cl.ShiftDuration}}</td>
+                                                            <td>
+                                                                <a class="p-1" href="#" ng-click="GetCreateById(cl)">
+                                                                    <i class="fas fa-edit text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#" ng-click="DelCreateById(cl)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                                <!-- table end -->
+                                            </div>
+                                        </div>
+                                        <footer class="row align-items-center mt-1">
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="CreatePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+
+                                </div>
+                                <!--Working Shift Tab Ends-->
+                                <!--Shift Mapping Tab Starts-->
+                                <div class="tab-pane fade main-section" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <div class="p-2">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label for="">Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newWorkingShift.Name" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Code</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newWorkingShift.Code" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">OnDuty Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.OnDutyTime" ng-change="CalculateDuration()" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">OffDuty Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.OffDutyTime" ng-change="CalculateDuration()" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">ShiftDuration(minute):</label>
+                                                    <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.ShiftDuration" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card" style="border: 1px solid aliceblue;">
+                                            <div class="card-header p-2" style="background-color: aliceblue; ">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label>Shift Break Detail</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" ng-model="newWorkingShift.EnableTwoShiftInADay">
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                Enable Two Shift In A Day
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="custom-control custom-checkbox mt-4">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckboxbreak1" ng-model="newWorkingShift.Break1">
+                                                            <label for="customCheckboxbreak1"
+                                                                   class="custom-control-label">
+                                                                Break1
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Start Time</label>
+                                                            <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.Break1StartTime" ng-change="CalculateDuration()" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">End Time</label>
+                                                            <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.Break1EndTime" ng-change="CalculateDuration()" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Duration(minute):</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.Break1Duration" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="custom-control custom-checkbox mt-4">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckboxbreak2" ng-model="newWorkingShift.Break2">
+                                                            <label for="customCheckboxbreak2"
+                                                                   class="custom-control-label">
+                                                                Break2
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Start Time</label>
+                                                            <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.Break2StartTime" ng-change="CalculateDuration()" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">End Time</label>
+                                                            <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.Break2EndTime" ng-change="CalculateDuration()" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Duration(minute):</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.Break2Duration" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="custom-control custom-checkbox mt-4">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckboxbreakhalf" ng-model="newWorkingShift.HalfDay">
+                                                            <label for="customCheckboxbreakhalf"
+                                                                   class="custom-control-label">
+                                                                Half Day
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Start Time</label>
+                                                            <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.HalfDayStartTime" ng-change="CalculateDuration()" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">End Time</label>
+                                                            <input type="time" class="form-control form-control-sm" ng-model="newWorkingShift.HalfDayEndTime" ng-change="CalculateDuration()" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Duration(minute):</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.HalfDayDuration" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card" style="border: 1px solid #d4e1db;">
+                                            <div class="card-header p-2" style="background-color: aliceblue;">
+                                                Advance Employee Policy Details
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Permitted Late Arrival(In Min.)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.PermittedLateArrival" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Permitted Early Departure(In Min.)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.PermittedEarlyDeparture" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Mark as Half Day if working hour Less Than(In Min.)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.HalfDayLessThanHr" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Mark as Absent if working hour Less Than(In Min.)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.AbsentiLessThanHr" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card" style="border: 1px solid #d4e1db;">
+                                            <div class="card-header p-2" style="background-color: aliceblue;">
+                                                Half Day & Absent For Late Arrival & Early Departure
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Late Arrival(In Min.)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.LateArrival" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Show As for Late Arrival</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.LateArrivalCut">
+                                                                <option ng-repeat="A in ArrivalCutColl" ng-value="A.id" ng-selected="A.id == newWorkingShift.LateArrivalCut "> {{A.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Early Departure(In Min.)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.EarlyDeparture" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Show As for Early Departure</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.EarlyDepartureCut">
+                                                                <option ng-repeat="A in ArrivalCutColl" ng-value="A.id" ng-selected="A.id == newWorkingShift.EarlyDepartureCut "> {{A.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card" style="border: 1px solid #d4e1db;">
+                                            <div class="card-header p-2" style="background-color: aliceblue;">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox" ng-model="newWorkingShift.LateIncoming"
+                                                           id="customCheck" value="1">
+                                                    <label for="customCheck"
+                                                           class="custom-control-label">Enable Late Incoming</label>
+                                                </div>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>No Of Late In A Month</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 Times" class="form-control form-control-sm" ng-model="newWorkingShift.NoOfLateInAMonth" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Cut Days</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.CutDays">
+                                                                <option ng-repeat="A in ArrivalCutColl" ng-value="A.id" ng-selected="A.id == newWorkingShift.CutDays "> {{A.text}}</option>
+
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-3 col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Ignore Over time Less than(In Min)</label>
+                                                            <input type="text" number-input onfocus="this.select();" placeholder="5 min" class="form-control form-control-sm" ng-model="newWorkingShift.IgnoreOTDLessthan" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card" style="border: 1px solid #e9f2ee; ">
+                                            <div class="card-header p-2" style="background-color: aliceblue;">
+                                                <label>Weekly off days Condiditon</label>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>First Weekly Off</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.FirstWeeklyOff">
+                                                                <option ng-repeat="ct in FirstWeeklyOffList track by ct.id" ng-value="{{ ct.id }}" ng-selected="ct.id==newWorkingShift.FirstWeeklyOff">
+                                                                    {{ct.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Second Weekly Off</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.SecondWeeklyOff">
+                                                                <option ng-repeat="ct in FirstWeeklyOffList track by ct.id" ng-value="{{ ct.id }}" ng-selected="ct.id==newWorkingShift.SecondWeeklyOff">
+                                                                    {{ct.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Second Weekly Off Type</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.SecondWeeklyOffType">
+                                                                <option ng-repeat="ct in SecondWeeklyOffTypeList track by ct.id" ng-value="{{ ct.id }}" ng-selected="ct.id==newWorkingShift.SecondWeeklyOffType">
+                                                                    {{ct.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Remove Duplicate Punch(minutes)</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.RemoveDuplicatePunch" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Single Punch Policy</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newWorkingShift.SinglePunchPolicy">
+                                                                <option ng-repeat="ct in SinglePunchPolicyList track by ct.id" ng-value="{{ ct.id }}" ng-selected="ct.id==newWorkingShift.SinglePunchPolicy">
+                                                                    {{ct.text}}
+                                                                </option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Max Early Hour Allow (minutes)</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.MaxEarlyMinutesAllow" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">Max OT Allow (minutes)</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.MaxOTAllow" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label for="">No of Present for Weekly Off</label>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="newWorkingShift.NoofPresentforWeeklyOff" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="card">
+                                            <div class="card-header p-2" style="background-color: aliceblue; border: 1px solid #ccc ">
+                                                <div class="row">
+                                                    <div class="col-md-2 col-sm-2">
+                                                        <label class="float-right mt-1">OT Calculation</label>
+                                                    </div>
+                                                    <div class="col-md-3 col-sm-3">
+                                                        <select class="form-control form-control-sm select2" name="OTCalculation" id="txtOTCalculation" ng-model="newWorkingShift.OTCalculation">
+                                                            <option ng-repeat="ct in OTCalculationList track by ct.id" ng-value="{{ct.id}}" ng-selected="ct.id==newWorkingShift.OTCalculation">
+                                                                {{ct.text}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-1 col-sm-1">
+                                                        <label>/ WAWAbsent </label>
+                                                    </div>
+                                                    <div class="col-md-1 col-sm-1">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="waw" ng-model="newWorkingShift.WAWAbsent">
+                                                            <label for="waw"
+                                                                   class="custom-control-label">
+                                                                W-A-W
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1 col-sm-1">
+                                                        <label>/ LWL Absent  </label>
+                                                    </div>
+                                                    <div class="col-md-1 col-sm-1">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="lwl" ng-model="newWorkingShift.LWLAbsent">
+                                                            <label for="lwl"
+                                                                   class="custom-control-label">
+                                                                L-W-L
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <!--New Field Added by suresh on 4 Ashwin-->
+                                            <div class="col-sm-2 col-lg-2  col-md-2">
+                                                <div class="form-group">
+                                                    <label>Absent Notification Time</label>
+                                                    <input type="time"
+                                                           class="form-control form-control-sm"
+                                                           placeholder="" ng-model="newWorkingShift.AbsentNoticeTime" />
+                                                </div>
+                                            </div>
+                                            <!--Ends-->
+                                        </div>
+
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button" class="btn btn-sm btn-default load" style="min-width: 90px;" ng-click="ClearCreate()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-info load" style="min-width: 90px;" ng-click="SaveUpdateCreate()">{{newWorkingShift.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!--Shift Mapping Tab Ends-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,186 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/hr/master/Category.js"></script>
+<div ng-app="myApp" ng-controller="CategoryController" ng-init="LoadData()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div id="category-section">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Category">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Category">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Category">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#category'" sheet-name="'categoryDetails'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#category').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                            </div>
+                                            <a print-tbl table-id="'#EmployeeProfile'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary load"
+                                                    id="add-category-details" style="min-width: 110px;" ng-click="ClearCategory()">
+                                                <i class="fas fa-plus w-t"></i> Add New Category
+                                            </button>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mb-3">
+                                    <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                        <thead>
+                                            <tr>
+                                                <th style="text-align: center; width: 60px; ">
+                                                    S.No
+                                                </th>
+                                                <th style="text-align: center; width: 200px; ">
+                                                    Name
+                                                </th>
+                                                <th style="text-align: center; width: 150px; ">
+                                                    OrderNo
+                                                </th>
+                                                <th style="text-align: center; width: 150px; ">
+                                                    Code
+                                                </th>
+                                                <th style="text-align: center; width: 80px;">Action</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr dir-paginate="C in CategoryList | filter:searchData.Category | itemsPerPage: perPage.Category" current-page="currentPages.Category" pagination-id="CategoryPagination">
+                                                <td style="text-align:center;margin:auto">
+                                                    {{$index+1}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{C.Name}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{C.OrderNum}}
+                                                </td>
+                                                <td style="text-align:left;margin:auto">
+                                                    {{C.Code}}
+                                                </td>
+                                                <td class="project-actions" style="text-align:center">
+                                                    <div class="btn-group-sm">
+                                                        <a class="btn btn-success" ng-click="getCategoryById(C, $index)"><i class="fas fa-pencil-alt"></i></a>
+                                                        <a class="btn btn-danger" ng-click="DelCategoryById(C)"><i class="fas fa-trash"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+
+                                    </table>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="CategoryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div id="category-form">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Order No</label>
+                                                <input type="number" class="form-control form-control-sm" style="width:100%" ng-model="newDet.OrderNum">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Category Name</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Name">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Code</label>
+                                                <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="newDet.Code">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" ng-click="ClearCategory()">Cancel</button>
+                                        <button type="button" class="btn btn-secondary" id="back-to-category-list">Back to List</button>
+
+                                        <button type="button" class="btn btn-primary" ng-click="SaveCategory()">{{newDet.Mode}}</button>
+                                    </div>
+
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+</div>
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

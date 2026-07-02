@@ -1,0 +1,231 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/service/reporting/ServiceRemainder.js"></script>
+<style>
+
+
+    .table-container {
+        overflow: auto;
+    }
+
+    .table-scroll {
+        max-height: 100%;
+        overflow-y: auto;
+    }
+
+    .table {
+        margin: 0;
+        width: 100%;
+    }
+
+    .centered-cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+    }
+
+        .centered-cell button {
+            margin: 0;
+        }
+</style>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="JobCardDetailController">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Anything to be added here-->
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <!-- Main content -->
+                <section>
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card p-2">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="JobCardDetail.DateFrom_TMP" style="max-width:100px" date-detail="JobCardDetail.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="JobCardDetail.DateTo_TMP" style="max-width:100px" date-detail="JobCardDetail.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="row" ng-show="BranchList.length>1">
+                                                    <div class="col-md-4">
+                                                        <label>Branch</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control form-control-sm select2" ng-model="JobCardDetail.BranchId" data-placeholder="*Select Branch*">
+                                                            <option ng-value="cl.id" ng-repeat="cl in BranchList" ng-selected="cl.id==JobCardDetail.BranchId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                         
+                                            <div class="col-md-5">
+                                                <div class="form-group text-right">
+                                                    <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 75px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetAllJobCardDetail()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2" id="grid-table">
+                                        <header class="row">
+                                            <div class="col-md-5 col-sm-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Find:</span>
+                                                            </div>
+                                                            <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                                <option>Contain</option>
+                                                                <option>Prefix</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-group input-group-sm" style="width: 180px;">
+                                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-change="onFilterTextBoxChanged()" ng-model="search">
+
+                                                            <div class="input-group-append">
+                                                                <button type="submit" class="btn btn-default">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7 col-sm-7 text-right">
+                                                <form class="form-inline float-right">
+
+                                                    <div class="dropdown dnld-file ml-2">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#" ng-click="onBtExport()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image">
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon">
+                                                                CSV
+                                                            </a>
+                                                           
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" title="Print" ng-click="Print()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                        <i class="fas fa-filter"></i>
+                                                    </a>
+                                                </form>
+                                            </div>
+                                        </header>
+                                        <div id="datatable" style="height: calc(100vh - 7rem) !important; width: 100%; " class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                    </div>
+                                    <!-- Modal HTML -->
+
+                                    <div class="modal fade" id="AddComment">
+                                        <div class="modal-dialog modal-xl">
+                                            <div class="modal-content">
+                                                <div class="modal-header p-2">
+                                                    <h5 class="modal-title" id="exampleModalLongTitle">Comments for : <b> {{newComment.PartyName}}</b></h5>
+                                                    <button type="button" class="close float-right" data-dismiss="modal">&times;</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            @*<div class="row">
+                                                                <div class="d-flex mb-2 p-2">
+                                                                    <p class="ml-2" ng-bind-html="newComment.Description |unsafe"></p>
+                                                                </div>
+                                                            </div>*@
+                                                            <div class="row">
+                                                                <div class="col-md-12">
+                                                                    <div class="mb-3">
+                                                                        <div>
+                                                                            <div class="d-flex justify-content-start align-items-center mb-2" ng-repeat="C in CommentList">
+                                                                                <!-- <i class="fas fa-user-circle fa-2x mr-2"></i> -->
+                                                                                <i class="mr-2">
+                                                                                    <i class="fas fa-user text-info" style="font-size:25px"></i>
+                                                                                    @*<img src="/wwwroot/membership/images/man.png" alt="" style="height: auto; width: 28px;">*@
+                                                                                </i>
+                                                                                <div>
+                                                                                    <p class="mb-0 ml-1" style="font-size: 12px; color: #837e7e;">{{C.UserName}}, {{C.LogMiti}},{{C.LogDateTime | timeFormat}}</p>
+                                                                                    <div class="text-white rounded px-2 py-1" style="color: black !important;background-color:aliceblue;border:1px solid #ccc;">
+                                                                                        <p class="mb-0" ng-bind-html="C.Remarks |unsafe"></p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+
+
+                                                                            <div class="row ml-1 mt-3">
+                                                                                <div class="col-md-12">
+                                                                                    <div class="d-flex">
+                                                                                        @*<input type="text" html-editor class="form-control form-control-sm" ng-model="newComment.Remarks">*@
+                                                                                        <textarea class="form-control form-control-sm" rows="3" ng-model="newComment.Remarks"></textarea>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-primary" ng-click="SaveRemarks()">Save</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>
+

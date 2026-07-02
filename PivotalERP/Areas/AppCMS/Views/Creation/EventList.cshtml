@@ -1,0 +1,160 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    th,
+    tr,
+    td {
+        width: 30px;
+        height: 30px;
+        text-align: center;
+    }
+
+
+
+    td {
+        height: 45px;
+        margin: 2px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    tr {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    th {
+        font-weight: 700;
+        background-color: #e9f2ee;
+        color: #025a58;
+    }
+</style>
+<script src="~/jslib/AppCMS/EventList.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="npEventListController" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card" style="border: 1px solid #ccc;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th colspan="7" class="pt-2" style="background-color: #068abf; color: lightcyan;">
+                                            <i class="fas fa-chevron-left float-left ml-4" ng-click="nextPreviusMonth(-1)"></i>{{AcademicCalendar.CurMonth.MonthName}}
+                                            {{AcademicCalendar.YearId}} <i class="ml-4 fas fa-angle-right float-right mr-4" ng-click="nextPreviusMonth(1)"></i>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th style="background-color: #7abe5a; color: #ffff;">Sun</th>
+                                        <th style="background-color: #7abe5a; color: #ffff;">Mon</th>
+                                        <th style="background-color: #7abe5a; color: #ffff;">Tue</th>
+                                        <th style="background-color: #7abe5a; color: #ffff;">Wed</th>
+                                        <th style="background-color: #7abe5a; color: #ffff;">Thu</th>
+                                        <th style="background-color: #7abe5a; color: #ffff;">Fri</th>
+                                        <th style="background-color: #7abe5a; color: red;" class="text-danger">Sat</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @*<ul class="days">
+                                            <li ng-repeat="dd in mn.BlankDaysColl track by $index">&emsp;</li>
+                                            <li class="wait" ng-repeat="dd in mn.DataColl" ng-click="ClickOnDay(dd)">
+                                                {{dd.ND}}
+                                                <span style="content: ''; display: block;  height: 24px; width: 100%; margin-top: -21px; border: 1px solid #ccc;border-radius: 50%;" ng-style="{ 'background-color' : ec.ColorCode }"> </span>
+                                            </li>
+                                        </ul>*@
+                                    <tr ng-repeat="rc in AcademicCalendar.CurMonth.RowColl">
+                                        <td ng-repeat="dd in rc.ColColl">
+                                            {{dd.ND}}
+                                            <span ng-show="dd.IsWeekend==true" style="content: ''; display: block;  height: 24px; width: 100%; margin-top: -21px; border: 1px solid #ccc;border-radius: 50%;" ng-style="{ 'background-color' : dd.WeekendColorCode }"> </span>
+                                            <span style="content: ''; display: block;  height: 24px; width: 100%; margin-top: -21px; border: 1px solid #ccc;border-radius: 50%;" ng-style="{ 'background-color' : ec.ColorCode }" ng-repeat="ec in dd.EventColl"> </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card card-widget" style="border: 1px solid #ccc;">
+                            <div class="card-header p-2">
+                                <h5 class="mb-0" style="color:#1f5d9e"><b>Events and Holidays in {{AcademicCalendar.CurMonth.MonthName}}</b></h5>
+                            </div>
+                            <div class="card-footer card-comments" style="height:277px;overflow-y: auto;">
+                                <div class="card-comment" ng-repeat="ec in AcademicCalendar.CurMonth.EventColl">
+                                    <img class="img-circle img-sm" ng-src="{{ec.ImagePath}}" ng-click="ShowPersonalImg(ec)" alt="User Image">
+                                    <div class="comment-text">
+                                        <span class="username">
+                                            {{ec.Name}}
+                                            <span class="text-muted float-right">{{ec.FromDate_BS}} </span>
+                                        </span>
+                                        {{ec.Description}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="card" style="border: 1px solid #ccc;">
+                    <div class="card-header border-0 p-2">
+                        <h3 class="card-title"><b>All Events for the year {{AcademicCalendar.YearId}}</b></h3>
+                    </div>
+                    <div class="table-scroll-x-y" style="max-height: 500px;">
+                        <table class="table table-head-fixed table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 250px; z-index: 3; background-color: #e9f2ee!important">Event Name</th>
+                                    <th style="width: 120px; z-index: 3; background-color: #e9f2ee !important ">Event Type</th>
+                                    <th style="width: 250px; z-index: 3; background-color: #e9f2ee !important ">Description</th>
+                                    <th style="width: 120px; z-index: 3; background-color: #e9f2ee !important ">Date From </th>
+                                    <th style="width: 120px; z-index: 3; background-color: #e9f2ee !important ">Date To </th>
+                                    <th style="width: 200px; z-index: 3; background-color: #e9f2ee !important ">Applied For Department</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ec in AllEventList">
+                                    <td class="text-left p-1 align-middle">
+                                        <div class="row">
+                                            <div class="col-md-2"><img class="img-fluid" ng-src="{{ec.ImagePath}}" ng-click="ShowPersonalImg(ec)" style="max-height: 50px;"></div>
+                                            <div class="col-md-10"> {{ec.Name}}</div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">{{ec.EventType}}</td>
+                                    <td class="align-middle">{{ec.Description}}</td>
+                                    <td class="align-middle">{{ec.FromDate_BS}}</td>
+                                    <td class="align-middle">{{ec.ToDate_BS}}</td>
+                                    <td class="align-middle">{{ec.ForDepartment}} </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-0">
+                    <img ng-src="{{viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                    <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

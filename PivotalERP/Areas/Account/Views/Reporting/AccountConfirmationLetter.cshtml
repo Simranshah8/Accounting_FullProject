@@ -1,0 +1,256 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.AccountConfirmationLetter)";
+</script>
+<script src="~/jslib/account/reporting/AccountConfirmationLetter.js?v=20250701"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="AccountConfirmationLetter">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap px-3">
+                        <!--Add anything you want here for sidebar-->
+                        <div class="d-xl-block" style="height: 200px;">
+                            <div class="form-group" ng-show="BranchList.length>1">
+                                <label class="mr-2 mt-1">Branch</label>
+                                <select class="form-control form-control-sm hideSideBar" active-select2 style="width: 100%;" ng-model="AccountConfirmationLetter.BranchId" placeholder="*select branch*">
+                                    <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId">
+                                        {{vt.Name}}
+                                    </option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <section class="">
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card px-2 pt-1 pb-0">
+                                        <div class="row">
+                                            <div class="col-sm-5">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div>
+                                                            <select class="form-control form-control-sm text-dark input-sm" ng-model="AccountConfirmationLetter.PeriodOPT" style="background-color: #e9ecef" ng-change="AccountConfirmationLetter()">
+                                                                <option ng-value="poc.id" ng-repeat="poc in PeriodOptColl">{{poc.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-group-prepend" ng-show="AccountConfirmationLetter.PeriodOPT==1">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input ng-show="AccountConfirmationLetter.PeriodOPT==1" class="form-control text-dark input-sm" type="text" date-picker ng-model="AccountConfirmationLetter.DateFrom_TMP" style="max-width:100px" date-detail="AccountConfirmationLetter.DateFromDet" />
+                                                        <div class="input-group-prepend" ng-show="SalesVatRegister.PeriodOPT==1">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input ng-show="AccountConfirmationLetter.PeriodOPT==1" class="form-control text-dark input-sm" type="text" date-picker ng-model="AccountConfirmationLetter.DateTo_TMP" style="max-width:100px" date-detail="AccountConfirmationLetter.DateToDet" />
+
+                                                        <div class="input-group-prepend" ng-show="AccountConfirmationLetter.PeriodOPT==2">
+                                                            <span class="input-group-text">Year:</span>
+                                                        </div>
+                                                        <select class="form-control form-control-sm" ng-show="AccountConfirmationLetter.PeriodOPT==2" style="width:100px" ng-model="AccountConfirmationLetter.RptCostClassId" ng-change="GetPeriodMonths(AccountConfirmationLetter.RptCostClassId)">
+                                                            <option ng-value="rCC.CostClassId" ng-repeat="rCC in RptCostClassColl" ng-selected="rCC.CostClassId==AccountConfirmationLetter.RptCostClassId">{{rCC.Name}}</option>
+                                                        </select>
+                                                        <div class="input-group-prepend" ng-show="SalesVatRegister.PeriodOPT==2">
+                                                            <span class="input-group-text">Month:</span>
+                                                        </div>
+                                                        <select class="form-control form-control-sm" ng-show="AccountConfirmationLetter.PeriodOPT==2" style="width:100px" ng-model="AccountConfirmationLetter.SelectedMonth" ng-change="ChangePeriodMonth(AccountConfirmationLetter.SelectedMonth)">
+                                                            <option ng-value="RptM" ng-repeat="RptM in PeriodMonthColl" ng-selected="RptM.SNo==AccountConfirmationLetter.RptMonthSNo">{{RptM.MonthName}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-md-2" ng-show="BranchList.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label class="mr-2">Branch</label>
+                                                    <select class="form-control form-control-sm hideSideBar" active-select2 style="width: 100%;" ng-model="AccountConfirmationLetter.BranchId" placeholder="*select branch*">
+                                                        <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId">
+                                                            {{vt.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>*@
+                                            
+
+                                            <div class="col-md-3" >
+                                                <div class="form-group d-flex">
+                                                    <label class="mr-2">Group</label>
+                                                    <select class="form-control form-control-sm select2" style="width: 80%;" ng-model="AccountConfirmationLetter.LedgerGroupId" data-placeholder="**select group**">
+                                                        <option ng-value="lg.LedgerGroupId" ng-repeat="lg in LedgerGroupList" ng-selected="lg.LedgerGroupId==lg.LedgerGroupId">{{lg.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group d-flex">
+                                                    <label class="mr-2" style="min-width:26%">Report As</label>
+                                                    <select class="form-control form-control-sm  ml-2" style="width:80%" ng-model="AccountConfirmationLetter.ReportType" data-placeholder="*select report type*">
+                                                        <option ng-value="a.id" ng-repeat="a in GroupByColl" ng-selected="a.id==AccountConfirmationLetter.ReportType">{{a.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-sm-1">
+                                                <button type="button" class="btn  load btn-primary px-1 float-right" style="min-width: 75px" ng-click="GetAccountConfirmationLetter()"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 ">
+                                        <header class="row">
+                                            <div class="col-md-4 col-sm-4">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Find:</span>
+                                                            </div>
+                                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                            <select class="form-control pr-0"
+                                                                    id="exampleFormControlSelect1">
+                                                                <option>Contain</option>
+                                                                <option>Prefix</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                            <div class="input-group-append">
+                                                                <button type="submit" class="btn btn-default">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-8 col-sm-8 text-right">
+                                                <form class="form-inline  float-right">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Search By:</span>
+                                                        </div>
+                                                        <div class="input-group-prepend">
+                                                            <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                                <option ng-value="asp" ng-repeat="asp in columnDefs">{{asp.headerName}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm" style="width: 200px;">
+                                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                        <div class="input-group-append">
+                                                            <button type="submit" class="btn btn-default">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="dropdown dnld-file ml-2" title="Download File">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                                     class="img-fluid exports-icon">
+                                                                CSV
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       title="Print" ng-click="Print()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                     <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                        <i class="fas fa-save"></i>
+                                                    </a>
+                                                </form>
+
+                                            </div>
+
+                                        </header>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div id="datatable" style="height: calc(100vh - 10rem);width: 100%;" class="ag-theme-alpine"></div>
+                                                <div id="myGridBottom" style="height: calc(100vh - 90vh);" class="ag-theme-alpine"></div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+                        <!-- /.row -->
+                    </div>
+                    <!--/. container-fluid -->
+                </section>
+            </div>
+            <!-- /.content -->
+            <!-- Add ReportTemplates Modal Dailog -->
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+	
+	@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+</div>
+
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

@@ -1,0 +1,671 @@
+﻿
+@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+
+    .switch-field {
+        display: flex;
+        overflow: hidden;
+    }
+
+        .switch-field input {
+            position: absolute !important;
+            clip: rect(0, 0, 0, 0);
+            height: 1px;
+            width: 1px;
+            border: 0;
+            overflow: hidden;
+        }
+
+        .switch-field label {
+            background-color: #e4e4e4;
+            color: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+            line-height: 1;
+            text-align: center;
+            padding: 8px 16px;
+            margin-right: -1px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.1s ease-in-out;
+        }
+
+            .switch-field label:hover {
+                cursor: pointer;
+            }
+
+        .switch-field input:checked + label {
+            background-color: #127dc2;
+            box-shadow: none;
+            color: #ffff !important
+        }
+
+        .switch-field label:first-of-type {
+            border-radius: 4px 0 0 4px;
+        }
+
+        .switch-field label:last-of-type {
+            border-radius: 0 4px 4px 0;
+        }
+        table th, table td{
+            padding:0.3rem!important
+        }
+</style>
+<script src="~/jslib/Task/ViewTask.js?v=3"></script>
+<div ng-app="myApp" ng-controller="ViewTaskController" ng-init="LoadData()">
+    <div class="container-fluid">
+        <div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-12">
+                    <!--<div class="card p-2 mb-2">
+                        <ul class="nav nav-pills " role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="Generated-Ticket-tab" data-toggle="pill" href="#Generated-Ticket" role="tab" ng-click="OnClickTab(1)" aria-controls="Generated-Ticket" aria-selected="true">Assign Task</a>
+                            </li>-->
+                            @*<li class="nav-item">
+                                <a class="nav-link" id="Forwaded-Ticket-tab" data-toggle="pill" href="#Forwaded-Ticket" role="tab" ng-click="OnClickTab(2)" aria-controls="Forwaded-Ticket" aria-selected="false">Mentioned Task</a>
+                            </li>*@
+                        <!--</ul>
+                    </div>-->
+                    <div class="">
+                        <div class="tab-content" id="custom-tabs-two-tabContent">
+                            <div class="tab-pane fade show active" id="Generated-Ticket" role="tabpanel" aria-labelledby="Generated-Ticket-tab">
+                                <div id="UpdateExecutive-section">
+                                    <div class="card p-2">
+                                        <div class="">
+                                            <div class="row">
+                                                @*<div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Product Name</label>
+                                                        <select class="form-control form-select form-control-sm select2" ng-model="newDetFilter.ProductNameId" style="width: 100%;">
+                                                            <option ng-repeat="c in ProductNameList" ng-value="c.ProductNameId">{{c.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+                                                <div class="col-md-3">
+                                                    <div class="form-group">
+                                                        <label for="">Employee</label>
+                                                        <select class="form-control form-select form-control-sm select2" ng-model="newDetFilter.SupportExecutiveId" style="width: 100%;" data-placeholder="**select Employee**">
+                                                            <option ng-repeat="E in EmployeeProfileList" ng-value="E.EmployeeId" ng-selected="newDet.AssignTo==E.EmployeeId">{{E.Name}} - {{E.EmployeeCode}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Task For</label>
+                                                        <select class="form-control form-select form-control-sm" ng-model="newDetFilter.RequirementTypeId" style="width: 100%;">
+                                                            <option ng-repeat="c in RequirementProblemColl" ng-value="c.TaskTypeId">{{c.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Priority</label>
+                                                        <select class="form-control form-select form-control-sm" ng-model="newDetFilter.PriorityId" style="width: 100%;" ng-change="GetAllGenerateTicketList()">
+                                                            <option ng-repeat="c in PriorityCol" ng-value="c.id" ng-selected="newDetFilter.PriorityId==c.id">{{c.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <label for="">Show</label>
+                                                        <select class="form-control form-select form-control-sm" ng-model="newDetFilter.ApprovedId" style="width: 100%;" ng-change="GetAllGenerateTicketList()">
+                                                            <option ng-repeat="c in ApprovedColl" ng-value="c.id" ng-selected="newDetFilter.ApprovedId==c.id">{{c.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <header class="row d-flex">
+                                                <div class="col-md-12">
+                                                    <div class="clearfix">
+                                                        <form class="form-inline">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Show</span>
+                                                                </div>
+                                                                <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                <select class="form-select form-control border-left-0 border-right-0 px-1" ng-model="paginationOptions.pageSize" style="width:65px;">
+                                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==paginationOptions.pageSize">{{pp.text}}</option>
+                                                                </select>
+                                                                <div class="input-group-append">
+                                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm table-search-filed mb-1">
+                                                                <input class="form-control form-control-navbar" type="search"
+                                                                       placeholder="Search" aria-label="Search" ng-model="searchData.ViewGenerate" style="width:135px;">
+                                                                <div class="input-group-append">
+                                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="switch-field ml-1">
+                                                                <input type="radio" id="all" ng-model="newDetFilter.TicketStatus" name="statuschoose" ng-value="0" ng-change="GetAllGenerateTicketList()" />
+                                                                <label class="px-1" for="all">All</label>
+                                                                <input type="radio" id="open" ng-model="newDetFilter.TicketStatus" name="statuschoose" ng-value="1" ng-change="GetAllGenerateTicketList()" />
+                                                                <label class="px-1" for="open">Open</label>
+                                                                <input type="radio" id="hold" ng-model="newDetFilter.TicketStatus" name="statuschoose" ng-value="2" ng-change="GetAllGenerateTicketList()" />
+                                                                <label class="px-1" for="hold">Hold</label>
+                                                                <input type="radio" id="inprogress" ng-model="newDetFilter.TicketStatus" name="statuschoose" ng-value="3" ng-change="GetAllGenerateTicketList()" />
+                                                                <label class="px-1" for="inprogress">InProgress</label>
+                                                                <input type="radio" id="closed" ng-model="newDetFilter.TicketStatus" name="statuschoose" ng-value="4" ng-change="GetAllGenerateTicketList()" />
+                                                                <label class="px-1" for="closed">Closed</label>
+                                                            </div>
+                                                            <div class="input-group input-group-sm">                                                               
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <div class="form-group">
+                                                                        <select class="form-control form-select form-control-sm" ng-model="newDetFilter.FilterDateAs" style="width: 100%;">
+                                                                            <option ng-repeat="c in FilterDateAsColl" ng-value="c.id" ng-selected="c.id==newDetFilter.FilterDateAs">{{c.text}}</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <input placeholder="From" date-picker ng-model="newDetFilter.DateFrom_TMP" date-detail="newDetFilter.DateFromDet" type="text" class="form-control" style="width: 90px;">
+                                                                <input placeholder="To" date-picker ng-model="newDetFilter.DateTo_TMP" date-detail="newDetFilter.DateToDet" type="text" class="form-control" style="width: 90px;">
+                                                                <button type="button" class="px-2 btn btn-sm btn-primary mx-2" ng-click="GetAllGenerateTicketList()" style="height:28px; font-size:13px"><i class="fas fa-redo mr-2"></i>Load</button>
+                                                                <button type="button" class="px-1 btn btn-sm btn-secondary" style="border-radius: 5px !important; height: 28px; font-size: 13px" ng-click="ClearFilter()">Clear Filter</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                <!-- end col-md-8 -->
+                                            </header>
+                                        </div>
+                                        <!-- /.card-header -->
+                                        <div class="table-scroll-x-y table-scroll" style="height:auto!important;max-height:calc(100vh - 10rem)!important">
+                                            <table class="main-table table table-sm table-bordered bg-white">
+                                                <thead class=" ">
+                                                    <tr>
+                                                        <th style="width: 120px">Action</th>
+                                                        <th style="width: 55px">S.No.</th>
+                                                        <th style="width: 82px">Task No.</th>
+                                                        <th style="width: 90px">Date</th>
+
+                                                        <th style="width: 150px">Task For</th>
+                                                        @*<th style="width: 150px">Product</th>*@
+                                                        <th style="width: 190px">Heading</th>
+                                                        <th style="width: 80px">Priority</th>
+                                                        <th style="width: 170px">Assigned To</th>
+                                                        <th style="width: 200px">Status</th>
+                                                        
+                                                        <th style="width: 160px">Estimated Time</th>
+                                                        <th style="width: 160px">Time Taken</th>
+                                                       
+                                                        <th style="width: 120px">Create By</th>
+                                                        <th style="width: 120px">Status Time</th>
+                                                        <th style="width: 120px">Pending Time</th>
+                                                        @*<th style="width: 210px">Customer Name</th>*@
+                                                        <th style="width: 120px">Approved By</th>
+                                                        <th style="width: 220px">Approved Remarks</th>
+                                                        <th style="width: 120px">Approved At</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="V in ViewGenrateList | filter:searchData.ViewGenerate |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                                        @*</tr>
+                        <tr dir-paginate="V in ViewGenrateList | filter:searchData.ViewGenerate | itemsPerPage: perPage.ViewGenerate"  current-page="currentPages.ViewGenerate" pagination-id="ViewGeneratedPagination">*@
+                                                        <td>
+                                                            <a class="p-1" ng-click="openStatusModal(V)" data-toggle="tooltip" title="Add Status" ng-hide="V.TicketStatus=='Closed'">
+                                                                <i class="fas fa-ban text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="GetTicketCommentById(V)" data-toggle="tooltip" title="Add Comment" ng-hide="V.TicketStatus=='Closed'">
+                                                                <i class="far fa-comment text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="openAssignModal(V)" data-toggle="tooltip" title="AssignTo" ng-hide="V.TicketStatus=='Closed'">
+                                                                <i class="fas fa-user-plus text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="GetTicketHisById(V)" data-toggle="tooltip" title="Hisotry">
+                                                                <i class="fas fa-history text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="openFeedbackModal(V)" data-toggle="tooltip" title="Task Verify" ng-hide="V.TicketStatus=='Closed'">
+                                                                <i class="fas fa-user-tag text-info"></i>
+                                                            </a>
+                                                            <!--Icon added by suresh for attachment on 15-12-2023-->
+                                                            <a class="p-1" ng-click="GetAllTicketAttachment(V)" data-toggle="tooltip" title="Task Attachment">
+                                                                <i class="fas fa-paperclip text-info"></i>
+                                                            </a>
+
+                                                        </td>
+                                                        <td class="text-center">{{$index+1}}</td>
+                                                        <td>{{V.TranId}}</td>
+                                                        <td>{{V.LogMiti}} {{ V.LogDateTime |timeFormat}}</td>
+
+
+                                                        <td>{{V.TaskType}}</td>
+                                                        @*<td>{{V.ProductName}}</td>*@
+                                                        <td>{{V.Heading}}</td>
+                                                        <td>{{V.PriorityAs}}</td>
+                                                        <td>{{V.AssignTo}}</td>
+                                                        <td>{{V.TaskStatus}} <br /> {{V.StatusRemarks}}</td>
+
+                                                        <td>{{V.EstimatedTime}}</td>
+                                                        <td>{{V.TotalTimeTaken}}</td>
+
+                                                        <td>{{V.UserName}}</td>
+                                                        <td>{{V.StatusHDiff}}</td>
+                                                        <td>{{V.PendingHDiff}}</td>
+                                                        @*<td>
+                                                            {{V.CustomerName}} - ({{V.CustomerCode}})<br />
+                                                            - {{V.ProductName}}
+                                                        </td>*@
+
+                                                        <td>{{V.ApprovedBy}}</td>
+                                                        <td>{{V.ApprovedRemarks}}</td>
+                                                        <td>{{V.ApprovedMiti}} {{V.ApprovedAt |timeFormat}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- /.card-body -->
+                                        <footer class="row align-items-center">
+                                            <div class="col-md-12">
+                                                @*<dir-pagination-controls pagination-id="ViewGeneratedPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>*@
+                                                <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                                         on-page-change="ReSearchData(newPageNumber)">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </footer>
+                                        <!-- end pagination -->
+                                    </div>
+                                </div>
+                                @*Status modal here start*@
+                                <div class="modal fade" id="AddStatus">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Status for {{newStatus.TranId}} :- <b>{{newStatus.AssignTo}} ({{newStatus.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-2">
+                                                        <div class="form-group">
+                                                            <label>Status</label>
+                                                            <select class="form-control select2 form-control-sm" style="width:100%" ng-model="newStatus.StatusId">
+                                                                <option ng-repeat="S in StatusColl" ng-value="S.id" ng-selected="newStatus.StatusId==S.id">{{S.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4" ng-show="newStatus.StatusId==4 && newStatus.RequirementType=='YearClosing'">
+                                                        <div class="form-group">
+                                                            <label>Payment Verified By</label>
+                                                            <select class="form-control form-select form-control-sm select2" ng-model="newStatus.PaymentVerifiedById" style="width: 100%;" data-placeholder="**select Employee**">
+                                                                <option ng-repeat="E in EmployeeProfileList" ng-value="E.EmployeeId">{{E.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-7">
+                                                        <div class="form-group">
+                                                            <label>Remarks</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newStatus.StatusRemarks" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Attach Document</label>
+                                                            <div class="form-group">
+                                                                <input class="form-control form-control-sm p-0" id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newStatus.Photo_TMP" fileread="newStatus.PhotoData" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer p-2">
+
+                                                <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveTicketStatus()">Save</button>
+                                                @*<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*Status modal here End*@
+
+                                @*COmment modal here start*@
+                                <div class="modal fade" id="AddComment">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Comments for {{newComment.TranId}} : <b>{{newComment.AssignTo}} ({{newComment.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal"data-dismiss="modal"  aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="row">
+                                                            <div class="d-flex mb-2 p-2">                                                             
+                                                                <p class="ml-2" ng-bind-html="newComment.Description |unsafe"></p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="mb-3">
+                                                                    <div>
+                                                                        <div class="d-flex justify-content-start align-items-center mb-2" ng-repeat="C in CommentList">
+                                                                            <!-- <i class="fas fa-user-circle fa-2x mr-2"></i> -->
+                                                                            <i class="mr-2 fas fa-user text-info" style="font-size:20px">
+
+                                                                            </i>
+                                                                            <div>
+                                                                                <p class="mb-0 ml-1" style="font-size: 12px; color: #837e7e;">{{C.UserName}}, {{C.LogMiti}},{{C.LogDateTime | timeFormat}}</p>
+                                                                                <div class="text-white rounded px-2 py-1" style="color: black !important;background-color:aliceblue;border:1px solid #ccc;">
+                                                                                    <p class="mb-0" ng-bind-html="C.Comment |unsafe"></p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+
+                                                                        <div class="col-md-12">
+                                                                            <div class="row ml-1 mt-3">
+                                                                                <div class="col-md-8">
+                                                                                    <div class="d-flex">
+                                                                                        <input type="text" html-editor class="form-control form-control-sm" ng-model="newComment.Comment">
+
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <div class="col-md-4">
+                                                                                    <div class="form-group">
+                                                                                        @*<label>Attach Document</label>*@
+                                                                                        <div class="d-flex">
+                                                                                            <input class="form-control form-control-sm mr-1 p-0" id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newComment.Photo_TMP" fileread="newComment.PhotoData" />
+                                                                                            <button type="button" class="btn load btn-success" style="min-width: 90px;" ng-click="SaveTicketComment()"><i class="far fa-paper-plane mr-2"></i>Send</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*COmment modal here End*@
+
+                                @*Assign modal here start*@
+                                <div class="modal fade" id="Assign">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Assign To for {{newAssign.TranId}} : <b>{{newAssign.AssignTo}} ({{newAssign.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Assign To</label>
+                                                            <select class="form-control form-select form-control-sm select2" ng-model="newAssign.AssignToId" style="width: 100%;" data-placeholder="**select Employee**">
+                                                                <option ng-repeat="E in EmployeeProfileList" ng-value="E.EmployeeId">{{E.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="form-group">
+                                                            <label>Remarks</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newAssign.Remarks" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer p-2">
+                                                @*<button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearAssign()">Reset</button>*@
+                                                <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveTicketAssign()">Save</button>
+                                                @*<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>*@
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*Status modal here End*@
+
+
+                                @*History modal here start*@
+                                <div class="modal fade" id="AddHistory">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Hisotry for {{newHis.TranId}} : <b>{{newHis.AssignTo}} ({{newHis.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal"  aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="table-scroll-x-y  table-scroll mt-1" style="max-height: calc(100vh - 15rem);">
+                                                        <table class="table table-bordered table-head-fixed ">
+                                                            <thead class=" ">
+                                                                <tr>
+                                                                    <th style="width: 50px">S.No.</th>
+                                                                    <th style="width: 120px">For</th>
+                                                                    <th style="width: 90px">Remarks</th>
+                                                                    <th style="width: 210px">User</th>
+                                                                    <th style="width: 150px">LogDateTime</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="V in newHis.DataColl">
+                                                                    <td class="text-center">{{$index+1}}</td>
+                                                                    <td>{{V.Status}}</td>
+                                                                    <td>
+                                                                        <p  ng-bind-html="V.Remarks |unsafe"></p>
+                                                                    </td>
+                                                                    <td>{{V.User}}</td>
+                                                                    <td>{{V.LogMiti}} {{ V.LogDateTime |timeFormat}}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*History modal here End*@
+
+                                @*Ticket Close Feedback modal start*@
+                                <div class="modal fade" id="TicketCloseFeedback">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title">Task Followup for {{newFeedback.TranId}} :- <b>{{newFeedback.AssignTo}} ({{newFeedback.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal"  aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="form-group d-flex">
+                                                            <label class="mr-4">Call Status :</label>
+                                                            <div class="form-group clearfix mb-0 pb-0">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check mt-1 mr-2" type="radio" id="callstatusyes" ng-model="newFeedback.CallStatus" name="CallStatus" ng-value="true">
+                                                                    <label class="form-check-label" for="callstatusyes">Connected</label><br>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check mt-1 mr-2" type="radio" id="callstatusno" ng-model="newFeedback.CallStatus" name="CallStatus" ng-value="false">
+                                                                    <label class="form-check-label" for="callstatusno">Failed</label><br>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row" ng-show="newFeedback.CallStatus=='true' || newFeedback.CallStatus==true">
+                                                        <div class="col-md-3">
+                                                            <div class="form-group">
+                                                                <label>Work Status</label>
+                                                                <select class="form-control form-control-sm form-select" ng-model="newFeedback.WorkStatusId">
+                                                                    <option ng-repeat="W in WorkStatusColl" ng-value="W.id" ng-selected="newFeedback.WorkStatusId==W.id">{{W.text}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-3" ng-show="newFeedback.WorkStatusId==2">
+                                                            <div class="custom-control custom-checkbox mt-4">
+                                                                <input class="custom-control-input" type="checkbox"
+                                                                       id="reopen" value="option1" ng-model="newFeedback.ReopenTicket">
+                                                                <label for="reopen"
+                                                                       class="custom-control-label">
+                                                                    Re-Open Ticket
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3" ng-show="newFeedback.WorkStatusId==1">
+                                                            <div class="form-group">
+                                                                <label>Rating(Out of 10)</label>
+                                                                <input type="number" class="form-control form-control-sm" ng-model="newFeedback.Rating" />
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-12" ng-show="newFeedback.WorkStatusId==2||newFeedback.CallStatus=='false' || newFeedback.CallStatus==false">
+                                                            <div class="form-group">
+                                                                <label>Comment</label>
+                                                                <textarea class="form-control form-control-sm" rows="1" ng-model="newFeedback.Comment"></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer p-2">
+                                                <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveTicketCloseFeedback()">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*Ticket CloseFeedback modal here End*@
+
+                                <!--View Attachment Modal Starts. Made by Suresh on 15-12-2023-->
+                                <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="viewattachment" role="dialog" @*tabindex="-1"*@>
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-body mb-0 p-0 text-center">
+                                                <iframe ng-src="{{viewImg.attachFile || viewImg.attachFile}}" style="width:100%;height: 70vh; border: 0;"></iframe>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div><a href="{{viewImg.attachFile || viewImg.attachFile}}" download>Download</a></div>
+                                                <button class="btn btn-success btn-rounded load ml-4 text-center" data-bs-dismiss="modal" data-dismiss="modal"  type="button" style="min-width: 90px;">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @*Task Verify Start*@
+                                <div class="modal fade" id="AddTaskVerify">
+                                    <div class="modal-dialog modal-xl">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Task Verify For {{newFeedback.TranId}} : <b>{{newFeedback.AssignTo}} ({{newFeedback.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal"  aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="row">
+                                                            <div class="col-md-12">
+                                                                <div class="mb-3">
+                                                                    <div>
+                                                                      
+                                                                        <div class="col-md-12">
+                                                                            <div class="row ml-1 mt-3">
+                                                                                <div class="col-md-8">
+                                                                                    <div class="d-flex">
+                                                                                        <input type="text" class="form-control form-control-sm" ng-model="newFeedback.ApprovedRemarks">
+
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                <div class="col-md-4">
+                                                                                    <div class="form-group"> 
+                                                                                        <div class="d-flex">
+                                                                                            
+                                                                                            <button type="button" class="btn load btn-success" style="min-width: 90px;" ng-click="SaveTaskVerify()"><i class="far fa-paper-plane mr-2"></i>Verify</button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*COmment modal here End*@
+
+                                <!--View All Ticket Attachment Modal Starts. Made by Suresh on 1 Chaitra-->
+                                <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="TicketAttachments" role="dialog" @*tabindex="-1"*@>
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header p-2">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Attachment for Task of  {{CurTicket.TranId}} : <b> {{CurTicket.AssignTo}} ({{CurTicket.Heading}})</b></h5>
+                                                <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal"  aria-label="Close">
+                                                    <span aria-hidden="true">×</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body mb-0 p-0 text-center" style="max-height:calc(100vh - 5rem);overflow-y:auto">
+                                                <div ng-repeat="P in TicketImg">
+                                                    <div style="border-bottom: 2px dashed #dee2e6">
+                                                        <div class="d-flex mb-2 p-2">
+
+                                                            <img class="ml-4" ng-src="{{P.attachFile || P.attachFile}}" ng-if="P.attachFile" style="width:150px;">
+                                                            <a ng-if="P.attachFile" href="{{P.attachFile || P.attachFile}}" download class="btn btn-outline-info btn-sm mx-2" style="height:28px"><i class="fas fa-download"></i></a>
+
+                                                            <p class="ml-4" ng-bind-html="P.Comment |unsafe"></p>
+
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="text-right">
+                                                                <label><i class="fas fa-user ml-2 text-secondary"></i> : {{P.CUserName}}</label>
+                                                                <label><i class="fas fa-user-clock ml-2 text-secondary"></i> : {{P.LogMiti}} , {{P.LogDateTime|timeFormat}}</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                            @*<div class="modal-footer">
+                        <div><a href="{{viewImg.attachFile || viewImg.attachFile}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-bs-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                    </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+

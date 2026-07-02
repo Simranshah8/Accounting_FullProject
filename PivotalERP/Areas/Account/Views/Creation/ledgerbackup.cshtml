@@ -1,0 +1,1024 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/account/creation/Ledger.js"></script>
+<script>
+    var TranId=@ViewBag.TranId;
+</script>
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+
+
+<div ng-app="myApp" ng-controller="Ledger" ng-init="LoadData()" ng-cloak>
+    <div class="content" style="min-height:720px!important;">
+        <div class="card">
+            <div class="card-header header-corner-triangle">
+                <h3 class="card-title">Ledger </h3>
+            </div>
+            <!--Vertical Tab-->
+            <div class="cstm-vertical-nav-tabs">
+                <div id="parentVerticalTab">
+                    <div class="row no-gutters">
+                        <div class="col-md-4 col-lg-3">
+                            <div class="left-side-wrap">
+                                <ul class="resp-tabs-list hor_1 mt-0">
+                                    `
+                                    <li>Basic Info</li>
+                                    <li>Contact Details</li>
+                                    <li>Statutory Details</li>
+                                    <li>Doc. Attach</li>
+                                    <li>Opening Details</li>
+                                </ul>
+                                <div class="bottom-content-wrap py-0">
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="clearfix">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="radio" id="radioPrimary1" name="r1" checked="" ng-model="newLedger.Status" ng-value="true">
+                                                        <label for="radioPrimary1">Active</label>
+                                                    </div>
+                                                    <div class="icheck-primary d-inline ml-3">
+                                                        <input type="radio" id="radioPrimary2" name="r1" ng-model="newLedger.Status" ng-value="false">
+                                                        <label for="radioPrimary2">De-Active</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="">
+                                        <div class="form-group">
+                                            <label>Bill wise adjustments</label>
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="radioPrimary3" name="r2" checked="" ng-model="newLedger.BillWiseAdjustment" ng-value="true">
+                                                    <label for="radioPrimary3">Active</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="radioPrimary4" name="r2" ng-model="newLedger.BillWiseAdjustment" ng-value="false">
+                                                    <label for="radioPrimary4">De-Active</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="">
+                                        <div class="form-group">
+                                            <label>Inventory Values are affected</label>
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="radioPrimary5" name="r3" checked="" ng-model="newLedger.InventoryValuesAreAffected" ng-value="true">
+                                                    <label for="radioPrimary5">Active</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="radioPrimary6" name="r3" ng-model="newLedger.InventoryValuesAreAffected" ng-value="false">
+                                                    <label for="radioPrimary6">De-Active</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="">
+                                        <div class="form-group">
+                                            <label>Cost content are applied</label>
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="radioPrimary7" name="r4" checked="" ng-model="newLedger.CostCentersAreApplied" ng-value="true">
+                                                    <label for="radioPrimary7">Active</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="radioPrimary8" name="r4" ng-model="newLedger.CostCentersAreApplied" ng-value="false">
+                                                    <label for="radioPrimary8">De-Active</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="">
+                                        <label>Active interest calculation</label>
+                                        <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="radio" id="rb-interest-calc-yes" name="r5" onclick="interestCalcStatus(0)" ng-model="newLedger.ActiveInterestCalculation" ng-value="true">
+                                                <label for="rb-interest-calc-yes">Active</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="radio" id="rb-interest-cal-no" name="r5" checked="" onclick="interestCalcStatus(1)" ng-model="newLedger.ActiveInterestCalculation" ng-value="false">
+                                                <label for="rb-interest-cal-no">De-Active</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="checkbox" id="checkboxPrimary5" checked="" ng-model="newLedger.ActiveChequeDetails">
+                                            <label for="checkboxPrimary5">Active Cheque Details</label>
+                                        </div>
+                                    </div>
+                                    @* <div class="form-group clearfix">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="checkbox" id="checkboxPrimary1" checked="" ng-model="newLedger.IsTDS">
+                                                <label for="checkboxPrimary1">Is TDS</label>
+                                            </div>
+                                            <div class="icheck-primary d-inline ml-3">
+                                                <input type="checkbox" id="checkboxPrimary2" ng-model="newLedger.IsVAT">
+                                                <label for="checkboxPrimary2">Is VAT</label>
+                                            </div>
+                                        </div>*@
+                                    <div class="form-group clearfix">
+                                        <div class="icheck-primary d-inline">
+                                            <input type="checkbox" id="checkboxPrimary6" checked="" ng-model="newLedger.IsImportExportLedger">
+                                            <label for="checkboxPrimary6">Is Import or Export Ledger</label>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        @*Basic Information *@
+                        <div class="col-md-8 col-lg-9">
+                            <div class="resp-tabs-container hor_1" style="height:100%!important;">
+                                <div>
+                                    <div class="row">
+
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Name</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Name">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Print Name</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.NameNP">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>Alias</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Alias">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <label>Code</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Code">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Group</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.LedgerGroupId" data-placeholder="** Select Group **">
+                                                    <option ng-value="pl.LedgerGroupId" ng-repeat="pl in LedgerGroupList" ng-selected="pl.LedgerGroupId==newLedger.LedgerGroupId">{{pl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Agent</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.AgentId">
+                                                    <option selected="selected">Agent</option>
+                                                    <option>Agent1</option>
+                                                    <option>Agent2</option>
+                                                    <option>Agent3</option>
+                                                    <option>Agent4</option>
+                                                    <option>Agent5</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>PanVatNo</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.PanVatNo">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="form-group">
+                                                <label>Notes</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Notes">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Address</label>
+                                                <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.Address">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label>Opening Balannce</label>
+                                                        <div class="input-group mb-3">
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newLedger.OpeningAmount">
+                                                            <div class="input-group-append">
+                                                                <select id="inputState" class="form-control form-control-sm rounded-0" ng-model="newLedger.DrCr">
+                                                                    <option>DR</option>
+                                                                    <option>CR</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Date From</label>
+                                                        <input type="text" class="form-control form-control-sm float-right serial hideSideBar" name="VoucherDate" date-picker ng-model="beData.VoucherDate" date-detail="beData.VoucherDateDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label>Credit Limit</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.CreditLimitAmount">
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label>Credit Days</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newLedger.CreditLimitDays">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Currency</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.CurrencyId">
+                                                    <option ng-value="c.CurrencyId" ng-repeat="c in CurrencyList" ng-selected="c.CurrencyId==newLedger.CurrencyId">{{c.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>SalesMan</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.AgentId" data-placeholder="** Select Salesman **">
+                                                    <option ng-value="cl.id" ng-repeat="cl in SalesManList" ng-selected="cl.id==newLedger.AgentId">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Area</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.AreaId" data-placeholder="** Select Area **">
+                                                    <option ng-value="pl.Id" ng-repeat="pl in AreaList" ng-selected="pl.Id==newLedger.AreaId">{{pl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Debtor/Creditor Type</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.DebtorTypeId" data-placeholder="** Select DebtorCreditorType **">
+                                                    <option ng-value="cl.id" ng-repeat="cl in DebtorTypeList" ng-selected="cl.id==newLedger.DebtorTypeId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Debtor/ Creditor Route</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.DebtorRouteId" data-placeholder="** Select DebtorCreditorType **">
+
+                                                    <option ng-value="cl.id" ng-repeat="cl in RouteList" ng-selected="cl.id==newLedger.DebtorRouteId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- row -->
+                                </div>
+                                <div>
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="mb-2 text-center">
+                                                <img src="https://via.placeholder.com/200" alt="..." class="img-thumbnail">
+                                            </div>
+                                            <div class="text-center">
+                                                <button type="button" class="btn btn-primary" ng-click="AddMoreFiles(attachFile,docType,docDescription)">Add Photo</button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Name</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.Name">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Designation</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.Designation">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Address</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.Address">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Email Id</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.EmailId">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Citizenship No.</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.CitizenshipNo">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Mobile No1.</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.MobileNo1">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Mobile No2.</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.MobileNo2">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Tel. No.1</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.TelNo1">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label>Tel. No.2</label>
+                                                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="newContactDetails.TelNo2">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group text-right">
+                                                        <label class="d-block invisible">Add more btn</label>
+                                                        <button type="button" class="btn btn-outline-primary" ng-click="AddNewContactPerson()"><i class="fas fa-plus"></i> Add New Member</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- col-md-9 -->
+                                    </div>
+                                    <div class="table-responsive mt-4">
+                                        <table class="table table-sm table-hover border">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 60px">SN.</th>
+                                                    <th style="width:180px">Name</th>
+                                                    <th style="width:140px">Designation</th>
+                                                    <th style="width:180px">Address</th>
+                                                    <th style="width:130px">Citizenship No.</th>
+                                                    <th style="width: 120px">Contact No.</th>
+                                                    <th style="width: 90px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="cp in newLedger.ContactPersons">
+                                                    <td scope="row" class="align-middle">{{$index+1}}</td>
+                                                    <td>
+                                                        <div class="user-block">
+                                                            @*<img src="dynamic/images/aryan-shrestha.png" class="img-circle img-bordered-sm" alt="User Image" />*@
+                                                            <span class="username">
+                                                                <a href="#">{{cp.Name}}</a>
+                                                            </span>
+                                                            <span class="description email-add">{{cp.EmailId}}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="align-middle">{{cp.Post}}</td>
+                                                    <td class="align-middle">{{cp.Address}}</td>
+                                                    <td class="align-middle">{{cp.CitizenShipNo}}</td>
+                                                    <td class="align-middle">{{cp.MobileNo1}}, {{cp.MobileNo2}}</td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm">
+                                                            @*<a href="#" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc."><i class="fas fa-download"></i></a>*@
+                                                            <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="EditContactPerson($index)"><i class="fas fa-eye"></i></a>
+                                                            <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Contact Person." ng-click="DelContactPerson($index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="row">
+                                        @*<div class="col-sm-4">
+                                                <div class="form-group clearfix">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary8" checked="" ng-model="newLedger.ActiveRemitDetails">
+                                                        <label for="checkboxPrimary8">Active Remit Details</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group clearfix">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary9" checked="" ng-model="newLedger.IsImportExportLedger">
+                                                        <label for="checkboxPrimary9">Is Import or Export Ledger</label>
+                                                    </div>
+                                                </div>
+                                            </div>*@
+                                        <div class="col-sm-4">
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="checkboxPrimary7" checked="" ng-model="newLedger.LedgerWiseCostCenter">
+                                                    <label for="checkboxPrimary7">Ledger Wise Cost Center</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group clearfix">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="checkboxPrimary10" checked="" ng-model="newLedger.IsLC">
+                                                    <label for="checkboxPrimary10">Is L.C.</label>
+                                                    <span> <a href="#"> Select Party</a> </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Bank Name</label>
+                                                <input type="text" class="form-control" placeholder="" ng-model="newLedger.BankName">
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Bank Account No.</label>
+                                                <input type="text" class="form-control" placeholder="" ng-model="newLedger.BankAccountNo">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Opening For Branch</label>
+                                                <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newLedger.OpeningForBranchId" data-placeholder="** Select Branch **">
+                                                    <option ng-value="cl.Id" ng-repeat="cl in BranchList" ng-selected="cl.Id==newLedger.OpeningForBranchId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Aditional Cost On The Basis Of (Inventory)</label>
+                                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="newLedger.AditionalCostOnTheBasis">
+                                                    <option ng-value="cl.id" ng-repeat="cl in AditionalCostTypeList" ng-selected="cl.id==newLedger.AditionalCostOnTheBasis">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label> Type of ledger</label>
+                                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="newLedger.TypeOfledger">
+                                                    <option ng-value="cl.id" ng-repeat="cl in ledgerTypeList" ng-selected="cl.id==newLedger.TypeOfledger">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group">
+                                                <label>Type Of Income/Expenses</label>
+                                                <select class="form-control form-control-sm" style="width: 100%;" ng-model="newLedger.TypeOfIncomeExp">
+                                                    <option ng-value="cl.id" ng-repeat="cl in IncomeExpensesTypeList" ng-selected="cl.id==newLedger.TypeOfIncomeExp">{{cl.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <label><b>Area Details</b></label>
+
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Province:</label>
+                                                <select class="custom-select" ng-model="newLedger.Province">
+                                                    <option value="1">Province 1</option>
+                                                    <option value="2">Province 2</option>
+                                                    <option value="3">Province 3</option>
+                                                    <option value="4">Province 4</option>
+                                                    <option value="5">Province 5</option>
+                                                    <option value="6">Province 6</option>
+                                                    <option value="7">Province 7</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>District:</label>
+                                                <select class="custom-select" ng-model="newLedger.District">
+                                                    <option value="1">Kathmandu</option>
+                                                    <option value="2">Bhaktapur</option>
+                                                    <option value="3">Lalitpur</option>
+                                                    <option value="4">Kavre</option>
+                                                    <option value="5">Gorkha</option>
+                                                    <option value="6">Sindhupalanchok</option>
+                                                    <option value="7">Lamjung</option>
+                                                    <option value="8">Nuwakot</option>
+                                                    <option value="9">Nawalparasi</option>
+                                                    <option value="10">Rasuwa</option>
+                                                    <option value="11">Makwanpur</option>
+                                                    <option value="12">Parsa</option>
+                                                    <option value="13">Doti</option>
+                                                    <option value="14">Kailali</option>
+                                                    <option value="15">Kanchanpur</option>
+                                                    <option value="16">Dang</option>
+                                                    <option value="17">Dolpa</option>
+                                                    <option value="18">Rolpa</option>
+                                                    <option value="19">Taplejung</option>
+                                                    <option value="20">Humla</option>
+                                                    <option value="21">Mugu</option>
+                                                    <option value="22">Jajarkot</option>
+                                                    <option value="23">Jumla</option>
+                                                    <option value="24">Panchthar</option>
+                                                    <option value="25">Rupandehi</option>
+                                                    <option value="26">Saptari</option>
+                                                    <option value="27">Salyan</option>
+                                                    <option value="28">Danusha</option>
+                                                    <option value="29">Dhankuta</option>
+                                                    <option value="30">Terathum</option>
+                                                    <option value="31">Surkhet</option>
+                                                    <option value="32">Khotang</option>
+                                                    <option value="33">Kaski</option>
+                                                    <option value="34">Sunsari</option>
+                                                    <option value="35">Rautahat</option>
+                                                    <option value="36">Argakhachhi</option>
+                                                    <option value="37">Chitwan</option>
+                                                    <option value="38">Solokhumbhu</option>
+                                                    <option value="39">Mustang</option>
+                                                    <option value="40">Managa</option>
+                                                    <option value="41">Parbat</option>
+                                                    <option value="42">Baglung</option>
+                                                    <option value="43">Myagdi</option>
+                                                    <option value="44">Dhangadi</option>
+                                                    <option value="45">Nepalgunj</option>
+                                                    <option value="46">Bhojpur</option>
+                                                    <option value="47">Udaypur</option>
+                                                    <option value="48">Morang</option>
+                                                    <option value="49">Bara</option>
+                                                    <option value="50">Kalikot</option>
+                                                    <option value="51">Rukum</option>
+                                                    <option value="52">Jhapa</option>
+                                                    <option value="53">Kapilvastu</option>
+                                                    <option value="54">Sankhuwasabha</option>
+                                                    <option value="55">Dailekh</option>
+                                                    <option value="56">Darchula</option>
+                                                    <option value="57">Palpa</option>
+                                                    <option value="58">Tanahu</option>
+                                                    <option value="59">Syanja</option>
+                                                    <option value="60">Bajura</option>
+                                                    <option value="61">Ilam</option>
+                                                    <option value="62">Sarlahi</option>
+                                                    <option value="63">Sindhuli</option>
+                                                    <option value="64">Jiri</option>
+                                                    <option value="65">Siraha</option>
+                                                    <option value="66">Rammechap</option>
+                                                    <option value="67">Dolakha</option>
+                                                    <option value="68">Dadheldura</option>
+                                                    <option value="69">Achham</option>
+                                                    <option value="70">Baitadi</option>
+                                                    <option value="71">Banke</option>
+                                                    <option value="72">Bajang</option>
+                                                    <option value="73">Dhading</option>
+                                                    <option value="74">Gulmi</option>
+                                                    <option value="75">Mohatari</option>
+                                                    <option value="76">Okhaldunga</option>
+                                                    <option value="77">Phyuthan</option>
+
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group">
+                                                <label>Palika:</label>
+                                                <select class="custom-select" ng-model="newLedger.Palika">
+                                                    <option value="1">Maha Nagarpalika</option>
+                                                    <option value="2">Upa Maha Nagarpalika</option>
+                                                    <option value="3">Nagarpalika</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+
+
+                                </div>
+                                <div>
+                                    <div class="pb-3 add-more-than-one-form-block">
+                                        <form>
+                                            <article>
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <div class="form-group">
+                                                            <label>Type Of Document</label>
+                                                            <select class="custom-select">
+                                                                <option selected>Choose Document</option>
+                                                                <option value="1">Citizenship</option>
+                                                                <option value="2">Licence</option>
+                                                                <option value="3">Pan Card</option>
+                                                                <option value="3">Voter ID</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-sm-9">
+                                                        <div class="row">
+                                                            <div class="col-sm-8">
+                                                                <div class="form-group">
+                                                                    <label>Attach Doc.</label>
+                                                                    <div class="form-group">
+                                                                        <input type="file" class="form-control-file border p-1" id="exampleFormControlFile1">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-4">
+                                                                <div class="d-flex">
+                                                                    <div>
+                                                                        <label class="invisible d-block">for height</label>
+                                                                        <button type="button" class="btn btn-primary">Save</button>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label class="invisible d-block">for height</label>
+                                                                        <button type="button" class="btn btn-secondary"><i class="fas fa-plus"></i> Add More</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        </form>
+                                    </div>
+                                    <div class="pb-3">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover border">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col" style="width: 20px">SN.</th>
+                                                        <th scope="col" style="width: 40%">Doc. Type</th>
+                                                        <th scope="col">File Size</th>
+                                                        <th scope="col" style="width: 130px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <th scope="row">1</th>
+                                                        <td>Citizenship</td>
+                                                        <td>30kb</td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="#" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc."><i class="fas fa-download"></i></a>
+                                                                <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc"><i class="fas fa-eye"></i></a>
+                                                                <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc."><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th scope="row">2</th>
+                                                        <td>Licence</td>
+                                                        <td>30kb</td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="#" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc."><i class="fas fa-download"></i></a>
+                                                                <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc"><i class="fas fa-eye"></i></a>
+                                                                <a href="#" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc."><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    @*//For Opening Details//*@
+
+
+                                    <div>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Opening For Branch:</label>
+
+                                                    <select class="form-control form-control-sm select2" style="width: 100%;">
+                                                        <option selected="selected">Main Branch</option>
+                                                        <option>Main Branch</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="pb-3">
+                                            <div class="table-scroll-x-y table-scroll mt-2" style="height:100%">
+                                                <table id="maintable" class="table table-bordered table-hover table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="width: 70px">SN.</th>
+                                                            <th style="width: 100px">Date</th>
+                                                            <th style="width: 90px">Dr/Cr</th>
+                                                            <th style="width: 100px">Amount</th>
+                                                            <th style="width: 90px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <th>1</th>
+                                                            <th><input type="date" class="form-control form-control-sm" /></th>
+                                                            <th>
+                                                                <select class="form-control form-control-sm" style="width: 100%;">
+                                                                    <option>Dr</option>
+                                                                    <option>Cr</option>
+                                                                </select>
+                                                            </th>
+                                                            <th><input type="text" class="form-control form-control-sm" /></th>
+                                                            <td>
+                                                                <a class="p-1" href="#">
+                                                                    <i class="fas fa-plus text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>1</th>
+                                                            <th><input type="date" class="form-control form-control-sm" /></th>
+                                                            <th>
+                                                                <select class="form-control form-control-sm" style="width: 100%;">
+                                                                    <option>Dr</option>
+                                                                    <option>Cr</option>
+                                                                </select>
+                                                            </th>
+                                                            <th><input type="text" class="form-control form-control-sm" /></th>
+                                                            <td>
+                                                                <a class="p-1" href="#">
+                                                                    <i class="fas fa-plus text-info"></i>
+                                                                </a>
+                                                                <a class="p-1" href="#">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="3" class="text-right">Total</th>
+                                                            <th class="text-right">567</th>
+                                                            <th></th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </div>
+
+
+                                <div class="px-3" id="interestCalcStstusYes">
+                                    <div class="">
+                                        <div class="">
+                                            <h5 class="">Interest Setting</h5>
+                                            <form action="">
+                                                <div class="bg-light py-3 px-3">
+                                                    <div class="row">
+                                                        <div class="col-sm-9">
+                                                            <div class="row">
+                                                                <div class="col-sm-3">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <label class="my-1 mr-2" for="">Active</label>
+                                                                        <input type="text" class="form-control my-1 mr-sm-2">
+                                                                        <label class="my-1 mr-2" for="">Days</label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-4">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <label class="my-1 mr-2 col-6 text-right" for="">Interest Rate</label>
+                                                                        <input type="text" class="form-control my-1 mr-sm-2">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-5">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-6">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <label class="my-1 mr-2 " for="">Per</label>
+                                                                                <select class="custom-select">
+                                                                                    <option selected></option>
+                                                                                    <option value="1">One</option>
+                                                                                    <option value="2">Two</option>
+                                                                                    <option value="3">Three</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-sm-6">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <label class="my-1 mr-2" for="">On</label>
+                                                                                <select class="custom-select">
+                                                                                    <option selected></option>
+                                                                                    <option value="1">One</option>
+                                                                                    <option value="2">Two</option>
+                                                                                    <option value="3">Three</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- col-md-9 -->
+                                                        <div class="col-sm-3">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="icheck-primary d-inline">
+                                                                    <input type="checkbox" id="slabwize">
+                                                                    <label for="slabwize">Active Slab Wise Interest</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- bg-light -->
+                                            </form>
+                                            <div class="table-responsive">
+                                                <table class="table bg-light table-sm">
+                                                    <tr>
+                                                        <td>
+                                                            <table class="table table-bordered bg-white">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th colspan="4" class="text-center">Slab Wise Interest Rate</th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th style="width:90px;">From Days</th>
+                                                                        <th style="width:90px;">To Days</th>
+                                                                        <th style="width:90px;">Per(%)</th>
+                                                                        <th style="width:80px;">Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                        <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                        <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                        <td>
+                                                                            <a class="p-1" href="#">
+                                                                                <i class="fas fa-plus text-info"></i>
+                                                                            </a>
+                                                                            <a class="p-1" href="#">
+                                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                        <td>
+                                                            <table class="table table-bordered bg-white">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th colspan="4" class="text-center">Slab Wise Rebate Rate</th>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th style="width:90px;">From Days</th>
+                                                                        <th style="width:90px;">To Days</th>
+                                                                        <th style="width:90px;">Per(%)</th>
+                                                                        <th style="width:80px;">Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                        <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                        <td><input type="text" class="form-control form-control-sm" /></td>
+                                                                        <td>
+                                                                            <a class="p-1" href="#">
+                                                                                <i class="fas fa-plus text-info"></i>
+                                                                            </a>
+                                                                            <a class="p-1" href="#">
+                                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                                            </a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                            <!-- row -->
+                                            <div class="text-right">
+                                                <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Accept</button>
+                                                <button type="button" class="btn btn-sm btn-primary">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-primary">Decline</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <!-- Main Footer -->
+                <footer class="main-footer">
+                    <div class="text-right control-btns">
+                        <button type="button" class="btn btn-default" ng-click="ClearLedger()">Reset</button>
+
+                        <button type="button" class="btn btn-primary" ng-click="SaveUpdateLedger()">Save</button>
+                    </div>
+                    <!-- /.card-footer-->
+                    <!-- Default to the left -->
+                    <!-- <strong>Copyright &copy; 2020-2021 <a href="https://www.dynamic.net.np/">Dynamic Technosoft Pvt. Ltd.</a></strong> -->
+                </footer>
+
+
+                <!--// End Interest Calculation Radio Content-->
+                <!--Contact Photo Upload-->
+                <div class="modal fade" id="updatePhoto" tabindex="-1" aria-labelledby="updatePhotoLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updatePhotoLabel">Upload Photo</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <i class="flaticon-close"></i>
+                                </button>
+                            </div>
+                            <div class="modal-body text-center" border-0 pb-0" file-dropzone="[image/png, image/jpeg]"
+                                 data-max-file-size="3" ng-model="newContactDetails.Photo_TMP" @*after-selected="AddContactDetailsPhoto()"*@ fileread="newContactDetails.PhotoData">
+                                <div class="photo-upload-wrap">
+                                    <span class="static-content">
+                                        <img ng-src="{{newContactDetails.PhotoData}}" class="img-fluid" id="imgPhoto">
+                                        <span>Drag & Drop your<br>image here</span>
+                                    </span>
+                                </div>
+                                <div class="text-muted pb-3">or</div>
+                                <label for="choose-file" type="button" class="btn btn-secondary btn-light btn-sm">Upload Image</label>
+                                <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newContactDetails.Photo_TMP" @*after-selected="AddStudentPhoto()"*@ fileread="newContactDetails.PhotoData" />
+                                <a ng-click="ClearContactDetailsPhoto()" href="#" class="text-danger d-block mt-3">remove current image</a>
+                            </div>
+                            <div class="modal-footer justify-content-center">
+                                <button type="button" class="btn btn-dafault" data-dismiss="modal">Ok</button>
+                                <button type="button" class="btn btn-secondary px-4" ng-click="AddContactDetailsImage()">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    // For Interest Calculation Radio Content
+                    function interestCalcStatus(x) {
+                        if (x == 0)
+                            document.getElementById("interestCalcStstusYes").style.display = "block";
+                        else
+                            document.getElementById("interestCalcStstusYes").style.display = "none";
+                        return;
+                    }
+                    $("#rb-interest-calc-yes").click(function () {
+                        $('html,body').animate({
+                            scrollTop: $("#interestCalcStstusYes").offset().top
+                        },
+                            'slow');
+                    });
+                    $("#rb-interest-cal-no").click(function () {
+                        $('html,body').animate({
+                            scrollTop: $("#interestCalcStstusYes").offset().top
+                        },
+                            'fast');
+                    });
+                </script>
+
+                <!--Plug-in In itialisation-->
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        //Vertical Tab
+                        $('#parentVerticalTab').easyResponsiveTabs({
+                            type: 'vertical', //Types: default, vertical, accordion
+                            width: 'auto', //auto or any width like 600px
+                            fit: true, // 100% fit in a container
+                            closed: 'accordion', // Start closed if in accordion view
+                            tabidentify: 'hor_1', // The tab groups identifier
+                            activate: function (event) { // Callback function if tab is switched
+                                var $tab = $(this);
+                                var $info = $('#nested-tabInfo2');
+                                var $name = $('span', $info);
+                                $name.text($tab.text());
+                                $info.show();
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+</div>

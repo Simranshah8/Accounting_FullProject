@@ -1,0 +1,167 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_LeaveEntry)";
+</script>
+
+
+<script src="~/jslib/hr/leave/LeaveEntry.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LeaveEntryController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-2 card-primary card-outline card-outline-tabs">
+                    <div class="row">
+
+                        <div class="col-md-12">
+
+                            <div class="row">
+                                <div class="col-sm-2 col-md-2">
+                                    <div class="form-group">
+                                        <label for="">For</label>
+                                        <div class="input-group-prepend">
+                                            <select class="form-control form-control-sm" ng-model="newLeaveEntry.EmployeeOrSalesman" style="width:100%;">
+                                                <option ng-value="pp.id" ng-repeat="pp in TypeColl" ng-selected="pp.id==newLeaveEntry.EmployeeOrSalesman">{{pp.text}}</option>
+                                            </select>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8 col-md-8" ng-show="newLeaveEntry.EmployeeOrSalesman==1">
+                                    <div class="form-group">
+                                        <label for="">Employee</label>
+                                        <div class="input-group-prepend">
+                                            <select class="input-group-text dropdown-toggle p-0"
+                                                    style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newLeaveEntry.SelectEmployee">
+
+                                                <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newLeaveEntry.EmployeeSearchBy">
+                                                    {{ss.text}}
+                                                </option>
+
+                                            </select>
+
+                                            <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newLeaveEntry.UserId" confirm-action="GetLeaveTypeByEmployee()" employee-detail="newLeaveEntry.EmployeeDetails" side-bar-data="newLeaveEntry.EmpSideBarData" search-by="newLeaveEntry.EmployeeSearchBy">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8 col-md-8" ng-show="newLeaveEntry.EmployeeOrSalesman==2">
+                                    <div class="form-group">
+                                        <label for="">Salesman</label>
+                                        <div class="input-group-prepend">
+
+                                            <select class="form-control form-control-sm select2" ng-model="newLeaveEntry.UserId" style="width:100%;">
+                                                <option ng-value="pp.UserId" ng-repeat="pp in SalesManList" ng-selected="pp.UserId==newLeaveEntry.UserId">{{pp.Name}} - {{pp.Code}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Leave Type<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2" ng-model="newLeaveEntry.LeaveTypeId" ng-change="GetLeaveBalanceDetail(newLeaveEntry.LeaveTypeId)">
+                                            <option ng-repeat="L in LeaveTypeByEmployeeList" ng-value="L.LeaveTypeId" ng-selected="newLeaveEntry.LeaveTypeId==L.LeaveTypeId">{{L.LeaveType}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Duration Type<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2" ng-model="newLeaveEntry.LeaveDuration" ng-change="ChangeNoOfDays()">
+                                            <option ng-repeat="D in LeaveDurationList" ng-value="D.id" ng-selected="newLeaveEntry.LeaveDuration==D.id">{{D.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" ng-show="newLeaveEntry.LeaveDuration==2">
+                                    <div class="form-group">
+                                        <label>Leave Period<span style="color:red">*</span></label>
+                                        <select class="form-control form-control-sm select2" ng-model="newLeaveEntry.LeavePeriod">
+                                            <option ng-repeat="D in LeavePeriodList" ng-value="D.id" ng-selected="newLeaveEntry.LeavePeriod==D.id">{{D.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2" ng-show="newLeaveEntry.LeaveDuration==3">
+                                    <div class="form-group">
+                                        <label for="">Leave Hours</label>
+                                        <input type="number" class="form-control form-control-sm" ng-model="newLeaveEntry.LeaveHours">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">From Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newLeaveEntry.DateFrom_TMP" date-detail="newLeaveEntry.DateFromDet" confirm-action="ChangeNoOfDays()">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">To Date</label>
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="newLeaveEntry.DateTo_TMP" date-detail="newLeaveEntry.DateToDet" confirm-action="ChangeNoOfDays()">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">No Of Days</label>
+                                        <input type="number" class="form-control form-control-sm" disabled ng-model="newLeaveEntry.NoOfDays" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">Leave Balance</label>
+                                        <label class="form-control form-control-sm" style="background-color: #e9ecef;">{{newLeaveEntry.RemainLeave | number:2}}</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-9">
+                                    <div class="form-group">
+                                        <label>Reason</label>
+                                        <textarea class="form-control form-control-sm" ng-model="newLeaveEntry.Remarks" rows="1"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Attach Document</label>
+                                        <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newLeaveEntry.Photo_TMP" fileread="newLeaveEntry.PhotoData" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            @*<button type="button"
+                                        class="btn btn-sm btn-info"
+                                        id="back-to-list" ng-click="back_to_list()"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>*@
+                            <button type="button" class="btn btn-sm btn-default load" style="min-width: 90px;" ng-click="ClearLeaveEntry()">Reset</button>
+                            <button type="button" class="btn btn-sm btn-info load" style="min-width: 90px;" ng-click="SaveUpdateLeaveEntry()">{{newLeaveEntry.Mode}}</button>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- /.row -->
+            </div>
+            <!--/. container-fluid -->
+        </div>
+    </div>
+    <!-- Main content -->
+    <!-- /.content -->
+
+
+</div>

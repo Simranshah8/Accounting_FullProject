@@ -1,0 +1,471 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+@*<script>
+        var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Lab_Methods)";
+    </script>*@
+<script src="~/jslib/Hospitals/Creation/HMSVoucher.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="HMSVoucher" ng-init="LoadData()" ng-cloak>
+    <div class="content">
+        <div class="container-fluid p-0">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">HMSVoucher</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div class="p-2">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllHMSVoucher()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Specimen'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                <i class="fas fa-save"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </header>
+
+                                <div class="">
+                                    <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab" style="height: calc(100vh - 120px); overflow-y: auto;">
+                            <div class="p-2">
+                                <form>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Voucher Name<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.VoucherName">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Voucher Type <span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select" ng-model="newDet.VoucherType">
+                                                    <option ng-value="V.id" ng-repeat="V in VoucherTypeColl" ng-selected="V.id==newDet.VoucherType">{{V.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Numbering  Method<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm" ng-model="newDet.NumberingMethod">
+                                                    <option ng-value="D.id" ng-repeat="D in NumberingMethodColl" ng-selected="D.id==newDet.NumberingMethod">{{D.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label> Start Number<span class="text-danger">*</span></label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.StartNumber">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>  Numerical PartWidth<span class="text-danger">*</span></label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.NumericalPartWidth">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Send Auto SMS After Save</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="IsSendAutoSMSYes" name="IsSendAutoSMS" ng-value="true" ng-model="newDet.SendSMSAfterSave">
+                                                    <label for="IsSendAutoSMSYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="IsSendAutoSMSNo" name="IsSendAutoSMS" ng-value="false" ng-model="newDet.SendSMSAfterSave">
+                                                    <label for="IsSendAutoSMSNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Prefil Zero</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="IsPrefilZeroYes" name="IsPrefilZero" ng-value="true" ng-model="newDet.PrefilZero">
+                                                    <label for="IsPrefilZeroYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="IsPrefilZeroNo" name="IsPrefilZero" ng-value="false" ng-model="newDet.PrefilZero">
+                                                    <label for="IsPrefilZeroNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label> Print After Saving</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="PrintAfterSavingYes" name="PrintAfterSaving" ng-value="true" ng-model="newDet.PrintVoucherAfterSaving">
+                                                    <label for="PrintAfterSavingYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="PrintAfterSavingNo" name="PrintAfterSaving" ng-value="false" ng-model="newDet.PrintVoucherAfterSaving">
+                                                    <label for="PrintAfterSavingNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label> Print After Modify</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="PrintAfterModifyYes" name="PrintAfterModify" ng-value="true" ng-model="newDet.PrintVoucherAfterModify">
+                                                    <label for="PrintAfterModifyYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="PrintAfterModifyNo" name="PrintAfterModify" ng-value="false" ng-model="newDet.PrintVoucherAfterModify">
+                                                    <label for="PrintAfterModifyNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label> Auto Print On Default Printer </label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="AutoPrintYes" name="AutoPrint" ng-value="true" ng-model="newDet.AllowAutoPrintOnDefaultPrinter">
+                                                    <label for="AutoPrintYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="AutoPrintNo" name="AutoPrint" ng-value="false" ng-model="newDet.AllowAutoPrintOnDefaultPrinter">
+                                                    <label for="AutoPrintNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Allow Discount</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="AllowDiscountYes" name="AllowDiscount" ng-value="true" ng-model="newDet.AllowDiscount">
+                                                    <label for="AllowDiscountYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="AllowDiscountNo" name="AllowDiscount" ng-value="false" ng-model="newDet.AllowDiscount">
+                                                    <label for="AllowDiscountNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Use Common Narration</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="CommonNarrationYes" name="CommonNarration" ng-value="true" ng-model="newDet.UseCommonNarration">
+                                                    <label for="CommonNarrationYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="CommonNarrationNo" name="CommonNarration" ng-value="false" ng-model="newDet.UseCommonNarration">
+                                                    <label for="CommonNarrationNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Allow Discount EachRow</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="DiscountEachRowYes" name="DiscountEachRow" ng-value="true" ng-model="newDet.AllowDiscountEachRow">
+                                                    <label for="DiscountEachRowYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="DiscountEachRowNo" name="DiscountEachRow" ng-value="false" ng-model="newDet.AllowDiscountEachRow">
+                                                    <label for="DiscountEachRowNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Can EntryDate Change</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="EntryDateChangeYes" name="EntryDateChange" ng-value="true" ng-model="newDet.CanEntryDateChange">
+                                                    <label for="EntryDateChangeYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="EntryDateChangeNo" name="EntryDateChange" ng-value="false" ng-model="newDet.CanEntryDateChange">
+                                                    <label for="EntryDateChangeNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>No. of Copies<span class="text-danger">*</span></label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.NoOfCopies">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Tax Rate<span class="text-danger">*</span></label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.TaxRate">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Doctor Name Compulsory</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="DoctorNameCompulsoryYes" name="DoctorNameCompulsory" ng-value="true" ng-model="newDet.Doctorcompulsory">
+                                                    <label for="DoctorNameCompulsoryYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="DoctorNameCompulsoryNo" name="DoctorNameCompulsory" ng-value="false" ng-model="newDet.Doctorcompulsory">
+                                                    <label for="DoctorNameCompulsoryNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>No. of Templates<span class="text-danger">*</span> </label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.NoOfTemplates">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Validate Tender Amount</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="TenderAmountYes" name="TenderAmount" ng-value="true" ng-model="newDet.ValidateTender">
+                                                    <label for="TenderAmountYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="TenderAmountNo" name="TenderAmount" ng-value="false" ng-model="newDet.ValidateTender">
+                                                    <label for="TenderAmountNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Prefix</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Prefix">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Suffix</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Suffix">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Allow Schame</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="AllowSchameYes" name="AllowSchame" ng-value="true" ng-model="newDet.AllowSchame">
+                                                    <label for="AllowSchameYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="AllowSchameNo" name="AllowSchame" ng-value="false" ng-model="newDet.AllowSchame">
+                                                    <label for="AllowSchameNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Allow Schame Each Row</label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="AllowSchameEachRowYes" name="AllowSchameEachRow" ng-value="true" ng-model="newDet.AllowSchameEachRow">
+                                                    <label for="AllowSchameEachRowYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="AllowSchameEachRowNo" name="AllowSchameEachRow" ng-value="false" ng-model="newDet.AllowSchameEachRow">
+                                                    <label for="AllowSchameEachRowNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix">
+                                                    <label for="" class="invisible d-block">Is Cash Billing</label>
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="CashBilling" ng-model="newDet.IsCashBilling">
+                                                        <label for="CashBilling">Is Cash Billing</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Acc.Voucher Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newDet.VoucherTypeId">
+                                                    <option ng-value="V.id" ng-repeat="V in AccountingVoucherTypeList" ng-selected="V.id==newDet.VoucherTypeId">{{V.VoucherName}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Cost Class</label>
+                                                <select class="form-control form-control-sm  select" ng-model="newDet.CostClassId">
+                                                    <option ng-value="C.id" ng-repeat="C in CostClassList" ng-selected="C.id==newDet.CostClassId">{{C.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>CashLedger</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newDet.CashLedgerId" ledgertype="true"
+                                                        placeholder="** Select Ledger **" showdetails="true" confirm-action="PartySelectionChange(newDet)" ledger-detail="newDet.LedgerDetails" side-bar-data="newDet.partySideBarData"></select>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Allow MemoBilling </label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="AllowMemoBillingYes" name="AllowMemoBilling" ng-value="true" ng-model="newDet.AllowMemoBilling">
+                                                    <label for="AllowMemoBillingYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="AllowMemoBillingNo" name="AllowMemoBilling" ng-value="false" ng-model="newDet.AllowMemoBilling">
+                                                    <label for="AllowMemoBillingNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>GHT Ledger</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newDet.GHTLedgerId" ledgertype="true"
+                                                        placeholder="** Select Ledger **" showdetails="true" confirm-action="PartySelectionChange(newDet)" ledger-detail="newDet.LedgerDetails" side-bar-data="newDet.partySideBarData"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label>Allow Doctor Selection Each Row </label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="AllowDoctorSelectionRowYes" name="AllowDoctorSelectionRow" ng-value="true" ng-model="newDet.AllowDoctorSelectionEachRow">
+                                                    <label for="AllowDoctorSelectionRowYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="AllowDoctorSelectionRowNo" name="AllowDoctorSelectionRow" ng-value="false" ng-model="newDet.AllowDoctorSelectionEachRow">
+                                                    <label for="AllowDoctorSelectionRowNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Credit Ledger</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newDet.CreditLedgerId" ledgertype="true"
+                                                        placeholder="** Select Ledger **" showdetails="true" confirm-action="PartySelectionChange(newDet)" ledger-detail="newDet.LedgerDetails" side-bar-data="newDet.partySideBarData"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Donar Ledger</label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newDet.DonorLedgerId" ledgertype="true"
+                                                        placeholder="** Select Ledger **" showdetails="true" confirm-action="PartySelectionChange(newDet)" ledger-detail="newDet.LedgerDetails" side-bar-data="newDet.partySideBarData"></select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group ">
+                                                <label title="Commission Calculation for Other Doctors on Test Names with Pre-assigned Doctors">  Commission Calc (Pre-assigned Doctors)    </label> <br />
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="radio" id="CommisionForPreassignedDoctorYes" name="CommisionForPreassignedDoctor" ng-value="true" ng-model="newDet.CommissionOtherDoctor">
+                                                    <label for="CommisionForPreassignedDoctorYes">Yes</label>
+                                                </div>
+                                                <div class="icheck-primary d-inline ml-3">
+                                                    <input type="radio" id="CommisionForPreassignedDoctorNo" name="CommisionForPreassignedDoctor" ng-value="false" ng-model="newDet.CommissionOtherDoctor">
+                                                    <label for="CommisionForPreassignedDoctorNo">NO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateHMSVoucher()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>Save</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

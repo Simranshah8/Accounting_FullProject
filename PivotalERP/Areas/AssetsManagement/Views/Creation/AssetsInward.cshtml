@@ -1,0 +1,561 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+@*<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />*@
+
+<script>
+    var VoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.AssetsInward)";
+	  var DefaultKeyValues = "";
+</script>
+<script src="~/jslib/AssetsManagement/AssetsInward.js"></script>
+
+<style>
+
+    .date-col {
+        max-width: 140px; /* controls column width */
+    }
+
+    .date-input {
+        width: 90px; /* reduce input width */
+    }
+
+    .date-label {
+        width: 120px; /* same as input width */
+        text-align: center; /* center label text */
+    }
+
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+
+    #DocView .modal-body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+<div id="ActionDiv" ng-app="myApp" ng-controller="AssetsInward" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Assets Inward</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div id="Assets-section">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AssetsInward">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.AssetsInward">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllAssetInward()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'AssetsInward'" report-name="'List of AssetsInward '" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'AssetsInward',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'AssetsInward '" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </header>
+
+                                <div class="mt-2  table-scroll-x-y table-container flex-grow-1" style="max-height:calc(100vh - 6rem) !important;">
+                                    <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                        <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                            <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                <thead class="text-left">
+                                                    <tr>
+                                                        <th class="cstm-sticky text-center" style="width: 50px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                        <th style="width: 60px;"> Date</th>
+                                                        <th style="width: 80px;"> Voucher No </th>
+                                                        <th style="width: 150px;">Branch</th>
+                                                        <th style="width: 150px ;">Vendor</th>
+                                                        <th style="width: 150px ;">Remarks</th>
+                                                        <th style="width: 150px ;">Create By</th>
+                                                        <th style="width: 150px ;">Fiscal Year</th>
+                                                        <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 80px; right: 0;">
+                                                            <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                <option value="" disabled selected>Action</option>
+                                                                <option value="save">Save Layout</option>
+                                                                <option value="reset">Reset Layout</option>
+                                                            </select>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="beData in AssetsInwardList | filter:searchData.AssetsInward| itemsPerPage:perPage.AssetsInward" current-page="currentPages.AssetsInward" pagination-id="AssetsInwardPagination">
+                                                        <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                        <td>{{beData.InWardDateNepali }}</td>
+                                                        <td>{{beData.AutoManualNo}}</td>
+                                                        <td>{{beData.BranchName}}</td>
+                                                        <td>{{beData.Vendor}}</td>
+                                                        <td>{{beData.Remarks}}</td>
+                                                        <td>{{beData.CUserName}}</td>
+                                                        <td>{{beData.FiscalYear}}</td>
+                                                        <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 80px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                            <div class="btn-group-sm">
+                                                                <a class="btn btn-info" ng-click="GetInwardAttById(beData)" title="Attachment"><i class="fas fa-file-alt"></i></a>
+                                                                <a href="#" class="btn btn-info" ng-click="GetAssetInwardById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                                <a href="#" class="btn btn-danger" ng-click="DelAssetInward(beData, $index)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="AssetsInwardPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="Doc-View" @*tabindex="-1"*@ role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl  " role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title" id="exampleModalCenterTitle">Document Attachments</h6>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body gradient-bg py-0">
+                                            <div class="table-responsive">
+                                                <div class="table-scroll-x-y table-scroll mt-1" style="height: 350px !important;">
+                                                    <table id="maintable" class="table table-bordered table-hover table-sm dynamic-uiux-table cstm-collapse-border">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:15px;z-index: 2;">S.N</th>
+                                                                <th style="width:130px;z-index: 2;">Name</th>
+                                                                <th style="width:130px;z-index: 2;">Description</th>
+                                                                <th style="width: 25px; z-index: 2;">Action</th>
+
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="D in DocView.DocumentColl">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{D.Name}}</td>
+                                                                <td>{{D.Description}}</td>
+                                                                <td>
+                                                                    <a class="text-info" ng-click="ShowDocPdf(D)" title="Attachment"><i class="fas fa-eye"></i></a>
+                                                                    <a class="text-info" href="{{D.DocPath}}" download><i class="fas fa-download"></i></a>
+                                                                </td>
+                                                            </tr>
+
+                                                        </tbody>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="DocView" role="dialog" tabindex="-1">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-body mb-0 p-2">
+                                            <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                                            <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                                        </div>
+                                        <div class="modal-footer p-2">
+                                            <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                                            <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade " id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form class="mb-0">
+                                    <div class="row">
+                                        @*<h3 class="card-title mr-4">{{SelectedVoucher && SelectedVoucher.VoucherName ? SelectedVoucher.VoucherName : 'Receipt'}}</h3>*@
+                                        <div class="col-md-3" ng-hide="HideShow.VoucherType==true">
+                                            <div class="form-group row mb-0">
+                                                <label for="inputEmail3" class="col-sm-6 col-form-label">Voucher Type<span style="color:red">*</span></label>
+                                                <div class="col-md-6">
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="newDet.VoucherId" ng-change="GetAutoInWardNo()" ng-disabled="newDet.TranId>0">
+                                                        <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == newDet.VoucherId">
+                                                            {{vt.VoucherName}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3" ng-hide="HideShow.CostClass==true">
+                                            <div class="form-group row mb-0">
+                                                <label for="" class="col-sm-4 col-form-label text-nowrap">Fiscal Year</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="newDet.CostClassId" ng-change="GetAutoInWardNo()" ng-disabled="newDet.TranId>0">
+                                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == newDet.CostClassId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                    <div class="row align-items-end">
+                                        <div class=" row col-md-12">
+                                            <div class="col-md-3">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width: 115px;">Assets InWard No.  </label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.AutoManualNo" disabled style="max-width:130px">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group d-flex float-right">
+                                                    <label style="min-width: 115px;"> Party Invoice No.<span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newDet.InVoiceNo" style="max-width:130px">
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Branch<span class="text-danger">*</span></label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newDet.BranchId">
+                                                            <option ng-value="pl.id" ng-repeat="pl in BranchList" ng-selected="pl.id==newDet.BranchId">{{pl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>*@
+
+
+                                            <div class="col-md-6 mt-0 float-right">
+                                                <div class="cstm-voucher-date-group-field d-flex float-right">
+                                                    <label style="min-width:100px!important" title="Voucher Date">Voucher Date</label>
+                                                    <div id="dvDTVoucher">
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newDet.VoucherDate_TMP" style="max-width:100px" date-detail="newDet.VoucherDateDet" id="dtVoucherDate" confirm-action="getVoucherNoOnly(2)" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group d-flex">
+                                                <label style="min-width:115px">Vendor <span class="text-danger">*</span></label>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newDet.VendorId" ledgertype="1"
+                                                        placeholder="** Select Vendor Name**" showdetails="true" confirm-action="ChangeParticularLedger(ledAllocation)" ledger-detail="ledAllocation.LedgerDetails" side-bar-data="ledAllocation.partySideBarData"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2 table-scroll-x-y table-container " style="height:calc(100vh - 17rem) !important;">
+                                        <div class="  outer-scroll-wrapper-h-scrollbar-fix">
+                                            <div class="  table-h-scrollbar-fix table-scroll-wrapper">
+                                                <table id="main-table" make-table-resizable class=" main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th class="cstm-sticky text-center" style="width: 50px; left: 0; background-color: #e6f5fb !important; z-index: 4">S.No.</th>
+                                                            <th class="cstm-sticky text-left" style="width: 205px; left: 50px; background-color: #e6f5fb !important; z-index: 4">Particulars<span class="text-danger">*</span></th>
+                                                            <th class="text-left" style="width: 100px;">Closing Stock</th>
+                                                            <th class="text-center" style="width:120px">Warranty Date</th>
+                                                            <th class="text-center" style="width:90px">Qty<span class="text-danger">*</span></th>
+                                                            <th class="text-center" style="width:80px">Rate</th>
+                                                            <th class="text-center" style="width:80px">Dis Amt</th>
+                                                            <th class="text-center" style="width:80px"> Amount</th>
+                                                            <th hidden class="text-center" style="width:80px"> USNo</th>
+
+                                                            <th class="text-center" style="width:80px">Status<span class="text-danger">*</span></th>
+                                                            <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px;">
+                                                                <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                    <option value="" disabled selected>Action</option>
+                                                                    <option value="save">Save Layout</option>
+                                                                    <option value="reset">Reset Layout</option>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="pDet in newDet.AssetInwardDetailsColl">
+                                                            <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                            <td class="text-left">
+                                                                <select class="form-control form-control-sm" active-select2 ng-model="pDet.ParticularId" data-placeholder="**Select Particulars**" ng-change="onParticularChange($index,pDet)">
+                                                                    <option ng-value="R.TranId" ng-repeat="R in ParticularList" ng-selected="R.TranId==pDet.ParticularId">{{R.Name}}-{{R.Code}}-{{R.SerialNum}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td class="text-center">{{ pDet.ClosingStock }}</td>
+                                                            <td><input type="text" class="form-control form-control-sm text-center" style="width: 100%" date-picker ng-model="pDet.DateOfWarranty_TMP" date-detail="pDet.DateOfWarrantyDet" /></td>
+                                                            <td><input type="text" number-input ng-change="CalculateAmount(pDet)" class="form-control form-control-sm text-center" ng-model="pDet.Qty"></td>
+                                                            <td style="text-align:center;">
+                                                                <input type="text" number-input ng-change="CalculateAmount(pDet)" class="form-control form-control-sm text-right" ng-model="pDet.PRate">
+                                                            </td>
+                                                            <td style="text-align:center;">
+                                                                <input ng-change="CalculateAmount(pDet)" type="text" number-input class="form-control form-control-sm text-right" ng-model="pDet.DisAmt">
+                                                            </td>
+                                                            <td style="text-align:center;">
+                                                                <input ng-change="CalculateQty(pDet)" type="text" number-input class="form-control form-control-sm text-right" ng-model="pDet.Amt">
+                                                            </td>
+
+                                                            <td style="text-align:center;">
+                                                                <select class="form-control form-control-sm form-select " style="width: 100%;" ng-model="pDet.Status">
+                                                                    <option ng-value="S.id" ng-repeat="S in StatusColl" ng-selected="S.id == pDet.Status">{{ S.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td hidden><input class="form-control form-control-sm" ng-model="pDet.USno" ng-init="pDet.USno = $index + 1" type="number"></td>
+
+                                                            <td class="text-center cstm-sticky sticky-action-col" style=" background-color: #ffffff !important; z-index: 3; right: 0;">
+                                                                <a ng-click="AddPHDDetails($index)" class="mr-2"><i class="fas fa-plus"></i></a>
+                                                                <a ng-click="delPHDDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                            </td>
+                                                        </tr>
+                                                        <tr class="font-weight-bold bg-light">
+                                                            <td colspan="4" class="text-right">Total</td>
+                                                            <td class="text-center">
+                                                                {{ getTotalQty() }}
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td class="text-right">
+                                                                {{ getTotalAmount() }}
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 mt-1">
+                                            <div class="form-group">
+                                                <label>Remarks/Notes</label>
+                                                <textarea type="text" class="form-control form-control-sm" rows="1" ng-model="newDet.Remarks"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentAttachModal">
+                                                Document Attach ({{ (newDet.AttechFiles.length+(newDet.DocumentColl ? newDet.DocumentColl.length : 0)) }} )
+                                            </button>
+                                        </div>
+                                        <div class="text-right control-btns col-sm-8">
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateAssetInWard()"><span class="glyphicon glyphicon-save"></span>{{newDet.Mode}}</button>
+                                        </div>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade sales-invoice-page-modal document-attach-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="timeline-item">
+                            <div class="add-more-than-one-form-block">
+                                <form>
+                                    <article>
+                                        <div class="row">
+                                            @*UIUX code update: grid from col-sm-10 to col-sm-12*@
+                                            <div class="col-sm-12">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Attach Document</label>
+
+                                                            <div class="new-cstm-file-upload">
+                                                                <div class="drop-area" file-drop>
+                                                                    <div class="icon"></div>
+                                                                    <h3>Drag & Drop Files Here</h3>
+                                                                    <p>or <span>click to browse</span></p>
+                                                                    <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                    <div class="attached-list">
+                                                                        <ul class="file-list"></ul>
+                                                                        <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex flex-column h-100 justify-content-between">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div>
+                                                                    <label class="invisible d-none">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </form>
+                            </div>
+                            <div class="pb-3">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+
+                                                <th scope="col">File Name</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ac in newDet.DocumentColl">
+                                                <th scope="row">{{$index+1}}</th>
+
+                                                <td>{{ac.Name}}</td>
+                                                <td>{{ac.Description}}</td>
+                                                <td>
+                                                    <div>
+                                                        <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                            <i class="fas fa-eye text-secondary"></i>
+                                                        </a>
+
+                                                        <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-add btn-outline-secondary dynamic-uiux-sm-btn" style="width:50px" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body mb-0 p-2">
+                        <iframe class="responsive-iframe1" ng-hide="viewImg1.FileType === 'image'" id="pdfViewer1" style="width: 100%; height: 700px; border: none;"></iframe>
+                        <img ng-show="viewImg1.FileType === 'image'" ng-src="{{viewImg1.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                    </div>
+                    <div class="modal-footer p-2">
+                        <div><a href="{{viewImg1.ContentPath}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+<script>
+    document.querySelector('.responsive-iframe1').onload = function () {
+        const iframeDocument1 = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument1.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+
+
+
+
+
+

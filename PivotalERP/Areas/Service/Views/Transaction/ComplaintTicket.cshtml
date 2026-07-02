@@ -1,0 +1,1580 @@
+﻿<style>
+    .dropdown {
+        position: relative !important;
+        display: inline !important;
+    }
+
+
+    .table-sm td {
+        padding: 0.4rem !important;
+    }
+    .table-scroll-x-y{
+        height: auto !important
+    }
+</style>
+
+
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+      var VoucherType = "@ViewBag.VoucherType";
+      var EntityId = "@ViewBag.EntityId";
+      var TranId=@ViewBag.TranId;
+</script>
+
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-grid.css">
+<link rel="stylesheet" href="~/wwwroot/plugins/ag-grid/css/ag-theme-alpine.css">
+<script src="~/wwwroot/plugins/ag-grid/js/ag-grid-community.min.noStyle.js"></script>
+<script src="~/jslib/service/ComplaintTicket/ComplaintTicket.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="ComplainTicketController" ng-init="LoadData()" ng-cloak>
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="pt-1"></div>
+                <div class="tab-content" id="Ticket-Section">
+                    <!-- Second Tab Content -->
+                    <div class="card p-2">
+                        <header class="row">
+                            <div class="col-md-12 row mb-1">
+                                <div class="col" style="max-width: 105px;">
+                                    <label class="form-check-label" for="Open">
+                                        Open
+                                    </label>
+                                    <span class="dot mt-1 ml-3" style=" height: 12px; width: 12px; background-color: red;  display: inline-block;"></span>
+                                </div>
+
+                                <div class="col" style="max-width: 135px;">
+                                    <label class="form-check-label" for="InProgress">
+                                        InProgress
+                                    </label>
+                                    <span class="dot mt-1 ml-3" style=" height: 12px; width: 12px; background-color: yellow;  display: inline-block;"></span>
+                                </div>
+
+                                <div class="col" style="max-width: 110px;">
+                                    <label class="form-check-label" for="Closed">
+                                        Closed
+                                    </label>
+                                    <span class="dot mt-1 ml-3" style=" height: 12px; width: 12px; background-color: green;  display: inline-block;"></span>
+                                </div>
+
+                                <div class="col" style="max-width: 180px;">
+                                    <label class="form-check-label" for="Customer">
+                                        Customer Waiting
+                                    </label>
+                                    <span class="dot mt-1 ml-3" style=" height: 12px; width: 12px; background-color: orange;  display: inline-block;"></span>
+                                </div>
+
+
+                                <div class="col" style="max-width: 191px;">
+                                    <label class="form-check-label" for="Feedback">
+                                        Feedback Pending
+                                    </label>
+                                    <span class="dot mt-1 ml-3" style=" height: 12px; width: 12px; background-color: darkorange;  display: inline-block;"></span>
+                                </div>
+
+                                <div class="col" style="max-width: 200px;">
+                                    <label class="form-check-label" for="Waiting">
+                                        Waiting for Spare parts
+                                    </label>
+                                    <span class="dot mt-1 ml-3" style=" height: 12px; width: 12px; background-color: lawngreen;  display: inline-block;"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="clearfix">
+                                    <form class="form-inline mb-1">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.TransctionComplain">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.TransctionComplain">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="input-group input-group-sm">
+                                    <div class="input-group-prepend">
+                                        <select class="input-group-text dropdown-toggle p-0" id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false" style="outline: none; font-size: 14px">
+                                            <option class="dropdown-item">
+                                                Open
+                                            </option>
+                                            <option class="dropdown-item">
+                                                InProgress
+                                            </option>
+                                            <option class="dropdown-item">Customer Waiting</option>
+                                            <option class="dropdown-item">Feedback Pending</option>
+                                            <option class="dropdown-item">Waiting For Spare Part</option>
+                                        </select>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm" />
+
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-sm btn-info load" style="min-width: 90px;  border: none;">
+                                    <i class="fas fa-search mr-2"></i><span class="mb-0">Search</span>
+                                </button>
+                            </div>
+
+                            <div class="col-md-3 text-right">
+                                <div class="dropdown dnld-file"
+                                     data-placement="top"
+                                     title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            id="dropdownMenuButton"
+                                            data-toggle="dropdown"
+                                            aria-haspopup="true"
+                                            aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item" href="#">
+                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                 class="img-fluid exports-icon"
+                                                 alt="Excel image" />
+                                            Excel
+                                        </a>
+                                        <a class="dropdown-item" href="#">
+                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                 class="img-fluid exports-icon"
+                                                 alt="Excel image" />
+                                            CSV
+                                        </a>
+
+                                    </div>
+                                </div>
+
+                                <a href="#"
+                                   class="btn btn-secondary btn-light btn-sm"
+                                   data-placement="top"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <a href="#"
+                                   class="btn btn-secondary btn-light btn-sm"
+                                   data-placement="top"
+                                   title="Import Complain Card From API" ng-click="ImportDatafromAPI()">
+                                    <i class="fas fa-file-import"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-sm btn-info load float-right"
+                                        id="open-ComplainForm"
+                                        style="min-width: 90px" ng-click="ClearFields()">
+                                    <i class="fas fa-plus w-t"></i> Add Complaint Ticket
+                                </button>
+                            </div>
+                        </header>
+                        @*<div class="table-scroll-x-y table-scroll ag-theme-alpine" style="max-height: calc(100Vh - 6rem)!important;" id="myComplainTicket">
+        </div>*@
+
+
+                        <div class="table-scroll-x-y table-scroll" style="height:auto!important;max-height:calc(100vh - 7rem)!important">
+                            <table id="ELeaveRequest"
+                                   class="main-table table table-sm table-bordered bg-white">
+                                <thead style="background-color: #e9ecef !important;">
+                                    <tr>
+                                        <th style="width: 60px; background-color: #e9ecef !important;">S.No</th>
+                                        <th style="width: 130px; background-color: #e9ecef !important;">Entry Date</th>
+                                        <th style="width: 100px; background-color: #e9ecef !important;">Voucher No</th>
+                                        <th style="width: 120px; background-color: #e9ecef !important;">Complain Status</th>
+                                        <th style="width: 200px; background-color: #e9ecef !important;">Complain Detail</th>
+                                        <th style="width: 140px; background-color: #e9ecef !important;">Customer Code</th>
+                                        <th style="width: 200px; background-color: #e9ecef !important;">Customer Name</th>
+                                        <th style="width: 200px; background-color: #e9ecef !important;">Customer Address</th>
+                                        <th style="width: 130px; background-color: #e9ecef !important;">Phone Number</th>
+                                        <th style="width: 130px; background-color: #e9ecef !important;">Model No</th>
+                                        <th style="width: 150px; background-color: #e9ecef !important;">Model Version No</th>
+                                        <th style="width: 120px; background-color: #e9ecef !important;">Vin No</th>
+                                        <th style="width: 150px; background-color: #e9ecef !important;">Registration No</th>
+                                        @*<th style="width: 80px">Action</th>*@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+                                    @*<tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>
+
+                                    <tr dir-paginate="cl in TransctionComplainColl | filter:searchData.TransctionComplain | itemsPerPage: perPage.TransctionComplain" current-page="currentPages.TransctionComplain" pagination-id="TransctionComplainPagination">
+                                        <td>
+
+                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetTransactionComplainById(cl)"><i class="fas fa-pencil-alt"></i></a>
+                                            {{$index+1}}
+                                        </td>
+                                        <td>{{cl.VoucherDate}}</td>
+                                        <td>{{cl.AutoVoucherNo}}</td>
+                                        <td>{{cl.ComplaintStatus}}</td>
+                                        <td>{{cl.ComplainDetail}}</td>
+                                        <td>{{cl.CustomerCode}}</td>
+                                        <td>{{cl.CustomerName}}</td>
+                                        <td>{{cl.CustomerAddress}}</td>
+                                        <td>{{cl.PhoneNumber}}</td>
+                                        <td>{{cl.ModelNo}}</td>
+                                        <td>{{cl.ModelVersionNo}}</td>
+                                        <td>{{cl.VinNo}}</td>
+                                        <td>{{cl.RegdNo}}</td>
+                                    </tr>*@
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="TransctionComplainPaginationPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <div class="mb-3" id="ComplainForm">
+                        <div class="card">
+                            <div class="card-header p-0">
+                                <div class="row" data-card-widget="collapse" data-toggle="tooltip" @*title="Click to expand it"*@>
+                                    <div class="col-md-12">
+                                        <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group d-flex mb-0">
+                                                        <label class="my-1"><b>General</b> </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="form-inline float-right">
+                                                        <div class="form-group form-inline float-right mb-0">
+                                                            <label class="my-1"><b> {{S.ChieldColl.length}}</b></label>
+                                                        </div>
+                                                        <div class="card-tools">
+                                                            <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"
+                                                                    data-toggle="tooltip" title="Click to expand it">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </button>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="card-body p-0 expand">
+                                <div class="row p-2 px-2">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-4" ng-hide="HideShow.VoucherType==true">
+                                                <div class="form-group row">
+                                                    <label class="col-md-4">Voucher Type</label>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.VoucherId" ng-change="getVoucherNo()" ng-disabled="beData.TranId>0">
+                                                            <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == beData.VoucherId">
+                                                                {{vt.VoucherName}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4" ng-hide="HideShow.CostClass==true">
+                                                <div class="form-group row">
+                                                    <label for="" class="col-sm-4 col-form-label">Fiscal Year</label>
+                                                    <div class="col-sm-8">
+                                                        <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="getVoucherNo()" ng-disabled="beData.TranId>0">
+                                                            <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                                                {{cc.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Document No</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="text" class="form-control form-control-sm serial" placeholder="" ng-model="beData.AutoManualNo" readonly ng-hide="HideShow.AutoVoucherNo==true" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+                                                        <input type="text" class="form-control form-control-sm serial hideSideBar" placeholder="" ng-model="beData.ManualVoucherNO" ng-hide="HideShow.AutoVoucherNo==false" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:90px">Ticket For</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <select class="form-control form-control-sm" ng-model="beData.TicketForId">
+                                                            <option ng-repeat="T in TicketForList" ng-value="T.TicketForId" ng-selected="beData.TicketForId==H.TicketForId">
+                                                                {{T.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:90px">Entry Date</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly()" title="{{(beData.VoucherDateDet.dateAD |dateFormat)}}">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-8">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Customer Name</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <select autoShowHide="true" class="select2 serial form-control-sm" all-ledger ng-model="beData.LedgerId" id="cboParty1" style="width:95%" ledgertype="3" fortransaction="true"
+                                                                placeholder="** Select Customer **" showdetails="true" confirm-action="CustmerChange()" ledger-detail="beData.PartyLedger" side-bar-data="beData.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="66"></select>
+ 
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:90px">Phone No.</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.PhoneNo" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Customer Address</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.CustomerAddress" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:90px">Source</label>
+                                                    <div class="input-group input-group-sm">
+                                                        <select class="form-control form-control-sm" ng-model="beData.SourceId">
+                                                            <option ng-repeat="S in SourceList" ng-value="S.SourceId" ng-selected="beData.SourceId==S.SourceId">
+                                                                {{S.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:90px">Nature @*<span style="color:red">*</span>*@</label>
+                                                    <select class="form-control form-control-sm" ng-model="beData.NatureId">
+                                                        <option ng-repeat="N in NatureList" ng-value="N.NatureId" ng-selected="beData.NatureId==N.NatureId">
+                                                            {{N.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0">
+                                <div class="row" data-card-widget="collapse" data-toggle="tooltip" @*title="Click to expand it"*@>
+                                    <div class="col-md-12">
+                                        <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group d-flex mb-0">
+                                                        <label class="my-1"><b>Vehicle Details</b> </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="form-inline float-right">
+                                                        <div class="form-group form-inline float-right mb-0">
+                                                            <label class="my-1"><b> {{S.ChieldColl.length}}</b></label>
+                                                        </div>
+                                                        <div class="card-tools">
+                                                            <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"
+                                                                    data-toggle="tooltip" title="Click to expand it">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </button>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="card-body p-0 expand">
+                                <div class="row p-2 px-2">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-sm-8 col-lg-8 col-md-8 ">
+                                                <div class="row">
+                                                    <div class="col-sm-12 col-lg-12 col-md-12">
+                                                        <div class="input-group-prepend">
+                                                            <select class="input-group-text dropdown-toggle p-0"
+                                                                    style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1;" ng-model="beData.SearchOption">
+
+                                                                <option ng-repeat="ss in VehicleSearchOptions" ng-value="ss.value" ng-selected="ss.value==beData.SearchOption">
+                                                                    {{ss.text}}
+                                                                </option>
+                                                            </select>
+                                                            <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-vehicle ng-model="beData.VehicleId" style="width:100%"
+                                                                    placeholder="** Select Vehicle  **" showdetails="true" confirm-action="VehicleSelectionChange(beData,$index)" vehicle-detail="beData.vehicleDetail" side-bar-data="beData.sideBarData" voucher-id="SelectedBranch.BranchId" search-by="beData.SearchOption"></select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:160px">Registration No.</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.RegistrationNo" readonly />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Make Code</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.MakeCode" readonly />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:100px">Model Code</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ModelCode" readonly />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:160px">Model Version No.</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ModelVersionNo" readonly />
+                                                </div>
+                                            </div>
+
+
+
+
+
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width: 140px">Model Version Desc.</label>
+                                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.ChassisNo" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:100px">Engine No</label>
+                                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.EngineNo" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:160px">Vehicle Warranty Status</label>
+                                                    <input type="text" class="form-control form-control-sm" readonly ng-model="beData.VehicleWarrantyStatus" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0">
+                                <div class="row" data-card-widget="collapse" data-toggle="tooltip" @*title="Click to expand it"*@>
+                                    <div class="col-md-12">
+                                        <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group d-flex mb-0">
+                                                        <label class="my-1"><b>Supplier Company</b> </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="form-inline float-right">
+                                                        <div class="form-group form-inline float-right mb-0">
+                                                          
+                                                        </div>
+                                                        <div class="card-tools">
+                                                            <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"
+                                                                    data-toggle="tooltip" title="Click to expand it">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 expand">
+                                <div class="row p-2 px-2">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Complaint No.</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.STPLComplaintNo" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Entry Date</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.STPLEntryDate_TMP" date-detail="beData.STPLEntryDateDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:150px">Entry Time</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="beData.STPLEntryTime_TMP" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Entry By User</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.STPlEntryDatebyUser" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:140px">Contact Code</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.STPLContactCode" />
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:150px">Contact Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.STPLContactName" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:185px">Synced with Supplier ERP</label>
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" id="customCheckbox4" ng-model="beData.SyncedwithSupplierErp" value="option1">
+                                                        <label for="customCheckbox4" class="custom-control-label">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0">
+                                <div class="row" data-card-widget="collapse" data-toggle="tooltip" @*title="Click to expand it"*@>
+                                    <div class="col-md-12">
+                                        <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group d-flex mb-0">
+                                                        <label class="my-1"><b>Complaint Lines</b> </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="form-inline float-right">
+                                                        <div class="form-group form-inline float-right mb-0">
+                                                            <label class="my-1"><b> {{S.ChieldColl.length}}</b></label>
+                                                        </div>
+                                                        <div class="card-tools">
+                                                            <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"
+                                                                    data-toggle="tooltip" title="Click to expand it">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </button>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 expand">
+                                <div class="p-2 px-2">
+                                    <div class="table-scroll-x-y mb-1 table-container" style="max-height: calc(100Vh - 7rem) !important; height: auto !important; overflow: auto;">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 105px; background-color: #ececec !important; position: sticky; left:0; z-index:2;">Action</th>
+                                                    <th style="width: 140px; background-color: #ececec !important; position: sticky; left: 105px; z-index: 2; ">Document No.</th>
+                                                    <th style="width: 70px; background-color: #ececec !important; ">Line No.</th>
+                                                    <th style="width: 130px; background-color: #ececec !important;">Nature</th>
+                                                    <th style="width: 180px; background-color: #ececec !important;">Department</th>
+                                                    @*<th style="width: 120px; background-color: #ececec !important;">Lube Segment</th>*@
+                                                    <th style="width: 180px; background-color: #ececec !important;">SubType</th>
+                                                    <th style="width: 220px; background-color: #ececec !important;">Type</th>
+                                                    <th style="width: 230px; background-color: #ececec !important;">Complaint Details</th>
+                                                    @*<th style="width: 100px; background-color: #ececec !important;">Repeat Complain</th>*@
+                                                    <th style="width: 140px; background-color: #ececec !important;">Status</th>
+                                                    <th style="width: 150px; background-color: #ececec !important;">Forwarded Branch</th>
+
+                                                    <th style="width: 150px; background-color: #ececec !important;">STPL Forwarded Date</th>
+                                                    <th style="width: 150px; background-color: #ececec !important;">STPL Forwarded Time</th>
+                                                    <th style="width: 150px; background-color: #ececec !important;">Responsible Employee</th>
+                                                    <th style="width: 140px; background-color: #ececec !important;">Booking Job No</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Part No.</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Root Cause</th>
+
+                                                    <th style="width: 120px; background-color: #ececec !important;">Resolution Detail</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Remarks</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Verified By</th>
+
+                                                    <th style="width: 120px; background-color: #ececec !important;">Resolved By</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Resolved Date</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Resolved Time</th>
+                                                    <th style="width: 150px; background-color: #ececec !important;">Closed By</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Closed Date</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Closed Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="C in beData.ComplainLinesColl">
+                                                    <td style="position: sticky; left: 0; z-index: 1; background-color:#fff;">
+                                                        <a class="p-1" style="cursor:pointer" ng-click="AddComplaintLineTicket($index)">
+                                                            <i class="fas fa-plus w-t text-info"></i>
+                                                        </a>
+
+                                                        <a class="p-1" style="cursor: pointer" ng-click="DelComplaintLineTicket($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+
+                                                        <a class="p-1" style="cursor:pointer" data-toggle="modal" data-target="#Updatemodal">
+                                                            <i class="fas fa-save text-info" style="color: #2460b9 !important;"></i>
+                                                        </a>
+                                                        <a class="p-1" style="cursor: pointer" ng-click="TakeAction(C)">
+                                                            <i class="far fa-hand-point-right text-success"></i>
+                                                        </a>
+
+                                                    </td>
+                                                    <td style="position: sticky; left: 105px; z-index: 1; background-color: #fff;">
+                                                        <input class="form-control form-control-sm" type="text" ng-model="C.DocumentNo" disabled/>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        {{C.LineNo}}
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm" ng-model="C.NatureId">
+                                                            <option ng-repeat="N in NatureList" ng-value="N.NatureId" ng-selected="C.NatureId==N.NatureId">
+                                                                {{N.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control form-control-sm" type="text" ng-model="C.Department" />
+                                                    </td>                                                    
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.SubType" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.Type" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.ComplaintDetails" /></td>
+                                                    
+                                                    <td>                                                        
+                                                        <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="C.Status">
+                                                            <option ng-repeat="vt in ComplaintStatusColl" ng-value="vt.value" ng-selected="vt.value == C.Status">
+                                                                {{vt.text}}
+                                                            </option>
+                                                        </select>
+
+                                                    </td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.ForwardedBranch" /></td>
+
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="C.STPLForwardedDate_TMP" date-picker date-detail="C.STPLForwardedDateDet"></td>
+                                                    <td><input class="form-control form-control-sm" type="time" ng-model="C.STPLForwardedTime" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.ResponsibleEmployee" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.Reference" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.PartNo" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.RootCause" /></td>
+                                                    <td>
+                                                        <input class="form-control form-control-sm" type="text" ng-model="C.ResolutionDetail" />
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control form-control-sm" type="text" ng-model="C.Remarks" />
+                                                    </td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.VerifiedBy" /></td>
+
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.ResolvedBY" /></td>
+
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="C.ResolvedDate_TMP" date-picker date-detail="C.ResolvedDateDet"></td>
+                                                    <td><input class="form-control form-control-sm" type="time" ng-model="C.ResolvedTime" /></td>
+
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="C.ClosedBy" /></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="C.ClosedDate_TMP" date-picker date-detail="C.ClosedDateDet"></td>
+                                                    <td><input class="form-control form-control-sm" type="time" ng-model="C.ClosedTime" /></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0">
+                                <div class="row" data-card-widget="collapse" data-toggle="tooltip">
+                                    <div class="col-md-12">
+                                        <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group d-flex mb-0">
+                                                        <label class="my-1"><b>Action Taken</b> </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-7">
+                                                    <div class="form-inline float-right">
+                                                        <div class="form-group form-inline float-right mb-0">
+                                                            <label class="my-1"></label>
+                                                        </div>
+                                                        <div class="card-tools">
+                                                            <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"
+                                                                    data-toggle="tooltip" title="Click to expand it">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 expand">
+                                <div class="p-2 px-2">
+                                    <div class="table-scroll-x-y mb-1 table-container" style="max-height: calc(100Vh - 7rem) !important; height: auto !important; overflow: auto;">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 80px; background-color: #ececec !important; position: sticky; left:0; z-index:2;">Action</th>
+                                                    <th class="text-center" style="width: 60px; background-color: #ececec !important;">SNo</th>
+                                                    <th class="pl-2" style="width: 70px; background-color: #ececec !important;"> Line No.</th>
+                                                    <th style="width: 180px; background-color: #ececec !important;">SubType</th>
+                                                    <th style="width: 90px; background-color: #ececec !important;">Type</th>
+                                                    <th style="width: 230px; background-color: #ececec !important;">Action Details</th>
+                                                    <th style="width: 120px; background-color: #ececec !important; ">Date</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Time</th>
+                                                    <th style="width: 190px; background-color: #ececec !important;">Immediate & Futher Action</th>
+                                                    <th style="width: 130px; background-color: #ececec !important;">Commitment Date</th>
+                                                    <th style="width: 130px; background-color: #ececec !important;">Commitment Time</th>
+                                                    <th style="width: 140px; background-color: #ececec !important;">Complaint Sub Type</th>
+                                                    <th style="width: 140px; background-color: #ececec !important;">Deputed Person</th>
+                                                    <th style="width: 170px; background-color: #ececec !important;">Deputed Person Name</th>
+                                                    <th style="width: 120px; background-color: #ececec !important;">Deputed Time</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="A in CurComplain.ActionTakenColl">
+                                                    <td style="position: sticky; left: 0; z-index: 1; background-color:#fff;">
+                                                        <a class="p-1" style="cursor:pointer" ng-click="AddActionTaken($index)">
+                                                            <i class="fas fa-plus w-t text-info"></i>
+                                                        </a>
+                                                        <a class="p-1" style="cursor: pointer" ng-click="DelActionTaken($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                        
+
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td class="text-center" style="z-index: 1; background-color: #fff;">
+                                                        {{CurComplain.SNo}}
+                                                    </td>
+                                                    <td>
+                                                        {{CurComplain.SubType}}
+                                                    </td>
+                                                    <td>
+                                                        {{CurComplain.Type}}
+                                                    </td>                                                    
+                                                    <td>
+                                                        <input class="form-control form-control-sm" type="text" ng-model="A.Action" />                                                        
+                                                    </td>
+
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="A.ActionDate_TMP" date-picker date-detail="A.ActionDateDet"></td>
+                                                    <td><input class="form-control form-control-sm" type="time" ng-model="A.ActionTime" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="A.ImmediateAndFurtherAction" /></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="A.CommitmentDate_TMP" date-picker date-detail="A.CommitmentDateDet"></td>
+                                                    <td><input class="form-control form-control-sm" type="time" ng-model="A.CommitmentTime" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="A.ComplaintSubType" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="A.DeputedPerson" /></td>
+                                                    <td><input class="form-control form-control-sm" type="text" ng-model="A.DeputedPersonName" /></td>
+                                                    <td><input class="form-control form-control-sm" type="time" ng-model="A.DeputedTime" /></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>                                   
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header p-0">
+                                <div class="row" data-card-widget="collapse" data-toggle="tooltip" @*title="Click to expand it"*@>
+                                    <div class="col-md-12">
+                                        <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                            <div class="row">
+                                                <div class="col-md-5">
+                                                    <div class="form-group d-flex mb-0">
+                                                        <label class="my-1"><b>Closer Of Customer Complaint</b> </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <div class="form-inline float-right">                                                       
+                                                        <div class="card-tools">
+                                                            <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"
+                                                                    data-toggle="tooltip" title="Click to expand it">
+                                                                <i class="fas fa-plus text-info"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 expand">
+                                <div class="row p-2 px-2">
+                                    <div class="col-md-12">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:210px">Satisfaction Verification Date:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.SatisfcationVerificationDate_TMP" date-detail="beData.SatisfcationVerificationDateDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:230px">Complaint Status:</label>                                                     
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.ComplaintStatus">
+                                                        <option ng-repeat="vt in ComplaintStatusColl" ng-value="vt.value" ng-selected="vt.value == beData.ComplaintStatus">
+                                                            {{vt.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:220px">Type Of Satisfaction Verify:</label>                                                    
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.TypeofSatisfactionVerify">
+                                                        <option ng-repeat="vt in TypeOfSatisfactionColl" ng-value="vt.value" ng-selected="vt.value == beData.TypeofSatisfactionVerify">
+                                                            {{vt.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:210px">Complaint Closed Date:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.ComplaintClosedDate_TMP" date-detail="beData.ComplaintClosedDateDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:230px">Validation Remarks:</label>
+                                                    <textarea class="form-control form-control-sm" rows="1" ng-model="beData.ValidationRemarks"></textarea>
+                                                 
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:220px">Complaint Closed Time:</label>
+                                                    <input type="time" class="form-control form-control-sm" ng-model="beData.ComplaintClosedTime_TMP" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:210px">First Response Date & Time:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.FirstResponseDateAndTime_TMP" date-detail="beData.FirstResponseDateAndTimeDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:230px">Complaint Closed By:</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.ComplaintClosedBy" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:220px">Attended Date & Time:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.AttendedDateAndTime_TMP" date-detail="beData.AttendedDateAndTimeDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:210px"> Is Corrective Action Required:</label>
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" id="customCheckbox1" value="option1" ng-model="beData.IsCorrectiveActionRequired">
+                                                        <label for="customCheckbox1" class="custom-control-label">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:230px">Vehicle On Road Date and Time:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.VehicleOnRoadDateTime_TMP" date-detail="beData.VehicleOnRoadDateTimeDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:220px">Target Date For Comp.Closure:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.TargetDateForComplaintClosure_TMP" date-detail="beData.TargetDateForComplaintClosureDet" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:210px">Validation Status:</label>
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.ValidationStatus">
+                                                        <option ng-repeat="vt in ValidationStatusColl" ng-value="vt.value" ng-selected="vt.value == beData.ValidationStatus">
+                                                            {{vt.text}}
+                                                        </option>
+                                                    </select>                                                    
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:230px">Reopened:</label>
+                                                    <div class="custom-control custom-checkbox">
+                                                        <input class="custom-control-input" type="checkbox" id="customCheckbox2" ng-model="beData.Reopened" value="option1">
+                                                        <label for="customCheckbox2" class="custom-control-label">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:220px">Repair Status:</label>                                                    
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.RepairStatus">
+                                                        <option ng-repeat="vt in RepairStatusColl" ng-value="vt.value" ng-selected="vt.value == beData.RepairStatus">
+                                                            {{vt.text}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label for="" style="min-width:210px">Reopened Date Time:</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.ReopenedDateTime_TMP" date-detail="beData.ReopenedDateTimeDet" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm btn-secondary load"
+                                        id="back-to-list"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default load" ng-click="ClearFields()" style="min-width: 90px;">Reset</button>
+                                <button type="button" class="btn btn-sm btn-info load" ng-click="SaveUpdateComplainTicket()" style="min-width: 90px;">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                @*Action Taken Modal for Update start*@
+                <div class="modal fade" id="Updatemodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-md" role="document">
+                        <div class="modal-content" style="margin-top: 50px; max-width: 800px;">
+                            <div class="modal-header" style="padding: 6px">
+                                <h5 class="modal-title px-2 p-1" id="exampleModalLongTitle">
+                                    <label style=" font-size: 20px;">
+                                        <i class="fas fa-info pr-2 text-info" style="color: #2460b9 !important;"></i>
+
+                                        Choose One Of the Following Options
+                                    </label>
+                                </h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check pb-2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios1" id="Open" value="Open">
+                                            <label class="form-check-label" for="Open">
+                                                Open
+                                            </label>
+                                            <span class="dot mt-1 ml-2" style=" height: 12px; width: 12px; background-color: red;  display: inline-block;"></span>
+
+                                        </div>
+                                        <div class="form-check pb-2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios1" id="InProgress" value="InProgress">
+                                            <label class="form-check-label" for="InProgress">
+                                                InProgress
+                                            </label>
+                                            <span class="dot mt-1 ml-2" style=" height: 12px; width: 12px; background-color: yellow;  display: inline-block;"></span>
+
+                                        </div>
+
+
+                                        <div class="form-check pb-2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios1" id="Customer" value="Customer Waiting">
+                                            <label class="form-check-label" for="Customer">
+                                                Customer Waiting
+                                            </label>
+                                            <span class="dot mt-1 ml-2" style=" height: 12px; width: 12px; background-color: orange;  display: inline-block;"></span>
+
+                                        </div>
+
+                                        <div class="form-check pb-2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios1" id="Waiting" value="Waiting for Spare parts">
+                                            <label class="form-check-label" for="Waiting">
+                                                Waiting for Spare parts
+                                            </label>
+                                            <span class="dot mt-1 ml-2" style=" height: 12px; width: 12px; background-color: brown;  display: inline-block;"></span>
+
+                                        </div>
+                                        <div class="form-check pb-2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios1" id="Feedback" value="Feedback Pending">
+                                            <label class="form-check-label" for="Feedback">
+                                                Feedback Pending
+                                            </label>
+                                            <span class="dot mt-1 ml-2" style=" height: 12px; width: 12px; background-color: darkorange;  display: inline-block;"></span>
+
+                                        </div>
+                                         
+                                        <div class="form-check pb-2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios1" id="Closed" value="Closed">
+                                            <label class="form-check-label" for="Closed">
+                                                Closed
+                                            </label>
+                                            <span class="dot mt-1 ml-2" style=" height: 12px; width: 12px; background-color: green;  display: inline-block;"></span>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-info load" style="min-width: 90px" data-dismiss="modal">
+                                    OK
+                                </button>
+                                <button type="button" class="btn btn-sm btn-default load" style="min-width: 90px" data-dismiss="modal">Cancel</button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*Action Taken Modal for update end here*@
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+
+</div>
+
+

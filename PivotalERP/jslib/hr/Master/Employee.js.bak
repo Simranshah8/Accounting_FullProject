@@ -1,0 +1,1789 @@
+﻿app.controller('EmployeeController', function ($scope, $http, $timeout, $filter, GlobalServices) {
+    $scope.Title = 'Employee';
+
+    OnClickDefault();
+
+    $scope.LoadData = function () {
+        $('.select2').select2();
+        $scope.confirmMSG = GlobalServices.getConfirmMSG();
+        $scope.perPageColl = GlobalServices.getPerPageList();
+        $scope.currentPages = {
+            Employee: 1,
+        };
+
+        $scope.searchData = {
+            Employee: '',
+
+        };
+
+        $scope.perPage = {
+            Employee: GlobalServices.getPerPageRow()
+        };
+
+
+        $scope.GenderColl = [
+            { id: 1, text: 'Male' },
+            { id: 2, text: 'Female' },
+            { id: 3, text: 'Others' },
+        ]
+
+        $scope.BloodGroupColl = [
+            { id: 1, text: 'A+' },
+            { id: 2, text: 'A-' },
+            { id: 3, text: 'B+' },
+            { id: 4, text: 'B-' },
+            { id: 5, text: 'O+' },
+            { id: 6, text: 'O-' },
+            { id: 7, text: 'AB+' },
+            { id: 8, text: 'AB-' },
+        ]
+        $scope.ReligionColl = [
+            { id: 1, text: 'Hinduism' },
+            { id: 2, text: 'Islam' },
+            { id: 3, text: 'Buddhisim' },
+            { id: 4, text: 'Christianity' },
+            { id: 5, text: 'Jainism' },
+            { id: 6, text: 'Sikhism' },
+            { id: 7, text: 'Judaism' },
+        ]
+        $scope.MaritalStatusColl = [
+            { id: 1, text: 'Single' },
+            { id: 2, text: 'Married' },
+            { id: 3, text: 'Widowed' },
+            { id: 4, text: 'Separated' },
+            { id: 5, text: 'Divorced' }
+        ]
+        $scope.RelationshipColl = [
+            { id: 1, text: 'Husband' },
+            { id: 2, text: 'Wife' },
+            { id: 3, text: 'Father' },
+            { id: 4, text: 'Mother' },
+            { id: 5, text: 'Son' },
+            { id: 6, text: 'Daughter' },
+            { id: 7, text: 'Brother' },
+            { id: 8, text: 'Sister' },
+            { id: 9, text: 'Grand-Father' },
+            { id: 10, text: 'Grand-Mother' },
+            { id: 11, text: 'Grand-Son' },
+            { id: 12, text: 'Grand-Daughter' },
+            { id: 13, text: 'Uncle' },
+            { id: 14, text: 'Aunt' },
+            { id: 15, text: 'Cousion' },
+            { id: 16, text: 'Nephew' },
+            { id: 17, text: 'Niece' },
+            { id: 18, text: 'Father-in-law' },
+            { id: 19, text: 'Mother-in-law' },
+            { id: 20, text: 'Brother-in-law' },
+            { id: 21, text: 'Sister-in-law' }
+        ]
+        $scope.IDTypeColl = [
+            { id: 1, text: 'Citizenship' },
+            { id: 2, text: 'PanId' },
+            { id: 3, text: 'Driving License' },
+            { id: 4, text: 'PassPort' }
+        ]
+        $scope.PaymentTypeColl = [
+            { id: 1, text: 'Daily' },
+            { id: 2, text: 'Weekely' },
+            { id: 3, text: 'Monthly' },
+            { id: 4, text: 'Quarterly' },
+            { id: 5, text: 'Half-Yearly' },
+            { id: 6, text: 'Yearly' }
+        ]
+        $scope.StartMonthColl = [
+            { id: 1, text: 'January' },
+            { id: 2, text: 'February' },
+            { id: 3, text: 'March' },
+            { id: 4, text: 'April' },
+            { id: 5, text: 'May' },
+            { id: 6, text: 'June' },
+            { id: 7, text: 'July' },
+            { id: 8, text: 'August' },
+            { id: 9, text: 'September' },
+            { id: 10, text: 'October' },
+            { id: 11, text: 'November' },
+            { id: 12, text: 'December' }
+        ]
+        $scope.InsuranceTypeColl = [
+            { id: 1, text: 'GPA' },
+            { id: 2, text: 'Medical Insurance' },
+            { id: 3, text: 'Covid-19 Insurance' }
+        ]
+        $scope.CountryColl = [
+            { id: 1, text: 'Nepal' },
+            { id: 2, text: 'India' }
+        ]
+
+        //nationality db Data
+        $scope.NationalityList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllNationality",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.NationalityList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        //designation
+        $scope.DesignationList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllDesignation",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.DesignationList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+
+        //CategoryList
+        $scope.CategoryList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllCategory",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.CategoryList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+        //level
+        $scope.LevelList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllLevel",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.LevelList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        //ServiceType
+
+        $scope.ServiceTypeList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllServiceType",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.ServiceTypeList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        $scope.DisabilitiesList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllDisabilities",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.DisabilitiesList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        //for Supervisor
+        $scope.EmployeeList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllEmployee",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.EmployeeList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        //for document
+        $scope.DocumentList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllDocument",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.DocumentList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+
+        //for department
+        $scope.DepartmentList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllDepartment",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.DepartmentList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        //for RemoteArea
+        $scope.AreaList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllArea",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.AreaList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+
+        // for Bank
+        $scope.BankList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllBank",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.BankList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        // for Company
+        $scope.CompanyList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllCompanyList",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.CompanyList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        // for CostCenter
+        $scope.CostCenterList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllCostCenter",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.CostCenterList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+
+        $http({
+            method: 'get',
+            url: base_url + "HR/Master/GetCompanyDetail",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.CompanyDetail = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+
+        $scope.ProvinceColl = GetStateList();
+        $scope.DistrictColl = GetDistrictList();
+        $scope.VDCColl = GetVDCList();
+
+        $scope.ProvinceColl_Qry = mx($scope.ProvinceColl);
+        $scope.DistrictColl_Qry = mx($scope.DistrictColl);
+        $scope.VDCColl_Qry = mx($scope.VDCColl);
+
+
+        $scope.newDet = {
+            EmployeeId: 0,
+            EmployeeCode: '',
+            EnrollNumber: null,
+            FirstName: '',
+            MiddleName: '',
+            LastName: '',
+            Photo: '',
+            GenderId: null,
+            BloodGroupId: null,
+            ReligionId: null,
+            DobBS: '',
+            DobAD: '',
+            MaritalStatusId: null,
+            NationalityId: null,
+            PanId: '',
+            CitiNum: '',
+            CitiIssueDate_TMP: '',
+            CitiIssuePlaceId: null,
+            CitiFrontImg: '',
+            CitiBackImg: '',
+            EmailId: '',
+            OfficeNum: null,
+            PersonalNum: null,
+            FatherName: '',
+            MotherName: '',
+            GFatherName: '',
+            GMotherName: '',
+            DrivingLicNum: '',
+            LicIssuePlace: '',
+            LicIssueDate_TMP: '',
+            LicExpiryDate_TMP: '',
+            PassportNum: '',
+            PassportIssueDate_TMP: '',
+            PassportExpiryDate_TMP: '',
+            PassportIssuePlace: '',
+            IsSameAsPermanentAddress: false,
+            PCountryId: null,
+            PStateId: null,
+            PCity: '',
+            PDistrictId: null,
+            P_LocalLevelId: null,
+            PWard: null,
+            PHouseNum: '',
+            PFullAddr: '',
+            TCountryId: null,
+            TStateId: null,
+            TDistrictId: null,
+            TCity: '',
+            Temp_LocalLevelId: null,
+            TWard: null,
+            THouseNum: '',
+            TFullAddr: '',
+
+            ContactPer: '',
+            ContactRelation: null,
+            ContactAddr: '',
+            ContactPhone: '',
+            ContactMobile: '',
+            CompanyId: null,
+            BranchId: null,
+            SubBranch: null,
+            DepartmentId: null,
+            DesignationId: null,
+            CategoryId: null,
+            ELevelId: null,
+            JTitle: '',
+            ServiceTypeId: null,
+            JoinDate_TMP: '',
+            ConfirmDate_TMP: '',
+            RetireDate_TMP: '',
+            HeadQtr: '',
+            RemoteAreaId: null,
+            DisabilitiesId: null,
+            PfAccNum: '',
+            PfNominee: '',
+            PfRelation: null,
+            PfID: null,
+            PfIDNum: '',
+            PfEntryDate_TMP: '',
+            PfIssueOffice: '',
+            PfIssuePlace: '',
+            PfAtt: '',
+            AccessNum: '',
+            SsfNum: '',
+            CitCode: '',
+            CitAccNum: '',
+            CitAmt: 0,
+            CitNominee: '',
+            CitRelation: null,
+            CitIdType: null,
+            CitIdNum: '',
+            CitEntryDate_TMP: '',
+            GratCode: '',
+            GratAccNum: '',
+            GratNominee: '',
+            GratRelation: null,
+            GratIdType: null,
+            GratIdNum: '',
+            GratEntryDate_TMP: '',
+            GratIssueOffice: '',
+            GratIssuePlace: '',
+            GratAtt: '',
+            LInsuComp: '',
+            LPolicyName: '',
+            LPolicyNum: '',
+            LPolicyAmt: 0,
+            LPolicySDate_TMP: '',
+            LPolicyLDate_TMP: '',
+            LPremiumAmt: 0,
+            LPaymentType: null,
+            LStartMonth: null,
+            LDedSalary: false,
+            LRemarks: '',
+            LInsuTypeId: null,
+            LiAtt: '',
+            HInsuComp: '',
+            HPolicyName: '',
+            HPolicyNum: '',
+            HPolicyAmt: 0,
+            HPolicySDate_TMP: '',
+            HPolicyLDate_TMP: '',
+            HPremiumAmt: 0,
+            HStartMonth: null,
+            HDedSalary: false,
+            HRemarks: '',
+            HInsuTypeId: null,
+            HiAtt: '',
+            AccLedger: '',
+            CostCenter: null,
+            OTLedger: '',
+            EFirstLevel: null,
+            ESecondLevel: null,
+            EThirdLevel: null,
+
+            EmpBankAccColl: [],
+            BankNameId: null,
+            AccName: '',
+            AccNum: '',
+            Branch: '',
+            ForPayroll: false,
+
+            AcaQualificationColl: [],
+            DegreeName: '',
+            BoardUni: '',
+            PassedYr: '',
+            GradePer: '',
+
+            WorkExpColl: [],
+            Org: '',
+            Department: null,
+            JobTitle: '',
+            StartDate_TMP: '',
+            EndDate_TMP: '',
+            Remarks: '',
+
+            AttachmentColl: [],
+            DocTypeId: null,
+            DocAtt: '',
+            Description: '',
+
+            Mode: 'Save'
+        };
+        $scope.newDet.EmpBankAccColl.push({});
+        $scope.newDet.AcaQualificationColl.push({});
+        $scope.newDet.WorkExpColl.push({});
+
+        $scope.GetAllEmployee();
+
+        if (EmployeeID && EmployeeID) {
+            var Dat = {
+                EmployeeId: EmployeeID
+            }
+            $scope.getEmployeeById(Dat);
+        }
+
+    };
+
+    $scope.ClearEmpProfile = function () {
+        $scope.ClearEmpPhoto();
+        $scope.ClearCitiFront();
+        $scope.ClearCitiBack();
+        $scope.newDet = {
+            EmployeeId: 0,
+            EmployeeCode: '',
+            EnrollNumber: null,
+            FirstName: '',
+            MiddleName: '',
+            LastName: '',
+            Photo: '',
+            GenderId: null,
+            BloodGroupId: null,
+            ReligionId: null,
+            DobBS: '',
+            DobAD: '',
+            MaritalStatusId: null,
+            NationalityId: null,
+            PanId: '',
+            CitiNum: '',
+            CitiIssueDate_TMP: '',
+            CitiIssuePlaceId: null,
+            CitiFrontImg: '',
+            CitiBackImg: '',
+            EmailId: '',
+            OfficeNum: null,
+            PersonalNum: null,
+            FatherName: '',
+            MotherName: '',
+            GFatherName: '',
+            GMotherName: '',
+            DrivingLicNum: '',
+            LicIssuePlace: '',
+            LicIssueDate_TMP: '',
+            LicExpiryDate_TMP: '',
+            PassportNum: '',
+            PassportIssueDate_TMP: '',
+            PassportExpiryDate_TMP: '',
+            PassportIssuePlace: '',
+            IsSameAsPermanentAddress: false,
+            PCountryId: null,
+            PStateId: null,
+            PCity: '',
+            PDistrictId: null,
+            P_LocalLevelId: null,
+            PWard: null,
+            PHouseNum: '',
+            PFullAddr: '',
+            TCountryId: null,
+            TStateId: null,
+            TDistrictId: null,
+            TCity: '',
+            Temp_LocalLevelId: null,
+            TWard: null,
+            THouseNum: '',
+            TFullAddr: '',
+
+            ContactPer: '',
+            ContactRelation: null,
+            ContactAddr: '',
+            ContactPhone: '',
+            ContactMobile: '',
+            CompanyId: null,
+            BranchId: null,
+            SubBranch: null,
+            DepartmentId: null,
+            DesignationId: null,
+            CategoryId: null,
+            ELevelId: null,
+            JTitle: '',
+            ServiceTypeId: null,
+            JoinDate_TMP: '',
+            ConfirmDate_TMP: '',
+            RetireDate_TMP: '',
+            HeadQtr: '',
+            RemoteAreaId: null,
+            DisabilitiesId: null,
+            PfAccNum: '',
+            PfNominee: '',
+            PfRelation: null,
+            PfID: null,
+            PfIDNum: '',
+            PfEntryDate_TMP: '',
+            PfIssueOffice: '',
+            PfIssuePlace: '',
+            PfAtt: '',
+            AccessNum: '',
+            SsfNum: '',
+            CitCode: '',
+            CitAccNum: '',
+            CitAmt: 0,
+            CitNominee: '',
+            CitRelation: null,
+            CitIdType: null,
+            CitIdNum: '',
+            CitEntryDate_TMP: '',
+            GratCode: '',
+            GratAccNum: '',
+            GratNominee: '',
+            GratRelation: null,
+            GratIdType: null,
+            GratIdNum: '',
+            GratEntryDate_TMP: '',
+            GratIssueOffice: '',
+            GratIssuePlace: '',
+            GratAtt: '',
+            LInsuComp: '',
+            LPolicyName: '',
+            LPolicyNum: '',
+            LPolicyAmt: 0,
+            LPolicySDate_TMP: '',
+            LPolicyLDate_TMP: '',
+            LPremiumAmt: 0,
+            LPaymentType: null,
+            LStartMonth: null,
+            LDedSalary: false,
+            LRemarks: '',
+            LInsuTypeId: null,
+            LiAtt: '',
+            HInsuComp: '',
+            HPolicyName: '',
+            HPolicyNum: '',
+            HPolicyAmt: 0,
+            HPolicySDate_TMP: '',
+            HPolicyLDate_TMP: '',
+            HPremiumAmt: 0,
+            HStartMonth: null,
+            HDedSalary: false,
+            HRemarks: '',
+            HInsuTypeId: null,
+            HiAtt: '',
+            AccLedger: '',
+            CostCenter: null,
+            OTLedger: '',
+            EFirstLevel: null,
+            ESecondLevel: null,
+            EThirdLevel: null,
+
+            EmpBankAccColl: [],
+            BankNameId: null,
+            AccName: '',
+            AccNum: '',
+            Branch: '',
+            ForPayroll: false,
+
+            AcaQualificationColl: [],
+            DegreeName: '',
+            BoardUni: '',
+            PassedYr: '',
+            GradePer: '',
+
+            WorkExpColl: [],
+            Org: '',
+            Department: null,
+            JobTitle: '',
+            StartDate_TMP: '',
+            EndDate_TMP: '',
+            Remarks: '',
+
+            AttachmentColl: [],
+            DocTypeId: null,
+            DocAtt: '',
+            Description: '',
+
+            Mode: 'Save'
+        };
+        $scope.newDet.EmpBankAccColl.push({});
+        $scope.newDet.AcaQualificationColl.push({});
+        $scope.newDet.WorkExpColl.push({});
+    }
+
+
+
+    $scope.ClearEmpPhoto = function () {
+        $timeout(function () {
+            $scope.$apply(function () {
+                $scope.newDet.PhotoData = null;
+                $scope.newDet.Photo_TMP = [];
+            });
+
+        });
+        $('#imgEmp').attr('src', '');
+        $('#imgPhoto1').attr('src', '');
+    };
+
+    $scope.ClearCitiFront = function () {
+        $timeout(function () {
+            $scope.$apply(function () {
+                $scope.newDet.CitiFrontImgData = null;
+                $scope.newDet.CitiFrontImg_Tmp = [];
+            });
+
+        });
+        $('#imgEmpCitF').attr('src', '');
+        $('#imgPhoto2').attr('src', '');
+    };
+
+    $scope.ClearCitiBack = function () {
+        $timeout(function () {
+            $scope.$apply(function () {
+                $scope.newDet.CitiBackImgData = null;
+                $scope.newDet.CitiBackImg_tmp = [];
+            });
+
+        });
+        $('#imgEmpCitB').attr('src', '');
+        $('#imgPhoto3').attr('src', '');
+    };
+
+    //------------------------
+    $scope.AddbankDet = function (ind) {
+        if ($scope.newDet.EmpBankAccColl) {
+            if ($scope.newDet.EmpBankAccColl.length > ind + 1) {
+                $scope.newDet.EmpBankAccColl.splice(ind + 1, 0, {
+                    AccName: '',
+
+                })
+            } else {
+                $scope.newDet.EmpBankAccColl.push({
+                    AccName: '',
+                })
+            }
+        }
+    }
+
+    $scope.DelBankDet = function (ind) {
+        if ($scope.newDet.EmpBankAccColl) {
+            if ($scope.newDet.EmpBankAccColl.length > 1) {
+                $scope.newDet.EmpBankAccColl.splice(ind, 1);
+            }
+        }
+    };
+
+    $scope.AddQualDet = function (ind) {
+        if ($scope.newDet.AcaQualificationColl) {
+            if ($scope.newDet.AcaQualificationColl.length > ind + 1) {
+                $scope.newDet.AcaQualificationColl.splice(ind + 1, 0, {
+                    DegreeName: '',
+
+                })
+            } else {
+                $scope.newDet.AcaQualificationColl.push({
+                    DegreeName: '',
+                })
+            }
+        }
+    }
+
+    $scope.DelQualDet = function (ind) {
+        if ($scope.newDet.AcaQualificationColl) {
+            if ($scope.newDet.AcaQualificationColl.length > 1) {
+                $scope.newDet.AcaQualificationColl.splice(ind, 1);
+            }
+        }
+    };
+
+    $scope.AddWorkDet = function (ind) {
+        if ($scope.newDet.WorkExpColl) {
+            if ($scope.newDet.WorkExpColl.length > ind + 1) {
+                $scope.newDet.WorkExpColl.splice(ind + 1, 0, {
+                    JobTitle: '',
+
+                })
+            } else {
+                $scope.newDet.WorkExpColl.push({
+                    JobTitle: '',
+                })
+            }
+        }
+    }
+
+    $scope.DelWorkDet = function (ind) {
+        if ($scope.newDet.WorkExpColl) {
+            if ($scope.newDet.WorkExpColl.length > 1) {
+                $scope.newDet.WorkExpColl.splice(ind, 1);
+            }
+        }
+    };
+
+    $scope.delAttachmentDoc = function (ind) {
+        if ($scope.newDet.AttachmentColl) {
+            if ($scope.newDet.AttachmentColl.length > 0) {
+                $scope.newDet.AttachmentColl.splice(ind, 1);
+            }
+        }
+    };
+
+    $scope.AddMoreFilesReceived = function (files, docType, des) {
+
+        if (files && docType) {
+            if (files != null && docType != null) {
+
+                angular.forEach(files, function (file) {
+                    $scope.newDet.AttachmentColl.push({
+                        DocumentTypeId: docType.DocumentTypeId,
+                        DocumentTypeName: docType.Name,
+                        File: file,
+                        Name: file.name,
+                        Type: file.type,
+                        Size: file.size,
+                        Description: des,
+                        Path: null
+                    });
+                })
+
+                $scope.docType = null;
+                $scope.attachFile = null;
+                $scope.docDescription = '';
+            }
+        }
+    };
+
+
+    $scope.ShowPersonalImg = function (item) {
+        $scope.viewImg = {
+            ContentPath: '',
+            FileType: null
+        };
+
+        if (item.DocPath && item.DocPath.length > 0) {
+            $scope.viewImg.ContentPath = item.DocPath;
+            $scope.viewImg.FileType = 'pdf';  // Assuming DocPath is for PDFs
+            document.getElementById('pdfViewer').src = item.DocPath;
+            $('#PersonalImg').modal('show');
+        } else if (item.PhotoPath && item.PhotoPath.length > 0) {
+            $scope.viewImg.ContentPath = item.PhotoPath;
+            $scope.viewImg.FileType = 'image';  // Assuming PhotoPath is for images
+            $('#PersonalImg').modal('show');
+        } else if (item.File) {
+            var blob = new Blob([item.File], { type: item.File?.type });
+            $scope.viewImg.ContentPath = URL.createObjectURL(blob);
+            $scope.viewImg.FileType = item.File.type.startsWith('image/') ? 'image' : 'pdf';
+
+            if ($scope.viewImg.FileType === 'pdf') {
+                document.getElementById('pdfViewer').src = $scope.viewImg.ContentPath;
+            }
+
+            $('#PersonalImg').modal('show');
+        } else {
+            Swal.fire('No Image Found');
+        }
+    };
+
+
+    //Show hide jf for Employee Profile
+
+    function OnClickDefault() {
+        /*  show or hide Employee Profile*/
+
+
+        document.getElementById('emp-add-question').onclick = function () {
+            $('#EmployeeAdd-tab').tab('show');
+        }
+        document.getElementById('back-emp-det-question').onclick = function () {
+            $('#EmployeeDet-tab').tab('show');
+        }
+
+        document.getElementById('emergency-contact-question').onclick = function () {
+            $('#Emergency-tab').tab('show');
+        }
+        document.getElementById('back-emp-add-question').onclick = function () {
+            $('#EmployeeAdd-tab').tab('show');
+        }
+
+        document.getElementById('office-detail-question').onclick = function () {
+            $('#Office-tab').tab('show');
+        }
+        document.getElementById('back-emg-det-question').onclick = function () {
+            $('#Emergency-tab').tab('show');
+
+
+        }
+        document.getElementById('PF-question').onclick = function () {
+            $('#PFSSF-tab').tab('show');
+
+        }
+        document.getElementById('back-off-det-question').onclick = function () {
+            $('#Office-tab').tab('show');
+
+        }
+        document.getElementById('bank-question').onclick = function () {
+            $('#BankAcc-tab').tab('show');
+
+        }
+        document.getElementById('back-pf-det-question').onclick = function () {
+            $('#PFSSF-tab').tab('show');
+
+        }
+        document.getElementById('ins-question').onclick = function () {
+            $('#Insurance-tab').tab('show');
+
+        }
+        document.getElementById('back-bank-question').onclick = function () {
+            $('#BankAcc-tab').tab('show');
+
+        }
+        document.getElementById('acc-det-question').onclick = function () {
+            $('#Account-tab').tab('show');
+
+        }
+        document.getElementById('back-acc-question').onclick = function () {
+            $('#Insurance-tab').tab('show');
+
+        }
+        document.getElementById('Academic-question').onclick = function () {
+            $('#Qualification-tab').tab('show');
+
+        }
+        document.getElementById('back-det-question').onclick = function () {
+            $('#Account-tab').tab('show');
+
+        }
+        document.getElementById('work-question').onclick = function () {
+            $('#Experience-tab').tab('show');
+
+        }
+        document.getElementById('back-academic-question').onclick = function () {
+            $('#Qualification-tab').tab('show');
+
+        }
+        document.getElementById('supervisor-question').onclick = function () {
+            $('#Supervisor-tab').tab('show');
+
+        }
+        document.getElementById('back-work-question').onclick = function () {
+            $('#Experience-tab').tab('show');
+
+        }
+
+        document.getElementById('att-question').onclick = function () {
+            $('#Attachment-tab').tab('show');
+
+        }
+        document.getElementById('back-supervisor-question').onclick = function () {
+            $('#Supervisor-tab').tab('show');
+
+        }
+
+
+    };
+
+    $scope.SamePAddress = function () {
+        if ($scope.newDet.IsSameAsPermanentAddress == true) {
+
+            $scope.newDet.TCountryId = $scope.newDet.PCountryId;
+            $scope.newDet.TStateId = $scope.newDet.PStateId;
+            $scope.newDet.TDistrictId = $scope.newDet.PDistrictId;
+            $scope.newDet.Temp_LocalLevelId = $scope.newDet.P_LocalLevelId;
+            $scope.newDet.TCity = $scope.newDet.PCity;
+            $scope.newDet.TWard = $scope.newDet.PWard;
+            $scope.newDet.TStreet = $scope.newDet.PStreet;
+            $scope.newDet.THouseNum = $scope.newDet.PHouseNum;
+            $scope.newDet.TFullAddr = $scope.newDet.PFullAddr;
+
+
+
+        } else {
+            $scope.newDet.TStateId = null;
+            $scope.newDet.TCountryId = null;
+            $scope.newDet.TDistrictId = null;
+            $scope.newDet.TCity = null;
+            $scope.newDet.Temp_LocalLevelId = '';
+            $scope.newDet.TWard = null;
+            $scope.newDet.TStreet = '';
+            $scope.newDet.THouseNum = '';
+            $scope.newDet.TFullAddr = '';
+        }
+    }
+
+
+    //save 
+
+
+
+    $scope.IsValidEEmpCode = function () {
+        //if (!$scope.newDet.EmployeeCode) {
+        //    Swal.fire('Employee Code Required');
+        //    return false;
+        //}
+        return true;
+    }
+
+    $scope.SaveEmployeeDetails = function () {
+        if ($scope.IsValidEEmpCode() == true) {
+            if ($scope.confirmMSG.Accept == true) {
+                var saveModify = $scope.newDet.Mode;
+                Swal.fire({
+                    title: 'Do you want to ' + saveModify + ' the current data?',
+                    showCancelButton: true,
+                    confirmButtonText: saveModify,
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        $scope.CallSaveUpdateEmpProfile();
+                    }
+                });
+            } else
+                $scope.CallSaveUpdateEmpProfile();
+        }
+    };
+
+    $scope.CallSaveUpdateEmpProfile = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        var photo = $scope.newDet.Photo_TMP;
+        var citiFront = $scope.newDet.CitiFrontImg_Tmp;
+        var citiBack = $scope.newDet.CitiBackImg_tmp;
+
+
+
+        if ($scope.newDet.CitiIssueDateDet) {
+            $scope.newDet.CitiIssueDate = $filter('date')(new Date($scope.newDet.CitiIssueDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.CitiIssueDate = null;
+
+        if ($scope.newDet.LicIssueDateDet) {
+            $scope.newDet.LicIssueDate = $filter('date')(new Date($scope.newDet.LicIssueDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.LicIssueDate = null;
+
+        if ($scope.newDet.LicExpiryDateDet) {
+            $scope.newDet.LicExpiryDate = $filter('date')(new Date($scope.newDet.LicExpiryDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.LicExpiryDate = null;
+
+        if ($scope.newDet.PassportIssueDateDet) {
+            $scope.newDet.PassportIssueDate = $filter('date')(new Date($scope.newDet.PassportIssueDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.PassportIssueDate = null;
+
+        if ($scope.newDet.PassportExpiryDateDet) {
+            $scope.newDet.PassportExpiryDate = $filter('date')(new Date($scope.newDet.PassportExpiryDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.PassportExpiryDate = null;
+
+
+
+        selectData1 = $('#cboDistrictCiti').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            district1 = selectData1[0].text.trim();
+        $scope.newDet.CitiIssuePlace = district1;
+
+
+        //Province district for Permanent Address
+        var selectData1 = $('#cboProvincePer').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            province1 = selectData1[0].text.trim();
+
+        selectData1 = $('#cboDistrictPer').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            district1 = selectData1[0].text.trim();
+
+
+        selectData1 = $('#cboAreaPer').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            area1 = selectData1[0].text.trim();
+
+        $scope.newDet.PStateName = province1;
+        $scope.newDet.PDistrictName = district1;
+        $scope.newDet.P_LocalLevelName = area1;
+
+        
+
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveEmployeeDetails",
+            headers: { 'Content-Type': undefined },
+
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+
+                if (data.emPhoto && data.emPhoto.length > 0)
+                    formData.append("photo", data.emPhoto[0]);
+
+                if (data.emCitiFront && data.emCitiFront.length > 0)
+                    formData.append("citiFront", data.emCitiFront[0]);
+
+                if (data.emCitiBack && data.emCitiBack.length > 0)
+                    formData.append("citiBack", data.emCitiBack[0]);
+
+               
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet, emPhoto: photo, emCitiFront: citiFront, emCitiBack: citiBack
+            }
+        }).then(function (res) {
+
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+    
+    $scope.SaveEmployeeAdd = function () {
+        if ($scope.IsValidEEmpCode() == true) {
+            if ($scope.confirmMSG.Accept == true) {
+                var saveModify = $scope.newDet.Mode;
+                Swal.fire({
+                    title: 'Do you want to ' + saveModify + ' the current data?',
+                    showCancelButton: true,
+                    confirmButtonText: saveModify,
+                }).then((result) => {
+                    /* Read more about isConfirmed, isDenied below */
+                    if (result.isConfirmed) {
+                        $scope.CallSaveUpdateEmpAdd();
+                    }
+                });
+            } else
+                $scope.CallSaveUpdateEmpAdd();
+        }
+    };
+
+    $scope.CallSaveUpdateEmpAdd = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+
+        //Province district for Permanent Address
+        var selectData1 = $('#cboProvincePer').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            province1 = selectData1[0].text.trim();
+
+        selectData1 = $('#cboDistrictPer').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            district1 = selectData1[0].text.trim();
+
+
+        selectData1 = $('#cboAreaPer').select2('data');
+        if (selectData1 && selectData1.length > 0)
+            area1 = selectData1[0].text.trim();
+
+        $scope.newDet.PStateName = province1;
+        $scope.newDet.PDistrictName = district1;
+        $scope.newDet.P_LocalLevelName = area1;
+
+         //Province district for Temporary Address
+        var selectData2 = $('#cboProvinceTmp').select2('data');
+        if (selectData2 && selectData2.length > 0)
+            province2 = selectData2[0].text.trim();
+
+        selectData2 = $('#cboDistrictTmp').select2('data');
+        if (selectData2 && selectData2.length > 0)
+            district2 = selectData2[0].text.trim();
+
+
+        selectData2 = $('#cboAreaTmp').select2('data');
+        if (selectData2 && selectData2.length > 0)
+            area2 = selectData2[0].text.trim();
+
+        $scope.newDet.TStateName = province2;
+        $scope.newDet.TDistrictName = district2;
+        $scope.newDet.Temp_LocalLevelName = area2;
+        
+
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveEmployeeAdd",
+            headers: { 'Content-Type': undefined },
+
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+               
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+
+
+    $scope.UpdateEmpEmergency = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveEmpEmergency",
+            headers: { 'Content-Type': undefined },
+
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+    $scope.UpdateOfficeDet = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        if ($scope.newDet.JoinDateDet) {
+            $scope.newDet.JoinDate = $filter('date')(new Date($scope.newDet.JoinDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.JoinDate = null;
+        if ($scope.newDet.ConfirmDateDet) {
+            $scope.newDet.ConfirmDate = $filter('date')(new Date($scope.newDet.ConfirmDateDet.dateAD), 'yyyy-MM-dd');
+        } else
+            $scope.newDet.ConfirmDate = null;
+        if ($scope.newDet.RetireDateDet) {
+            $scope.newDet.RetireDate = $filter('date')(new Date($scope.newDet.RetireDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.RetireDate = null;
+        }
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveOfficeDetails",
+            headers: { 'Content-Type': undefined },
+
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+
+    $scope.UpdatePfSsfCit = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+
+        var pfAttach = $scope.newDet.PfAtt_TMP;
+        var sfAttach = $scope.newDet.SsfAtt_TMP;
+        var citAttach = $scope.newDet.CitAtt_TMP;
+        var gratAttach = $scope.newDet.GratAtt_TMP;
+
+        if ($scope.newDet.PfEntryDateDet) {
+            $scope.newDet.PfEntryDate = $filter('date')(new Date($scope.newDet.PfEntryDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.PfEntryDate = null;
+        }
+
+        if ($scope.newDet.CitEntryDateDet) {
+            $scope.newDet.CitEntryDate = $filter('date')(new Date($scope.newDet.CitEntryDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.CitEntryDate = null;
+        }
+
+        if ($scope.newDet.GratEntryDateDet) {
+            $scope.newDet.GratEntryDate = $filter('date')(new Date($scope.newDet.GratEntryDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.GratEntryDate = null;
+        }
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/ModifyPfSsfCit",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+                if (data.empfAttach && data.empfAttach.length > 0)
+                    formData.append("pfAttach", data.empfAttach[0]);
+
+                if (data.emsfAttach && data.emsfAttach.length > 0)
+                    formData.append("sfAttach", data.emsfAttach[0]);
+
+                if (data.emcitAttach && data.emcitAttach.length > 0)
+                    formData.append("citAttach", data.emcitAttach[0]);
+
+                if (data.emgratAttach && data.emgratAttach.length > 0)
+                    formData.append("gratAttach", data.emgratAttach[0]);
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet, pfAttach, emsfAttach: sfAttach, emcitAttach: citAttach, emgratAttach: gratAttach
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+
+
+    $scope.UpdateBankDetails = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateBankDetails",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+    $scope.UpdateInsurance = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+
+        var liAttach = $scope.newDet.LiAtt_TMP;
+        var hiAttach = $scope.newDet.HiAtt_TMP;
+
+        if ($scope.newDet.LPolicySDateDet) {
+            $scope.newDet.LPolicySDate = $filter('date')(new Date($scope.newDet.LPolicySDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.LPolicySDate = null;
+        }
+
+        if ($scope.newDet.LPolicyLDateDet) {
+            $scope.newDet.LPolicyLDate = $filter('date')(new Date($scope.newDet.LPolicyLDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.LPolicyLDate = null;
+        }
+
+        if ($scope.newDet.HPolicySDateDet) {
+            $scope.newDet.HPolicySDate = $filter('date')(new Date($scope.newDet.HPolicySDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.HPolicySDate = null;
+        }
+
+        if ($scope.newDet.HPolicyLDateDet) {
+            $scope.newDet.HPolicyLDate = $filter('date')(new Date($scope.newDet.HPolicyLDateDet.dateAD), 'yyyy-MM-dd');
+        } else {
+            $scope.newDet.HPolicyLDate = null;
+        }
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateInsurance",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+                if (data.emliAttach && data.emliAttach.length > 0)
+                    formData.append("liAttach", data.emliAttach[0]);
+
+                if (data.emhiAttach && data.emhiAttach.length > 0)
+                    formData.append("hiAttach", data.emhiAttach[0]);
+
+
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet, emliAttach: liAttach, emhiAttach: hiAttach
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+
+    $scope.SaveUpdateAccountDet = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateAccountDet",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));               
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+    $scope.UpdateQualification = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateQualification",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));               
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+    $scope.UpdateExperience = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        if ($scope.newDet.WorkExpColl) {
+            $scope.newDet.WorkExpColl.forEach((S) => {
+                if (S.StartDateDet)
+                    S.StartDate = $filter('date')(new Date(S.StartDateDet.dateAD), 'yyyy-MM-dd');
+                if (S.EndDateDet)
+                    S.EndDate = $filter('date')(new Date(S.EndDateDet.dateAD), 'yyyy-MM-dd');
+            });
+        }
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateExperience",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));               
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+    $scope.UpdateSupervisor= function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+       
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateSupervisor",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+              
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+    $scope.UpdateDocument= function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        var filesColl = $scope.newDet.AttachmentColl;
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/SaveUpdateDocument",
+            headers: { 'Content-Type': undefined },
+            transformRequest: function (data) {
+                var formData = new FormData();
+                formData.append("jsonData", angular.toJson(data.jsonData));
+                if (data.files) {
+                    for (var i = 0; i < data.files.length; i++) {
+                        formData.append("file" + i, data.files[i].File);
+                    }
+                }
+                return formData;
+            },
+            data: {
+                jsonData: $scope.newDet, files: filesColl
+            }
+        }).then(function (res) {
+            $scope.loadingstatus = "stop";
+            hidePleaseWait();
+            Swal.fire(res.data.ResponseMSG);
+            if (res.data.IsSuccess == true) {
+                $scope.GetAllEmployee();
+            }
+        }, function (errormessage) {
+            $scope.loadingstatus = "stop";
+            Swal.fire(errormessage);
+        });
+    }
+
+
+    $scope.GetAllEmployee = function () {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        $scope.EmployeeList = [];
+        $http({
+            method: 'GET',
+            url: base_url + "HR/Master/GetAllEmployee",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.EmployeeList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+    }
+
+
+
+    $scope.getEmployeeById = function (refData) {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        var para = {
+            EmployeeId: refData.EmployeeId
+        };
+        $http({
+            method: 'POST',
+            url: base_url + "HR/Master/getEmployeeById",
+            dataType: "json",
+            data: JSON.stringify(para)
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.ClearEmpProfile();
+                $scope.newDet = res.data.Data;
+
+
+                if ($scope.newDet.CitiIssueDate)
+                    $scope.newDet.CitiIssueDate_TMP = new Date($scope.newDet.CitiIssueDate);
+                if ($scope.newDet.LicIssueDate)
+                    $scope.newDet.LicIssueDate_TMP = new Date($scope.newDet.LicIssueDate);
+                if ($scope.newDet.LicExpiryDate)
+                    $scope.newDet.LicExpiryDate_TMP = new Date($scope.newDet.LicExpiryDate);
+                if ($scope.newDet.PassportIssueDate)
+                    $scope.newDet.PassportIssueDate_TMP = new Date($scope.newDet.PassportIssueDate);
+
+                if ($scope.newDet.PassportExpiryDate)
+                    $scope.newDet.PassportExpiryDate_TMP = new Date($scope.newDet.PassportExpiryDate);
+
+                if ($scope.newDet.JoinDate)
+                    $scope.newDet.JoinDate_TMP = new Date($scope.newDet.JoinDate);
+                if ($scope.newDet.ConfirmDate)
+                    $scope.newDet.ConfirmDate_TMP = new Date($scope.newDet.ConfirmDate);
+                if ($scope.newDet.RetireDate)
+                    $scope.newDet.RetireDate_TMP = new Date($scope.newDet.RetireDate);
+                if ($scope.newDet.PfEntryDate)
+                    $scope.newDet.PfEntryDate_TMP = new Date($scope.newDet.PfEntryDate);
+                if ($scope.newDet.CitEntryDate)
+                    $scope.newDet.CitEntryDate_TMP = new Date($scope.newDet.CitEntryDate);
+                if ($scope.newDet.GratEntryDate)
+                    $scope.newDet.GratEntryDate_TMP = new Date($scope.newDet.GratEntryDate);
+                if ($scope.newDet.LPolicySDate)
+                    $scope.newDet.LPolicySDate_TMP = new Date($scope.newDet.LPolicySDate);
+                if ($scope.newDet.LPolicyLDate)
+                    $scope.newDet.LPolicyLDate_TMP = new Date($scope.newDet.LPolicyLDate);
+                if ($scope.newDet.HPolicySDate)
+                    $scope.newDet.HPolicySDate_TMP = new Date($scope.newDet.HPolicySDate);
+                if ($scope.newDet.HPolicyLDate)
+                    $scope.newDet.HPolicyLDate_TMP = new Date($scope.newDet.HPolicyLDate);
+
+                if ($scope.newDet.WorkExpColl) {
+                    $scope.newDet.WorkExpColl.forEach((S) => {
+                        if (S.StartDate)
+                            S.StartDate_TMP = new Date(S.StartDate);
+                        if (S.EndDate)
+                            S.EndDate_TMP = new Date(S.EndDate);
+                    });
+                }
+
+                if (!$scope.newDet.EmpBankAccColl || $scope.newDet.EmpBankAccColl.length == 0) {
+                    $scope.newDet.EmpBankAccColl = [];
+                    $scope.newDet.EmpBankAccColl.push({});
+                }
+                if (!$scope.newDet.AcaQualificationColl || $scope.newDet.AcaQualificationColl.length == 0) {
+                    $scope.newDet.AcaQualificationColl = [];
+                    $scope.newDet.AcaQualificationColl.push({});
+                }
+                if (!$scope.newDet.WorkExpColl || $scope.newDet.WorkExpColl.length == 0) {
+                    $scope.newDet.WorkExpColl = [];
+                    $scope.newDet.WorkExpColl.push({});
+                }
+
+                $scope.newDet.Mode = 'Update';
+                document.getElementById('employee-profile-section').style.display = "none";
+                document.getElementById('employee-profile-form').style.display = "block";
+
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+    };
+
+
+
+    $scope.DelEmployeeById = function (refData) {
+        Swal.fire({
+            title: 'Do you want to delete ' + refData.EmployeeCode + '?',
+            showCancelButton: true,
+            confirmButtonText: 'Delete',
+            //message: 'Are you sure to delete selected BaliType :-' + beData.Name,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var para = {
+                    EmployeeId: refData.EmployeeId
+                };
+                $http({
+                    method: 'POST',
+                    url: base_url + "HR/Master/DeleteEmployee",
+                    dataType: "json",
+                    data: JSON.stringify(para)
+                }).then(function (res) {
+                    hidePleaseWait();
+                    $scope.loadingStatus = "stop";
+                    Swal.fire(res.data.ResponseMSG);
+                    if (res.data.IsSuccess == true) {
+                        $scope.GetAllEmployee();
+                    }
+                }, function (reason) {
+                    Swal.fire('Failed' + reason);
+                });
+            }
+
+        });
+    }
+
+
+});

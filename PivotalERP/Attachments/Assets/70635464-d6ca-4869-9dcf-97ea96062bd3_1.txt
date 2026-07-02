@@ -1,0 +1,158 @@
+ALTER PROCEDURE [dbo].[usp_GetAllAssetWiseReport]
+(
+    @UserId     INT,
+    @EntityId   INT = NULL,
+    @TranId     INT = NULL,
+    @DateFrom   DATE = NULL,
+    @DateTo     DATE = NULL,
+    @BranchId   INT = NULL
+
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    EXEC sp_set_session_context @key = N'UserId', @value = @UserId;
+    SET @DateFrom = ISNULL(@DateFrom, CONVERT(DATE, GETDATE()));
+    SET @DateTo   = ISNULL(@DateTo,   CONVERT(DATE, GETDATE()));
+    DECLARE @Today DATE = CONVERT(DATE, GETDATE());
+
+    ;WITH AssetMovement AS
+    (
+          
+
+    SELECT
+    AO.VoucherDate AS VoucherDateAD, ND.BS_Date   AS VoucherDateBS, CAST(AO.AutoManualNo AS NVARCHAR(50)) AS VoucherNo, 'Asset Opening' AS VoucherName,
+    NULL AS Name, B.Name AS Branch,  AOD.Qty AS InQty,  0 AS OutQty
+      FROM dbo.tbl_AssetOpening  (NOLOCK) AO INNER JOIN dbo.tbl_AssetOpeningDetails  (NOLOCK) AOD ON AOD.TranId = AO.TranId
+    LEFT JOIN tbl_Branch  (NOLOCK)B ON B.BranchId = AO.BranchId
+    LEFT JOIN tbl_NepaliDate ND (NOLOCK) ON ND.AD_Date = CONVERT(DATE, AO.VoucherDate, 101)
+    WHERE AOD.ParticularId = @TranId   AND (@BranchId IS NULL OR AO.BranchId = @BranchId)
+    UNION ALL
+
+
+        SELECT 
+            TR.VoucherDate AS VoucherDateAD,    ND.BS_Date    AS VoucherDateBS,  CAST(TR.AutoManualNo AS NVARCHAR(50)) AS VoucherNo, 'Asset Inward' AS VoucherName,
+            L.Name     AS Name,  B.Name     AS Branch,   CTR.Qty   AS InQty,  0       AS OutQty FROM dbo.tbl_AssetInward TR (NOLOCK)
+        INNER JOIN dbo.tbl_AssetInwardDetails CTR (NOLOCK) ON CTR.TranId = TR.TranId
+        LEFT JOIN tbl_Ledger L (NOLOCK) ON L.LedgerId = TR.VendorId
+        LEFT JOIN tbl_Branch B (NOLOCK) ON B.BranchId = TR.BranchId
+        LEFT JOIN tbl_NepaliDate ND (NOLOCK) ON ND.AD_Date = CONVERT(DATE, TR.VoucherDate, 101) WHERE CTR.ParticularId = @TranId AND (@BranchId IS NULL OR TR.BranchId = @BranchId)
+
+
+        UNION ALL
+
+        SELECT
+          TR.VoucherDate,  ND.BS_Date, CAST(TR.AutoManualNo AS NVARCHAR(50)), 'Asset Transfer (From)', NULL,  BF.Name,   0,   CTR.Qty
+        FROM dbo.tbl_AssetTransfer TR (NOLOCK)
+        INNER JOIN dbo.tbl_AssetTransferDetails CTR (NOLOCK)  ON CTR.TranId = TR.TranId
+        LEFT JOIN tbl_Branch BF (NOLOCK) ON BF.BranchId = TR.FromBranchId
+        LEFT JOIN tbl_NepaliDate ND (NOLOCK)  ON ND.AD_Date = CONVERT(DATE, TR.VoucherDate, 101)
+        WHERE CTR.ParticularId = @TranId   AND (@BranchId IS NULL OR TR.FromBranchId = @BranchId)
+
+
+        UNION ALL
+
+        SELECT
+            TR.VoucherDate, ND.BS_Date,  CAST(TR.AutoManualNo AS NVARCHAR(50)), 'Asset Transfer (To)',  NULL,  B.Name,  CTR.Qty,  0
+        FROM dbo.tbl_AssetTransfer TR (NOLOCK)   INNER JOIN dbo.tbl_AssetTransferDetails CTR (NOLOCK)  ON CTR.TranId = TR.TranId
+        LEFT JOIN tbl_Branch B (NOLOCK) ON B.BranchId = TR.ToBranchId
+        LEFT JOIN tbl_NepaliDate ND (NOLOCK)  ON ND.AD_Date = CONVERT(DATE, TR.VoucherDate, 101)
+        WHERE CTR.ParticularId = @TranId  AND (@BranchId IS NULL OR TR.ToBranchId = @BranchId)
+
+
+        UNION ALL
+
+        SELECT
+            TR.VoucherDate, ND.BS_Date, CAST(TR.AutoManualNo AS NVARCHAR(50)), 'Asset Issue',
+             CASE WHEN TR.IssueById = 1 THEN E.Name WHEN TR.IssueById = 2  THEN V.Name ELSE '' END AS Name,
+            B.Name, 0,  CTR.Qty
+        FROM dbo.tbl_AssetIssue TR (NOLOCK) INNER JOIN dbo.tbl_AssetsIssueDetails CTR (NOLOCK)  ON CTR.TranId = TR.TranId
+        LEFT JOIN tbl_User U (NOLOCK) ON U.UserId = TR.UserId
+           left join V_Employee(nolock) E on E.UserId = TR.UserId
+        LEFT JOIN tbl_HeadOfDepartment H (NOLOCK) ON H.TranId = TR.HODId
+        left join V_Employee(nolock) V on V.EmployeeId = H.EmployeeId
+        LEFT JOIN tbl_Branch B (NOLOCK) ON B.BranchId = TR.BranchId
+        LEFT JOIN tbl_NepaliDate ND (NOLOCK)  ON ND.AD_Date = CONVERT(DATE, TR.VoucherDate, 101)
+        WHERE CTR.ParticularId = @TranId   AND (@BranchId IS NULL OR TR.BranchId = @BranchId)
+
+
+        UNION ALL
+
+        SELECT
+            TR.VoucherDate, ND.BS_Date,  CAST(TR.AutoManualNo AS NVARCHAR(50)),  'Asset Return',
+              CASE WHEN TR.ReturnById = 1 THEN  E.Name WHEN TR.ReturnById = 2  THEN V.Name ELSE '' END AS Name,
+            B.Name,  CTR.Qty,   0
+        FROM dbo.tbl_AssetReturn TR (NOLOCK)
+        INNER JOIN dbo.tbl_AssetReturnDetails CTR (NOLOCK)  ON CTR.TranId = TR.TranId
+        LEFT JOIN tbl_User U (NOLOCK) ON U.UserId = TR.UserId
+         left join V_Employee(nolock)E on E.UserId = TR.UserId
+        LEFT JOIN tbl_HeadOfDepartment H (NOLOCK) ON H.TranId = TR.HODId
+         left join V_Employee(nolock) V on V.EmployeeId = H.EmployeeId
+        LEFT JOIN tbl_Branch B (NOLOCK) ON B.BranchId = TR.BranchId
+        LEFT JOIN tbl_NepaliDate ND (NOLOCK)  ON ND.AD_Date = CONVERT(DATE, TR.VoucherDate, 101)
+        WHERE CTR.ParticularId = @TranId   AND (@BranchId IS NULL OR TR.BranchId = @BranchId)
+
+
+        UNION ALL
+
+        SELECT
+            TR.VoucherDate,  ND.BS_Date,  CAST(TR.AutoManualNo AS NVARCHAR(50)),    'Asset Damage', NULL,  B.Name, 0, CTR.Qty
+        FROM dbo.tbl_AssetDamage TR (NOLOCK)
+        INNER JOIN dbo.tbl_AssetDamageDetails CTR (NOLOCK)  ON CTR.TranId = TR.TranId
+        LEFT JOIN tbl_Branch B (NOLOCK) ON B.BranchId = TR.BranchId
+        LEFT JOIN tbl_NepaliDate ND (NOLOCK)   ON ND.AD_Date = CONVERT(DATE, TR.VoucherDate, 101)
+        WHERE CTR.ParticularId = @TranId   AND (@BranchId IS NULL OR TR.BranchId = @BranchId)
+
+
+        UNION ALL
+
+    SELECT RI.VoucherDate AS VoucherDateAD, ND.BS_Date AS VoucherDateBS, CAST(RI.AutoManualNo AS NVARCHAR(50)) AS VoucherNo, 'Repaired Inward' AS VoucherName,
+    NULL AS Name,   B.Name AS Branch,  RID.QTY AS InQty,  0 AS OutQty
+    FROM dbo.tbl_RepairedInward  (NOLOCK) RI INNER JOIN dbo.tbl_RepairedInwardDetails  (NOLOCK) RID  ON RID.TranId = RI.TranId
+    LEFT JOIN tbl_Branch  (NOLOCK) B ON B.BranchId = RI.BranchId LEFT JOIN tbl_NepaliDate ND (NOLOCK)
+    ON ND.AD_Date = CONVERT(DATE, RI.VoucherDate, 101)
+    WHERE RID.ParticularId = @TranId AND RID.StatusId = 2   AND (@BranchId IS NULL OR RI.BranchId = @BranchId)
+
+    ),
+
+    OpeningStock AS
+    (
+        SELECT ISNULL(SUM(InQty - OutQty), 0) AS OpeningQty
+        FROM AssetMovement
+        WHERE VoucherDateAD < @DateFrom
+    ),
+    PeriodMovement AS
+    (
+        SELECT *
+        FROM AssetMovement
+        WHERE VoucherDateAD BETWEEN @DateFrom AND @DateTo
+    ),
+    FinalData AS
+    (
+        SELECT  PM.VoucherDateAD,   PM.VoucherDateBS,  PM.VoucherNo,  PM.VoucherName,  PM.Name,   PM.Branch,  PM.InQty,  PM.OutQty,  NULL AS OpeningQty,
+            OS.OpeningQty +
+            SUM(PM.InQty - PM.OutQty) OVER
+            (
+                ORDER BY PM.VoucherDateAD, PM.VoucherNo
+                ROWS UNBOUNDED PRECEDING
+            ) AS BalanceQty
+        FROM PeriodMovement PM  CROSS JOIN OpeningStock OS
+    ),
+    OpeningRow AS
+    (
+        SELECT     @DateFrom AS VoucherDateAD,   NULL AS VoucherDateBS,NULL AS VoucherNo,'Opening ' AS VoucherName, NULL AS Name, NULL AS Branch, 0 AS InQty,
+            0 AS OutQty,   OpeningQty, OpeningQty AS BalanceQty
+        FROM OpeningStock
+        WHERE OpeningQty <> 0
+    )
+    SELECT *,
+           CASE WHEN @DateTo > @Today THEN 1 ELSE 0 END AS IsFrontDate
+    FROM
+    (
+        SELECT * FROM OpeningRow
+        UNION ALL
+        SELECT * FROM FinalData
+    ) X
+    ORDER BY VoucherDateAD, VoucherNo;
+END
+

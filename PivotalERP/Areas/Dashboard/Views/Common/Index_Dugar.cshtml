@@ -1,0 +1,1290 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .absolute-tools {
+        position: absolute;
+        top: 16px;
+        right: 170px;
+    }
+
+        .absolute-tools .card-tools {
+            position: relative;
+            z-index: 9999;
+        }
+
+    .chat-custom-controlers .card-tools {
+        margin-right: 170px;
+    }
+
+    .chat-custom-controlers > .card-body {
+        margin-top: -52px;
+    }
+</style>
+
+<!-- ChartJS -->
+<script src="~/wwwroot/plugins/chart.js/Chart.min.js"></script>
+<!-- Sparkline -->
+<script src="~/wwwroot/plugins/sparklines/sparkline.js"></script>
+<!-- JQVMap -->
+<script src="~/wwwroot/plugins/jqvmap/jquery.vmap.min.js"></script>
+<script src="~/wwwroot/plugins/jqvmap/maps/jquery.vmap.usa.js"></script>
+<!-- jQuery Knob Chart -->
+<script src="~/wwwroot/plugins/jquery-knob/jquery.knob.min.js"></script>
+<!-- daterangepicker -->
+<script src="~/wwwroot/plugins/moment/moment.min.js"></script>
+<script src="~/wwwroot/plugins/daterangepicker/daterangepicker.js"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="~/wwwroot/plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- Summernote -->
+<script src="~/wwwroot/plugins/summernote/summernote-bs4.min.js"></script>
+<!-- overlayScrollbars -->
+<script src="~/wwwroot/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+@*<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>*@
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.48.0/apexcharts.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.48.0/apexcharts.min.css">
+
+
+<script src="~/jslib/dashboard/common/common_dugar.js?v=2"></script>
+
+<div ng-app="myApp" ng-controller="commonDashboardController" ng-class="{waiting: loadingstatus=='running'}" ng-cloak>
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <section class="sec1 shadow">
+        <ul class="nav nav-tabs nav-fill" id="myTab" role="tablist" style="position: sticky; top: 0; z-index: 9999; background-color: aliceblue;">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">
+                    <span class="tab-subheading">Monthly Income Expenses</span>
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">
+                    <span class="tab-subheading">Cash & Bank</span>
+                </a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">
+                    <span class="tab-subheading">Cash Flow</span>
+                </a>
+            </li>
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                <div id="Mixchart">
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-6 col-lg-6">
+                        <div class="card outstandings-card">
+                            <div class="row no-gutters">
+
+                                <div class="col-md-8">
+                                    <div class="card-header border-0  pt-3 pb-0">
+                                        <h3 class="card-title">Fixed Assets</h3>
+                                    </div>
+                                    <div class="card-body pb-0 pt-2">
+                                        <h4 class="digit text-primary">
+                                            {{ fixedAssetsDet.Closing |formatNumberAC}}
+                                        </h4>
+                                    </div>
+                                    <div class="two-calc-wrap">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap
+                                                            recievabes">                                                    
+                                                    <span class="title">DR:</span>
+                                                    <span class="desc">
+                                                        <small class="circle-dot-bfor-digit"></small> {{ fixedAssetsDet.DrAmount |formatNumber}}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap
+                                                            payables">
+                                                    <span class="title">CR</span>                                                    
+                                                <span class="desc">
+                                                    <small class="circle-dot-bfor-digit"></small> {{ fixedAssetsDet.CrAmount |formatNumber}}
+                                                </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="p-3">
+                                        <canvas id="outstandingPieChart" width="90" height="90"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /. Fixed Assets card -->
+                        <div class="card profit-n-loss-card">
+                            <div class="row no-gutters">
+                                <div class="col-md-8">
+                                    <div class="card-header border-0 pt-3 pb-0">
+                                        <h3 class="card-title">
+                                            Investments
+                                        </h3>
+                                    </div>
+                                    <div class="card-body pb-0 pt-2">
+                                        <h4 class="digit text-primary">
+                                            {{income-expenses |formatNumberAC }}
+                                        </h4>
+                                    </div>
+                                    <div class="two-calc-wrap">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap">
+                                                    <span class="title">DR:</span>
+                                                    @*<span class="title">
+                                                            Income
+                                                        </span>*@
+                                                    <span class="desc">
+                                                        {{income |formatNumberAC }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap">
+                                                    <span class="title">CR:</span>
+                                                    @*<span class="title">
+                                                            Expenses
+                                                        </span>*@
+                                                    <span class="desc">
+                                                        {{expenses |formatNumberAC }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="p-3">
+                                        <canvas id="profitNlossChart" width="90" height="90"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.  Investments card -->
+
+                        <div class="card outstandings-card">
+                            <div class="row no-gutters">
+
+                                <div class="col-md-8">
+                                    <div class="card-header border-0  pt-3 pb-0">
+                                        <h3 class="card-title">Current Liabilities</h3>
+                                    </div>
+                                    <div class="card-body pb-0 pt-2">
+                                        <h4 class="digit text-primary">
+                                            {{ OutStandings.Closing |formatNumberAC}}
+                                        </h4>
+                                    </div>
+                                    <div class="two-calc-wrap">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap recievabes">
+                                                    <span class="title">DR:</span>
+                                                    @*<span class="title">Net Receivables:</span>*@
+                                                    <span class="desc">
+                                                        <small class="circle-dot-bfor-digit"></small> {{ OutStandings.Receivables |formatNumberAC}}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap payables">
+                                                    <span class="title">CR:</span>
+                                                    @*<span class="title">Net Payables:</span>*@
+                                                    <span class="desc">
+                                                        <small class="circle-dot-bfor-digit"></small> {{ OutStandings.Payables |formatNumberAC}}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="p-3">
+                                        <canvas id="outstandingPieChart" width="90" height="90"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /. Current Liabilities card -->
+                        <div class="card profit-n-loss-card">
+                            <div class="row no-gutters">
+                                <div class="col-md-8">
+                                    <div class="card-header border-0 pt-3 pb-0">
+                                        <h3 class="card-title">
+                                            Sales
+                                        </h3>
+                                    </div>
+                                    <div class="card-body pb-0 pt-2">
+                                        <h4 class="digit text-primary">
+                                            {{income-expenses |formatNumberAC }}
+                                        </h4>
+                                    </div>
+                                    <div class="two-calc-wrap">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap">
+                                                    @*<span class="title">
+                                                            Income
+                                                        </span>*@
+                                                    <span class="title" style="">DR:</span>
+                                                    <span class="desc">
+                                                        {{income |formatNumberAC }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="title-desc-wrap">
+                                                    @*<span class="title">
+                                                            Expenses
+                                                        </span>*@
+                                                    <span class="title">CR:</span>
+                                                    <span class="desc">
+                                                        {{expenses |formatNumberAC }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="p-3">
+                                        <canvas id="profitNlossChart" width="90" height="90"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.  Sales card -->
+
+                    </div>
+                    <div class="col-sm-6 col-lg-6">
+                        <div class="card profit-n-loss-card">
+                            <div class="row no-gutters">
+                                <div class="col-sm-6">
+                                    <div class="card bg-card capital-invested">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Current Assets
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                <h4 class="digit text-primary">
+                                                    {{ capitalDet.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+
+                                        </div>
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+                                    </div>
+                                </div>
+                                <!-- Current Assets card -->
+                                <div class="col-sm-6">
+                                    <div class="card bg-card fixed-assets">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Loans
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Loans
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ fixedAssetsDet.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+                                    </div>
+                                    <!-- Capital-invested card -->
+                                </div>
+
+
+                                <div class="col-sm-6">
+                                    <div class="card bg-card capital-invested">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Indirect Income
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Indirect Income
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ capitalDet.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Ends-->
+                                    </div>
+                                </div>
+                                <!-- Indirect Income card -->
+                                <div class="col-sm-6">
+                                    <div class="card bg-card fixed-assets">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Purchase
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Purchase
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ fixedAssetsDet.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+                                    </div>
+                                    <!-- Purchase  card -->
+                                </div>
+
+
+
+
+                                <div class="col-sm-6">
+                                    <div class="card bg-card loan-n-liability">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Branch / Division
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Branch / Division
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ loansAndLiability.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <!-- Capital-invested card -->
+                                    <div class="card bg-card
+                                            loan-n-advance">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Capital
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Capital
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ loansAndAdvance.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas  fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+
+                                    </div>
+                                    <!-- Capital-invested card -->
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <div class="card bg-card loan-n-liability">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Direct Expenses
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Direct Expenses
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ loansAndLiability.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <!-- Direct Expenses card -->
+                                    <div class="card bg-card loan-n-advance">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Indirect Expenses.
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <div class="title-desc-wrap">
+                                                @*<h6 class="title">
+                                                        Indirect Expenses.
+                                                    </h6>*@
+                                                <h4 class="digit text-primary">
+                                                    {{ loansAndAdvance.Closing | formatNumberAC }}
+                                                </h4>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                        <!--New Field Added-->
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">DR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title" style="font-size: 0.8125rem; color: #959595;">CR:</span>
+                                                        <span class="desc" style="font-size:14px">
+                                                            0
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!--Enfds-->
+
+                                    </div>
+                                    <!-- Indirect Expenses. card -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                <div class="cash-and-bank-card">
+                    <div class="card-body">
+                        <div id="CashBankchart"></div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-6">
+                            <div class="card outstandings-card">
+                                <div class="row no-gutters">
+                                    <div class="col-md-8">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">Outstandings</h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <h4 class="digit text-primary">
+                                                {{ OutStandings.Closing |formatNumberAC}}
+                                            </h4>
+                                        </div>
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap recievabes">
+                                                        <span class="title">DR:</span>
+                                                        <span class="desc">
+                                                            <small class="circle-dot-bfor-digit"></small> {{ OutStandings.Receivables |formatNumberAC}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap payables">
+                                                        <span class="title">CR:</span>
+                                                        <span class="desc">
+                                                            <small class="circle-dot-bfor-digit"></small> {{ OutStandings.Payables |formatNumberAC}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="p-3">
+                                            <canvas id="outstandingPieChart" width="90" height="90"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @* /. Outstanding card*@
+                            <div class="card profit-n-loss-card">
+                                <div class="row no-gutters">
+                                    <div class="col-md-8">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Total Income & Expenses
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <h4 class="digit text-primary">
+                                                {{income-expenses |formatNumberAC }}
+                                            </h4>
+                                        </div>
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title">
+                                                            DR
+                                                        </span>
+                                                        <span class="desc">
+                                                            {{income |formatNumberAC }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title">
+                                                            CR
+                                                        </span>
+                                                        <span class="desc">
+                                                            {{expenses |formatNumberAC }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="p-3">
+                                            <canvas id="profitNlossChart" width="90" height="90"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*/. Profit & Loss card*@
+                        </div>
+                        <div class="col-sm-6 col-lg-6">
+                            <div class="row capital-fixed-assets-wrap">
+                                <div class="col-sm-6">
+                                    <div class="card bg-card capital-invested">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Capital Invested
+                                                </h6>
+                                                <span class="desc">
+                                                    {{ capitalDet.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                @*Capital-invested card*@
+                                <div class="col-sm-6">
+                                    <div class="card bg-card fixed-assets">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Fixed Assets:
+                                                </h6>
+                                                <span class="desc">
+                                                    {{ fixedAssetsDet.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                    @*Capital-invested card*@
+                                </div>
+                            </div>
+                            <div class="row loans-wrap">
+                                <div class="col-sm-6">
+                                    <div class="card bg-card loan-n-liability">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Loan & Liability
+                                                </h6>
+                                                <span class="desc">
+                                                    {{ loansAndLiability.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    @*Capital-invested card*@
+                                    <div class="card bg-card loan-n-advance">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Loan & Advances
+                                                </h6>
+                                                <span class="desc text-primary">
+                                                    {{ loansAndAdvance.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                    @*Capital-invested card*@
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                <div class="cash-and-bank-card">
+                    <div class="card-body">
+                        <div id="CashFlowchart"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-6">
+                            <div class="card outstandings-card">
+                                <div class="row no-gutters">
+                                    <div class="col-md-8">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">Outstandings</h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <h4 class="digit text-primary">
+                                                {{ OutStandings.Closing |formatNumberAC}}
+                                            </h4>
+                                        </div>
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap recievabes">
+                                                        <span class="title">DR:</span>
+                                                        <span class="desc">
+                                                            <small class="circle-dot-bfor-digit"></small> {{ OutStandings.Receivables |formatNumberAC}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap payables">
+                                                        <span class="title">CR:</span>
+                                                        <span class="desc">
+                                                            <small class="circle-dot-bfor-digit"></small> {{ OutStandings.Payables |formatNumberAC}}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="p-3">
+                                            <canvas id="outstandingPieChart" width="90" height="90"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @* /. Outstanding card*@
+                            <div class="card profit-n-loss-card">
+                                <div class="row no-gutters">
+                                    <div class="col-md-8">
+                                        <div class="card-header border-0 pt-3 pb-0">
+                                            <h3 class="card-title">
+                                                Total Income & Expenses
+                                            </h3>
+                                        </div>
+                                        <div class="card-body pb-0 pt-2">
+                                            <h4 class="digit text-primary">
+                                                {{income-expenses |formatNumberAC }}
+                                            </h4>
+                                        </div>
+                                        <div class="two-calc-wrap">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title">
+                                                            DR
+                                                        </span>
+                                                        <span class="desc">
+                                                            {{income |formatNumberAC }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="title-desc-wrap">
+                                                        <span class="title">
+                                                            CR
+                                                        </span>
+                                                        <span class="desc">
+                                                            {{expenses |formatNumberAC }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="p-3">
+                                            <canvas id="profitNlossChart" width="90" height="90"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @*/. Profit & Loss card*@
+                        </div>
+                        <div class="col-sm-6 col-lg-6">
+                            <div class="row capital-fixed-assets-wrap">
+                                <div class="col-sm-6">
+                                    <div class="card bg-card capital-invested">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Capital Invested
+                                                </h6>
+                                                <span class="desc">
+                                                    {{ capitalDet.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                @*Capital-invested card*@
+                                <div class="col-sm-6">
+                                    <div class="card bg-card fixed-assets">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Fixed Assets:
+                                                </h6>
+                                                <span class="desc">
+                                                    {{ fixedAssetsDet.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                    @*Capital-invested card*@
+                                </div>
+                            </div>
+                            <div class="row loans-wrap">
+                                <div class="col-sm-6">
+                                    <div class="card bg-card loan-n-liability">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Loan & Liability
+                                                </h6>
+                                                <span class="desc">
+                                                    {{ loansAndLiability.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    @*Capital-invested card*@
+                                    <div class="card bg-card loan-n-advance">
+                                        <div class="card-body">
+                                            <div class="title-desc-wrap">
+                                                <h6 class="title">
+                                                    Loan & Advances
+                                                </h6>
+                                                <span class="desc text-primary">
+                                                    {{ loansAndAdvance.Closing | formatNumberAC }}
+                                                </span>
+                                            </div>
+                                            @*<a href="#">
+                                                    Statistics <i class="right fas fa-angle-right"></i>
+                                                </a>*@
+                                        </div>
+                                    </div>
+                                    @*Capital-invested card*@
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+    </section>
+    @*<div class="card purchase-n-sell">
+            <div class="card-header border-0 pt-3 pb-0">
+                <h3 class="card-title">Purchase & Sales</h3>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card-body pr-0 pb-0 mt-lg-4">
+                        <div class="title-desc-wrap">
+                            <span class="title">Total Sales</span>
+                            <span class="desc">{{salesAmt  |formatNumberAC }}</span>
+                        </div>
+                        <div class="title-desc-wrap">
+                            <span class="title">Total Purchase</span>
+                            <span class="desc">{{purchaseAmt |formatNumberAC }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <div class="card-body pl-0 pb-0">
+                        <div id="purchaseSalesChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+    <div class="row">
+        <div class="col-sm-6 col-lg-4">
+            <div class="card top-modules-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="pe-7s-users"></i> Top Customers
+                    </h3>
+                    <div class="card-tools">
+
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div id="topCustomers"></div>
+                <div class="top-members-list">
+                    <ul class="list-group list-group-flush
+                                            flush-no-border">
+                        <li class="list-group-item" ng-repeat="tc in topCustomers">
+                            <div class="user-block w-100">
+                                <img class="img-circle
+                                                        img-bordered-sm" src="~/wwwroot/dist/img/user8-128x128.jpg" alt="user image">
+                                <span class="username">
+                                    <a href="#">
+                                        {{tc.Name}}
+                                    </a>
+                                    <div class="text-focus-right">
+                                        <small class="opacity-5 pr-1">NRs.</small>
+                                        <span>{{tc.Value  |formatNumber}}</span>
+                                        <small class="text-warning pl-2">
+                                            <i class="fa fa-angle-down"></i>
+                                        </small>
+                                    </div>
+                                </span>
+
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            <!-- end card -->
+        </div>
+        <!-- col-sm-6 col-lg-4 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="card top-modules-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="pe-7s-users"></i> Top Suppliers
+                    </h3>
+                    <div class="card-tools">
+
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div id="topSuppliers"></div>
+                <div class="top-members-list">
+                    <ul class="list-group list-group-flush
+                                            flush-no-border">
+                        <li class="list-group-item" ng-repeat="tc in topSuppliers">
+                            <div class="user-block w-100">
+                                <img class="img-circle
+                                                        img-bordered-sm" src="~/wwwroot/dist/img/user7-128x128.jpg" alt="user image">
+                                <span class="username">
+                                    <a href="#"> {{tc.Name}}</a>
+                                    <div class="text-focus-right">
+                                        <small class="opacity-5
+                                                                pr-1">NRs.</small>
+                                        <span>{{tc.Value  |formatNumber}}</span>
+                                        <small class="text-success pl-2">
+                                            <i class="fa fa-angle-up"></i>
+                                        </small>
+                                    </div>
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- col-sm-6 col-lg-4 -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="card top-modules-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="pe-7s-users"></i> Top Receivable
+                    </h3>
+                    <div class="card-tools">
+
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div id="topReceivable"></div>
+                <div class="top-members-list">
+                    <ul class="list-group list-group-flush
+                                            flush-no-border">
+                        <li class="list-group-item" ng-repeat="tc in topReceivables">
+                            <div class="user-block w-100">
+                                <img class="img-circle
+                                                        img-bordered-sm" src="~/wwwroot/dist/img/user7-128x128.jpg" alt="user image">
+                                <span class="username">
+                                    <a href="#">{{tc.Name}}</a>
+                                    <div class="text-focus-right">
+                                        <small class="opacity-5 pr-1">NRs.</small>
+                                        <span>{{tc.Value  |formatNumber}}</span>
+                                    </div>
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- end Top Receivable -->
+        <div class="col-sm-6 col-lg-4">
+            <div class="card top-modules-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="pe-7s-wallet"></i> Top Payables
+                    </h3>
+                    <div class="card-tools">
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div id="topPayables"></div>
+                <div class="top-members-list">
+                    <ul class="list-group list-group-flush
+                                            flush-no-border">
+                        <li class="list-group-item" ng-repeat="tc in topPayables">
+                            <div class="user-block w-100">
+                                <img class="img-circle
+                                                        img-bordered-sm" src="~/wwwroot/dist/img/user7-128x128.jpg" alt="user image">
+                                <span class="username">
+                                    <a href="#">{{tc.Name}}</a>
+                                    <div class="text-focus-right">
+                                        <small class="opacity-5
+                                                                pr-1">NRs.</small>
+                                        <span>{{tc.Value  |formatNumberAC}}</span>
+                                        <small class="text-success pl-2">
+                                            <i class="fa  fa-angle-up"></i>
+                                        </small>
+                                    </div>
+                                </span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- col-sm-6 col-lg-4 End Top Payables-->
+        @*<div class="col-sm-6 col-lg-4">
+                <div class="card top-modules-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="pe-7s-wallet"></i> Fast Moving Items
+                        </h3>
+                        <div class="card-tools">
+                        </div>
+                    </div>
+
+                    <div id="fastMovingItems"></div>
+                    <div class="top-members-list">
+                        <ul class="list-group list-group-flush flush-no-border">
+                            <li class="list-group-item" ng-repeat="tc in fastMoveingItems">
+                                <div class="user-block w-100">
+                                    <img class="img-circle img-bordered-sm" src="~/wwwroot/dist/img/user7-128x128.jpg" alt="user image">
+                                    <span class="username">
+                                        <a href="#">{{tc.Name}}</a>
+                                        <div class="text-focus-right">
+                                            <small class="opacity-5
+                                                                    pr-1">NRs.</small>
+                                            <span>{{tc.Value  |formatNumber}}</span>
+                                            <small class="text-success pl-2">
+                                                <i class="fa fa-angle-up"></i>
+                                            </small>
+                                        </div>
+                                    </span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>*@
+
+        <!--<div class="col-sm-6 col-lg-4">
+            <div class="card top-modules-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="pe-7s-wallet"></i> Non Moving Items
+                    </h3>
+                    <div class="card-tools">
+                        <div class="d-inline-block">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Brand:</span>
+                                </div>
+                                <select class="form-control text-dark" ng-model="nonMIProductBrandId" ng-change="GetTopNonMovingItems(nonMIProductBrandId)">
+                                    <option ng-value="0" ng-selected="nonMIProductBrandId==0">All</option>
+                                    <option ng-value="un.ProductBrandId" ng-repeat="un in ProductBrandColl" ng-selected="un.ProductBrandId==nonMIProductBrandId">{{un.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-header -->
+        <!--<div id="nonMovingItems"></div>
+        <div class="top-members-list">
+            <ul class="list-group list-group-flush
+                                    flush-no-border">
+                <li class="list-group-item" ng-repeat="tc in nonMoveingItems">
+                    <div class="user-block w-100">
+                        <img class="img-circle
+                                                img-bordered-sm" src="~/wwwroot/dist/img/user7-128x128.jpg" alt="user image">
+                        <span class="username">
+                            <a href="#">{{tc.Name}}</a>
+                            <div class="text-focus-right">
+                                <small class="opacity-5
+                                                        pr-1">Days</small>
+                                <span>{{tc.LastSalesDays}}</span>
+                                <small class="text-success  pl-2">
+                                    <i class="fa fa-angle-up"></i>
+                                </small>
+                            </div>
+                        </span>
+                    </div>
+                </li>
+            </ul>
+        </div>-->
+        @*<div class="p-2 text-center">
+                <a href="~/Dashboard/Common/NonMovingItems?DateFrom=&DateTo=&ProductBrandId={{nonMIProductBrandId}}" class="btn btn-primary
+                                        btn-sm mb-1">
+                    View Complete Report <i class="fa fa-arrow-right pl-1
+                                            opacity-5"></i>
+                </a>
+            </div>*@
+    </div>
+</div>-->
+    </div>
+</div>
+
+
+<script>
+    // For Interest Calculation Radio Content
+    function interestCalcStatus(x) {
+        if (x == 0)
+            document.getElementById("interestCalcStstusYes").style.display = "block";
+        else
+            document.getElementById("interestCalcStstusYes").style.display = "none";
+        return;
+    }
+
+    // End Interest Calculation Radio Content</script>
+
+<script>
+    $(function () {
+        //The passed argument has to be at least a empty object or a object with your desired options
+        $('.top-members-list').overlayScrollbars({
+            scrollbars: {
+                autoHide: "scroll",
+                autoHide: "never",
+            },
+        });
+
+    });
+</script>
+

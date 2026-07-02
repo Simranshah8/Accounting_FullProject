@@ -1,0 +1,263 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script src="~/jslib/hr/transaction/SalaryAddDeduct.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="SalaryAddDeductController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="card p-2 mb-0">
+                    <div id="SalaryADlist">
+                        <header class="row">
+                            <div class="col-md-7">
+                                <div class="clearfix">
+                                    <form class="form-inline">
+                                        <div class="input-group input-group-sm mr-sm-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text cstm">Show</span>
+                                            </div>
+                                            <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.SalaryAD">
+                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.SalaryAD">{{pp.text}}</option>
+                                            </select>
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-white"><small>entries</small></span>
+                                            </div>
+                                        </div>
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search" placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.SalaryAD">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-5 text-right">
+                                <div class="dropdown dnld-file ml-2">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#SalaryAD'" sheet-name="'SalaryADList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#SalaryAD').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                    </div>
+
+                                    <a print-tbl table-id="'#SalaryAD'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                       data-toggle="tooltip" data-placement="top" title="Print">
+                                        <i class="fas fa-print"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-sm btn-add btn-success"
+                                            id="add-SalaryAD"
+                                            style="min-width: 90px">
+                                        <i class="fas fa-plus w-t"></i> Add Salary AddDeduct
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
+                        <div>
+                            <div class="table-scroll-x-y  table-scroll mt-1">
+                                <table id="SalaryAD"
+                                       class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 70px">S.No.</th>
+                                            <th style="width: 140px">Branch</th>
+                                            <th style="width: 140px">Department</th>
+                                            <th style="width: 100px">Emp.Code</th>
+                                            <th style="width: 150px">Emp.Name</th>
+                                            <th style="width: 140px">Service Type</th>
+                                            <th style="width: 130px">Pay Heading</th>
+                                            <th style="width: 100px">Amount</th>
+                                            <th style="width: 100px">Date</th>
+                                            <th style="width: 70px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr dir-paginate="cl in SalaryADList | filter:searchData.SalaryAD | itemsPerPage: perPage.SalaryAD" current-page="currentPages.SalaryAD" pagination-id="SalaryADPagination">
+                                            <td>{{$index+1}}</td>
+                                            <td>{{cl.BranchName}}</td>
+                                            <td>{{cl.Department}}</td>
+                                            <td>{{cl.EmployeeCode}}</td>
+                                            <td>{{cl.EmployeeName}}</td>
+                                            <td>{{cl.ServiceType}}</td>
+                                            <td>{{cl.PayHeading}}</td>
+                                            <td>{{cl.Amount}}</td>
+                                            <td>{{cl.ForMiti}}</td>
+                                            <td>
+                                                <a class="p-1" href="#" ng-click="GetSalaryADById(cl)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>
+                                                <a class="p-1" href="#" ng-click="DelSalaryADById(cl)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <footer class="row align-items-center">
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="SalaryADPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </footer>
+                    </div>
+                    <!-- source form starts -->
+                    <div id="SalaryAD-form">
+                        <div class="row  p-2">
+                            @*<div class="col-sm-4 col-md-4">
+                                    <div class="form-group">
+                                        <label for="">Branch</label>
+                                        <select class="form-control form-control-sm select2" ng-model="newSalaryAD.BranchId">
+                                            <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newSalaryAD.BranchId">{{B.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>*@
+
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="">Employee</label>
+                                    <div class="input-group-prepend">
+                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newSalaryAD.EmployeeId" student-detail="newSalaryAD.EmployeeDetails" side-bar-data="newSalaryAD.EmpSideBarData" search-by="newSalaryAD.EmployeeSearchBy" ng-disabled="isEmployeeIdDisabled" ng-change="toggleFields()">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4 col-md-4">
+                                <div class="form-group">
+                                    <label for="">Department</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.DepartmentId" ng-disabled="isFieldsDisabled" ng-change="toggleFields()">
+                                        <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newSalaryAD.DepartmentId">{{c.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <div class="form-group">
+                                    <label for="">Designation</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.DesignationId" ng-disabled="isFieldsDisabled" ng-change="toggleFields()">
+                                        <option ng-value="c.DesignationId" ng-repeat="c in DesignationList" ng-selected="c.DesignationId==newSalaryAD.DesignationId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <div class="form-group">
+                                    <label for="">Service Type</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.ServiceTypeId" ng-disabled="isFieldsDisabled" ng-change="toggleFields()">
+                                        <option ng-value="c.ServiceTypeId" ng-repeat="c in ServiceTypeList" ng-selected="c.ServiceTypeId==newSalaryAD.ServiceTypeId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4 col-md-4">
+                                <div class="form-group">
+                                    <label for="">Gender<span style="color:red">*</span></label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.Gender" ng-disabled="isFieldsDisabled">
+                                        <option ng-value="gen.id" ng-repeat="gen in GenderColl" ng-selected="gen.id==newSalaryAD.Gender">{{gen.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Title</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newSalaryAD.Title" />
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.TypeId">
+                                        <option ng-repeat="T in TypeList" ng-value="T.id" ng-selected="newSalaryAD.TypeId==T.id">{{T.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Amount</label>
+                                    <input type="number" class="form-control form-control-sm" number-input onfocus="this.select();" ng-model="newSalaryAD.Amount" />
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-md-2">
+                                <div class="form-group">
+                                    <label>Year</label>
+                                    <select class="form-control form-control-sm" ng-model="newSalaryAD.YearId">
+                                        <option ng-value="A.id" ng-repeat="A in AcademicYearColl" ng-selected="A.id==newSalaryAD.YearId">{{A.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-2 col-md-2">
+                                <div class="form-group">
+                                    <label for="">Month</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.MonthId">
+                                        <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newSalaryAD.MonthId">{{cl.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-md-4">
+                                <div class="form-group">
+                                    <label for="">Pay Heading</label>
+                                    <select class="form-control form-control-sm select2" ng-model="newSalaryAD.PayHeadingId">
+                                        <option ng-repeat="P in PayHeadingList" ng-value="P.PayHeadingId" ng-selected="P.PayHeadingId==newSalaryAD.PayHeadingId">{{P.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="">Date</label>
+                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newSalaryAD.ForDate_TMP" date-detail="newSalaryAD.ForDateDet">
+                                </div>
+                            </div>
+                            <div class="col-sm-8 col-md-8">
+                                <div class="form-group">
+                                    <label>Remarks</label>
+                                    <input type="text" class="form-control form-control-sm" ng-model="newSalaryAD.Remarks">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button"
+                                        class="btn btn-sm  btn-add btn-info"
+                                        id="SalaryADback-btn"
+                                        style="min-width: 90px">
+                                    Back to List
+                                </button>
+                                <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearSalaryAD()">Reset</button>
+                                <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateSalaryAD()">{{newSalaryAD.Mode}}</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</div>

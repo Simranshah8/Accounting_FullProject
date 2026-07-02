@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Dynamic.DataAccess.Global;
+
+namespace Dynamic.BL.Payroll
+{
+
+	public class ServiceType : Dynamic.BusinessLogic.Global.Common
+	{
+
+		Dynamic.DA.Payroll.ServiceTypeDB db = null;
+
+		int _UserId = 0;
+
+		public ServiceType(int UserId, string hostName, string dbName)
+		{
+			this._UserId = UserId;
+			db = new Dynamic.DA.Payroll.ServiceTypeDB(hostName, dbName);
+		}
+		public ResponeValues SaveFormData(Dynamic.BE.Payroll.ServiceType beData)
+		{
+			bool isModify = beData.ServiceTypeId > 0;
+			ResponeValues isValid = IsValidData(ref beData, isModify);
+			if (isValid.IsSuccess)
+				return db.SaveUpdate(beData, isModify);
+			else
+				return isValid;
+		}
+		public Dynamic.BE.Payroll.ServiceTypeCollections GetAllServiceType(int EntityId)
+		{
+			return db.getAllServiceType(_UserId, EntityId);
+		}
+		public Dynamic.BE.Payroll.ServiceType GetServiceTypeById(int EntityId, int ServiceTypeId)
+		{
+			return db.getServiceTypeById(_UserId, EntityId, ServiceTypeId);
+		}
+		public ResponeValues DeleteById(int EntityId, int ServiceTypeId)
+		{
+			return db.DeleteById(_UserId, EntityId, ServiceTypeId);
+		}
+		public ResponeValues IsValidData(ref Dynamic.BE.Payroll.ServiceType beData, bool IsModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			try
+			{
+				if (beData == null)
+				{
+					resVal.ResponseMSG = GLOBALMSG.NO_DATA_FOUND;
+				}
+				else if (IsModify && beData.ServiceTypeId == 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Modify";
+				}
+				else if (!IsModify && beData.ServiceTypeId != 0)
+				{
+					resVal.ResponseMSG = GLOBALMSG.INVALID_DATA + " For Save";
+				}
+				else if (beData.CUserId == 0)
+				{
+					resVal.ResponseMSG = "Invalid User for CRUD";
+				}
+				else if (string.IsNullOrEmpty(beData.Name))
+				{
+					resVal.ResponseMSG = "Please ! Enter Name ";
+				}
+				else
+				{
+					if (!string.IsNullOrEmpty(beData.Name))
+					{
+						var validName = IsValidName(beData.Name);
+						if (!validName.IsSuccess)
+							return validName;
+					}
+					resVal.IsSuccess = true;
+					resVal.ResponseMSG = "Valid";
+				}
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			return resVal;
+		}
+	}
+
+}
+

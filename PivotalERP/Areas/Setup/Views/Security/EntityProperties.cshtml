@@ -1,0 +1,257 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .person-photo-attachment-wrap .img-wrap {
+        background-color: #fff;
+        border: 1px solid #bbb;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 1rem;
+        width: 100px;
+        height: 100px;
+    }
+</style>
+
+<script src="~/jslib/setup/EntityProperties.js"></script>
+<div ng-app="myApp" ng-controller="entityPController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="container-fluid">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="card">
+                <div class="card-header header-corner-triangle p-2">
+                    <h3 class="card-title">Entity Properties</h3>
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">Module </label>
+                                        <select class="form-control form-control-sm" ng-model="newEP.ModuleId" ng-change="ChangeModule()" data-placeholder="**Select Module**">
+                                            <option ng-value="cl.AutoNumber" ng-repeat="cl in ModuleList">{{cl.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">Entity Type </label>
+                                        <select class="form-control form-control-sm ml-2" ng-model="newEP.EntityType" ng-change="ChangeModule()" data-placeholder="**Select EntityType**">
+                                            <option ng-value="cl.id" ng-repeat="cl in EntityTypeList">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label for="">Entity </label>
+                                        <select class="form-control form-control-sm select2 ml-2" ng-model="newEP.SelectedEntity" ng-change="ChangeEntity()" data-placeholder="**Select Entity**">
+                                            <option ng-value="cl" ng-repeat="cl in EntityColl">{{cl.EntityName}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 mt-4">
+                                    <button type="button"
+                                            class="btn btn-md btn-primary"
+                                            style="min-width: 90px; padding-top: 3px; padding-bottom: 3px;" ng-click="CallSaveUpdateEP()">
+                                        <i class="fas fa-database w-t"></i>Update Data
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-md btn-primary"
+                                            style="min-width: 90px; padding-top: 3px; padding-bottom: 3px;" ng-click="DeleteEP()">
+                                        <i class="fas fa-save w-t"></i> Reset as Default
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-md btn-primary"
+                                            style="min-width: 90px; padding-top: 3px; padding-bottom: 3px;" ng-click="ViewCodeModal()">
+                                        <i class="fas fa-save w-t"></i> Validation Function
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mt-4">
+                                    <form class="form-inline float-right">
+                                        <div class="input-group input-group-sm table-search-filed">
+                                            <input class="form-control form-control-navbar"
+                                                   type="search"
+                                                   placeholder="Search"
+                                                   aria-label="Search" ng-model="searchData.AllowEntity" />
+                                            <div class="input-group-append">
+                                                <button class="btn btn-default border-left-0"
+                                                        type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div>
+
+                                    <div class="table-responsive">
+                                        <div class="table-scroll-x-y table-scroll mt-1" style="height: calc(100vh - 9rem)!important;">
+                                            <table id="maintable" class="table table-bordered table-hover table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="align-middle cstm-sticky" style="width: 200px;z-index: 3;left:0; background-color: #ececec !important">Properties</th>
+                                                        <th class="align-middle cstm-sticky" style="width: 80px;z-index: 3;left:200; background-color: #ececec !important">Alias</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Label</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">DataType</th>
+                                                        <th style="z-index: 2; width: 100px; background-color: #ececec !important">Default Value</th>
+                                                        <th style="z-index: 2; width: 100px; background-color: #ececec !important">Is Mandatory</th>
+                                                        <th style="z-index: 2; width: 220px; background-color: #ececec !important">Mandatory MSG</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Show Hide</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Max Len</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Min Len</th>
+                                                        <th style="z-index: 2; width: 120px; background-color: #ececec !important">DropDown List</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Col Width</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Formula</th>
+                                                        <th style="z-index: 2; width: 90px; background-color: #ececec !important">Source</th>
+                                                        <th style="z-index: 2; width: 150px; background-color: #ececec !important">Filter Para</th>
+                                                        <th style="z-index: 2; width: 130px; background-color: #ececec !important">Action(Event)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="el in PropertiesColl |filter:searchData.AllowEntity">
+                                                        <td class="align-middle cstm-sticky" style="width: 200px; left:0; z-index: 2; background-color: #ffffff!important">{{el.Name}}</td>
+                                                        <td class="align-middle cstm-sticky" style="width: 80px; left:200; z-index: 2; background-color: #ffffff!important">{{el.Alias}}</td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.Label">
+                                                        </td>
+                                                        <td>
+                                                            {{el.DataType}}
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.DefaultValue">
+                                                        </td>
+                                                        <td class="text-center align-middle">
+
+                                                            <div class="icheck-primary d-inline">
+                                                                <input type="checkbox" id="checkboxPrimary{{$index}}" ng-model="el.IsMandatory">
+                                                                <label for="checkboxPrimary{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.MandatoryMSG">
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm" ng-model="el.ShowHide">
+                                                                <option ng-value="cl.id" ng-repeat="cl in ShowHideColl" ng-selected="el.ShowHide==cl.id">{{cl.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="el.MaxLen">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="el.MinLen">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.DropDownList">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control form-control-sm" ng-model="el.ColWidth">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.Formula">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.Source">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="el.FilterPara">
+                                                        </td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-md btn-primary" ng-click="ShowEvenModal(el,1)" title="On Change Event">C</button>
+                                                            <button type="button" class="btn btn-md btn-primary" ng-click="ShowEvenModal(el,2)" title="On Blur Event">B</button>
+                                                            <button type="button" class="btn btn-md btn-primary" ng-click="ShowEvenModal(el,3)" title="On Focus Event">F</button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- table end -->
+                            </div>
+
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-code">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Validation Code </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Code</label>
+                        <textarea class="form-control form-control-sm" rows="15" placeholder="" ng-model="newEP.Code" style="font-size: 14pt"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Ok</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-eventcode">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle"> {{ (CodeFor==1 ? 'On Change' : (CodeFor==2 ? 'On Blur' : 'On Focus')) }} For {{CurPro.Name}} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group" ng-show="CodeFor==1">
+                        <label>Code</label>
+                        <textarea class="form-control form-control-sm" rows="15" placeholder="" ng-model="CurPro.OnChange" style="font-size: 11pt"></textarea>
+                    </div>
+                    <div class="form-group" ng-show="CodeFor==2">
+                        <label>Code</label>
+                        <textarea class="form-control form-control-sm" rows="15" placeholder="" ng-model="CurPro.OnBlur" style="font-size: 11pt"></textarea>
+                    </div>
+                    <div class="form-group" ng-show="CodeFor==3">
+                        <label>Code</label>
+                        <textarea class="form-control form-control-sm" rows="15" placeholder="" ng-model="CurPro.OnFocus" style="font-size: 11pt"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Ok</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+</div>

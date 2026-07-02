@@ -1,0 +1,609 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+<script src="~/jslib/inventory/transaction/MeterReading.js"></script>
+
+<div ng-app="myApp" ng-controller="NatureController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-2"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true" ng-click="ClearNozzle()"> Nozzle</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearPump()">Pump</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-meter-tab" data-toggle="pill" href="#custom-tabs-meter-profile" role="tab" aria-controls="custom-tabs-meter-profile" aria-selected="false" ng-click="ClearMeterReading()">Meter Reading</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-report-meter-tab" data-toggle="pill" href="#custom-tabs-report-profile" role="tab" aria-controls="custom-tabs-report-profile" aria-selected="false">Report</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body px-2 py-3">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div id="NozzleTable">
+                                    <header class="row">
+                                        <div class="col-md-8">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Nozzle">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Nozzle">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search"
+                                                               placeholder="Search" aria-label="Search" ng-model="searchData.Nozzle">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-4 text-right">
+                                            <div class="dropdown dnld-file" title="Download File">
+                                                <button class="btn btn-default btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false" style="font-size:13px">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <button print-tbl table-id="'#datatable'" class="btn btn-default btn-sm wait"
+                                                        title="Print" style="font-size:13px;padding:7px">
+                                                    <i class="fas fa-print"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-success" id="addnozzle" style="font-size:13px"><i class="fas fa-plus mr-2"></i>Add Nozzle</button>
+                                            </div>
+
+
+                                        </div>
+                                    </header>
+                                    <div class="search-toolbar mb-3 mt-2">
+                                        <div class="">
+
+                                            <table class="main-table table table-bordered table-striped table-hover table-sm" id="Nozzle">
+                                                <tr>
+                                                    <th style="text-align: center; width:50px"> S.No </th>
+                                                    <th style="width:200px"> Name</th>
+                                                    <th style="width:450px"> Description </th>
+                                                    <th style="text-align: center; width: 70px">Action</th>
+
+                                                </tr>
+                                                <tr dir-paginate="beData in NozzleList | orderBy:sortKey:reverse | filter:searchData.Nozzle | itemsPerPage:perPage.Nozzle" current-page="currentPages.Nozzle" pagination-id="NozzlePagination">
+
+
+                                                    <td style="text-align:center;margin:auto">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td style="text-align: left; margin: auto">
+                                                        {{beData.Name}}
+                                                    </td>
+
+
+                                                    <td style="text-align: left; margin: auto">
+                                                        {{beData.Description}}
+                                                    </td>
+                                                    <td class="project-actions text-center" style="text-align:center">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info btn-sm" ng-click="GetNozzleById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-danger btn-sm" ng-click="DelNozzle(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="NozzlePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div id="NozzleForm">
+                                    <div class="p-2">
+                                        <form>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newNozzle.Name">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 mb-3">
+                                                <div class="form-group">
+                                                    <label>Description</label>
+                                                    <textarea type="text" rows="3" class="form-control form-control-sm" ng-model="newNozzle.Description"></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-4 ml-2">
+                                                <button type="button" class="btn btn-sm btn-primary" style="min-width:80px;font-size:13px" id="backtonozzle">BackToList</button>
+                                                <button type="button" class="btn  btn-sm btn-default" style="min-width: 80px; font-size: 13px" ng-click="ClearNozzle()">Cancel</button>
+                                                <button type="button" class="btn  btn-sm btn-success" style="min-width: 80px; font-size: 13px" ng-click="SaveUpdateNozzle()">{{newNozzle.Mode}}</button>
+                                            </div>
+                                        </form>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div id="PumpTable">
+                                    <header class="row">
+                                        <div class="col-md-8">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Pump">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Nature">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar" type="search"
+                                                               placeholder="Search" aria-label="Search" ng-model="searchData.Pump">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-4 text-right">
+                                            <div class="dropdown dnld-file" title="Download File">
+                                                <button class="btn btn-default btn-light btn-sm dropdown-toggle" style="font-size:13px" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+                                                <a print-tbl table-id="'#datatable'" class="btn btn-default btn-light btn-sm wait"
+                                                   title="Print" style="font-size:13px;padding:7px">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button class="btn btn-sm btn-success" id="addPump" style="font-size:13px"><i class="fas fa-plus mr-2"></i>Add Pump</button>
+                                            </div>
+
+
+                                        </div>
+                                    </header>
+                                    <div class="search-toolbar mb-3 mt-2">
+                                        <div class="">
+
+                                            <table class="main-table table table-bordered table-striped table-hover table-sm" id="BankGroup">
+                                                <tr>
+                                                    <th style="text-align: center; width:50px"> S.No </th>
+                                                    <th style="width:200px"> Name</th>
+                                                    <th style="width:450px"> Description </th>
+                                                    <th style="text-align:center;width: 90px;">Action</th>
+
+                                                </tr>
+                                                <tr dir-paginate="beData in PumpList | orderBy:sortKey:reverse | filter:searchData.Pump | itemsPerPage:perPage.Pump" current-page="currentPages.Pump" pagination-id="PumpPagination">
+
+
+                                                    <td class="text-center" style="text-align:center;margin:auto">
+                                                        {{$index+1}}
+                                                    </td>
+                                                    <td style="text-align: left; margin: auto">
+                                                        {{beData.Name}}
+                                                    </td>
+
+
+                                                    <td style="text-align: left; margin: auto">
+                                                        {{beData.Description}}
+                                                    </td>
+                                                    <td class="project-actions text-center" style="text-align:center">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info btn-sm" ng-click="GetPumpById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-danger btn-sm" ng-click="DeletePump(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="PumpPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div id="PumpForm">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label>Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newPump.Name">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-8">
+                                                <div class="form-group">
+                                                    <label>Description</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newPump.Description">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mt-4">
+                                            <div class="col-md-12">
+                                                <div class="">
+                                                    <table class="main-table table table-bordered table-striped table-hover table-sm" id="BankGroup">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="text-align: center; width:70px"> S.No </th>
+                                                                <th style="width:140px"> Nozzle </th>
+                                                                <th style="width:140px"> Product </th>
+                                                                <th style="width:140px"> Opening </th>
+                                                                <th style="text-align:center;width: 10%;">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="P in newPump.PumpNozzleDetColl">
+                                                                <td class="text-center">{{$index+1}}</td>
+                                                                <td>
+                                                                    <select class="form-control form-control-sm select2" ng-model="P.NozzleId">
+                                                                        <option ng-value="0">**Select All**</option>
+                                                                        <option ng-repeat="B in NozzleList" ng-value="B.NozzleId" ng-selected="B.NozzleId==P.NozzleId">{{B.Name}}</option>
+                                                                    </select>
+                                                                </td>
+
+                                                                <td class="align-middle cstm-sticky" style="width: 250px; z-index: 2; left: 50px; background-color: #fff">
+                                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="P.ProductId" style="width:100%"
+                                                                            placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData" voucher-id="SelectedVoucher.VoucherId" ledger-id="P.PartyLedgerId"></select>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="text" number-input ng-model="P.Opening" class="form-control form-control-sm" />
+                                                                </td>
+                                                                <td class="project-actions text-center" style="text-align:center">
+                                                                    <div class="btn-group-sm">
+                                                                        <a href="#" class="btn btn-info btn-sm" ng-click="AddPumpNozzleDetWise(beData)"><i class="fas fa-plus"></i></a>
+                                                                        <a href="#" class="btn btn-danger btn-sm" ng-click="DelPumpNozzleDetWise(beData)"><i class="fas fa-trash"></i></a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <div class="text-center control-btns">
+                                                <button type="button" class="btn btn-primary load" style="min-width:75px" id="backtopump">BackToList</button>
+                                                <button type="button" class="btn btn-default load" style="min-width:75px" ng-click="ClearPump()">Cancel</button>
+                                                <button type="button" class="btn btn-success load" style="min-width:75px" ng-click="SaveUpdatePump()">Save</button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="custom-tabs-meter-profile" role="tabpanel" aria-labelledby="custom-tabs-meter-profile-tab">
+                                <div id="meterform">
+                                    <div class="p-2">
+
+                                        <div class="row mt-2">
+                                            <div class="col-sm-8 col-md-5">
+                                                <div class="card p-2" style="background-color: #2dce523d">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group d-flex">
+                                                                <label class="mr-2" style="min-width: 135px"><b>For Date</b></label>
+                                                                <input class="form-control form-control-sm" type="text" date-picker ng-model="newMeterReading.ForDate_TMP" date-detail="newMeterReading.ForDateDet" style="width:30%" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group d-flex">
+                                                                <label class="mr-2" style="min-width:135px"><b>Choose Pump</b></label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newMeterReading.SelectedPump" style="width:100%" ng-change="ChangePump()">
+                                                                    <option ng-repeat="P in PumpList" ng-value="P">{{P.Name}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group d-flex">
+                                                                <label class="mr-2" style="min-width:135px"><b>Choose Nozzle</b></label>
+                                                                <select class="form-control form-control-sm select2" ng-model="newMeterReading.SelectedNozzle" style="width:100%" ng-change="ChangePump()">
+                                                                    <option ng-repeat="P in newMeterReading.SelectedPump.PumpNozzleDetColl" ng-value="P">{{P.Nozzle}}-{{P.Product}}</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group d-flex">
+                                                                <label class="mr-2" style="min-width: 135px"><b>Last Reading</b></label>
+                                                                <input type="text" class="form-control" readonly ng-model="newMeterReading.LastReading" style="font-size:24px;font-weight:700" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group d-flex">
+                                                                <label class="mr-2" style="min-width: 135px"><b>Current Value</b></label>
+                                                                <input type="text" class="form-control" number-input ng-model="newMeterReading.CurrentReading" style="font-size:24px;font-weight:700" ng-change="calculateSales()" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <div class="form-group d-flex">
+                                                                <label class="mr-2" style="min-width: 135px"><b>Sales</b></label>
+                                                                <input type="text" class="form-control" readonly style="font-size:24px;font-weight:700" ng-model="newMeterReading.Sales" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="mt-4 text-center">
+                                                                <button type="button" class="btn btn-default load" style="min-width:70px" data-toggle="modal" @*data-target="#SearchModal"*@ ng-click="GetAllMeterReading()"> <span class="glyphicon glyphicon-remove" ></span>Search</button>
+                                                                <button type="button" class="btn btn-default load" style="width:70px" ng-click="ClearMeterReading()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                                                <button type="button" class="btn btn-success load" style="width:70px" ng-click="SaveUpdateMeterReading()">{{newMeterReading.Mode}}</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="custom-tabs-report-profile" role="tabpanel" aria-labelledby="custom-tabs-meter-report-tab">
+                                <div id="reportform">
+                                    <div class="">
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newRpt.DateFrom_TMP" style="max-width:100px" date-detail="newRpt.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newRpt.DateTo_TMP" style="max-width:100px" date-detail="newRpt.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <button type="button" class="btn btn-sm btn-primary load float-right mt-2 px-1" style="min-width:75px" ng-click="GetMeterSummary()"><i class="fas fa-download mr-2"></i>Load</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <header class="row">
+                                                    <div class="col-md-5 col-sm-5">
+                                                        <div class="clearfix">
+                                                            <form class="form-inline">
+                                                                <div class="input-group input-group-sm mr-sm-2">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text cstm">Find:</span>
+                                                                    </div>
+                                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                                    <select class="form-control pr-0"
+                                                                            id="exampleFormControlSelect1">
+                                                                        <option>Contain</option>
+                                                                        <option>Prefix</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="input-group input-group-sm" style="width: 150px;">
+                                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                                    <div class="input-group-append">
+                                                                        <button type="submit" class="btn btn-default">
+                                                                            <i class="fas fa-search"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-7 col-sm-7 text-right">
+                                                        <form class="form-inline  float-right">
+                                                            <div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Search By:</span>
+                                                                </div>
+                                                                @*Edited by bibek start here Added Angular for Search*@
+
+                                                                <div class="input-group-prepend">
+                                                                    <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                                        <option ng-value="asp" ng-repeat="asp in columnDefs">{{asp.headerName}}</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="input-group input-group-sm" style="width: 200px;">
+                                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="paginationOptions.SearchVal"  ng-change="ReSearchData(-1)">
+                                                                @*Edited by bibek End here*@
+
+
+                                                                <div class="input-group-append">
+                                                                    <button type="submit" class="btn btn-default">
+                                                                        <i class="fas fa-search"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="dropdown dnld-file ml-2">
+                                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                        type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                        aria-haspopup="true" aria-expanded="false">
+                                                                    <i class="fas fa-download"></i>
+                                                                </button>
+                                                                <div class="dropdown-menu dropdown-menu-right"
+                                                                     aria-labelledby="dropdownMenuButton">
+                                                                    <span class="dropdown-item">Choose an option:</span>
+                                                                    <a class="dropdown-item" href="#" ng-click="onBtExport()">
+                                                                        <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                                        Excel
+                                                                    </a>
+                                                                    <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                                        <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                                             class="img-fluid exports-icon">
+                                                                        CSV
+                                                                    </a>
+
+                                                                </div>
+                                                            </div>
+                                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" ng-click="Print()">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>
+                                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                                <i class="fas fa-filter"></i>
+                                                            </a>
+                                                        </form>
+
+                                                    </div>
+
+                                                </header>
+                                                <div id="datatable" style="height: calc(100vh - 10rem); width: 100%;" class="ag-theme-alpine"></div>
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+
+
+            <!--Search Modal Starts-->
+            <div class="modal fade sales-quotation-page-modal document-attach-modal" id="SearchModal" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Search Meter Reading</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body gradient-bg">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row">
+                                        <label for="" class="col-sm-2 col-form-label col-form-label-sm">Search </label>
+                                        <div class="col-sm-10">
+                                            <div class="input-group input-group-sm mb-1">
+                                                <div class="input-group-prepend">
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.MeterReading">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.MeterReading">{{pp.text}}</option>
+                                                    </select>
+                                                </div>
+                                                <input type="text" class="form-control" placeholder=""  ng-model="searchData.MeterReading">
+                                               
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="">
+                                <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center" style="width:50px">SNo</th>
+                                            <th style="width:110px">For Miti</th>
+                                            <th style="width:160px">Pump</th>
+                                            <th style="width:160px">Nozzle</th>
+                                            <th style="width:110px">Last Reading</th>
+                                            <th style="width:110px">Current Value</th>
+                                            <th style="width:110px">Sales</th>
+                                            <th class="text-center" style="width:90px">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="sd in AllTranColl |filter:searchData.MeterReading|itemsPerPage:perPage.MeterReading"   current-page="currentPages.MeterReading" pagination-id="MeterReadingPagination">
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>{{sd.ForMiti}}</td>
+                                            <td>{{sd.PumpName}}</td>
+                                            <td>{{sd.NozzleName}}</td>
+                                            <td>{{sd.LastReading}}</td>
+                                            <td>{{sd.CurrentReading}}</td>
+                                            <td>{{sd.Sales}}</td>
+                                            <td class="text-center">
+                                                @*<a class="p-1" href="#" ng-click="GetTransactionById(sd)">
+                                                    <i class="fas fa-edit text-info"></i>
+                                                </a>*@
+                                                <a class="p-1" href="#" ng-click="DelTransactionById(sd,$index)">
+                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                </a>
+                                                @*<a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                                    <i class="fas fa-print text-primary"></i>
+                                                </a>*@
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                                <dir-pagination-controls pagination-id="MeterReadingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+
+                        </div>
+                        <!-- end modal body -->
+                        
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+

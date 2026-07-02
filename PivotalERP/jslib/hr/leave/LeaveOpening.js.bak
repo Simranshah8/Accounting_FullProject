@@ -1,0 +1,239 @@
+﻿app.controller('LeaveOpeningController', function ($scope, $http, $timeout, $filter, GlobalServices) {
+	$scope.Title = 'Leave Type';
+
+	OnClickDefault();
+
+	$scope.LoadData = function () {
+		$('.select2').select2();
+		$scope.confirmMSG = GlobalServices.getConfirmMSG();
+		$scope.perPageColl = GlobalServices.getPerPageList();
+		//$scope.MonthList = GlobalServices.getMonthList();
+		$scope.EmployeeSearchOptions = GlobalServices.getEmployeeSearchOptions();
+
+		$scope.currentPages = {
+			LeaveOpening: 1,
+		};
+
+		$scope.searchData = {
+			LeaveOpening: '',
+		};
+
+		$scope.perPage = {
+			LeaveOpening: GlobalServices.getPerPageRow(),
+		};
+
+		$scope.newLeaveOpening = {
+			LeaveOpeningId: null,
+			Name: '',
+			Code: '',
+			ApplicableForId: '',
+			SNo: '',
+			IncludeWeeklyOff: false,
+			IncludeHoliday: false,
+			PaidLeave: false,
+			CarriedForward: false,
+			Remarks: '',
+			SelectEmployee: $scope.EmployeeSearchOptions[0].value,
+			Mode: 'Save'
+		};
+
+		$scope.PeriodList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/GetAllFinancialPeriodList",
+			dataType: "json"
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.PeriodList = res.data.Data;
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+ 
+
+		$scope.GetAllLeaveOpeningList();
+	}
+
+	function OnClickDefault() {
+		document.getElementById('LeaveOpening-form').style.display = "none";
+
+		document.getElementById('add-LeaveOpening').onclick = function () {
+			document.getElementById('LeaveOpening-section').style.display = "none";
+			document.getElementById('LeaveOpening-form').style.display = "block";
+		}
+		document.getElementById('LeaveOpening-btn').onclick = function () {
+			document.getElementById('LeaveOpening-form').style.display = "none";
+			document.getElementById('LeaveOpening-section').style.display = "block";
+		}
+	}
+
+	$scope.ClearLeaveOpening = function () {
+		$scope.newLeaveOpening = {
+			Name: '',
+			Code: '',
+			ApplicableForId: '',
+			SNo: '',
+			IncludeWeeklyOff: false,
+			IncludeHoliday: false,
+			PaidLeave: false,
+			CarriedForward: false,
+			Remarks: '',
+			SelectEmployee: $scope.EmployeeSearchOptions[0].value,
+			Mode: 'Save'
+		};
+	}
+	//************************* LeaveOpening *********************************
+	$scope.IsValidLeaveOpening = function () {
+		if (!$scope.newLeaveOpening.EmployeeId || $scope.newLeaveOpening.EmployeeId<0) {
+			Swal.fire('Please ! Select Employee');
+			return false;
+		}
+		return true;
+	}
+
+	$scope.SaveUpdateLeaveOpening = function () {
+		if ($scope.IsValidLeaveOpening() == true) {
+			if ($scope.confirmMSG.Accept == true) {
+				var saveModify = $scope.newLeaveOpening.Mode;
+				Swal.fire({
+					title: 'Do you want to ' + saveModify + ' the current data?',
+					showCancelButton: true,
+					confirmButtonText: saveModify,
+				}).then((result) => {
+					/* Read more about isConfirmed, isDenied below */
+					if (result.isConfirmed) {
+						$scope.CallSaveUpdateLeaveOpening();
+					}
+				});
+			} else
+				$scope.CallSaveUpdateLeaveOpening();
+		}
+	};
+
+	$scope.CallSaveUpdateLeaveOpening = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+
+		var findP = mx($scope.PeriodList).firstOrDefault(p1 => p1.PeriodId == $scope.newLeaveOpening.PeriodId);
+		if (findP) {
+			$scope.newLeaveOpening.DateFrom = $filter('date')(new Date(findP.StartDate_AD), 'yyyy-MM-dd');
+			$scope.newLeaveOpening.DateTo = $filter('date')(new Date(findP.EndDate_AD), 'yyyy-MM-dd');
+        }
+
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/SaveLeaveOpening",
+			headers: { 'Content-Type': undefined },
+			transformRequest: function (data) {
+				var formData = new FormData();
+				formData.append("jsonData", angular.toJson(data.jsonData));
+				return formData;
+			},
+			data: { jsonData: $scope.newLeaveOpening }
+		}).then(function (res) {
+			$scope.loadingstatus = "stop";
+			hidePleaseWait();
+			Swal.fire(res.data.ResponseMSG);
+			if (res.data.IsSuccess == true) {
+				$scope.ClearLeaveOpening();
+				$scope.GetAllLeaveOpeningList();
+			}
+		}, function (errormessage) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+		});
+	}
+
+	$scope.GetAllLeaveOpeningList = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		$scope.LeaveOpeningList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/GetAllLeaveOpeningList",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.LeaveOpeningList = res.data.Data;
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
+	$scope.GetLeaveOpeningById = function () {
+
+		if ($scope.newLeaveOpening.EmployeeId > 0 && $scope.newLeaveOpening.PeriodId > 0) {
+			$scope.loadingstatus = "running";
+			showPleaseWait();
+			var para = {
+				EmployeeId: $scope.newLeaveOpening.EmployeeId,
+				PeriodId: $scope.newLeaveOpening.PeriodId
+			};
+			$http({
+				method: 'POST',
+				url: base_url + "Attendance/Creation/GetLeaveOpeningById",
+				dataType: "json",
+				data: JSON.stringify(para)
+			}).then(function (res) {
+				hidePleaseWait();
+				$scope.loadingstatus = "stop";
+				if (res.data.IsSuccess && res.data.Data) {
+					$scope.newLeaveOpening.IsBalance = res.data.Data.IsBalance;
+					$scope.newLeaveOpening.LeaveQuotaDetail = res.data.Data.LeaveQuotaDetail;
+					
+					//document.getElementById('LeaveOpening-section').style.display = "none";
+					//document.getElementById('LeaveOpening-form').style.display = "block";
+
+				} else {
+					Swal.fire(res.data.ResponseMSG);
+				}
+			}, function (reason) {
+				Swal.fire('Failed' + reason);
+			});
+        }
+	
+	};
+
+	$scope.DelLeaveOpeningById = function (refData) {
+		Swal.fire({
+			title: 'Do you want to delete the selected data?',
+			showCancelButton: true,
+			confirmButtonText: 'Delete',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				var para = {
+					LeaveOpeningId: refData.TranId
+				};
+				$http({
+					method: 'POST',
+					url: base_url + "Attendance/Creation/DelLeaveOpening",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllLeaveOpeningList();
+					} else {
+						Swal.fire(res.data.ResponseMSG);
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+	$scope.pageChangeHandler = function (num) {
+		console.log('page changed to ' + num);
+	};
+
+});

@@ -1,0 +1,724 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+
+<style>
+    .photo-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .fixed-logophoto {
+        width: 160px;
+        height: 140px;
+        display: block;
+        object-fit: contain;
+        max-width: none;
+        max-height: none;
+    }
+
+    .fixed-photo {
+        width: 160px;
+        height: 140px;
+        display: block;
+        object-fit: cover;
+        max-width: none;
+        max-height: none;
+    }
+
+    @@media print {
+        @@page {
+            size: A4;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        #Print-Section, #Print-Section * {
+            visibility: visible !important;
+        }
+
+        #Print-Section {
+            position: relative !important;
+            left: 0 !important;
+            top: 0 !important;
+            margin: 10px auto !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            background: #fff !important;
+            box-shadow: none !important;
+        }
+
+        .photo-box {
+            justify-content: center !important;
+            align-items: center !important;
+        }
+
+        .fixed-logophoto {
+            width: 160px !important;
+            height: 140px !important;
+            max-width: none !important;
+            max-height: none !important;
+            object-fit: contain;
+        }
+
+        .fixed-photo {
+            width: 160px !important;
+            height: 140px !important;
+            max-width: none !important;
+            max-height: none !important;
+            object-fit: cover;
+        }
+
+        #Print-Section table {
+            width: 100% !important;
+            max-width: 100% !important;
+            table-layout: fixed !important;
+            border-collapse: collapse !important;
+        }
+
+        #Print-Section .row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+        }
+
+            #Print-Section .row > .col-md-4 {
+                flex: 0 0 33.3333% !important;
+                max-width: 33.3333% !important;
+            }
+
+        .control-btns, .no-print, .main-footer {
+            display: none !important;
+        }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            box-sizing: border-box !important;
+        }
+
+        table, tr, td, th {
+            page-break-inside: avoid !important;
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+
+        html, body {
+            background: #fff !important;
+        }
+    }
+</style>
+<script src="~/jslib/hr/Master/EmployeeJD.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="EmployeeJDController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true">Employee JD</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Employee Key Responsibilities History</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div id="Table-Section">
+                                <header class="row">
+                                    <div class="col-md-8 col-lg-8 col-sm-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeeJD">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.EmployeeJD">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 col-lg-4 col-sm-4">
+                                        <div class="row justify-content-end mr-1">
+                                            <div class="dropdown dnld-file"
+                                                 data-placement="top" title="Download File">
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Refresh" ng-click="GetAllEmployeeJD()">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </a>
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'EmployeeJD'" report-name="'List of Employee Job Description'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'EmployeeJD',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                </div>
+                                                <a print-tbl report-name="'Employee JD'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                            </div>
+                                            <a href="#" class="btn btn-primary btn-sm" id="add-Details" ng-click="ClearDetails()">
+                                                <i class="fas fa-plus w-t"></i> Add Employee JD
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </header>
+                                <div class="mt-2 table-scroll-x-y table-container flex-grow-1 ">
+                                    <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                        <div class="table-h-scrollbar-fix table-scroll-wrapper pb-2" style="height:auto; max-height: calc(100vh - 8rem)!important;">
+                                            <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                <thead style="background: #e6f5fb;">
+                                                    <tr>
+                                                        <th class="cstm-sticky text-center" style="width: 60px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                        <th style="width: 200px;">Employee Name</th>
+                                                        <th style="width: 110px;">Employee Code</th>
+                                                        <th style="width: 200px;">Official Email</th>
+                                                        <th style="width:150px;">Job Title</th>
+                                                        <th style="width:150px;">Department</th>
+                                                        <th style="width:100px;">Mobile No</th>
+                                                        <th style="width: 130px;">Division</th>
+                                                        <th style="width: 100px;">DOB</th>
+                                                        <th style="width:150px;">Work Station</th>
+                                                        <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 100px; right: 0;">
+                                                            <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                <option value="" disabled selected>Action</option>
+                                                                <option value="save">Save Layout</option>
+                                                                <option value="reset">Reset Layout</option>
+                                                            </select>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="beData in TableData | filter:searchData.EmployeeJD| itemsPerPage:perPage.EmployeeJD" current-page="currentPages.EmployeeJD" pagination-id="EmployeeJDPagination">
+                                                        <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3;">{{$index+1}}</td>
+                                                        <td>{{beData.Name}}</td>
+                                                        <td>{{beData.EmployeeCode}}</td>
+                                                        <td>{{beData.Email}}</td>
+                                                        <td>{{beData.JobTitle}}</td>
+                                                        <td>{{beData.Department}}</td>
+                                                        <td>{{beData.ContactNo}}</td>
+                                                        <td>{{beData.Division}}</td>
+                                                        <td>{{beData.DOB_BS}}</td>
+                                                        <td>{{beData.WorkStation}}</td>
+                                                        <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 100px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                            <div class="btn-group-sm">
+                                                                <a href="#" class="btn btn-info" title="Edit" ng-click="GetEmployeeJDById(beData, 0)"><i class="fas fa-pencil-alt"></i></a>
+                                                                <a href="#" class="btn btn-danger" title="Delete" ng-click="DelEmployeeJDById(beData, $index, 1)"><i class="fas fa-trash"></i></a>
+                                                                <a href="#" class="btn btn-secondary my-1 btn-sm" title="Print" ng-click="GetEmployeeJDById(beData, 1)">
+                                                                    <i class="fas fa-print"></i>
+                                                                </a>
+                                                                <a href="#" class="btn btn-success" title="Update Key Responsibility" ng-click="GetEmployeeJDById(beData, 2)"><i class="fas fa-save"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+                                        <div class="col-md-12 col-lg-12 col-sm-12">
+                                            <dir-pagination-controls pagination-id="EmployeeJDPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div id="Form-Section" class="mb-5">
+                                <div class="mb-5">
+                                    <div class="row">
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Full Name</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newEmployeeJD.EmployeeId" ng-change="GetEmployeeDetail(newEmployeeJD)" ng-disabled="!ShowCompleteForm">
+                                                    <option ng-value="E.EmployeeId" ng-repeat="E in EmployeeList" ng-selected="E.EmployeeId==newDetails.EmployeeId">{{E.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Official Email</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="EmpDetails.EmailId" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Job Title</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="EmpDetails.JTitle" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Department</label>
+                                                <select class="form-control form-control-sm" ng-model="EmpDetails.DepartmentId" disabled>
+                                                    <option ng-value="T.CostCenterDepartmentId" ng-repeat="T in DepartmentList" ng-selected="T.CostCenterDepartmentId==EmpDetails.DepartmentId">{{T.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Mobile No</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="EmpDetails.OfficeNum" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Division<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployeeJD.Division" ng-disabled="!ShowCompleteForm">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Date Of Joining</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="EmpDetails.JoinDate_TMP" date-detail="newEmployeeJD.DateOfJoiningDet" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Age</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployeeJD.Age" ng-disabled="!ShowCompleteForm">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Work Station<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployeeJD.WorkStation" ng-disabled="!ShowCompleteForm">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Experience Year<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployeeJD.ExpYear" ng-disabled="!ShowCompleteForm">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="form-group">
+                                                <label>Date Of Birth</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="EmpDetails.Dob_TMP" date-detail="EmpDetails.DobDet" disabled>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" ng-if="ShowCompleteForm">
+                                        <div class="col-md-12 col-lg-12 col-sm-12">
+                                            <label><strong>Qualification</strong></label>
+                                            <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table" style="table-layout: fixed">
+                                                <thead class="text-left">
+                                                    <tr>
+                                                        <th style="width: 50px">S.No.</th>
+                                                        <th>Qualification</th>
+                                                        <th style="width: 70px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="qDet in newEmployeeJD.EmpJDQualificationColl">
+                                                        <td>{{$index+1}}</td>
+
+                                                        <td>
+                                                            <input type="text" ng-model="qDet.Qualification" class="form-control form-control-sm" />
+                                                        </td>
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddQualification($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delQualification($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-md-12 col-lg-12 col-sm-12">
+                                            <label><strong>Achievements</strong></label>
+                                            <div class="table-scroll-wrapper">
+                                                <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table" style="table-layout: fixed">
+                                                    <thead class="text-left">
+                                                        <tr>
+                                                            <th style="width: 36px">S.No.</th>
+                                                            <th style="width: 350px">Org Name</th>
+                                                            <th style="width: 150px">Designation</th>
+                                                            <th style="width: 100px">Duration</th>
+                                                            <th style="width: 100px">Work Station</th>
+                                                            <th style="width: 50px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="aDet in newEmployeeJD.EmpJDAchievementColl">
+                                                            <td>{{$index+1}}</td>
+
+                                                            <td>
+                                                                <input type="text" ng-model="aDet.OrgName" class="form-control form-control-sm" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" ng-model="aDet.Designation" class="form-control form-control-sm" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" ng-model="aDet.Duration" class="form-control form-control-sm" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" ng-model="aDet.WorkStation" class="form-control form-control-sm" />
+                                                            </td>
+                                                            <td>
+                                                                <a class="p-1" ng-click="AddAchievement($index)">
+                                                                    <i class="fas fa-plus text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-click="delAchievement($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12 col-lg-12 col-sm-12">
+                                            <label><strong>Trainings</strong></label>
+                                            <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table" style="table-layout: fixed">
+                                                <thead class="text-left">
+                                                    <tr>
+                                                        <th style="width: 50px">S.No.</th>
+                                                        <th>Training</th>
+                                                     
+                                                        <th style="width: 70px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="qDet in newEmployeeJD.EmpJDTrainingColl">
+                                                        <td>{{$index+1}}</td>
+
+                                                        <td>
+                                                            <input type="text" ng-model="qDet.Training" class="form-control form-control-sm" />
+                                                        </td>
+                                                       
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddTraining($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delTraining($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="row pb-4">
+                                        <div class="col-md-12 col-lg-12 col-sm-12">
+                                            <label><strong>Key Responsibilities</strong></label>
+                                            <div @*class="table-scroll-x-y" style="height:auto; max-height: calc(100vh - 34rem)!important;"*@>
+                                                <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table" style="table-layout: fixed">
+                                                    <thead class="text-left">
+                                                        <tr>
+                                                            <th style="width: 50px">S.No.</th>
+                                                            <th>Responsibilities</th>
+                                                            <th style="width: 50px">Status</th>
+                                                            <th style="width: 70px">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="rDet in newEmployeeJD.EmpJDResponsibilityColl">
+                                                            <td>{{$index+1}}</td>
+                                                            <td>
+                                                                <input type="text" ng-disabled="rDet.EmpJDId" ng-model="rDet.Responsibility" class="form-control form-control-sm" />
+                                                            </td>
+                                                            <td style="text-align:center;">
+                                                                <input type="checkbox" id="checkbox{{$index}}" ng-model="rDet.IsActive">
+                                                            </td>
+                                                            <td class="align-middle text-center">
+                                                                <a class="p-1" ng-click="AddResponsibility($index)">
+                                                                    <i class="fas fa-plus text-secondary"></i>
+                                                                </a>
+                                                                <a class="p-1" ng-hide="rDet.EmpJDId" ng-click="delResponsibility($index)">
+                                                                    <i class="fas fa-trash-alt text-danger"></i>
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                           
+                                        </div>
+                                    </div>
+                                </div>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-primary" id="back-Details">Back to List</button>
+                                        <button type="button" class="btn btn-default" ng-click="ClearDetails()">Clear</button>
+                                        <button type="button" class="btn btn-primary" ng-click="SaveUpdateEmployeeJD()">{{newEmployeeJD.Mode}}</button>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div id="Print-Section" class="mb-5">
+                                <div class="pb-5">
+                                    <div class="row mx-0" style="border:1px solid #000;">
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="photo-box">
+                                                <img ng-src="{{CompanyDetail.CompanyLogoData || CompanyDetail.CompanyLogoPath}}"
+                                                     class="fixed-logophoto py-2"
+                                                     alt="Company Logo">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4 d-flex align-items-center justify-content-center" style="border:1px solid #000;">
+                                            <p><strong>Employee Profile</strong></p>
+                                        </div>
+                                        <div class="col-md-4 col-lg-4 col-sm-4">
+                                            <div class="photo-box">
+                                                <img ng-src="{{newEmployeeJD.PhotoPath || newEmployeeJD.Photo}}"
+                                                     class="fixed-photo my-2"
+                                                     alt="Employee Photo" style="border: 1px solid black">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="text-center py-1 " style="background: #068abf; color: white; border: 1px solid #000;">
+                                        <p><strong>Personal Information</strong></p>
+                                    </div>
+                                    <div style="border:1px solid #000;">
+                                        <div class="px-1">
+                                            <table class="main-table table table-bordered table-striped table-hover table-sm mb-0" id="datatable" @*style="border: 1px solid black"*@>
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="width:250px;"><strong>Full Name</strong></td>
+                                                        <td colspan="3">{{newEmployeeJD.Name}}</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td><strong>Designation</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.Designation}}</td>
+                                                        <td><strong>Department</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.Department}}</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td><strong>Division</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.Division}}</td>
+                                                        <td><strong>Date of Joining</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.DateOfJoiningMitti}}</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td><strong>Work Station</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.WorkStation}}</td>
+                                                        <td><strong>Total Working Experience</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.ExpYear}}</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td><strong>Official Mail ID</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.Email}}</td>
+                                                        <td><strong>Age</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.Age}}</td>
+                                                    </tr>
+
+                                                    <tr>
+                                                        <td><strong>Mobile No.</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.ContactNo}}</td>
+                                                        <td><strong>Date of Birth</strong></td>
+                                                        <td style="width: 250px">{{newEmployeeJD.DOB_BS}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                    </div>
+                                    <div style="border:1px solid #000;">
+                                        <div style="background: #068abf; color: white;" class="text-center">
+                                            <p class="py-1"><strong>Educational Background</strong></p>
+                                        </div>
+                                        <div class="my-1 px-1">
+                                            <p ng-repeat="i in newEmployeeJD.EmpJDQualificationColl">* {{i.Qualification}}</p>
+                                        </div>
+
+                                    </div>
+                                    <div class="text-center" style="border:1px solid #000;">
+                                        <p class="py-1" style="background: #068abf; color: white;"><strong>Career Accomplishment</strong></p>
+                                        <div class="px-1">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white my-2">
+                                                <thead>
+                                                    <tr>
+                                                        <th>S.No.</th>
+                                                        <th>Org Name</th>
+                                                        <th>Designation</th>
+                                                        <th>Duration</th>
+                                                        <th>Work Station</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="aDet in newEmployeeJD.EmpJDAchievementColl">
+                                                        <td>{{$index+1}}</td>
+
+                                                        <td>
+
+                                                            {{aDet.OrgName}}
+                                                        </td>
+                                                        <td>
+
+                                                            {{aDet.Designation}}
+                                                        </td>
+                                                        <td>
+
+                                                            {{aDet.Duration}}
+                                                        </td>
+                                                        <td>
+
+                                                            {{aDet.WorkStation}}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div style="border: 1px solid #000;">
+                                        <div style="background: #068abf; color: white;" class="text-center">
+                                            <p class="py-1"><strong>Trainings ETC...</strong></p>
+                                        </div>
+                                        <div class="my-1 px-1">
+                                            <p ng-repeat="i in newEmployeeJD.EmpJDTrainingColl">* {{i.Training}}</p>
+                                        </div>
+
+                                    </div>
+                                    <div style="border: 1px solid #000;">
+                                        <div style="background: #068abf; color: white;" class="text-center">
+                                            <p class="py-1"><strong>Job Profile in MV Dugar Group</strong></p>
+                                        </div>
+                                        <div class="my-1 px-1">
+                                            <p ng-repeat="i in newEmployeeJD.EmpJDResponsibilityColl">* {{i.Responsibility}}</p>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" id="back-List">Back to List</button>
+                                        <button type="button" class="btn btn-primary" ng-click="PrintPage()">Print</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div class="card-primary card-tabs ">
+                                <div class="tab-content" id="myTabContent">
+                                    <div >
+                                        <header class="row">
+                                            <div class="col-md-5 col-lg-5 col-sm-5">
+                                                <div class="form-group d-flex mb-0 ">
+                                                    <label style="width:110px;" class="mt-1 mr-1">Select Employee</label>
+                                                    <select class="form-control form-control-sm select2 ml-1" style="width: 90%;" ng-model="newFilter.EmployeeId" ng-change="GetData()">
+                                                        <option ng-value="E.EmployeeId" ng-repeat="E in EmployeeList" ng-selected="E.EmployeeId==newFilter.EmployeeId">{{E.Name}}-{{E.EmployeeCode}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-1 col-lg-1 col-sm-1">
+                                                <button type="button" title="Load Data" class="btn btn-primary load float-right" style="min-width: 90px;" ng-click="GetData()"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></button>
+                                            </div>
+                                            <div class="col-sm-3 col-lg-3 col-sm-3">
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="row ">
+                                                    <div class="col-md-8 col-lg-8 col-sm-8">
+                                                        <div class="clearfix">
+                                                            <form class="form-inline">
+                                                                <div class="input-group input-group-sm table-search-filed">
+                                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                                    <div class="input-group-append ">
+                                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                                            <i class="fas fa-search"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-lg-4 col-sm-4">
+                                                        <div class="dropdown dnld-file"
+                                                             data-placement="top" title="Download File">
+                                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                                               title="Refresh" ng-click="GetData()">
+                                                                <i class="fas fa-sync-alt"></i>
+                                                            </a>
+                                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                                    aria-haspopup="true" aria-expanded="false">
+                                                                <i class="fas fa-download"></i>
+                                                            </button>
+                                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                                <span class="dropdown-item">Choose an option:</span>
+                                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                                    Excel
+                                                                </a>
+                                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                                         class="img-fluid exports-icon">
+                                                                    CSV
+                                                                </a>
+                                                            </div>
+                                                            <a print-tbl report-name="'Asset Use Details'" table-id="'#TableData'" class="btn btn-secondary btn-light btn-sm wait"
+                                                               title="Print">
+                                                                <i class="fas fa-print"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </header>
+                                        <div class="">
+                                            <div id="TableData" style="height: calc(100vh - 6rem); width: 100%;" class="ag-theme-alpine"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

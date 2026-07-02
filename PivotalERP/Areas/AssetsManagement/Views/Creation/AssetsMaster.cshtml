@@ -1,0 +1,331 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/AssetsManagement/AssetsMaster.js"></script>
+<div ng-app="myApp" ng-controller="AssetsMasterController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card my-1 card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearDetails()" aria-controls="custom-tabs-four-profile" aria-selected="false">Assets Master</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AssetsMaster">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AssetsMaster">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.AssetsMaster">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllAssetsmaster()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'CompanyRelationshipList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </header>
+                                <div class="mt-2  table-scroll-x-y table-container flex-grow-1" style="max-height:calc(100vh - 6rem) !important;">
+                                    <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                        <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                            <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                <thead class="text-left">
+                                                    <tr>
+                                                        <th class="cstm-sticky text-center" style="width: 50px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                                        <th style="width:190px;">Asset Name</th>
+                                                        <th style="width:190px;">Asset Alias</th>
+                                                        <th style="width:190px;">Asset Code</th>
+                                                        <th style="width:190px;">Assets Group</th>
+                                                        <th style="width:190px;">Assets Type</th>
+                                                        <th style="width:190px;">Serial Number</th>
+                                                        <th style="width:190px;">RAM(Memory)</th>
+                                                        <th style="width:190px;">ROM(SSD/HDD)</th>
+                                                        <th style="width:190px;">Purchase Rate</th>
+                                                        <th style="width:190px;">Depreciation Rate</th>
+                                                        <th style="width:190px;"> Status  </th>
+                                                        <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 80px; right: 0;">
+                                                            <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                <option value="" disabled selected>Action</option>
+                                                                <option value="save">Save Layout</option>
+                                                                <option value="reset">Reset Layout</option>
+                                                            </select>
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="SL in TableData | filter:searchData.AssetsMaster | itemsPerPage: perPage.AssetsMaster" current-page="currentPages.AssetsMaster" pagination-id="AssetsMasterPagination">
+                                                        <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                                        <td  ng-class="{'text-danger': SL.StatusId == 2}" >{{SL.Name}}</td>
+                                                        <td>{{SL.Alias}}</td>
+                                                        <td>{{SL.Code}}</td>
+                                                        <td>{{SL.AssetGroupName}}</td>
+                                                        <td>{{SL.AssetTypeName}}</td>
+                                                        <td>{{SL.SerialNum}}</td>
+                                                        <td>{{SL.RAMName}}</td>
+                                                        <td>{{SL.RoMName}}</td>
+                                                        <td>{{SL.PurchaseRate}}</td>
+                                                        <td>{{SL.DepreciationRate}}</td>
+                                                        <td>{{SL.StatusName}}</td>
+                                                        <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 80px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                            <div class="btn-group-sm">
+                                                                <a class="btn btn-info" href="#" ng-click="GetAssetsMasterById(SL)">
+                                                                    <i class="fas fa-pencil-alt"></i>
+                                                                </a>
+                                                                <a class="btn btn-danger" href="#" ng-click="DelAssetsMasterById(SL,$index)">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <div class="col-md-12">
+                                                <dir-pagination-controls pagination-id="AssetsMasterPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                                </dir-pagination-controls>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="mb-3">
+                                    <form class="mb-0">
+                                        <div class="row">
+
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label> Asset Name<spna class="text-danger">*</spna></label>
+                                                            <input type="text" ng-model="newDetails.Name" ng-change="MergeCodeWithName(newDetails)" class="form-control form-control-sm" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Asset Alias</label>
+                                                            <input type="text" ng-model="newDetails.Alias" class="form-control form-control-sm" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Asset Code<span class="text-danger">*</span> </label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDetails.Code" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Asset Group <span class="text-danger">*</span> </label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.AssetGroupId">
+                                                                <option ng-value="G.AssetGroupId" ng-repeat="G in AssetGroupList" ng-selected="G.AssetGroupId==newDetails.AssetGroupId">{{G.GroupName}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Asset Type </label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.AssetTypeId" ng-change="ChangeAssetType()">
+                                                                <option ng-value="T.AssetTypeId" ng-repeat="T in AssetTypeList" ng-selected="T.AssetTypeId==newDetails.AssetTypeId">{{T.TypeName}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4" ng-repeat="uf in newDetails.UDFFeildsColl">
+                                                        <div class="form-group">
+                                                            <label style="min-width: 120px;">{{uf.Name}} <span style="color:red" ng-show="uf.IsMandatory==true">*</span></label>
+                                                            <udf-field udf="uf" change-event="ChangeUDFField(uf.NameId)"></udf-field>
+                                                        </div>
+                                                    </div>
+                                                     
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Serial Number <span class="text-danger"></span></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="newDetails.SerialNum" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label> RAM (Memory)  </label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.RAMId">
+                                                                <option ng-value="">Select RAM</option>
+                                                                <option ng-value="R.id" ng-repeat="R in RAMColl" ng-selected="R.id==newDetails.RAMId">{{R.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label> ROM (SSD/HDD)</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.ROMId">
+                                                                <option ng-value="">Select ROM</option>
+                                                                <option ng-value="pp.id" ng-repeat="pp in ROMColl" ng-selected="pp.id==newDetails.ROMId">{{pp.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label> Model</label>
+                                                            <select class="form-control form-control-sm select2 " ng-model="newDetails.ModelId">
+                                                                <option ng-value="M.AssetModelId" ng-repeat="M in ModelList" ng-selected="M.AssetModelId==newDetails.ModelId">{{M.ModelName}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Purchase Rate</label>
+                                                            <input number-input type="text" class="form-control form-control-sm text-right" ng-model="newDetails.PurchaseRate">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Rack</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.RackId">
+                                                                <option ng-value="pp.RackId" ng-repeat="pp in RackList" ng-selected="pp.RackId==newDetails.RackId">{{pp.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Branch</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.BranchId">
+                                                                <option ng-value="pl.id" ng-repeat="pl in BranchList" ng-selected="pl.id==newDetails.BranchId">{{pl.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Depreciation Rate</label>
+                                                            <input number-input type="text" class="form-control form-control-sm text-right" ng-model="newDetails.DepreciationRate">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Product</label>
+                                                            <select class="form-control form-control-sm select2" ng-model="newDetails.ProductId">
+                                                                <option ng-value="pl.ProductId" ng-repeat="pl in ProductList" ng-selected="pl.ProductId==newDetails.ProductId">{{pl.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Unit <span class="text-danger"></span> </label>
+                                                            <select class="form-control form-control-sm" ng-model="newDetails.UnitId">
+                                                                <option ng-value="U.UnitId" ng-repeat="U in UnitList" ng-selected="U.id==newDetails.UnitId">{{U.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Status <span class="text-danger">*</span> </label>
+                                                            <select class="form-control form-control-sm" ng-model="newDetails.StatusId">
+                                                                <option ng-value="S.id" ng-repeat="S in StatusColl" ng-selected="S.id==newDetails.StatusId">{{S.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{newDetails.PhotoData || newDetails.Photo }}" class="img-fluid" alt="" id="Photo" style="height:130px; width:165px; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-sfile" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Upload Image</label>
+                                                    <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newDetails.Photo_TMP" fileread="newDetails.PhotoData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12" style="margin-bottom:45px;">
+                                                <div class="form-group">
+                                                    <label for="">Notes</label>
+                                                    <textarea class="textarea" placeholder="Place some text here" style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" ng-model="newDetails.Notes" html-editor></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" ng-click="ClearDetails()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateAssetsmaster()">{{newDetails.Mode}}</button>
+                                        </div>
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

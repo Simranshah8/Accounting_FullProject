@@ -1,0 +1,395 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script src="~/jslib/inventory/creation/ProductScheme.js"></script>
+<div ng-app="myApp" ng-controller="ProductSchemeCtrl" ng-cloak ng-init="LoadData()">
+
+    <div class="box-body"></div>
+    <div class="content">
+        <div class="p-1"></div>
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header header-corner-triangle">
+                    <h3 class="card-title">Product Scheme</h3>
+                </div>
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false">Scheme</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ProductScheme">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ProductScheme">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.ProductScheme">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                      
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'ProductScheme'" report-name="'List Of Product Scheme'" ignore-column="'4'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'ProductScheme',ignoreColumn:'4' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'List Of Scheme'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="search-toolbar mb-3 mt-2">
+                                <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                    <thead>
+                                        <tr>
+                                            <th style="text-align:center;width:10%">
+                                                S.No
+                                                <span class="glyphicon sort-icon" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+
+                                            <th ng-click="sort('Name')" style="text-align: left; width: 20%;">
+                                                Name
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+
+                                            <th ng-click="sort('Alias')" style="text-align: left; width: 10%;">
+                                                Notes
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Alias'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th ng-click="sort('Age')" style="text-align:center;width:10%;">
+                                                Applicable
+                                                <span class="glyphicon sort-icon" ng-show="sortKey=='Age'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                            </th>
+                                            <th style="text-align:center;width:10%" class="no-print">Action</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="beData in ProductSchemeColl| orderBy:sortKey:reverse | filter:searchData.ProductScheme| itemsPerPage:perPage.ProductScheme" current-page="currentPages.ProductScheme" pagination-id="ProductSchemePagination">
+
+                                            <td style="text-align:center;">
+                                                {{$index+1}}
+                                            </td>
+                                            <td style="text-align: left;">
+                                                {{beData.Name}}
+                                            </td>
+
+                                            <td style="text-align: left;">
+                                                {{beData.Notes}}
+                                            </td>
+                                            <td style="text-align:center;">
+                                                {{beData.ApplicableFromMiti}} TO  {{beData.ApplicableToMiti}}
+                                            </td>
+                                            <td class="project-actions no-print" style="text-align:center">
+                                                <div class="btn-group-sm">
+                                                    <a href="#" class="btn btn-info" ng-click="getProductSchemeById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                    <a href="#" class="btn btn-danger" ng-click="deleteProductScheme(beData,$index)"><i class="fas fa-trash"></i></a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="ProductSchemePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div class="p-2">
+                                <form>
+                                    <div class="row">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Name</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newProductScheme.Name">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Note</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newProductScheme.Notes">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Voucher</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm hideSideBar" height:90%;" ng-model="newProductScheme.VoucherId">
+                                                            <option value="0" selected>**Select Voucher**</option>
+                                                            <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == newProductScheme.VoucherId" ">
+                                                                {{vt.VoucherName}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Applicable From</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newProductScheme.ApplicableFrom_TMP " date-detail="newProductScheme.ApplicableFromDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>Applicable To</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newProductScheme.ApplicableTo_TMP " date-detail="newProductScheme.ApplicableToDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>For Party</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm hideSideBar" height:90%;" ng-model="newProductScheme.ForParty">
+                                                            <option ng-repeat="vt in ForPartyColl track by vt.id" ng-value="vt.id" ng-selected="vt.id == newProductScheme.ForParty">
+                                                                {{vt.text}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForParty==1">
+                                                <div class="form-group">
+                                                    <label>Party</label>
+                                                    <div class="col-sm-12">
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newProductScheme.LedgerId" ledgertype="1" fortransaction="true"
+                                                                placeholder="** Select Party Name **" showdetails="true" confirm-action="ChangeParticularLedger(newProductScheme)" ledger-detail="newProductScheme.LedgerDetails" side-bar-data="newProductScheme.partySideBarData"></select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForParty==2">
+                                                <div class="form-group">
+                                                    <label>Group</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm  hideSideBar select2" style="width: 100%;" ng-model="newProductScheme.LedgerGroupId">
+                                                            <option ng-repeat="vt in LedgerGroupColl track by vt.LedgerGroupId" ng-value="vt.LedgerGroupId" ng-selected="vt.LedgerGroupId == newProductScheme.LedgerGroupId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForParty==3">
+                                                <div class="form-group">
+                                                    <label>Salesman</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm  hideSideBar select2" style="width: 100%;" ng-model="newProductScheme.AgentId">
+                                                            <option ng-repeat="vt in SalesManList track by vt.AgentId" ng-value="vt.AgentId" ng-selected="vt.AgentId == newProductScheme.AgentId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForParty==4">
+                                                <div class="form-group">
+                                                    <label>Area</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm  hideSideBar select2" style="width: 100%;" ng-model="newProductScheme.AreaId">
+                                                            <option ng-repeat="vt in AreaColl track by vt.AreaId" ng-value="vt.AreaId" ng-selected="vt.AreaId == newProductScheme.AreaId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForParty==5">
+                                                <div class="form-group">
+                                                    <label>Debtor Type</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm  hideSideBar select2" style="width: 100%;" ng-model="newProductScheme.DebtorTypeId">
+                                                            <option ng-repeat="vt in DebtorTypeColl track by vt.id" ng-value="vt.id" ng-selected="vt.id == newProductScheme.DebtorTypeId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <div class="form-group">
+                                                    <label>For Product</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm hideSideBar" height:90%;" ng-model="newProductScheme.ForProduct">
+                                                            <option ng-repeat="vt in ForProductColl track by vt.id" ng-value="vt.id" ng-selected="vt.id == newProductScheme.ForProduct">
+                                                                {{vt.text}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForProduct==1">
+                                                <div class="form-group">
+                                                    <label>Product</label>
+                                                    <div class="col-sm-12">
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="newProductScheme.ProductId" style="width:100%"
+                                                                placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(newProductScheme)" product-detail="newProductScheme.productDetail" side-bar-data="newProductScheme.sideBarData"></select>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForProduct==2">
+                                                <div class="form-group">
+                                                    <label>Group</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm hideSideBar select2" height:90%;" ng-model="newProductScheme.ProductGroupId">
+                                                            <option value="0" selected>**Select**</option>
+                                                            <option ng-repeat="vt in ProductGroupColl track by vt.ProductGroupId" ng-value="vt.ProductGroupId" ng-selected="vt.ProductGroupId == newProductScheme.ProductGroupId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="newProductScheme.ForProduct==3">
+                                                <div class="form-group">
+                                                    <label>Brand</label>
+                                                    <div class="col-sm-12">
+                                                        <select class="form-control form-control-sm hideSideBar select2" height:90%;" ng-model="newProductScheme.ProductBrandId">
+                                                            <option value="0" selected>**Select**</option>
+                                                            <option ng-repeat="vt in ProductBrandColl track by vt.ProductBrandId" ng-value="vt.ProductBrandId" ng-selected="vt.ProductBrandId == newProductScheme.ProductBrandId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>Min. Sales Amount</label>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="newProductScheme.MinSalesAmt">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-3">
+                                                    <div class="form-group">
+                                                        <label>Discount %</label>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="newProductScheme.DisPer">
+                                                    </div>
+                                                </div>*@
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>S.No</th>
+                                                    <th>Sales Amt.</th>
+                                                    <th>Sales Qty.</th>
+                                                    <th>Free Qty.</th>
+                                                    <th>Alternet Product</th>
+                                                    <th>Discount %</th>
+                                                    <th>Discount Amt.</th>
+                                                    <th>Scheme %</th>
+                                                    <th>Scheme Amt.</th>
+                                                    <th>Description</th>
+                                                    <th>Action</th>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="det in newProductScheme.DetailsColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.MinAmt">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.MinQty">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.FreeQty">
+                                                    </td>
+                                                    <td>
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="det.AlternetProductId" style="width:100%"
+                                                                placeholder="** Select Product  **" showdetails="false " confirm-action="ProductSelectionChange(det)" product-detail="det.productDetail" side-bar-data="det.sideBarData"></select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.DiscountPer">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.DiscountAmt">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.SchemePer">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-model="det.SchemeAmt">
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm serial hideSideBar" onfocus="this.select();" ng-model="det.Description">
+                                                    </td>
+                                                    <td>
+                                                        <a class="p-1" href="#" data-original-title="Add Row" ng-click="AddRow(det,$index)">
+                                                            <i class="fas fa-plus text-info"></i>
+                                                        </a>
+                                                        <a class="p-1" href="#" data-original-title="Delete Row." ng-click="delRow($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-secondary" ng-click="ClearProductScheme()">Reset</button>
+                                        <button type="button" class="btn btn-info" ng-click="SaveUpdateProductScheme()">Save and Close</button>
+                                        <button type="button" class="btn btn-success" ng-click="SaveUpdateProductScheme()">Save</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                        <!-- /.container-fluid -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @RenderPage("~/Views/Global/_IsValidMaster.cshtml")
+</div>

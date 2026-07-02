@@ -1,0 +1,717 @@
+﻿
+@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .btn-outline-primary {
+        color: rgb(18 125 194);
+        border-color: rgb(18 125 194);
+    }
+
+        .btn-outline-primary:hover {
+            color: rgb(255, 255, 255);
+            background-color: rgb(18 125 194);
+            border-color: rgb(18 125 194);
+        }
+
+    iframe img {
+        max-width: 100%; /* Make the image scale down if its natural size is larger than the container */
+        height: auto; /* Maintain the image's aspect ratio */
+        display: block; /* Remove extra space below the image */
+        margin: 0 auto; /* Center the image horizontally */
+    }
+    table th, table td {
+        padding: 0.3rem !important
+    }
+</style>
+
+<script src="~/jslib/Task/GenerateTask.js?v=2"></script>
+<div ng-app="myApp" ng-controller="AssignTaskController" ng-init="LoadData()">
+    <div class="container-fluid">
+        <div class="page-content-wrapper">
+            <div class="">
+                <div class="card">
+                    <div class="card-header" style="padding: 7px 10px;">
+                        <h5 class="card-title mb-0 text-primary"><b>Assign Task</b></h5>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body  p-2">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Task Type</label>
+                                    <select class="form-control form-select form-control-sm select2" ng-model="newDet.TaskTypeId" style="width: 100%;">
+                                        <option ng-repeat="c in TaskTypeList" ng-value="c.TaskTypeId" ng-selected="newDet.TaskTypeId==c.TaskTypeId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3" @*ng-hide="newDet.TaskTypeId==9"*@>
+                                <div class="form-group">
+                                    <label>Assign To</label>
+
+                                    <select class="form-control form-select form-control-sm select2" ng-model="newDet.AssignTo" style="width: 100%;" data-placeholder="**select Employee**" ng-change="GetAllGenerateTicketList()">
+                                        <option ng-repeat="E in EmployeeProfileList" ng-value="E.EmployeeId" ng-selected="newDet.AssignTo==E.EmployeeId">{{E.Name}} - {{E.EmployeeCode}}</option>
+                                    </select>
+                                    @*<select class="form-control form-select form-control-sm select2" ng-model="newDet.AssignTo" style="width: 100%;" data-placeholder="**select Employee**" ng-change="GetAllGenerateTicketList()">
+            <option ng-repeat="E in EmployeeProfileList" ng-value="E.EmployeeProfileId" ng-selected="newDet.AssignTo==E.EmployeeProfileId">{{E.Name}}</option>
+        </select>*@
+                                </div>
+                            </div>
+
+                            @*<div class="col-md-2" ng-show="newDet.TaskTypeId>1">
+                                <div class="form-group">
+                                    <label>Product</label>
+                                    <select class="form-control form-select form-control-sm" ng-model="newDet.ProductNameId" style="width: 100%;">
+                                        <option value="0">**select product**</option>
+                                        <option ng-repeat="c in ProductNameList" ng-value="c.ProductNameId">{{c.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>*@
+                            @*<div class="col-md-6" ng-show="newDet.TaskTypeId == 2 || newDet.TaskTypeId == 3 || newDet.TaskTypeId == 4">
+                                <div class="form-group">
+                                    <label style="min-width: 120px;">Select Customer</label>
+                                    <select class="form-control select2 form-control-sm" style="width:100%" ng-model="newDet.CustomerId" ng-change="ChangeCustomer(newDet)">
+                                        <option value="0">**select customer**</option>
+                                        <option ng-repeat="C in CustomerList" ng-value="C.CustomerId" ng-selected="newDet.CustomerId==C.CustomerId">{{C.CompanyName}}-{{C.Address}}-{{C.Product}}-{{C.Package}}-{{C.CompanyCode}}</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2" ng-show="newDet.TaskTypeId == 2 || newDet.TaskTypeId == 3 || newDet.TaskTypeId == 4">
+                                <div class="form-group">
+                                    <label style="min-width: 120px;">Code</label>
+                                    <input type="text" placeholder="" ng-model="newDet.CompanyCode" class="form-control form-control-sm" readonly>
+                                </div>
+                            </div>*@
+                            <div class="col-md-2" @*ng-hide="newDet.TaskTypeId==9"*@>
+                                <div class="form-group">
+                                    <label>Estimate Time(minutes)</label>
+                                    <input type="number" placeholder="" ng-model="newDet.EstMinutes" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                            <div class="col-md-2" @*ng-hide="newDet.TaskTypeId==9"*@>
+                                <div class="form-group">
+                                    <label>Estimate Date</label>
+                                    <input type="text" placeholder="" date-picker ng-model="newDet.Deadline_TMP" date-detail="newDet.DeadlineDet" class="form-control form-control-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+
+                            <div class="col-md-2" @*ng-hide="newDet.TaskTypeId==9"*@>
+
+                                <div class="form-group">
+                                    <label>Priority</label>
+                                    <select class="form-control form-select form-control-sm" ng-model="newDet.Priority" style="width: 100%;">
+                                        <option ng-repeat="c in PriorityCol" ng-value="c.id" ng-selected="newDet.Priority==c.id">{{c.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-10">
+                                <div class="form-group mb-2">
+                                    <label>Heading</label>
+                                    <input type="text" placeholder="" ng-model="newDet.Heading" class="form-control form-control-sm" required maxlength="50">
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group mb-2">
+                                    <label>Description</label>
+                                    <textarea class="textarea form-control form-control-sm" placeholder="Place some text here"
+                                              style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" ng-model="newDet.Description" html-editor></textarea>
+
+                                </div>
+                            </div>
+                        </div>
+                            <!-- attach file  -->
+                            <div class="pl-2">
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label>Attach Document</label>
+                                            <div class="form-group">
+                                                <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="newDet.Photo_TMP" fileread="newDet.PhotoData" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- attach file end -->
+                       
+                        <div class="row">
+                            <div class="col-md-12 pb-2 d-flex justify-content-end ">
+                                @*<div>
+                                <button type="button" class="btn btn-outline-primary btn-sm "> View Generate Ticket</button>
+                            </div>*@
+                                <div>
+                                    <button type="button" class="btn load btn-default" ng-click="ClearTask()" style="min-width: 80px;"><i class="fas fa-remove mr-2"></i>Clear</button>
+                                    <button type="button" class="btn load btn-primary" ng-click="SaveUpdateAssignTask()" style="min-width: 80px;">Save</button>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div>
+                            <div class="table-scroll-x-y table-scroll">
+                                <table  class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 120px">Action</th>
+                                            <th style="width: 55px">S.No.</th>
+                                            <th style="width: 82px">Task No.</th>
+                                            <th style="width: 90px">Date</th>
+                                            <th style="width: 150px">Task For</th>
+                                            @*<th style="width: 150px">Product</th>*@
+                                            <th style="width: 190px">Heading</th>
+                                            <th style="width: 80px">Priority</th>
+                                            <th style="width: 170px">Assigned To</th>
+                                            <th style="width: 200px">Status</th>
+                                            <th style="width: 160px">Comment</th>
+                                            <th style="width: 160px">Estimated Time</th>
+                                            <th style="width: 160px">Time Taken</th>
+                                            <th style="width: 120px">Create By</th>
+                                            <th style="width: 120px">Status Time</th>
+                                            <th style="width: 120px">Pending Time</th>
+                                            @*<th style="width: 210px">Customer Name</th>*@
+                                            <th style="width: 120px">Approved By</th>
+                                            <th style="width: 220px">Approved Remarks</th>
+                                            <th style="width: 120px">Approved At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="V in ViewGenrateList | filter:searchData.ViewGenerate">
+                                            <td>
+                                                <a class="p-1" ng-click="openStatusModal(V)" data-toggle="tooltip" title="Add Status" ng-hide="V.TicketStatus=='Closed'">
+                                                    <i class="fas fa-ban text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="GetTicketCommentById(V)" data-toggle="tooltip" title="Add Comment" ng-hide="V.TicketStatus=='Closed'">
+                                                    <i class="far fa-comment text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="openAssignModal(V)" data-toggle="tooltip" title="AssignTo" ng-hide="V.TicketStatus=='Closed'">
+                                                    <i class="fas fa-user-plus text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="GetTicketHisById(V)" data-toggle="tooltip" title="Hisotry">
+                                                    <i class="fas fa-history text-info"></i>
+                                                </a>
+                                                <a class="p-1" ng-click="openFeedbackModal(V)" data-toggle="tooltip" title="Task Verify" ng-hide="V.TicketStatus=='Closed'">
+                                                    <i class="fas fa-user-tag text-info"></i>
+                                                </a>
+                                                <!--Icon added by suresh for attachment on 15-12-2023-->
+                                                <a class="p-1" ng-click="GetAllTicketAttachment(V)" data-toggle="tooltip" title="Task Attachment">
+                                                    <i class="fas fa-paperclip text-info"></i>
+                                                </a>
+                                            </td>
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>{{V.TranId}}</td>
+                                            <td>{{V.LogMiti}} {{ V.LogDateTime |timeFormat}}</td>
+
+
+                                            <td>{{V.TaskType}}</td>
+                                            @*<td>{{V.ProductName}}</td>*@
+                                            <td>{{V.Heading}}</td>
+                                            <td>{{V.PriorityAs}}</td>
+                                            <td>{{V.AssignTo}}</td>
+                                            <td>{{V.TaskStatus}} <br /> {{V.StatusRemarks}}</td>
+                                            <td>{{V.LastComment}}</td>
+                                            <td>{{V.EstimatedTime}}</td>
+                                            <td>{{V.TotalTimeTaken}}</td>
+                                            <td>{{V.UserName}}</td>
+                                            <td>{{V.StatusHDiff}}</td>
+                                            <td>{{V.PendingHDiff}}</td>
+                                            @*<td>
+                                                {{V.CustomerName}} - ({{V.CustomerCode}})<br />
+                                                - {{V.ProductName}}
+                                            </td>*@
+
+                                            <td>{{V.ApprovedBy}}</td>
+                                            <td>{{V.ApprovedRemarks}}</td>
+                                            <td>{{V.ApprovedMiti}} {{V.ApprovedAt |timeFormat}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+            </div>
+            @*AddContactPerson modal here start*@
+            <div class="modal fade" id="AddCustomerContact" style="margin-top:130px;">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Contact Details</h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Contact Name</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newContact.Name">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Designation</label>
+                                        <select class="form-control select2 form-control-sm" style="width:100%" ng-model="newContact.DesignationId">
+                                            <option ng-repeat="D in DesignationList" ng-value="D.DesignationId" ng-selected="newContact.DesignationId==D.DesignationId">{{D.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control form-control-sm" ng-model="newContact.EmailId">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Mobile No</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newContact.MobileNo">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>Whatsapp No</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newContact.WhatsappNo">
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newContact.Remarks">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer p-2">
+                            <button type="button" class="btn load btn-default" style="min-width: 90px;" ng-click="ClearContactDetail()">Reset</button>
+                            <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveUpdateContactPerson()">Save</button>
+                            <button type="button" class="btn load btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*AddContactPerson modal here End*@
+
+
+            @*Status modal here start*@
+            <div class="modal fade" id="AddStatus">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Status for :- <b>{{newStatus.AssignTo}} ({{newStatus.Heading}})</b></h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Status</label>
+                                        <select class="form-control select2 form-control-sm" style="width:100%" ng-model="newStatus.StatusId">
+                                            <option ng-repeat="S in StatusColl" ng-value="S.id" ng-selected="newStatus.StatusId==S.id" ng-disable="S.id==1">{{S.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newStatus.StatusRemarks" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer p-2">
+
+                            <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveTicketStatus()">Save</button>
+                            @*<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*Status modal here End*@
+
+            @*COmment modal here start*@
+            <div class="modal fade" id="AddComment">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Comments for : <b>{{newComment.AssignTo}} ({{newComment.Heading}})</b></h5>
+                            <button type="button" class="close" data-bs-dismiss="modal"data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="mb-3">
+                                                <div>
+                                                    <div class="d-flex justify-content-start align-items-center mb-2" ng-repeat="C in CommentList">
+                                                        <!-- <i class="fas fa-user-circle fa-2x mr-2"></i> -->
+                                                        <i class="mr-2 fas fa-user text-info" style="font-size:20px">
+                                                           
+                                                        </i>
+                                                        <div>
+                                                            <p class="mb-0 ml-1" style="font-size: 12px; color: #837e7e;">{{C.UserName}}, {{C.LogMiti}},{{C.LogDateTime | timeFormat}}</p>
+                                                            <div class="text-white rounded px-2 py-1" style="color: black !important;background-color:aliceblue;border:1px solid #ccc;">
+
+                                                                <p class="mb-0">{{C.Comment}}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                    <div class="col-md-12">
+                                                        <div class="row ml-1 pl-3 mt-3">
+                                                            <div class="col-md-12">
+                                                                <div class="d-flex">
+                                                                    <input type="text" class="form-control form-control-sm mr-1" ng-model="newComment.Comment">
+                                                                    <button type="button" class="btn load btn-success" style="min-width: 90px;" ng-click="SaveTicketComment()"><i class="far fa-paper-plane mr-2"></i>Send</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*COmment modal here End*@
+
+
+            @*Task Verify Start*@
+            <div class="modal fade" id="AddTaskVerify">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Task Verify For : <b>{{newFeedback.AssignTo}} ({{newFeedback.Heading}})</b></h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="mb-3">
+                                                <div>
+
+                                                    <div class="col-md-12">
+                                                        <div class="row ml-1 mt-3">
+                                                            <div class="col-md-8">
+                                                                <div class="d-flex">
+                                                                    <input type="text" class="form-control form-control-sm" ng-model="newFeedback.ApprovedRemarks">
+
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <div class="form-group">
+                                                                    <div class="d-flex">
+
+                                                                        <button type="button" class="btn load btn-success" style="min-width: 90px;" ng-click="SaveTaskVerify()"><i class="far fa-paper-plane mr-2"></i>Verify</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*COmment modal here End*@
+
+            @*Assign modal here start*@
+            <div class="modal fade" id="Assign">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Assign To for : <b>{{newAssign.AssignTo}} ({{newAssign.Heading}})</b></h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Assign To</label>
+                                        <select class="form-control form-select form-control-sm select2" ng-model="newAssign.AssignToId" style="width: 100%;" data-placeholder="**select Employee**">
+                                            <option ng-repeat="E in EmployeeProfileList" ng-value="E.EmployeeId">{{E.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label>Remarks</label>
+                                        <input type="text" class="form-control form-control-sm" ng-model="newAssign.Remarks" />
+                                    </div>
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                        <div class="modal-footer p-2">
+                            @*<button type="button" class="btn btn-sm btn-default" style="min-width: 90px;" ng-click="ClearAssign()">Reset</button>*@
+                            <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveTicketAssign()">Save</button>
+                            @*<button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*Status modal here End*@
+
+
+            @*History modal here start*@
+            <div class="modal fade" id="AddHistory">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Hisotry for : <b>{{newHis.AssignTo}} ({{newHis.Heading}})</b></h5>
+                            
+                            <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="table-scroll-x-y  table-scroll mt-1" style="max-height: calc(100vh - 15rem);">
+                                    <table class="table table-bordered table-head-fixed ">
+                                        <thead class=" ">
+                                            <tr>
+                                                <th style="width: 50px">S.No.</th>
+                                                <th style="width: 120px">For</th>
+                                                <th style="width: 90px">Remarks</th>
+                                                <th style="width: 210px">User</th>
+                                                <th style="width: 150px">LogDateTime</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="V in newHis.DataColl">
+                                                <td class="text-center">{{$index+1}}</td>
+                                                <td>{{V.Status}}</td>
+                                                <td>{{V.Remarks}}</td>
+                                                <td>{{V.User}}</td>
+                                                <td>{{V.LogMiti}} {{ V.LogDateTime |timeFormat}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*History modal here End*@
+
+            @*Ticket Close Feedback modal start*@
+            <div class="modal fade" id="TicketCloseFeedback">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title">Task Followup for :- <b>{{newFeedback.AssignTo}} ({{newFeedback.Heading}})</b></h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal"  aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group d-flex">
+                                        <label class="mr-4">Call Status :</label>
+                                        <div class="form-group clearfix mb-0 pb-0">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check mt-1 mr-2" type="radio" id="callstatusyes" ng-model="newFeedback.CallStatus" name="CallStatus" ng-value="true">
+                                                <label class="form-check-label" for="callstatusyes">Connected</label><br>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check mt-1 mr-2" type="radio" id="callstatusno" ng-model="newFeedback.CallStatus" name="CallStatus" ng-value="false">
+                                                <label class="form-check-label" for="callstatusno">Failed</label><br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" ng-show="newFeedback.CallStatus=='true' || newFeedback.CallStatus==true">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Work Status</label>
+                                            <select class="form-control form-control-sm form-select" ng-model="newFeedback.WorkStatusId">
+                                                <option ng-repeat="W in WorkStatusColl" ng-value="W.id" ng-selected="newFeedback.WorkStatusId==W.id">{{W.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3" ng-show="newFeedback.WorkStatusId==2">
+                                        <div class="custom-control custom-checkbox mt-4">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="reopen" value="option1" ng-model="newFeedback.ReopenTicket">
+                                            <label for="reopen"
+                                                   class="custom-control-label">
+                                                Re-Open Ticket
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3" ng-show="newFeedback.WorkStatusId==1">
+                                        <div class="form-group">
+                                            <label>Rating(Out of 10)</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newFeedback.Rating" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12" ng-show="newFeedback.WorkStatusId==2||newFeedback.CallStatus=='false' || newFeedback.CallStatus==false">
+                                        <div class="form-group">
+                                            <label>Comment</label>
+                                            <textarea class="form-control form-control-sm" rows="1" ng-model="newFeedback.Comment"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="modal-footer p-2">
+                            <button type="button" class="btn load btn-success" style="min-width: 75px;" ng-click="SaveTicketCloseFeedback()">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*Ticket CloseFeedback modal here End*@
+
+            <!--View Attachment Modal Starts. Made by Suresh on 15-12-2023-->
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="viewattachment" role="dialog" @*tabindex="-1"*@>
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-0 text-center">
+                            <div>
+                                <iframe ng-src="{{viewImg.attachFile || viewImg.attachFile}}" style="width:100%;height: 70vh; border: 0;"></iframe>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <div><a href="{{viewImg.attachFile || viewImg.attachFile}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded load ml-4 text-center" data-bs-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--View All Ticket Attachment Modal Starts. Made by Suresh on 1 Chaitra-->
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="TicketAttachments" role="dialog" @*tabindex="-1"*@>
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header p-2">
+                            <h5 class="modal-title" id="exampleModalLongTitle">Attachment for Task of : <b> {{CurTicket.AssignTo}} ({{CurTicket.Heading}})</b></h5>
+                            <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal"  aria-label="Close">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                        <div class="modal-body mb-0 p-0 text-center" style="max-height:calc(100vh - 5rem);overflow-y:auto">
+                            <div ng-repeat="P in TicketImg">
+                                <div style="border-bottom: 2px dashed #dee2e6">
+                                    <div class="d-flex mb-2 p-2">
+
+                                        <img class="ml-4" ng-src="{{P.attachFile || P.attachFile}}" ng-if="P.attachFile" style="width:150px;">
+                                        <a ng-if="P.attachFile" href="{{P.attachFile || P.attachFile}}" download class="btn btn-outline-info btn-sm mx-2" style="height:28px"><i class="fas fa-download"></i></a>
+
+                                        <p class="ml-4" ng-bind-html="P.Comment |unsafe"></p>
+
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="text-right">
+                                            <label><i class="fas fa-user ml-2 text-secondary"></i> : {{P.CUserName}}</label>
+                                            <label><i class="fas fa-user-clock ml-2 text-secondary"></i> : {{P.LogMiti}} , {{P.LogDateTime|timeFormat}}</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                        @*<div class="modal-footer">
+                        <div><a href="{{viewImg.attachFile || viewImg.attachFile}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-bs-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                    </div>*@
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div> <!-- container-fluid -->
+</div>
+
+<style>
+    .form input[type="file"] {
+        line-height: 0;
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        margin: 0;
+        padding: 0;
+        left: 0;
+    }
+
+    .add-photo-btn {
+        display: inline-block;
+        padding: 8px;
+        background: #FFB75E; /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #ED8F03, #FFB75E); /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #ED8F03, #FFB75E); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+        cursor: pointer;
+        border-radius: 10px;
+        height: calc(1.8125rem + 2px);
+    }
+
+    input[type="text"] {
+        float: left;
+    }
+</style>
+
+<script>
+    $('textarea#summernote').summernote({
+        tabsize: 2,
+        height: 150,
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            // ['font', ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript', 'clear']],
+            //['fontname', ['fontname']],
+            // ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['height', ['height']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'hr']],
+            //['view', ['fullscreen', 'codeview']],
+            ['help', ['help']]
+        ],
+    });
+</script>
+

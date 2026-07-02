@@ -1,0 +1,273 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Payroll_TaxRule)";
+</script>
+
+
+<script src="~/jslib/hr/transaction/TaxRule.js"></script>
+<div ng-app="myApp" ng-controller="TaxRuleController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header navheader p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link bluenav active" id="normal-tab" data-toggle="pill" href="#normal" role="tab" aria-controls="normal" aria-selected="true"> Normal</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="ssf-tab" data-toggle="pill" href="#ssf" role="tab" aria-controls="ssf" aria-selected="false">SSF</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="normal" role="tabpanel" aria-labelledby="normal-tab">
+                                <div class="row mt-2">
+                                    <div class="col-md-3">
+                                        <div class="form-group d-flex">
+                                            <label class="mr-2 mt-1">For</label>
+                                            <select class="form-control form-control-sm" ng-model="newNormal.TaxFor" ng-change="GetAllTaxRule()" style="width: 100%">
+                                                <option ng-repeat="R in ResidentTypeList" ng-value="R.id" ng-selected="newNormal.TaxFor==R.id"> {{R.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="float-right">
+                                            <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearNormal()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateNormal()">{{newNormal.Mode}}</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="card" style="border:1px solid #cad8d2">
+                                    <div class="card-header" style="background-color: #e9f2ee;padding:5px 10px;">
+                                        <h3 class="card-title text-secondary"><b>Tax calculation for Indivisual</b></h3>
+                                    </div>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 80px">S.No.</th>
+                                                    <th style="width: 110px">MinValue</th>
+                                                    <th style="width: 110px">MaxValue</th>
+                                                    <th style="width: 100px">Rate %</th>
+                                                    <th style="width: 140px">Display Value</th>
+                                                    <th style="width: 140px">Pay Heading</th>
+                                                    <th style="width: 90px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="Ni in newNormal.NITaxDetailsColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="Ni.MinValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="Ni.MaxValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="Ni.Rate"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="Ni.DisplayValue"></td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="Ni.PayHeadingId">
+                                                            <option ng-repeat="P in PayHeadingList" ng-value="P.PayHeadingId" ng-selected="Ni.PayHeadingId==P.PayHeadingId">{{P.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddNITaxDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delNITaxDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="card" style="border:1px solid #cad8d2">
+                                    <div class="card-header" style="background-color: #e9f2ee;padding:5px 10px;">
+                                        <h3 class="card-title text-secondary"><b>Tax calculation for Couple</b></h3>
+                                    </div>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 80px">S.No.</th>
+                                                    <th style="width: 110px">MinValue</th>
+                                                    <th style="width: 110px">MaxValue</th>
+                                                    <th style="width: 100px">Rate %</th>
+                                                    <th style="width: 110px">Display Value</th>
+                                                    <th style="width: 140px">Pay Heading</th>
+                                                    <th style="width: 90px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="tDet in newNormal.NCTaxDetailsColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.MinValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.MaxValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.Rate"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="tDet.DisplayValue"></td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="tDet.PayHeadingId">
+                                                            <option ng-repeat="P in PayHeadingList" ng-value="P.PayHeadingId" ng-selected="tDet.PayHeadingId==P.PayHeadingId">{{P.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddNCTaxDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delNCTaxDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade" id="ssf" role="tabpanel" aria-labelledby="ssf-tab">
+                                <div class="row mt-2">
+                                    <div class="col-md-3">
+                                        <div class="form-group d-flex">
+                                            <label class="mr-2 mt-1">For</label>
+                                            <select class="form-control form-control-sm" ng-model="newSSF.TaxFor" ng-change="GetAllTaxRulessf()" style="width: 100%">
+                                                <option ng-repeat="R in ResidentTypeList" ng-value="R.id" ng-selected="newSSF.TaxFor==R.id"> {{R.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="float-right">
+                                            <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearSSF()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateSSF()">{{newSSF.Mode}}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card" style="border:1px solid #cad8d2">
+                                    <div class="card-header" style="background-color: #e9f2ee;padding:5px 10px;">
+                                        <h3 class="card-title text-secondary"><b>Tax calculation for Indivisual</b></h3>
+                                    </div>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 80px">S.No.</th>
+                                                    <th style="width: 110px">MinValue</th>
+                                                    <th style="width: 110px">MaxValue</th>
+                                                    <th style="width: 100px">Rate %</th>
+                                                    <th style="width: 110px">Display Value</th>
+                                                    <th style="width: 140px">Pay Heading</th>
+                                                    <th style="width: 90px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="tDet in newSSF.ITaxDetailsColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.MinValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.MaxValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.Rate"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="tDet.DisplayValue"></td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="tDet.PayHeadingId">
+                                                            <option ng-repeat="P in PayHeadingList" ng-value="P.PayHeadingId" ng-selected="tDet.PayHeadingId==P.PayHeadingId">{{P.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddITaxDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delITaxDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="card" style="border:1px solid #cad8d2">
+                                    <div class="card-header" style="background-color: #e9f2ee;padding:5px 10px;">
+                                        <h3 class="card-title text-secondary"><b>Tax calculation for Couple</b></h3>
+                                    </div>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 80px">S.No.</th>
+                                                    <th style="width: 110px">MinValue</th>
+                                                    <th style="width: 110px">MaxValue</th>
+                                                    <th style="width: 100px">Rate %</th>
+                                                    <th style="width: 110px">Display Value</th>
+                                                    <th style="width: 140px">Pay Heading</th>
+                                                    <th style="width: 90px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="tDet in newSSF.CTaxDetailsColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.MinValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.MaxValue"></td>
+                                                    <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="tDet.Rate"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="tDet.DisplayValue"></td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="tDet.PayHeadingId">
+                                                            <option ng-repeat="P in PayHeadingList" ng-value="P.PayHeadingId" ng-selected="tDet.PayHeadingId==P.PayHeadingId">{{P.Name}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddCTaxDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delCTaxDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+</div>

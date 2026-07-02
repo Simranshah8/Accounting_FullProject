@@ -1,0 +1,481 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var VoucherType = "@ViewBag.VoucherType";
+    var EntityId = "@ViewBag.EntityId";
+    var TranId=@ViewBag.TranId;
+    var DefaultKeyValues = "@ViewBag.DefaultKeyValues";
+    var EntityId1 = "@ViewBag.EntityId1";
+    var EntityId2 = "@ViewBag.EntityId2";
+</script>
+
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table th, .table td {
+        padding: 0.25rem !important;
+    }
+    
+    table.fold-table > tbody > tr.fold {
+        display: block !important;
+    }
+</style>
+<script src="~/jslib/account/transaction/VendorPayment.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="trnPendingVendorPaymentCntrl">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Add the required Contents of sidebar-->
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <section class="">
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card p-2">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm mb-1">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.DateFrom_TMP" style="max-width:100px" date-detail="dayBook.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="dayBook.DateTo_TMP" style="max-width:100px" date-detail="dayBook.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3" ng-show="BranchList.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width:60px">Branch</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dayBook.BranchId" data-placeholder="*Select Branch*" style="width:100%">
+                                                        <option ng-value="cl.id" ng-repeat="cl in BranchList" ng-selected="cl.id==newDayBook.BranchId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="CreditorGroupList.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width:60px">Group</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dayBook.LedgerGroupId" data-placeholder="*Select Group*" style="width:100%">
+                                                        <option ng-value="cl.LedgerGroupId" ng-repeat="cl in CreditorGroupList" ng-selected="cl.LedgerGroupId=dayBook.LedgerGroupId">{{cl.Name}}-{{cl.Code}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="DebtorTypeList.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width:60px">Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dayBook.DebtorTypeId" data-placeholder="*Select Type*" style="width:100%">
+                                                        <option ng-value="cl.id" ng-repeat="cl in DebtorTypeList" @*ng-selected="cl.DebtorTypeId=dayBook.DebtorTypeId"*@>{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="RouteList.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width:60px">Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="dayBook.DebtorRouteId" data-placeholder="*Select Route*" style="width:100%">
+                                                        <option ng-value="cl.id" ng-repeat="cl in RouteList" @*ng-selected="cl.DebtorRouteId=dayBook.DebtorRouteId"*@>{{cl.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3" ng-show="VoucherTypeColl.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width:60px">Voucher</label>
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="dayBook.VoucherId" ng-change="ChangeVoucherType()">
+                                                        <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == dayBook.VoucherId">
+                                                            {{vt.VoucherName}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="CostClassColl.length>1">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width:60px">For Year</label>
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="dayBook.CostClassId">
+                                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == dayBook.CostClassId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group text-right">
+                                                    <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 80px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetDuesBills()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 ">
+                                        <header class="row">
+                                            <div class="col-md-4 col-sm-4">
+                                                <div class="clearfix">
+                                                    <form class="form-inline d-flex flex-wrap w-100">
+                                                        <div class="input-group input-group-sm mb-1">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Show</span>
+                                                            </div>
+                                                            <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PendingOrder">
+                                                                <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PendingOrder">{{pp.text}}</option>
+                                                            </select>
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text bg-white">entries</span>
+                                                            </div>
+                                                        </div>
+                                                        <!--<div class="input-group input-group-sm mr-sm-2 ml-1">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text cstm">Find:</span>
+                        </div>-->
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <!--<select class="form-control pr-0"
+                                id="exampleFormControlSelect1">
+                            <option>Contain</option>
+                            <option>Prefix</option>
+                        </select>
+                    </div>-->
+                                                        <div class="input-group input-group-sm ml-1" style="width: 150px;">
+                                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="searchData.PendingOrder">
+
+                                                            <div class="input-group-append">
+                                                                <button type="submit" class="btn btn-default">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5 col-sm-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="d-flex justify-content-between align-items-center ml-2 mt-1" style="min-width: 300px; flex-grow: 1;">
+                                                            <span><b>TOTAL DUES : {{dayBook.Amount | number:3}}</b></span>
+                                                            <span class="ml-2"><b>PAID : {{dayBook.Paid | number:3}}</b></span>
+                                                            <span class="ml-2"><b>DUES : {{dayBook.Dues | number:3}}</b></span>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-3 col-sm-3 text-right">
+                                                <form class="form-inline  float-right">
+                                                    <div class="form-group">
+                                                        <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 80px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="MakePayment()" ng-disabled="loadingstatus=='running'"><i class="fas fa-save"> &nbsp;&nbsp;Make Payment</i></a>
+                                                        <button type="button" class="btn btn-default ml-1" style="min-width: 70px;padding:3px" ng-click="SearchData()">Search</button>
+                                                    </div>
+                                                    <div class="dropdown dnld-file ml-2">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                                aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right"
+                                                             aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       title="Print" ng-click="Print()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </form>
+                                            </div>
+                                        </header>
+                                        <div class="row">
+                                            <!--Table Added Starts-->
+                                            <div class="table-scroll-x-y mb-0" style="height: calc(100vh - 10rem)!important; width: 100%;">
+                                                <table id="datatable" class="table table-bordered table-head-fixed fold-table">
+                                                    <thead style="background-color: #EDEDFD;">
+                                                        <tr>
+                                                            <th class="align-middle" style="width:50px;background-color:#ececec!important"></th>
+                                                            <th class="align-middle" style="width:50px;background-color:#ececec!important">S.No.</th>
+                                                            <th class="align-middle" style="width:280px;background-color:#ececec!important">Party</th>
+                                                            <th class="align-middle" style="width: 100px;background-color:#ececec!important">Salesman</th>
+                                                            <th class="align-middle" style="width: 100px;background-color:#ececec!important">PAN/Vat No.</th>
+                                                            <th class="align-middle" style="width: 100px;background-color:#ececec!important">Email</th>
+                                                            <th class="align-middle" style="width: 130px;background-color:#ececec!important">Amount</th>
+                                                            <th class="align-middle" style="width: 100px;background-color:#ececec!important">Paid</th>
+                                                            <th class="align-middle" style="width: 150px;background-color:#ececec!important">Bank</th>
+                                                            <th class="align-middle" style="width: 150px;background-color:#ececec!important">Cheque</th>
+                                                            <th class="align-middle" style="width: 150px;background-color:#ececec!important">Remarks</th>
+                                                            <th class="align-middle" style="width: 120px;background-color:#ececec!important">Dues</th>
+                                                            <th class="align-middle" style="width: 50px;background-color:#ececec!important">Days</th>
+                                                            <th class="align-middle" style="width: 140px;background-color:#ececec!important">Closing</th>
+                                                            <th class="align-middle" style="width: 100px;background-color:#ececec!important">CR. Days</th>
+                                                            <th class="align-middle" style="width: 140px;background-color:#ececec!important">Group</th>
+                                                            <th class="align-middle" style="width: 130px;background-color:#ececec!important">Route</th>
+                                                            <th class="align-middle" style="width: 130px;background-color:#ececec!important">Type</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @*<tr class="view" fold-table dir-paginate-start="pv in PendingVoucherColl |filter:searchData.PendingOrder|itemsPerPage:paginationOptions.pageSize" current-page="paginationOptions.pageNumber" pagination-id="PendingOrderPagination">*@
+                                                        <tr ng-repeat-start="pv in PendingVoucherColl | filter:searchData.PendingOrder | limitTo:paginationOptions.pageSize:paginationOptions.pageSize*(paginationOptions.pageNumber-1) track by $index"
+                                                            class="view1">
+                                                            <!-- Expand/Collapse Button -->
+                                                            <td class="text-center">
+                                                                <button type="button" class="btn btn-xs btn-info"
+                                                                        ng-click="pv.expanded = !pv.expanded"
+                                                                        ng-if="pv.ChieldColl && pv.ChieldColl.length > 0"
+                                                                        title="Click to expand/collapse details">
+                                                                    <i class="fas" ng-class="{'fa-plus': !pv.expanded, 'fa-minus': pv.expanded}"></i>
+                                                                </button>
+                                                            </td>
+
+                                                            <td class="text-center">
+                                                                {{(paginationOptions.pageNumber-1)*paginationOptions.pageSize + $index+1}}
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <input type="checkbox" ng-change="ChangeSelection(pv)" ng-model="pv.IsSelected" id="chkPV{{$index}}" class="mr-2">
+                                                                    <label for="chkPV{{$index}}" class="mb-0 mr-2"> {{pv.Name}}-({{pv.Code}})</label>
+                                                                    <span class="badge badge-secondary" ng-if="pv.ChieldColl && pv.ChieldColl.length > 0">
+                                                                        {{pv.ChieldColl.length}}
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td>{{pv.SalesMan}}</td>
+                                                            <td>{{pv.PAN}}</td>
+                                                            <td>{{pv.EmailId}}</td>
+                                                            <td align="right">{{pv.Amount |number:3}}</td>
+                                                            <td>
+                                                                <input type="text" noofdecimal="3" class="form-control  form-control-sm" style="text-align:right" max-value="pv.Amount" number-input ng-model="pv.Paid" ng-change="ChangePaidAmt(pv,null,'totalPaid',$index)" positive="true">
+                                                            </td>
+                                                            <td>
+                                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="pv.CashBankLedgerId" ledgertype="8" fortransaction="true"
+                                                                        placeholder="** Select Cash/Bank Name **" showdetails="true" confirm-action="ChangeCashBankLedger(pv)" ledger-detail="pv.LedgerDetails" side-bar-data="pv.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="2"></select>
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm" active-select2 style="width: 100%;" ng-model="pv.ChequeId" ng-change="ChequeNoSelect(pv)">
+                                                                    <option ng-repeat="vt in pv.PendingChequeColl" ng-value="{{vt.ChequeId}}" ng-selected="vt.ChequeId == pv.ChequeId">
+                                                                        {{vt.DisplayChequeNo}}-{{vt.BranchName}}
+                                                                    </option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pv.Remarks" />
+                                                            </td>
+                                                            <td align="right">{{(pv.Amount-pv.Paid) |number:3}}</td>
+                                                            <td align="center">{{pv.Days}}</td>
+                                                            <td align="right">{{pv.Closing |accountFormat }}</td>
+                                                            <td align="center">{{pv.CrDays}}</td>
+                                                            <td>{{pv.GroupName}}</td>
+                                                            <td>{{pv.DebtorRoute}}</td>
+                                                            <td>{{pv.DebtorType}}</td>
+                                                        </tr>
+
+                                                        <!-- Child Row - This will be part of the same ng-repeat -->
+                                                        <tr ng-repeat-end ng-if="pv.expanded && pv.ChieldColl && pv.ChieldColl.length > 0" class="fold">
+                                                            <td colspan="18" class="p-0" style="background-color: #f8f9fa;">
+                                                                <div class="fold-content">
+                                                                    <div class="p-2">
+                                                                        <h6 class="mb-2" style="color: #495057; font-weight: bold;">
+                                                                            <i class="fas fa-list mr-1"></i>Invoice Details for <span class="text-info">{{pv.Name}}</span>
+                                                                        </h6>
+                                                                        <div class="table-responsive mb-0" style="max-height: 420px!important">
+                                                                            <table class="table mb-0 table-head-fixed fold-table">
+                                                                                <thead>
+                                                                                    <tr>
+                                                                                        <th class="py-0" style="width: 52px; background-color: #ececec !important; text-align: center">S.No.</th>
+                                                                                        <th class="py-0" style="width: 30px; background-color: #ececec !important; text-align: center"></th>
+                                                                                        <th class="py-0" style="width: 200px; background-color: #ececec !important;">Invoice No.</th>
+                                                                                        <th class="py-0" style="width: 80px; background-color: #ececec !important;">Ref. No.</th>
+                                                                                        <th class="py-0" style="width: 120px; background-color: #ececec !important; text-align: center">Invoice Miti</th>
+                                                                                        <th class="py-0" style="width: 100px; background-color: #ececec !important; text-align: center">Entry Miti</th>
+                                                                                        <th class="py-0" style="width: 120px; background-color: #ececec !important; text-align: center">Amount</th>
+                                                                                        <th class="py-0" style="width: 120px; background-color: #ececec !important; text-align: center">Paid</th>
+                                                                                        <th class="py-0" style="width: 50px; background-color: #ececec !important; text-align: center">Days</th>
+                                                                                        <th class="py-0" style="width: 140px; background-color: #ececec !important; text-align: center">Branch</th>
+                                                                                        <th style="text-align: center; width: 80px; background-color: #ececec !important;">Action</th>
+                                                                                    </tr>
+                                                                                </thead>
+                                                                                <tbody>
+                                                                                    <tr ng-repeat="itemDet in pv.ChieldColl">
+                                                                                        <td class="text-center">{{$index+1}}</td>
+                                                                                        <td>
+                                                                                            <input type="checkbox" ng-change="ChangeSelectionCH(pv,itemDet)" ng-model="itemDet.IsSelected" id="chkPVI{{pv.LedgerId}}-{{$index}}">
+                                                                                        </td>
+                                                                                        <td align="center">
+                                                                                            <label for="chkPVI{{pv.LedgerId}}-{{$index}}">{{itemDet.InvoiceNo}}</label>
+                                                                                        </td>
+                                                                                        <td>{{itemDet.RefNo}}</td>
+                                                                                        <td align="center">{{itemDet.VoucherDateBS}}</td>
+                                                                                        <td align="center">{{itemDet.EntryMiti}}</td>
+                                                                                        <td align="right">{{itemDet.Amount |number:3}}</td>
+                                                                                        <td>
+                                                                                            <input type="text" noofdecimal="3" class="form-control form-control-sm" style="text-align:right" number-input max-value="itemDet.Amount" ng-model="itemDet.Paid" ng-change="ChangePaidAmt(pv,itemDet,'paid',$index)" positive="true">
+                                                                                        </td>
+                                                                                        <td align="center">{{itemDet.Days}}</td>
+                                                                                        <td>{{itemDet.Branch}}</td>
+                                                                                        <td></td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <!-- Custom Pagination Controls -->
+                                            <div class="col-md-12 mt-3">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="text-muted">
+                                                            Showing {{(paginationOptions.pageNumber-1)*paginationOptions.pageSize + 1}} to
+                                                            {{getEndIndex()}}
+                                                            of {{PendingVoucherColl.length}} entries
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <button class="btn btn-sm btn-outline-primary"
+                                                                ng-click="paginationOptions.pageNumber = paginationOptions.pageNumber - 1"
+                                                                ng-disabled="paginationOptions.pageNumber == 1">
+                                                            <i class="fas fa-chevron-left"></i> Previous
+                                                        </button>
+                                                        <span class="mx-2">Page {{paginationOptions.pageNumber}} of {{totalPages()}}</span>
+                                                        <button class="btn btn-sm btn-outline-primary"
+                                                                ng-click="paginationOptions.pageNumber = paginationOptions.pageNumber + 1"
+                                                                ng-disabled="paginationOptions.pageNumber >= totalPages()">
+                                                            Next <i class="fas fa-chevron-right"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+                        <!-- /.row -->
+                    </div>
+                    <!--/. container-fluid -->
+                </section>
+                <!-- /.content -->
+            </div>
+            <!-- Add ReportTemplates Modal Dailog -->
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade sales-quotation-page-modal document-attach-modal" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content" style="min-width:1000px">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Search Payment</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body gradient-bg">
+
+                            <div class="table-scroll-x-y mb-1 table-container card" style="height:auto !important;">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white text-nowrap table-hover" style="table-layout: auto;">
+                                    <thead>
+                                        <tr>
+                                            <th style="z-index: 3; background-color: #ececec !important;">S.No.</th>
+                                            <th style="z-index: 3; background-color: #ececec !important;">No.Of Payment</th>
+                                            <th style="z-index: 3; background-color: #ececec !important;">Date</th>
+                                            <th style="z-index: 3; background-color: #ececec !important;">Miti</th>
+                                            <th style="z-index: 3; background-color: #ececec !important;">Amount</th>
+                                            <th class="cstm-sticky" style="right:0; z-index: 4; background-color: #ececec !important;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="sd in SearchDataColl |orderBy:sortKey:reverse">
+                                            <td align="center">{{sd.SNo}}</td>
+                                            <td>{{sd.NoOfPayment}}</td>
+                                            <td align="center">{{sd.LogDateTime |dateFormat}}</td>
+                                            <td align="center">{{sd.LogMiti}}</td>
+                                            <td align="right">{{sd.Amount |number:3}}</td>
+                                            <td class="text-center cstm-sticky" style="z-index: 3; right: 0; background-color: white !important;">
+                                                <a class="p-1" title="Print Payment List" href="#" ng-click="Print(sd.UniqueId)">
+                                                    <i class="fas fa-print text-primary"></i>
+                                                </a>
+                                                <a class="p-1" title="Print Voucher" href="#" ng-click="PrintVoucher(sd.ReceiptTranId)">
+                                                    <i class="fas fa-print text-primary"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+                        <!-- end modal body -->
+                        <div class="modal-footer justify-content-between align-items-center py-2">
+                            <h6 class="mb-0">Total Record: {{SearchDataColl.length}}</h6>
+                            <div class="">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

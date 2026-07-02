@@ -1,0 +1,180 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .ag-ltr .ag-header-cell-resize {
+        right: 0px !important;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.Att_LeaveBalanceSummary)";
+</script>
+
+<script src="~/jslib/hr/leave/LeaveBalanceSummary.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="LeaveBalanceSummaryController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card p-0 mb-0">
+                    <div class="card-body p-2">
+                        <div class="col-md-12 p-0">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group mb-0">
+                                        <label>Financial Year</label>
+                                        <select class="form-control form-control-sm select2" style="width:100%;" ng-model="filterLeaveSummary.PeriodId">
+                                            <option ng-value="A.CostClassId" ng-repeat="A in CostClassList" ng-selected="A.CostClassId==filterLeaveSummary.PeriodId">{{A.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group mb-0">
+                                        <label for="">For</label>
+                                        <select class="form-control form-control-sm" ng-model="filterLeaveSummary.EmployeeOrSalesman" style="width:100%;">
+                                            <option ng-value="pp.id" ng-repeat="pp in TypeColl" ng-selected="pp.id==filterLeaveSummary.EmployeeOrSalesman">{{pp.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <div class="form-group mb-0">
+                                        <label for="">Branch</label>
+                                        <select class="form-control form-control-sm select2" multiple style="width:100%;" ng-model="filterLeaveSummary.BranchId">
+                                            <option ng-value=0>****Select Branch****</option>
+                                            <option ng-value="cl.BranchId" ng-repeat="cl in BranchList" ng-selected="cl.BranchId==filterLeaveSummary.BranchId">{{cl.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3" ng-show="filterLeaveSummary.EmployeeOrSalesman == 1">
+                                    <div class="form-group mb-0">
+                                        <label for="">Department</label>
+                                        <select class="form-control form-control-sm select2" multiple style="width:100%;" ng-model="filterLeaveSummary.DepartmentId">
+                                            <option ng-value=0>****Select Department****</option>
+                                            <option ng-value="cl.CostCenterDepartmentId" ng-repeat="cl in DepartmentList" ng-selected="cl.CostCenterDepartmentId==filterLeaveSummary.DepartmentId">{{cl.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2" ng-show="filterLeaveSummary.EmployeeOrSalesman == 1">
+                                    <div class="form-group mb-0">
+                                        <label>Category</label>
+                                        <select class="form-control form-control-sm select2" multiple style="width:100%;" ng-model="filterLeaveSummary.CategoryId">
+                                            <option ng-value=0>****Select Category****</option>
+                                            <option ng-value="A.CategoryId" ng-repeat="A in CategoryList" ng-selected="A.CategoryId==filterLeaveSummary.CategoryId">{{A.Name}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-1 text-right">
+                                    <div class="">
+                                        <button class="btn btn-sm btn-info load mt-4" ng-click="GetLeaveSummary()"><i class="fas fa-download pr-1"></i> Load</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div id="phg-section" class="">
+                            <header class="row">
+                                <div class="col-md-5 col-sm-5">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm" style="width: 200px;">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-default">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 col-sm-7 text-right">
+                                    <form class="form-inline  float-right">
+                                        <div class="dropdown dnld-file ml-2" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                    type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                         class="img-fluid exports-icon" alt="Excel image">
+                                                    Excel
+                                                </a>
+                                                <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                    <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                         class="img-fluid exports-icon">
+                                                    CSV
+                                                </a>
+
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </header>
+                            <div class="">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal fade" id="modal-cancel" tabindex="-1" aria-labelledby="modal-cancel-title" aria-hidden="true" style="margin-top:25px!important;">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h6 class="modal-title" id="modal-cancel-title">Leave Balance Summary For: {{ EmployeeCode }} - {{ EmployeeName }}</h6>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body p-2">
+                                    <div class="table-responsive table-scroll">
+                                        <table id="leaveQuota" class="table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr class="text-center">
+                                                    <th style="width: 60px; background-color:#e4e4e4 !important;">S.No.</th>
+                                                    <th style="width: 300px; background-color:#e4e4e4 !important;">Leave Name</th>
+                                                    <th style="width: 100px; background-color:#e4e4e4 !important;">Code</th>
+                                                    <th style="width: 100px; background-color:#e4e4e4 !important;">Opening</th>
+                                                    <th style="width: 100px; background-color:#e4e4e4 !important;">Quota</th>
+                                                    <th style="width: 100px; background-color:#e4e4e4 !important;">Leave</th>
+                                                    <th style="width: 100px; background-color:#e4e4e4 !important;">Balance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="N in DataColl1" class="text-center">
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ N.LeaveName }}</td>
+                                                    <td>{{ N.LeaveCode }}</td>
+                                                    <td class="text-right">{{ N.OpeningQty | number: 2 }}</td>
+                                                    <td class="text-right">{{ N.QuotaQty | number: 2 }}</td>
+                                                    <td class="text-right">{{ N.leaveQty | number: 2 }}</td>
+                                                    <td class="text-right">{{ N.BalanceLeave | number: 2 }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

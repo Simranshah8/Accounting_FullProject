@@ -1,0 +1,741 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script src="~/jslib/hr/transaction/PayHeading.js"></script>
+<div ng-app="myApp" ng-controller="PayHeadingController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header navheader p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link bluenav active" id="payheadgroup-tab" data-toggle="pill" href="#payheadgroup" role="tab" aria-controls="payheadgroup" aria-selected="true"> PayHead Group</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheadcategory-tab" data-toggle="pill" href="#payheadcategory" role="tab" aria-controls="payheadcategory" aria-selected="false">PayHead Category</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheading-tab" data-toggle="pill" href="#payheading" role="tab" aria-controls="payheading" aria-selected="false">Pay Heading</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div class="p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="payheadgroup" role="tabpanel" aria-labelledby="payheadgroup-tab">
+                                <div id="phg-section" class=" py-2 mb-0">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PayHeadGroup">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PayHeadGroup">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.PayHeadGroup">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success btn-add"
+                                                    id="add-phg"
+                                                    style="min-width: 90px" ng-click="ClearPayHeadGroup()">
+                                                <i class="fas fa-plus w-t"></i> Add PayHeadGroup
+                                            </button>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 9rem)!important;">
+                                            <table id="PayHeadGroup"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">S.No</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 100px">Code</th>
+                                                        <th style="width: 250px">Description</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in PayHeadGroupList | filter:searchData.PayHeadGroup | itemsPerPage: perPage.PayHeadGroup" current-page="currentPages.PayHeadGroup" pagination-id="PayHeadGroupPagination">
+                                                        <td>{{cl.SNo}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.Code}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetPayHeadGroupById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelPayHeadGroupById(cl,$index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="PayHeadGroupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                                <!-- PayHead Group Form Starts -->
+                                <div id="phg-form" class=" py-2">
+                                    <div class="row">
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label for="">Name <span style="color:red">*</span></label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newPayHeadGroup.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Code</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newPayHeadGroup.Code" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">S.No</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm" ng-model="newPayHeadGroup.SNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newPayHeadGroup.Description" rows="3" placeholder=""></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <label><b>Tax Exemption Details :</b></label>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="main-table"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 80px">S.No.</th>
+                                                    <th style="width: 130px">Gender</th>
+                                                    <th style="width: 150px">Marital Status</th>
+                                                    <th style="width: 110px">Resident <span style="color:red">*</span></th>
+                                                    <th style="width: 100px">Rate</th>
+                                                    <th style="width: 110px">Amount</th>
+                                                    <th style="width: 150px">Formula</th>
+                                                    <th style="width: 90px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="pDet in newPayHeadGroup.PayHeadGroupTaxExemptionColl">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="pDet.GenderId">
+                                                            <option ng-value=" ">**Select Gender</option>
+                                                            <option ng-value="gen.id" ng-repeat="gen in GenderColl" ng-selected="gen.id==pDet.GenderId">{{gen.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="pDet.MaritalStatusId">
+                                                            <option ng-value=" ">**Select Marital Status</option>
+                                                            <option ng-value="m.id" ng-repeat="m in MaritalCol" ng-selected="m.id==pDet.MaritalStatusId">{{m.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control form-control-sm select2" ng-model="pDet.ResidentId">
+                                                            <option ng-value="R.id" ng-repeat="R in ResidentCol" ng-selected="R.id==pDet.ResidentId">{{R.text}}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.Rate"></td>
+                                                    <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.Amount"></td>
+                                                    <td><input type="text" class="form-control form-control-sm" ng-model="pDet.Formula"></td>
+                                                    <td>
+                                                        <a class="p-1" ng-click="AddTEDetails($index)">
+                                                            <i class="fas fa-plus text-secondary"></i>
+                                                        </a>
+                                                        <a class="p-1" ng-click="delTEDetails($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info btn-add"
+                                                    id="phgback-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-default btn-add" style="min-width: 90px;" ng-click="ClearPayHeadGroup()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-success btn-add" style="min-width: 90px;" ng-click="SaveUpdatePayHeadGroup()">{{newPayHeadGroup.Mode}}</button>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade" id="payheadcategory" role="tabpanel" aria-labelledby="payheadcategory-tab">
+
+                                <div id="phc-section" class=" py-2">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PayHeadCategory">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PayHeadCategory">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.PayHeadCategory">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success btn-add"
+                                                    id="add-phc"
+                                                    style="min-width: 90px" ng-click="ClearPayHeadCategory()">
+                                                <i class="fas fa-plus w-t"></i> Add PayHeadCategory
+                                            </button>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 9rem)!important;">
+                                            <table id="PayHeadCategory"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">Order No</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 100px">Code</th>
+                                                        <th style="width: 250px">Description</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in PayHeadCategoryList | filter:searchData.PayHeadCategory | itemsPerPage: perPage.PayHeadCategory" current-page="currentPages.PayHeadCategory" pagination-id="PayHeadCategoryPagination">
+                                                        <td>{{cl.SNo}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.Code}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetPayHeadCategoryById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelPayHeadCategoryById(cl,$index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="PayHeadCategoryPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                                <!-- PayHead Category Form Starts -->
+                                <div id="phc-form" class="p-0">
+                                    <div class="row card-body px-0 py-2">
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label for="">Name <span style="color:red">*</span></label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newPayHeadCategory.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Code</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newPayHeadCategory.Code" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Order No</label>
+                                                <input type="number"
+                                                       class="form-control form-control-sm" ng-model="newPayHeadCategory.SNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newPayHeadCategory.Description"
+                                                          rows="3"
+                                                          placeholder=""></textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-info btn-add"
+                                                    id="phcback-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-default btn-add" style="min-width: 90px;" ng-click="ClearPayHeadCategory()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-success btn-add" style="min-width: 90px;" ng-click="SaveUpdatePayHeadCategory()">{{newPayHeadCategory.Mode}}</button>
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade" id="payheading" role="tabpanel" aria-labelledby="payheading-tab">
+                                <div id="payheadinglist" class="mb-0 py-2">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.PayHeading">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.PayHeading">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.PayHeading">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success btn-add"
+                                                    id="add-payheading"
+                                                    style="min-width: 90px" ng-click="ClearPayHeading()">
+                                                <i class="fas fa-plus w-t"></i> Add PayHeading
+                                            </button>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll" style="max-height: calc(100vh - 9rem)!important;">
+                                            <table id="PayHeading"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 80px">Order No</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 200px">PayHead Type</th>
+                                                        <th style="width: 200px">PayHead Group</th>
+                                                        <th style="width: 100px">Is Taxable</th>
+                                                        <th style="width: 100px">Is Active</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    <tr dir-paginate="cl in PayHeadingList | filter:searchData.PayHeading | itemsPerPage: perPage.PayHeading" current-page="currentPages.PayHeading" pagination-id="PayHeadingPagination">
+                                                        <td>{{cl.SNo}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.PayHeadType}}</td>
+                                                        <td>{{cl.PayheadGroupName}}</td>
+                                                        <td>{{cl.IsTaxable}}</td>
+                                                        <td>{{cl.IsActive}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetPayHeadingById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelPayHeadingById(cl,$index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="PayHeadingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                                <!-- source form starts -->
+                                <div id="payheading-form" class="p-0 mb-0">
+                                    <div class=" card-body px-0 py-2">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Name <span style="color:red">*</span></label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newPayHeading.Name" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Display Name</label>
+                                                    <input type="text"
+                                                           class="form-control form-control-sm" ng-model="newPayHeading.DisplayName" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="">Code</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" ng-model="newPayHeading.Code" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="">Order No</label>
+                                                            <input type="text"
+                                                                   class="form-control form-control-sm" ng-model="newPayHeading.SNo" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="col-sm-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Payhead Type <span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm" ng-model="newPayHeading.PayheadType">
+                                                        <option ng-repeat="P in PayHeadTypeCol" ng-value="P.id" ng-selected="P.id==newPayHeading.PayheadType">{{P.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Nature <span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm" ng-model="newPayHeading.Natures">
+                                                        <option ng-repeat="N in NatureCol" ng-value="N.id" ng-selected="N.id==newPayHeading.Natures">{{N.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-md-3" ng-show="newPayHeading.Natures==2">
+                                                <div class="form-group">
+                                                    <label for="">Month</label>
+                                                    <select class="form-control form-control-sm " ng-model="newPayHeading.MonthId">
+                                                        <option ng-value="0">**Select Month**</option>
+                                                        <option ng-value="cl.id" ng-repeat="cl in MonthList" ng-selected="cl.id==newPayHeading.MonthId">{{cl.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Calculation Type <span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPayHeading.CalculationType">
+                                                        <option ng-repeat="C in CalculationTypeCol" ng-value="C.id" ng-selected="C.id==newPayHeading.CalculationType">{{C.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-md-3" ng-show="newPayHeading.CalculationType==1">
+                                                <div class="form-group">
+                                                    <label for="">Attendance Type <span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPayHeading.AttendanceTypeId">
+                                                        <option ng-repeat="C in AttendanceTypeList" ng-value="C.AttendanceTypeId" ng-selected="C.AttendanceTypeId==newPayHeading.AttendanceTypeId">{{C.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Ledger </label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="newPayHeading.LedgerId" id="cboParty" ledgertype="1"
+                                                            placeholder="** Select Ledger **" showdetails="true" ledger-detail="newPayHeading.FeeLedger" side-bar-data="newPayHeading.FeeSideBarData"></select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">PayHead Group <span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPayHeading.PayHeadGroupId" data-placeholder="** Select Group **">
+                                                        <option ng-value="Grp.PayHeadGroupId" ng-repeat="Grp in PayHeadGroupList" ng-selected="Grp.PayHeadGroupId==newPayHeading.PayHeadGroupId">{{Grp.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">PayHead Category <span style="color:red">*</span></label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPayHeading.PayHeadCategoryId" style="width: 100%;" data-placeholder="** Select Category **">
+                                                        <option ng-value="Cat.PayHeadCategoryId" ng-repeat="Cat in PayHeadCategoryList" ng-selected="Cat.PayHeadCategoryId==newPayHeading.PayHeadCategoryId">{{Cat.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-3 col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Calculation On Heading</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPayHeading.CalculationOnHeading" style="width: 100%;" data-placeholder="** Select Heading **">
+                                                        @*<option ng-value=" ">**Select Heading**</option>*@
+                                                        <option ng-repeat="H in PayHeadingList" ng-value="H.id" ng-selected="H.id==newPayHeading.CalculationOnHeading">{{H.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3 col-md-3" ng-show="newPayHeading.PayheadType==4">
+                                                <div class="form-group">
+                                                    <label for="">Tax Rule As</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newPayHeading.TaxRuleAs">
+                                                        <option ng-repeat="H in TaxTypeList" ng-value="H.id" ng-selected="H.id==newPayHeading.TaxRuleAs">{{H.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label for="">Formula</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newPayHeading.Formula" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <div class="custom-control custom-checkbox mt-2">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" ng-model="newPayHeading.IsTaxable">
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                Taxable
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="custom-control custom-checkbox mt-2">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox11" value="option11" ng-model="newPayHeading.IsActive">
+                                                            <label for="customCheckbox11"
+                                                                   class="custom-control-label">
+                                                                Is Active
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+                                        <label><b>PayHeading Details :</b></label>
+                                        <div class="table-scroll-x-y table-scroll">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px">S.No.</th>
+                                                        <th style="width: 200px">Branch</th>
+                                                        <th style="width: 200px">Category</th>
+                                                        <th style="width: 110px">MinAmount</th>
+                                                        <th style="width: 110px">MaxAmount</th>
+                                                        <th style="width: 90px">Rate</th>
+                                                        <th style="width: 110px">FixedAmount</th>
+                                                        <th style="width: 150px">Formula</th>
+                                                        <th style="width: 80px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="pDet in newPayHeading.PayHeadingDetailsColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.BranchId">
+                                                                <option ng-value=" ">**Select Branch***</option>
+                                                                <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==pDet.BranchId">{{B.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.CategoryId">
+                                                                <option ng-value=" ">**Select Category***</option>
+                                                                <option ng-repeat="B in CategoryList" ng-value="B.CategoryId" ng-selected="B.CategoryId==pDet.CategoryId">{{B.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.MinAmount"></td>
+                                                        <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.MaxAmount"></td>
+                                                        <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.Rate"></td>
+                                                        <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.FixedAmount"></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="pDet.Formula"></td>
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddPHDDetails($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delPHDDetails($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <label class="mt-2"><b>Tax Exemption Details :</b></label>
+                                        <div class="table-scroll-x-y table-scroll">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50px">S.No.</th>
+                                                        <th style="width: 130px">Gender</th>
+                                                        <th style="width: 150px">Marital Status</th>
+                                                        <th style="width: 110px">Resident</th>
+                                                        <th style="width: 100px">Rate</th>
+                                                        <th style="width: 110px">Amount</th>
+                                                        <th style="width: 150px">Formula</th>
+                                                        <th style="width: 90px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="pDet in newPayHeading.PayHeadingTaxExemptionColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.GenderId">
+                                                                <option ng-value=" ">**Select Gender</option>
+                                                                <option ng-value="G.id" ng-repeat="G in GenderColl" ng-selected="G.id==pDet.GenderId">{{G.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.MaritalStatusId">
+                                                                <option ng-value=" ">**Select Marital Status</option>
+                                                                <option ng-repeat="M in MaritalCol" ng-value="M.id" ng-selected="M.id==pDet.MaritalStatusId">{{M.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="pDet.ResidentId">
+                                                                <option ng-repeat="Res in ResidentCol" ng-value="Res.id" ng-selected="Res.id==pDet.ResidentId">{{Res.text}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.Rate"></td>
+                                                        <td><input type="text" number-input style="text-align:right" onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.Amount"></td>
+                                                        <td><input type="text" class="form-control form-control-sm" ng-model="pDet.Formula"></td>
+                                                        <td>
+                                                            <a class="p-1" ng-click="AddTaxExemptionDetails($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delTaxExemptionDetails($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="time-label">
+                                            <span class="d-block border-0 p-3 text-center">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info btn-add"
+                                                        id="PayHeadingback-btn"
+                                                        style="min-width: 90px" ng-click="ClearPayHeading()">
+                                                    Back to List
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-default btn-add" style="min-width: 90px;" ng-click="ClearPayHeading()">Reset</button>
+                                                <button type="button" class="btn btn-sm btn-success btn-add" style="min-width: 90px;" ng-click="SaveUpdatePayHeading()">{{newPayHeading.Mode}}</button>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+</div>
+
+

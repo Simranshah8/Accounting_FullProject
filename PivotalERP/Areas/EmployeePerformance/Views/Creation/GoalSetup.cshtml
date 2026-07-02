@@ -1,0 +1,237 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/EmployeePerformance/GoalSetup.js"></script>
+
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="GoalSetupController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="-customtabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">GoalSetup</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.GoalSetup">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.GoalSetup">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait" title="Refresh" ng-click="GetAllGoalSetup()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'GoalSetup'" report-name="'List of Asset Category'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'GoalSetup',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'Asset Category'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y pb-2" style="height:auto!important;max-height: calc(100vh - 6rem)!important; ">
+                                <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                    <thead>
+                                        <tr>
+                                            <th class="cstm-sticky text-center" style="width: 55px; left: 0; background-color: #e6f5fb !important; z-index: 4;">S.No.</th>
+                                            <th style="width: 250px; background-color: #e6f5fb !important;">Description</th>
+                                            <th style="width: 180px; background-color: #e6f5fb !important;">Goal Type</th>
+                                            <th style="width: 80px; background-color: #e6f5fb !important;">Date From</th>
+                                            <th style="width: 80px; background-color: #e6f5fb !important;">Date To</th>
+                                            <th style="width: 140px; background-color: #e6f5fb !important;">Target Type</th>
+                                            <th style="width: 100px; background-color: #e6f5fb !important;">Target Value</th>
+                                            <th style="width: 150px; background-color: #e6f5fb !important;">Goal Measurement</th>
+                                            <th style="width: 100px; background-color: #e6f5fb !important;">Weighted</th>
+                                            <th style="width: 90px; background-color: #e6f5fb !important;">Cost Class</th>
+                                            <th style="width: 60px; background-color: #e6f5fb !important;">Status</th>
+                                            <th class="cstm-sticky no-print text-center" style="width: 75px; right:0; background-color: #e6f5fb !important; z-index: 4;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="beData in GoalSetupList | filter:searchData.GoalSetup| itemsPerPage:perPage.GoalSetup" current-page="currentPages.GoalSetup" pagination-id="GoalSetupPagination">
+                                            <td class="cstm-sticky text-center" style="left: 0; background-color: #ffffff !important; z-index: 3">{{$index+1}}</td>
+                                            <td>{{beData.Description}}</td>
+                                            <td>{{beData.GoalType}}</td>
+                                            <td>{{beData.FromDateBS}}</td>
+                                            <td>{{beData.ToDateBS}}</td>
+                                            <td>{{beData.GoalTargetType}}</td>
+                                            <td>{{beData.TargetValue}}</td>
+                                            <td>{{beData.GoalMeasurement}}</td>
+                                            <td>{{beData.Weighted}}</td>
+                                            <td>{{beData.CostClass}}</td>
+                                            <td>{{beData.IsActive}}</td>
+                                            <td class="cstm-sticky no-print text-center" style="right: 0; background-color: #ffffff !important; z-index: 4">
+                                                <a ng-click="GetGoalSetupById(beData)"><i class="fas fa-pencil-alt text-info mr-2"></i></a>
+                                                <a ng-click="deleteGoalSetup(beData, $index)"><i class="fas fa-trash text-danger"></i></a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="GoalSetupPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form class="mb-0">
+                                    <div class="row">
+                                        <div class="col-sm-3" ng-hide="HideShow.CostClass==true">
+                                            <div class="form-group row mb-0">
+                                                <label for="" class="col-sm-4 col-form-label text-nowrap">Fiscal Year</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId">
+                                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                                            {{cc.Name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Goal Type<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.GoalTypeId">
+                                                    <option ng-repeat="pp in GoalTypeList" ng-value="pp.id" ng-selected="pp.id==beData.GoalTypeId">{{pp.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">From Date<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="beData.FromDate_TMP" date-detail="beData.FromDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">To Date<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="beData.ToDate_TMP" date-detail="beData.ToDateDet">
+                                            </div>
+                                        </div>
+                                        <!--<div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Period Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="beData.GoalPeriodId">
+                                                        <option ng-repeat="pp in GoalPeriodList" ng-value="pp.id"  ng-selected="pp.id==beData.GoalPeriodId">{{pp.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>-->
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Description<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.Description">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 d-flex my-2">
+                                            <div class="custom-control custom-checkbox mt-0 mr-2">
+                                                <input class="custom-control-input" type="checkbox" id="customIsMeasurement" ng-model="beData.IsMeasurement" ng-change="ChangeNullMeasure(beData)">
+                                                <label for="customIsMeasurement" class="custom-control-label">Is measurement</label>
+                                            </div>
+                                            <div class="custom-control custom-checkbox mt-0">
+                                                <input class="custom-control-input" type="checkbox" id="customIsActive" ng-model="beData.IsActive">
+                                                <label for="customIsActive" class="custom-control-label"> Is Active </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row"  ng-show="beData.IsMeasurement">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Target Value<span class="text-danger">*</span></label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="beData.TargetValue">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Goal Measurement<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.GoalMeasurement">
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="">Weighted<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm" ng-model="beData.WeightedId">
+                                                    <option  ng-repeat="pp in WeightedColl"  ng-value="pp.id"ng-selected="pp.id==beData.WeightedId">{{pp.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Target Type<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.GoalTargetTypeId">
+                                                    <option  ng-repeat="pp in GoalTargetTypeList" ng-value="pp.id" ng-selected="pp.id==beData.GoalTargetTypeId">{{pp.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                </form>
+
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateGoalSetup()"><span class="glyphicon glyphicon-save"></span>{{beData.Mode}}</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

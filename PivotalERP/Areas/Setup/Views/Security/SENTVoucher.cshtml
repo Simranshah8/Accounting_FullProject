@@ -1,0 +1,237 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<link href="~/wwwroot/plugins/summernote/summernote.css" rel="stylesheet" />
+<script src="~/wwwroot/plugins/summernote/summernote.min.js"></script>
+
+<script src="~/jslib/setup/security.js"></script>
+
+<div ng-app="myApp" ng-controller="sentVoucherCntrl" ng-class="{waiting: loadingstatus=='running'}">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-body">
+                        <div class="search-toolbar mb-3">
+                            <div class="row">
+                                @*<div class="col-sm-1">
+                                        <div class="form-group mt-4">
+                                            <label for="chkIsReport">Is Report</label>
+                                            <input type="checkbox" id="chkIsReport" name="chkIsReport" ng-change="getModuleWiseEntityList()" ng-model="beData.IsReport">
+                                        </div>
+                                    </div*@
+                                    <div class="col-sm-3">
+                                        <div class="form-group">
+                                            <label>Branch</label>
+                                            <select ng-model="SelectedBranch" active-select2 class="form-control input-sm" ng-change="getAllVouchers()">
+                                                <option>**select branch**</option>
+                                                <option ng-repeat="et in BranchColl" ng-value="et">
+                                                    {{et.Name}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                <div class="col-lg-4">
+                                    <div class="card-tools  mt-4">
+                                        <div class="input-group">
+                                            <input type="text" id="txtSearch" ng-model="search" class="form-control input-sm" placeholder="Search">
+                                            <div class="input-group-append">
+                                                <button type="submit" class="btn btn-default"><i class="fas fa-search"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.col-lg-6 -->
+                                <div class="col-lg-4">
+                                    <form class="float-right  mt-4">
+                                        <div class="form-row align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                                <input type="text" ng-model="noofrows" class="form-control input-sm" placeholder="NoOfRows" value="10">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <table cellpadding="12" class="table table-bordered table-striped table-hover table-responsive" id="datatable">
+                            <tr>
+                                <th ng-click="sort('TranId')" style="text-align:center;width: 5% ;">
+                                    S.No
+                                    <span class="glyphicon sort-icon" ng-show="sortKey=='TranId'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                </th>
+                                <th ng-click="sort('Text')" style="text-align:center;width: 35% ;Height:20px">
+                                    Voucher Name
+                                    <span class="glyphicon sort-icon" ng-show="sortKey=='Name'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+                                </th>
+                                <th style="text-align:center;width: 20% ;Height:20px">
+                                    App Notification
+                                </th>
+                                <th style="text-align:center;width: 20% ;Height:20px">
+                                    Email
+                                </th>
+                                <th style="text-align:center;width: 20% ;Height:20px">
+                                    SMS
+                                </th>
+                            </tr>
+                            <tr dir-paginate="dc in DataColl |orderBy:sortKey:reverse|filter:search|itemsPerPage:noofrows">
+                                <td align="center">
+                                    {{$index+1}}
+                                </td>
+                                <td>
+                                    {{dc.VoucherName}}
+                                </td>
+                                <td align="center">
+                                    <button type="button" class="btn-secondary btn-sm" data-toggle="modal" data-target="#sentTemplate" ng-click="LoadEntityWiseProperties(dc,3)"><i class="fas fa-edit">Edit</i></button>
+                                </td>
+                                <td align="center">
+                                    <button type="button" class="btn-secondary btn-sm" data-toggle="modal" data-target="#sentTemplate" ng-click="LoadEntityWiseProperties(dc,2)"><i class="fas fa-edit">Edit</i></button>
+                                </td>
+                                <td align="center">
+                                    <button type="button" class="btn-secondary btn-sm" data-toggle="modal" data-target="#sentTemplate" ng-click="LoadEntityWiseProperties(dc,1)"><i class="fas fa-edit">Edit</i></button>
+                                </td>
+                            </tr>
+                        </table>
+                        <dir-pagination-controls max-size="5" direction-links="true" boundary-links="true">
+                        </dir-pagination-controls>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+    <!--  Templates -->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="sentTemplate" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{beData.VoucherName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        @*<div class="col-sm-3">
+                                <label for="" class="col-sm-1 col-form-label col-form-label-sm">Action</label>
+                                <select ng-model="beData.OnAction" class="form-control input-sm">
+                                    <option ng-repeat="et in ActionColl track by et.id" ng-value="{{et.id}}" ng-selected="et.id == beData.OnAction">
+                                        {{et.text}}
+                                    </option>
+                                </select>
+                            </div>*@
+                        <div class="col-sm-3">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Status</label>
+                            <div class="form-control form-control-sm">
+                                <label class="radio">
+                                    <input type="radio" name="foobar" ng-value="true" ng-model="beData.Status">
+                                    Enable
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="foobar" ng-value="false" ng-model="beData.Status">
+                                    Disable
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-sm-9">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Recipients</label>
+                            <select ng-model="beData.UserIdColl" class="form-control input-sm select2" multiple="multiple" id="cboUser" name="cboUser">
+                                <option ng-repeat="cl in UserColl track by cl.UserId" value="{{cl.UserId}}" ng-selected="{{beData.UserIdColl.containt(cl.UserId)}}">
+                                    {{cl.UserName}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label> Schedule </label>
+                                <cron-selection ng-model="beData.CRON" config="cronOptions"></cron-selection>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="beData.ForTemplate==2">
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">CC</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Email_CC" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">BCC</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Email_BCC" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Subject</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Title" />
+                        </div>
+                    </div>
+                    <div class="row" ng-show="beData.ForTemplate==1">
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-4 col-form-label col-form-label-sm">To Mobile</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Email_CC" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Title</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Title" />
+                        </div>
+                    </div>
+                    <div class="row" ng-show="beData.ForTemplate==3">
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Title</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Title" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="" class="col-sm-4 col-form-label col-form-label-sm">To User</label>
+                            <input type="text" class="form-control form-control-sm" ng-model="beData.Email_CC" />
+                        </div>
+                    </div>
+                    <div class="row" ng-show="beData.ForTemplate==2">
+                        <div class="col-sm-12">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Body</label>
+                            <textarea class="form-control form-control-sm" cols="20" rows="12" html-editor ng-model="beData.Message"></textarea>
+                        </div>
+                    </div>
+                    <div class="row" ng-hide="beData.ForTemplate==2">
+                        <div class="col-sm-12">
+                            <label for="" class="col-sm-1 col-form-label col-form-label-sm">Body</label>
+                            <textarea class="form-control form-control-sm" cols="20" rows="12" ng-model="beData.Message"></textarea>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="top-members-list col-md-12" style="overflow:scroll;max-height:200px;">
+                            <ul class="list-group list-group-flush
+                                            flush-no-border">
+                                <li class="list-group-item" ng-repeat="tc in PropertesColl">
+                                    <span class="username">
+                                        <a href="#" ng-click="AddVariable(tc.datatype)">{{$index+1}} - {{tc.datatype}}</a>
+                                        &nbsp;&nbsp;
+                                        <span>{{tc.text}}</span>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <h6 class="mb-0"></h6>
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-primary" ng-click="AddNewTemplate()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

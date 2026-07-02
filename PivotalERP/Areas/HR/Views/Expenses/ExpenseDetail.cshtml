@@ -1,0 +1,432 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script src="~/jslib/hr/expenses/ExpenseDetail.js"></script>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="ExpenseController" ng-init="LoadData()">
+
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div id="root">
+                    <div class="card-primary px-0 card-tabs">
+                        <!-- Header -->
+                        <div id="expenseDetails" class="card p-2">
+                            <header class="row">
+                                <div class="col-md-12 row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>For</label>
+                                            <select class="form-control form-control-sm" ng-model="newDet.For">
+                                                <option ng-value="pp.id" ng-repeat="pp in ForColl" ng-selected="pp.id == newDet.For">{{pp.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Date From</label>
+                                            <input type="text" placeholder="" date-picker ng-model="newFilter.DateFrom_TMP" date-detail="newFilter.DateFromDet" class="form-control form-control-sm">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2" ng-show="newDet.For == 2">
+                                        <div class="form-group">
+                                            <label>Date To</label>
+                                            <input type="text" placeholder="" date-picker ng-model="newFilter.DateTo_TMP" date-detail="newFilter.DateToDet" class="form-control form-control-sm">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <select class="form-control form-control-sm select2" ng-model="newFilter.StatusId">
+                                                <option ng-value="pp.id" ng-repeat="pp in StatusColl" ng-selected="pp.id == newFilter.StatusId">{{pp.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Employee</label>
+                                            <select class="form-control select2 form-control-sm" style="width:85%" all-employee
+                                                    ng-model="newFilter.EmployeeId" employee-detail="newDet.EmployeeDetails">
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-1 text-right">
+                                        <button type="button" class="btn btn-sm load btn-primary mt-4" id="AddDetails" ng-click="GetAllExpenseDetail()">
+                                            <i class="fas fa-sync w-t"></i> Load
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 row">
+                                    <div class="col-md-7">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Expense">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Expense">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.Expense">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    @*<div class="col-md-5 ">
+                                            <div class="form-inline float-right">
+                                                <div class="dropdown dnld-file"
+                                                     data-toggle="tooltip"
+                                                     data-placement="top"
+                                                     title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button"
+                                                            id="dropdownMenuButton"
+                                                            data-toggle="dropdown"
+                                                            aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'Expense Detail'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    </div>
+                                                </div>
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-secondary btn-light btn-sm"
+                                                        id="open-form-btn"
+                                                        ng-click="PrintExpenses()">
+                                                    <i class="fas fa-print w-t"></i>
+                                                </button>
+                                            </div>
+
+                                        </div>*@
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y table-scroll" style="height:auto!important;max-height:calc(100vh - 9rem)!important">
+                                <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                    <thead>
+                                        <tr>
+                                            <th class="cstm-sticky align-middle" style="width: 105px; z-index: 4;left:0;background-color:#ececec!important">Action</th>
+                                            <th class="align-middle" style="width: 90px; z-index: 3; background-color: #ececec !important">Status</th>
+                                            <th class="align-middle text-center" style="width: 50px; z-index: 3; background-color: #ececec !important ">S.No.</th>
+                                            <th class="align-middle" style="width: 105px; z-index: 3; background-color: #ececec !important">Expense Date</th>
+                                            <th class="align-middle" style="width: 105px; z-index: 3; background-color: #ececec !important">Expense Title</th>
+                                            <th class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important">Expense Type</th>
+                                            <th class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important">Employee</th>
+                                            <th class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important">Full Address</th>
+                                            <th class="align-middle" style="width: 100px; z-index: 3; background-color: #ececec !important ">Destination From</th>
+                                            <th class="align-middle" style="width: 100px; z-index: 3; background-color: #ececec !important ">Destination To</th>
+                                            <th class="align-middle" style="width: 100px; z-index: 3; background-color: #ececec !important">Distance Travelled(KM)</th>
+                                            <th class="align-middle" style="width: 150px; z-index: 3; background-color: #ececec !important">Purpose of Visit</th>
+                                            <th class="align-middle" style="width: 100px; z-index: 3; background-color: #ececec !important ">Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="SL in ExpenseClaimList | filter:searchData.Expense | itemsPerPage: perPage.Expense" current-page="currentPages.Expense" pagination-id="ExpensePagination">
+                                            <td class="cstm-sticky bg-white" style=" left: 0; z-index:3;background-color:#ffffff!important">
+
+                                                <button class="p-1 btn btn-sm btn-info" ng-click="GetExpenseDetailById(SL)" ng-hide="SL.StatusId==5||SL.StatusId==6">
+                                                    Status
+                                                </button>
+                                                <button class="p-1 btn btn-sm btn-success" ng-click="GetAccClearanceDetailById(SL)" ng-show="SL.StatusId==2 || SL.StatusId==5">
+                                                    Clearance
+                                                </button>
+                                            </td>
+                                            <td>{{SL.Status}}</td>
+                                            <td class="text-center">{{$index+1}}</td>
+                                            <td>{{SL.ExpenseDate}}</td>
+                                            <td>{{SL.ExpenseTitle}}</td>
+                                            <td>
+                                                {{ SL.ExpensesType }}
+                                            </td>
+                                            <td>{{SL.EmployeeName}}</td>
+
+                                            <td>{{SL.Address}}</td>
+                                            <td>{{SL.DestinationFrom}}</td>
+                                            <td>{{SL.DestinationTo}}</td>
+                                            @*<td>{{SL.DestToLongitude}}</td>*@
+                                            <td>{{SL.DistanceTravelled}}</td>
+                                            <td>{{SL.PurposeOfVisit}}</td>
+                                            <td>{{SL.Reason}}</td>
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="ExpensePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </footer>
+
+
+                            <div id="detailmodal" class="modal fade" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header p-2" style="justify-content:space-between">
+                                            <p class="modal-title">Expense Entry Details(Update Status)</p>
+                                            <button class="btn" data-dismiss="modal">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body p-2">
+                                            <div id="printSection">
+                                                <div class="row mb-2">
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Date From</div>
+                                                            <div class="col-md-8 text-left"><strong>: {{newDet.DateFromMiti}} </strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Date To</div>
+                                                            <div class="col-md-8 text-left"><strong>: {{newDet.DateToMiti}} </strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Expense Title</div>
+                                                            <div class="col-md-8"><strong>: {{newDet.ExpenseTitle}}  </strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Employee</div>
+                                                            <div class="col-md-8"><strong>: {{newDet.EmployeeName}}</strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4">Remarks</div>
+                                                            <div class="col-md-8"><strong>: {{newDet.Reason}}</strong></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <div class="row mb-2">
+
+                                                    <div class="col-md-4">
+                                                        <div class="d-flex">
+                                                            <label class="mr-4">Status</label>
+                                                            <select class="form-control form-control-sm " ng-model="newDet.StatusId">
+                                                                <option ng-value="pp.id" ng-repeat="pp in StatusColl" ng-selected="pp.id == newDet.Status">{{pp.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="d-flex">
+                                                            <label class="mr-4">StatusRemarks</label>
+                                                            <textarea class="form-control form-control-sm" rows="1" ng-model="newDet.StatusRemark"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <table id="main-table" class="main-table table table-sm table-bordered">
+                                                    <thead style="background-color: skyblue">
+                                                        <tr>
+                                                            <th><i class="fa fa-file"></i></th>
+                                                            <th>S.No.</th>
+                                                            <th>Expense Date</th>
+                                                            <th>Expense Category</th>
+                                                            <th>Qty.</th>
+                                                            <th>Rate</th>
+                                                            <th>Amount</th>
+                                                            <th>Description</th>
+                                                            <th>Status</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tbody>
+                                                        <tr ng-repeat="P in newDet.DetailsColl">
+                                                            <td class="text-center" ng-click="ShowPersonalImg(P)"><i class="fa fa-file"></i></td>
+                                                            <td class="text-center">{{$index+1}}</td>
+                                                            <td>{{P.ExpenseDateMiti}}</td>
+                                                            <td>{{P.ExpenseCategory}}</td>
+                                                            <td>{{P.Quantity}}</td>
+                                                            <td>{{P.Rate}}</td>
+                                                            <td>{{P.Amount}}</td>
+                                                            <td>{{P.Description}}</td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm select2" ng-model="P.StatusId">
+                                                                    <option ng-value="pp.id" ng-repeat="pp in StatusColl" ng-selected="pp.id == P.StatusId">{{pp.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control form-control-sm" ng-model="P.StatusRemark" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+
+                                                </table>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer p-2 text-right">
+
+                                            <button class="btn btn-sm load btn-success" ng-click="UpdateStatus()">
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+                            <div id="clearancemodal" class="modal fade" role="dialog">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header p-2" style="justify-content:space-between">
+                                            <p class="modal-title">Status Clearance</p>
+                                            <button class="btn" data-dismiss="modal">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body p-2">
+                                            <div id="printSection">
+                                                <div class="row mb-2">
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Date From</div>
+                                                            <div class="col-md-8 text-left"><strong>: {{newDet.DateFromMiti}} </strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Date To</div>
+                                                            <div class="col-md-8 text-left"><strong>: {{newDet.DateToMiti}} </strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Expense Title</div>
+                                                            <div class="col-md-8"><strong>: {{newDet.ExpenseTitle}}  </strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4"> Employee</div>
+                                                            <div class="col-md-8"><strong>: {{newDet.EmployeeName}}</strong></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="row">
+                                                            <div class="col-md-4">Remarks</div>
+                                                            <div class="col-md-8"><strong>: {{newDet.Reason}}</strong></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                                <div class="row mb-2">
+
+                                                    <div class="col-md-4">
+                                                        <div class="d-flex">
+                                                            <div class="mr-4">Status</div>
+                                                            <select class="form-control form-control-sm" ng-model="newDet.StatusId">
+                                                                <option ng-value="pp.id" ng-repeat="pp in StatusColl" ng-selected="pp.id == newDet.Status">{{pp.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="d-flex">
+                                                            <label class="mr-4">ClearanceRemarks</label>
+                                                            <textarea class="form-control form-conytrol-sm" rows="1" ng-model="newDet.AcClearanceRemark"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <table id="main-table" class="main-table table table-sm table-bordered">
+                                                    <thead style="background-color: skyblue">
+                                                        <tr>
+                                                            <th><i class="fa fa-file"></i></th>
+                                                            <th>S.No.</th>
+                                                            <th>Expense Date</th>
+                                                            <th>Expense Category</th>
+                                                            <th>Qty.</th>
+                                                            <th>Rate</th>
+                                                            <th>Amount</th>
+                                                            <th>Description</th>
+                                                            <th>Status</th>
+                                                            <th>Remark</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tbody>
+                                                        <tr ng-repeat="P in newDet.TranExpenseClaimDetailsColl">
+                                                            <td class="text-center" ng-click="ShowPersonalImg(P)"><i class="fa fa-file"></i></td>
+                                                            <td class="text-center">{{$index+1}}</td>
+                                                            <td>{{P.ExpenseDateMiti}}</td>
+                                                            <td>{{P.ExpenseCategory}}</td>
+                                                            <td>{{P.Quantity}}</td>
+                                                            <td>{{P.Rate}}</td>
+                                                            <td>{{P.Amount}}</td>
+                                                            <td>{{P.Description}}</td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm select2" ng-model="P.StatusId">
+                                                                    <option ng-value="pp.id" ng-repeat="pp in StatusColl" ng-selected="pp.id == P.StatusId">{{pp.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input class="form-control form-control-sm" ng-model="P.AcClearanceRemark" />
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+
+                                                </table>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer p-2 text-right">
+                                            <button class="btn btn-sm load btn-success" ng-click="UpdateClearance()">
+                                                Save
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-body mb-0 p-2">
+                                            <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                                            <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                                        </div>
+                                        <div class="modal-footer p-2">
+                                            <div><a href="{{viewImg.ContentPath}}" download>Download</a></div>
+                                            <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center dynamic-uiux-sm-btn" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,649 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y table thead th {
+        background-color: #e8eef4 !important;
+    }
+</style>
+<script src="~/jslib/account/transaction/SalesInvoice.js"></script>
+<div ng-app="myApp" ng-controller="SalesInvoiceController" ng-init="LoadData()">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <!-- Page Content  -->
+            <div class="content-wrapper-new1 px-2">
+                <div class="card mt-1 bodypart" style="height: calc(100vh - 13rem);">
+                    <div class="demo-container">
+                        <div class="demo-header">
+                            <div class="card-body px-3 py-2">
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group">
+                                            <div class="d-flex">
+                                                <label for="inputEmail3" style="min-width: 120px;">Product</label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.ProductId" style="width:100%" ng-show="isToggled">
+                                                    <option>Product1</option>
+                                                    <option>Product2</option>
+                                                </select>
+                                                <div data-barcode-scanner="barcodeScanned" ng-hide="isToggled"></div>
+                                                <input ng-hide="isToggled" type="text" class="form-control form-control-sm" data-ng-model="beData.ProductBarCode" id="txtBarcode" name="txtBarcode" onfocus="this.select();" autocomplete="off" />
+
+
+
+                                                @*<button type="button" class="btn btn-sm btn-outline-secondary" ng-click="toggle()" ng-class="{'active': isActive}">
+                                                        <img style="height:20px;" ng-src="{{isActive ? '~/dynamic-erp/images/flaticons/barcode-scanner.png' : '~/dynamic-erp/images/flaticons/dropdown.png'}}" alt="Toggle Image">
+                                                    </button>*@
+
+
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" ng-click="toggle()">
+                                                    <i ng-if="isActive" class="fas fa-caret-square-down px-1 text-info" style="font-size:17px"></i>
+                                                    <i ng-if="!isActive" class="fas fa-barcode px-1 text-info" style="font-size:17px"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox1" value="option1" ng-model="beData.ActiveBuyerDetails">
+                                            <label for="customCheckbox1"
+                                                   class="custom-control-label">
+                                                Active Buyer Details
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Bill No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" ng-model="beData.BillNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Ref No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" ng-model="beData.RefNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Order No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" ng-model="beData.OrderNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Customer</label>
+                                            <select class="form-control form-control-sm select2" ng-model="beData.CustomerId">
+                                                <option>Customer1</option>
+                                                <option>Customer2</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" ng-show="beData.ActiveBuyerDetails">
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Buyer Name</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="BuyerName" ng-model="beData.CustomerName" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Address</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="Address" ng-model="beData.C_Address" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">PAN No.</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="PanNo" ng-model="beData.C_PanNo" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Mobile No</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="MobileNo" ng-model="beData.C_MobileNo" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="form-group d-flex">
+                                            <label for="inputEmail3" style="min-width:120px;">Remarks</label>
+                                            <input type="text" class="form-control form-control-sm float-right" name="Remarks" ng-model="beData.Remarks" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- end form fiels -->
+                        <div class="px-2 table-scroll-x-y mb-1 table-container">
+                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 45px;">S.No</th>
+                                        <th rowspan="2" class="align-middle" style="width: 200px;">Particulars</th>
+                                        <th rowspan="2" class="align-middle" style="width: 110px;">Closing Stock</th>
+                                        <th colspan="2" class="text-center" style="width: 160px;">Quantity</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 110px;">Free Qty</th>
+                                        <th colspan="2" class="text-center" style="width: 160px;">Alt.Unit1</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 90px;">Rate</th>
+                                        <th colspan="2" class="text-center" style="width: 160px;">Discount</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 90px;">Amount</th>
+                                        <th rowspan="2" class="text-center align-middle" style="width: 60px;">Action</th>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col" class="text-center cstm-sticky" style="top: 29px">Actual</th>
+                                        <th scope="col" class="text-center cstm-sticky" style="top: 29px">Unit</th>
+                                        <th scope="col" class="text-center cstm-sticky" style="top: 29px">Actual</th>
+                                        <th scope="col" class="text-center cstm-sticky" style="top: 29px">Unit</th>
+                                        <th scope="col" class="text-center cstm-sticky" style="top: 29px">Actual</th>
+                                        <th scope="col" class="text-center cstm-sticky" style="top: 29px">Unit</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>1</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+
+                                    <tr>
+                                        <td class="text-center"><b>31</b></td>
+                                        <td><b>Lorem Ipsum</b></td>
+                                        <td><b>12312</b></td>
+                                        <td class="text-center"><b>1221</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>1313</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>2312</b></td>
+                                        <td class="text-center"><b>Kg</b></td>
+                                        <td class="text-right"><b>2312</b></td>
+                                        <td class="project-actions no-print text-center">
+                                            <div class="btn-group-sm">
+
+                                                <a class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    </div>
+
+    <footer class="main-footer control-btns py-0">
+        <div class="secondary-footer mt-2 ">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group row float-right">
+                        <label class="mb-0" style="color:#000000">Label At Bottom:  121231231</label>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group row float-right">
+                        <label class="mb-0" style="color:#000000">Label At Bottom:  121231231</label>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group row float-right">
+                        <label class="mb-0" style="color:#000000">Label At Bottom:  121231231</label>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group row float-right">
+                        <label class="mb-0" style="color:#000000">Label At Bottom:  121231231</label>
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <div class="form-group row float-right">
+                        <label class="mb-0" style="color:#000000">Label At Bottom:  121231231</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row pb-3 pt-2" style="background-color: #c2e0fb">
+
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right" style="font-size: large;">Grand Total:</label>
+                        <div class="col-7 col-sm-6 col-md-6">
+                            <input type="text" number-input class="form-control hideSideBar" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-dark text-right" style="font-size: large;">Tender:</label>
+                        <div class="col-7 col-sm-6 col-md-6">
+                            <input type="text" number-input class="form-control hideSideBar" style="text-align: right; font-size: 28px; font-weight: 700;" placeholder="" ng-model="beData.ReceivedAmount" ng-change="ChangeTenderAmt()">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group row">
+                        <label for="inputEmail3" class="col-5 col-sm-6 col-form-label font-weight-bold text-right" style="color: red; font-size: large">Change:</label>
+                        <div class="col-7 col-sm-6 col-md-6">
+                            <input type="text" number-input class="form-control hideSideBar" style="text-align: right; font-size: 28px; font-weight: 700;" value="12321" readonly ng-model="beData.ChangeAmt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+

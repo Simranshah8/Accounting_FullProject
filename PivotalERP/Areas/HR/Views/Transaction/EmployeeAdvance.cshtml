@@ -1,0 +1,238 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script>
+        var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_EmployeeAdvance)";
+</script>
+
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script src="~/jslib/hr/Transaction/EmployeeAdvance.js"></script>
+<div ng-app="myApp" ng-controller="EmployeeAdvanceController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetAllEmployeeAdvanceList()">
+
+
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card my-1 card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearEmployeeAdvance()" aria-controls="custom-tabs-four-profile" aria-selected="false">EmployeeAdvance</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeeAdvance">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.EmployeeAdvance">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.EmployeeAdvance">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#EmployeeAdvance'" sheet-name="'EmployeeAdvanceList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#EmployeeAdvance').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl table-id="'#EmployeeAdvance'" class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                <i class="fas fa-filter"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div>
+                                    <div class="table-scroll-x-y table-scroll">
+                                        <table id="EmployeeAdvance"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 50px">S.No.</th>
+                                                    <th style="width: 255px">Company</th>
+                                                    <th style="width: 150px">Branch</th>
+                                                    <th style="width: 80px">Emp.Code</th>
+                                                    <th style="width: 150px">Emp.Name</th>
+                                                    <th style="width: 130px">Advance Type</th>
+                                                    <th style="width: 130px">Advance Amount</th>
+                                                    <th style="width: 130px">Deduction Amount</th>
+                                                    <th style="width: 110px">Effective Date</th>
+                                                    <th style="width: 180px">Remarks</th>
+                                                    <th style="width: 70px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in EmployeeAdvanceList | filter:searchData.EmployeeAdvance | itemsPerPage: perPage.EmployeeAdvance" current-page="currentPages.EmployeeAdvance" pagination-id="EmployeeAdvancePagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{cl.CompanyName}}</td>
+                                                    <td>{{cl.BranchName}}</td>
+                                                    <td>{{cl.EmployeeCode}}</td>
+                                                    <td>{{cl.EmployeeName}}</td>
+                                                    <td>{{cl.AdvanceType}}</td>
+                                                    <td>{{cl.AdvanceAmount}}</td>
+                                                    <td>{{cl.DeductionAmount}}</td>
+                                                    <td>{{cl.EffMiti}}</td>
+                                                    <td>{{cl.Remarks}}</td>
+                                                    <td>
+                                                        <a class="p-1" href="#" ng-click="GetEmployeeAdvanceById(cl)">
+                                                            <i class="fas fa-edit text-info"></i>
+                                                        </a>
+                                                        <a class="p-1" href="#" ng-click="DelEmployeeAdvance(cl,$index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- table end -->
+                                </div>
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="EmployeeAdvancePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div class="">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label for="">Employee</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newEmployeeAdvance.UserId" employee-detail="newEmployeeAdvance.EmployeeDetails" side-bar-data="newEmployeeAdvance.EmpSideBarData" search-by="newEmployeeAdvance.EmployeeSearchBy" confirm-action="SelectEmployeeId(newEmployeeAdvance.EmployeeDetails)">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newEmployeeAdvance.AdvanceDate_TMP" date-detail="newEmployeeAdvance.AdvanceDateDet">
+                                                </div>
+                                            </div>
+
+                                            <div class="col-sm-4 col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Advance Type</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newEmployeeAdvance.AdvanceTypeId">
+                                                        <option ng-repeat="A in AdvanceTypeList" ng-value="A.TranId" ng-selected="A.TranId==newEmployeeAdvance.AdvanceTypeId">{{A.Name}}</option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Advance Amount</label>
+                                                    <input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="newEmployeeAdvance.AdvanceAmount" ng-change="calculateDeduction()" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label for="">Installment No(Month)</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEmployeeAdvance.Installment" ng-change="calculateDeduction()" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Deduction Amount</label>
+                                                    <input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="newEmployeeAdvance.DeductionAmount" />
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Effective Date</label>
+                                                    <input type="text" class="form-control form-control-sm" date-picker ng-model="newEmployeeAdvance.EffDate_TMP" date-detail="newEmployeeAdvance.EffDateDet">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-8 col-md-8">
+                                                <div class="form-group">
+                                                    <label>Remarks</label>
+                                                    <input type="text" class="form-control form-control-sm" ng-model="newEmployeeAdvance.Remarks">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-sm load btn-default" style="min-width: 90px;" ng-click="ClearEmployeeAdvance()">Reset</button>
+                                            <button type="button" class="btn btn-sm load btn-primary" style="min-width: 90px;" ng-click="SaveUpdateEmployeeAdvance()">{{newEmployeeAdvance.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+
+
+

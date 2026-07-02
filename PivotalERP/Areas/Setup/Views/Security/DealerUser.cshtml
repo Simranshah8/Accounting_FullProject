@@ -1,0 +1,266 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<script src="~/jslib/Setup/DealerUser.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="DealerUserCtrl" ng-init="LoadData()">
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div id="day-book-section">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group d-flex">
+                                        <label style="width:120px">User Group </label>
+                                        <select class="form-control form-control-sm ml-2" ng-model="newDealerUser.GroupId" style="width:100%;" data-placeholder="**Select Group**">
+                                            <option ng-value="cl.GroupId" ng-repeat="cl in UserGroupList" ng-selected="cl.GroupId==newDealerUser.GroupId">{{cl.GroupName}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group d-flex">
+                                        <label style="width:170px">User Name as </label>
+                                        <select class="form-control form-control-sm  ml-2" ng-model="newDealerUser.AsPer" style="width:100%;">
+                                            <option ng-value="cl.id" ng-repeat="cl in UserNameAsList" ng-selected="cl.id==newDealerUser.AsPer">{{cl.text}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    @*<div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox1" value="option1">
+                                            <label for="customCheckbox1"
+                                                   class="custom-control-label">
+                                                Can Update Existing Users
+                                            </label>
+                                        </div>*@
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-sm btn-primary load float-right" style="min-width: 90px;" ng-click="GenerateUser()">Generate User</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card p-2">
+                            <header class="row">
+                                <div class="col-md-6">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-sm-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0"
+                                                        ng-model="perPage.UserName">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.UserName">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.UserName">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- end col-md-8 -->
+                                <div class="col-md-6 text-right">
+                                    <div class="dropdown dnld-file">
+                                        <button class="btn btn-default btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download" style="font-size:14px"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+
+                                        </div>
+                                        <a print-tbl table-id="'#main-table'" class="btn btn-default btn-sm wait">
+                                            <i class="fas fa-print" style="font-size: 14px"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-sm" ng-click="SendSMSToStudentUser()">
+                                            <i class="fas fa-sms" style="font-size: 14px"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-sm" ng-click="SendNotificationToStudentUser()">
+                                            <i class="fas fa-bell" style="font-size: 14px"></i>
+                                        </a>
+                                        <a class="btn btn-default btn-sm" ng-click="SendNotificationToForceLogOut()">
+                                            <i class="fas fa-check" style="font-size: 14px"></i>
+                                        </a>
+                                    </div>
+
+
+                                </div>
+                            </header>
+                            <div class="table-scroll-x-y table-scroll mt-1" style="max-height: calc(100vh - 11rem);">
+                                <table id="datatable" class="table table-bordered table-hover table-sm">
+                                    <thead>
+                                        <tr style="font-weight:bold">
+                                            <th class="text-center" style="width: 60px; background-color: #e8e8e8 !important;">
+                                                S.No
+                                            </th>
+                                            <th style="width: 100px; background-color: #e8e8e8 !important;">
+                                                Code
+                                            </th>
+                                            <th style="width: 200px; background-color: #e8e8e8 !important;">
+                                                Customer/Dealer Name
+                                            </th>
+                                            <th style="width: 200px; background-color: #e8e8e8 !important;">
+                                                Group
+                                            </th>
+                                            <th style="width: 130px; background-color: #e8e8e8 !important;">
+                                                Pan No
+                                            </th>
+                                            <th style="width: 150px; background-color: #e8e8e8 !important;">
+                                                Town
+                                            </th>
+                                            <th style="width: 150px; background-color: #e8e8e8 !important;">
+                                                Username
+                                            </th>
+                                            <th style="width: 110px; background-color: #e8e8e8 !important;">
+                                                Password
+                                            </th>
+                                            <th class="text-center" style="width: 130px; background-color: #e8e8e8 !important;z-index:3">
+                                                Action
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr dir-paginate="du in AllUserColl | orderBy:sortKey:reverse | filter:searchData.UserName | itemsPerPage:perPage.UserName" current-page="currentPages.UserName" pagination-id="DealerUserPagination">
+                                            <td class="text-center">
+                                                {{du.SNo}}
+                                            </td>
+                                            <td>
+                                                {{du.Code}}
+                                            </td>
+
+                                            <td>
+                                                {{du.Name}}
+                                            </td>
+                                            <td>
+                                                {{du.LedgerGroup}}
+                                            </td>
+                                            <td>
+                                                {{du.PanVatNo}}
+                                            </td>
+                                            <td>
+                                                {{du.UDF2}}
+                                            </td>
+                                            <td>
+                                                {{du.UserName}}
+                                            </td>
+                                            <td>
+                                                <span ng-hide="du.CanEdit==true">{{du.Pwd}}</span>
+                                                <input type="text" ng-model="du.Pwd" class="form-control form-control-sm" ng-show="du.CanEdit==true" />
+                                            </td>
+                                            <td>
+                                                <a href="#" class="btn btn-info" title="Reset Password" ng-click="ShowPwdReset(du)"><i class="fa fa-key"></i></a>
+                                            </td>
+                                            <!--<td>
+        <div class="d-flex">
+            <a class="p-1" href="#"-->
+                                            @*ng-click="GetStudentUsersById(cl)"*@
+                                            <!--ng-hide="du.CanEdit==true">
+        <i class="fas fa-edit text-info" style="font-size:15px"></i>
+    </a>
+    <a class="p-1" href="#"-->
+                                            @*ng-click="UpdateStudentPwd(cl)"*@
+                                            <!--ng-show="du.CanEdit==true">
+        <i class="fas fa-save text-info" style="font-size: 15px"></i>
+    </a>-->
+                                            @*<a class="p-1" href="#" ng-click="StudentForlogout(cl)">
+            <i class="fas fa-sign-out-alt text-info" style="font-size: 15px"></i>
+        </a>*@
+                                            <!--<div class="onoffswitch mt-1">
+                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="onoff1" checked>
+                <label class="onoffswitch-label" for="onoff1">
+                    <span class="onoffswitch-switch"></span>
+                    <span class="onoffswitch-inner"></span>
+                </label>
+            </div>
+        </div>
+    </td>-->
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <footer class="row align-items-center">
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="DealerUserPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                </div>
+                            </footer>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+
+    <!--Password Reset Modal Starts-->
+    <div class="modal fade" id="frmPwdReset">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Password Reset For {{ CurAgentUser.Name }}- {{CurAgentUser.UserName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-2">
+                    <div class="form-group">
+                        <label for="">User</label>
+                        <input type="text"
+                               class="form-control form-control-sm" ng-model="CurAgentUser.UserName" disabled />
+                    </div>
+                    <div class="form-group">
+                        <label for="">New Password</label>
+                        <input type="password"
+                               class="form-control form-control-sm" ng-model="CurAgentUser.NewPassword" />
+                    </div>
+                    <div class="form-group">
+                        <label for="">Confirm Password</label>
+                        <input type="password" class="form-control form-control-sm" ng-model="CurAgentUser.ConfirmPassword" />
+                    </div>
+                    <div class="time-label">
+                        <span class="d-block border-0 p-3 text-center">
+                            <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateResetPassword()">Update</button>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!--TDS Modal Ends-->
+
+</div>

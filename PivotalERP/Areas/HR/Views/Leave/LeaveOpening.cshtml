@@ -1,0 +1,275 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+
+@*<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Att_LeaveOpening)";
+</script>*@
+
+
+<script src="~/jslib/hr/leave/LeaveOpening.js"></script>
+<div ng-app="myApp" ng-controller="LeaveOpeningController" ng-init="GetAllLeaveOpeningList()">
+
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" ng-click="ClearLeaveOpening()" aria-selected="false">Add Leave Opening</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.LeaveOpening">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.LeaveOpening">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search" ng-model="searchData.LeaveOpening"
+                                                           aria-label="Search">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 text-right">
+                                        <div class="dropdown dnld-file"
+                                             data-placement="top" title="Download File">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#leaveOpeningTbl'" sheet-name="'LeaveOpeningList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#leaveOpeningTbl').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+
+                                            <a print-tbl table-id="'#leaveOpeningTbl'" href="#" class="btn btn-secondary btn-light btn-sm" title="Print">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            @*<button type="button" class="btn btn-sm btn-primary" id="add-LeaveOpening"
+                                                        style="min-width: 90px;font-size:12px">
+                                                    <i class="fas fa-plus w-t"></i> Add LeaveOpening
+                                                </button>*@
+                                        </div>
+                                    </div>
+                                </header>
+                                <div>
+                                    <div class="table-scroll-x-y table-scroll" style="height:auto !important; max-height :calc(100vh - 10rem) !important;">
+                                        <table id="leaveOpeningTbl"
+                                               class="main-table table table-sm table-bordered bg-white">
+                                            <thead class="text-nowrap">
+                                                <tr>
+                                                    <th style="background-color: #e9ecef !important; width: 70px">S.No</th>
+                                                    <th style="background-color: #e9ecef !important; width: 90px">For</th>
+                                                    <th style="background-color: #e9ecef !important; width: 140px">Period</th>
+                                                    <th style="background-color: #e9ecef !important; width: 90px">Code</th>
+                                                    <th style="background-color: #e9ecef !important; width: 200px">Name</th>
+                                                    <th style="background-color: #e9ecef !important; width: 130px">Branch</th>
+                                                    <th style="background-color: #e9ecef !important; width: 150px">Department</th>
+                                                    <th style="background-color: #e9ecef !important; width: 120px">Opening Balance</th>
+                                                    <th style="background-color: #e9ecef !important; width: 80px">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="cl in LeaveOpeningList | filter:searchData.LeaveOpening | itemsPerPage: perPage.LeaveOpening" current-page="currentPages.LeaveOpening" pagination-id="LeaveOpeningPagination">
+                                                    <td align="center">
+                                                        {{$index+1 }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.ForEmpOrSalesman }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.PeriodName }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Code }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Name }}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Branch}}
+                                                    </td>
+                                                    <td>
+                                                        {{cl.Department}}
+                                                    </td>
+                                                    <td align="right">
+                                                        {{cl.OpeningQty | number: 2}}
+                                                    </td>
+                                                    <td>
+                                                        @*<a class="p-1" href="#" ng-click="GetLeaveOpeningById(cl)" data-toggle="tooltip"
+               data-placement="top" title="Edit">
+                <i class="fas fa-edit text-info"></i>
+            </a>*@
+                                                        <a class="p-1" href="#" ng-click="DelLeaveOpeningById(cl)" data-toggle="tooltip"
+                                                           data-placement="top" title="Delete">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- table end -->
+                                </div>
+                                <footer class="row align-items-center">
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="LeaveOpeningPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)"></dir-pagination-controls>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div class="p-2">
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">For</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="form-control form-control-sm" ng-model="newLeaveOpening.EmployeeOrSalesman" style="width:100%;">
+                                                            <option ng-value="pp.id" ng-repeat="pp in TypeColl" ng-selected="pp.id==newLeaveOpening.EmployeeOrSalesman">{{pp.text}}</option>
+                                                        </select>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-md-6" ng-show="newLeaveOpening.EmployeeOrSalesman==1">
+                                                <div class="form-group">
+                                                    <label for="">Employee</label>
+                                                    <div class="input-group-prepend">
+                                                        <select class="input-group-text dropdown-toggle p-0"
+                                                                style="outline: none;
+                                                                            border-top-right-radius: unset;
+                                                                            border-bottom-right-radius: unset;
+                                                                            margin-right: -3px;
+                                                                            z-index: 1;
+                                                                    " ng-model="newLeaveOpening.SelectEmployee">
+
+                                                            <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newLeaveOpening.EmployeeSearchBy">
+                                                                {{ss.text}}
+                                                            </option>
+                                                        </select>
+
+                                                        <select class="form-control select2bs4 form-control-sm" all-employee ng-model="newLeaveOpening.UserId" employee-detail="newLeaveOpening.EmployeeDetails" side-bar-data="newLeaveOpening.EmpSideBarData" search-by="newLeaveOpening.EmployeeSearchBy" confirm-action="GetLeaveOpeningById()">
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 col-md-6" ng-show="newLeaveOpening.EmployeeOrSalesman==2">
+                                                <div class="form-group">
+                                                    <label for="">Salesman</label>
+                                                    <div class="input-group-prepend">
+
+                                                        <select class="form-control form-control-sm select2" ng-model="newLeaveOpening.UserId" style="width:100%;">
+                                                            <option ng-value="pp.UserId" ng-repeat="pp in SalesManList" ng-selected="pp.UserId==newLeaveOpening.UserId">{{pp.Name}} - {{pp.Code}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-md-2">
+                                                <div class="form-group">
+                                                    <label for="">Fiscal Year</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newLeaveOpening.PeriodId" ng-change="GetLeaveOpeningById()">
+                                                        <option ng-repeat="C in CostClassList" ng-value="C.CostClassId" ng-selected="C.CostClassId==newLeaveOpening.PeriodId">{{C.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-sm-2 col-md-2 mt-4">
+                                                <div class="custom-control custom-checkbox">
+                                                    <input class="custom-control-input" type="checkbox"
+                                                           id="customCheckbox1" ng-model="newLeaveOpening.IsBalance">
+                                                    <label for="customCheckbox1"
+                                                           class="custom-control-label">
+                                                        Is Balance
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <label class="mt-2"><b>Leave:</b></label>
+                                        <div class="table-scroll-x-y  table-scroll">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 80px">S.No.</th>
+                                                        <th style="width: 400px">Leave Type</th>
+                                                        <th style="width: 150px">Balance</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="lt in newLeaveOpening.LeaveQuotaDetail">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{lt.Name}}</td>
+                                                        <td> <input type="number" class="form-control form-control-sm" ng-model="lt.NoOfLeave" /></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" style="min-width: 90px;" ng-click="ClearLeaveOpening()">Reset</button>
+                                            <button type="button" class="btn btn-primary" style="min-width: 90px;" ng-click="SaveUpdateLeaveOpening()">{{newLeaveOpening.Mode}}</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+
+
+

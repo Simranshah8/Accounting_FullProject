@@ -1,0 +1,1126 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/inventory/transaction/ManufacturingStockJournal.js?v=20240801"></script>
+<script>
+    var VoucherType = "@ViewBag.VoucherType";
+    var EntityId = "@ViewBag.EntityId";
+	 var DefaultKeyValues = "@ViewBag.DefaultKeyValues";
+</script>
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+<div ng-app="myApp" ng-controller="ManufacturingStockJournal" ng-init="getVoucherNo()" ng-cloak>
+    <div class="sale-page-wrap cstm-stock-journal-page-wrap" @*style="height:810px;"*@>
+        <div class="overflow-hidden hidden h-100 bg-white" style="overflow-y:auto!important">
+            @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+            @RenderPage("~/Views/Global/_LedgerDetails.cshtml")
+
+            <!-- Page Content  -->
+            <div class="content-wrapper-new pr-0 dynamic-uiux-page-wrap mfg-stock-journal-page">
+
+                <div class="card shadow-none">
+                    <div class="card-header header-corner-triangle py-1">
+                        <div class="row">
+                            <div class="col-md-11">
+                                <h3 class="card-title">ManufacturingStock Journal</h3>
+                            </div>
+                            <div class="col-sm-1 ml-auto text-right">
+                                <div class="d-flex float-right">
+                                    <div class="cursor-pointer"
+                                         data-toggle="collapse"
+                                         data-target="#collapseOne"
+                                         aria-expanded="{{!isCollapsed}}"
+                                         aria-controls="collapseOne"
+                                         ng-click="isCollapsed = !isCollapsed">
+                                        <i class="mt-2 mr-2 text-primary fas"
+                                           ng-class="{'fa-chevron-up': !isCollapsed, 'fa-chevron-down': isCollapsed}"></i>
+                                    </div>
+                                    <div class="dropdown cstm-more-actions">
+                                        <button class="btn btn-default right-sidebar-call dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            More
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <div class="custom-menu">
+                                                <button type="button" id="" class="btn btn-text-link w-100 ctmRightSidebarCollapse"> Remaining Details  <i class="fas fa-arrow-right m-0"></i></button>
+                                                <button type="button" id="ctmRightSidebarCollapse1" class="btn btn-secondary" ng-click="UDFClick=!UDFClick" ng-show="SelectedVoucher.ActiveUDF==true">UDF</button>
+                                                <input class="btn btn-secondary" id="ctmRightSidebarCollapse2" type="file" accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" product-file-model ng-model="ImportItemData.Files_TMP" itemfilepath="ItemFilePath" sheetcoll="SheetColl" />
+                                                <button class="btn btn-text-link w-100 dropdown-toggle w-100" type="button" ng-click="ShowMultipleModal()">
+                                                    <i class="fas fa-file-import"></i> Create Multiple Data
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gradient-bg">
+                        <div class="card-body px-1 py-2 pt-1">
+                            <div id="collapseOne" class="panel-collapse collapse in show" role="tabpanel" aria-labelledby="headingOne" ng-class="{'show': isCollapsed}">
+                                <section class="px-3">
+                                    <div class="form-inline dynamic-uiux">
+                                        <label class="mb-2 mr-sm-2" for="inlineFormInputName2">Stock Journal No.</label>
+                                        <input type="text" class="form-control form-control-sm serial  mb-2 mr-sm-3" placeholder="" ng-model="beData.AutoManualNo" readonly ng-hide="HideShow.AutoVoucherNo==true" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+
+                                        <label class="mb-2 mr-sm-2" for="inlineFormInputName2">From Godown</label>
+                                        <select class="form-control form-control-sm select2  mb-2 mr-sm-3" ng-model="beData.SourceGodownId">
+                                            <option ng-value="at.GodownId" ng-repeat="at in GodownColl" ng-selected="at.GodownId == beData.SourceGodownId">
+                                                {{at.Name}}
+                                            </option>
+                                        </select>
+
+                                        <label class="mb-2 mr-sm-2" for="inlineFormInputName2">To Godown</label>
+                                        <select class="form-control form-control-sm select2 mb-2 mr-sm-3" ng-model="beData.TargetGodownId" ng-change="GodownSelectionChange()">
+                                            <option ng-value="at.GodownId" ng-repeat="at in GodownColl" ng-selected="at.GodownId == beData.TargetGodownId">
+                                                {{at.Name}}
+                                            </option>
+                                        </select>
+
+                                        <label class="mb-2 mr-sm-2 ml-auto" for="inlineFormInputName2">Date</label>
+                                        <input type="date" class="form-control form-control-sm mb-2" />
+                                    </div>
+                                </section>
+                                @*<div class="row" style="display:flex;justify-content:space-between">
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label>Stock Journal No.</label>
+                        <div>
+                            <input type="text" class="form-control form-control-sm serial" placeholder="" ng-model="beData.AutoManualNo" readonly ng-hide="HideShow.AutoVoucherNo==true" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" class="form-control form-control-sm" />
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label>From Godown</label>
+                        <select class="form-control form-control-sm select2" ng-model="beData.SourceGodownId">
+                            <option ng-value="at.GodownId" ng-repeat="at in GodownColl" ng-selected="at.GodownId == beData.SourceGodownId">
+                                {{at.Name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label>To Godown</label>
+                        <select class="form-control form-control-sm select2" ng-model="beData.TargetGodownId" ng-change="GodownSelectionChange()">
+                            <option ng-value="at.GodownId" ng-repeat="at in GodownColl" ng-selected="at.GodownId == beData.TargetGodownId">
+                                {{at.Name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>*@
+                            </div>
+                            <section class="px-3  my-2">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <p class="text-primary"><strong>Consumption</strong></p>
+                                    </div>
+                                    <div class="col-md-4 col-xl-3">
+                                        <div class="form-inline">
+                                            <label>Code</label>
+                                            <input type="number" class="form-control form-control-sm ml-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+
+                            <div class="table-scroll-x-y h-auto">
+                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                    <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                        <table id="main-table" make-table-resizable class="main-table col-shadow-table table table-sm table-bordered bg-white dynamic-uiux-table">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2" class="text-center align-middle sn-col-width" style="width:60px;z-index: 3;">SN.</th>
+                                                    <th rowspan="2" class="text-center align-middle particular-col-width" style="width:170px;z-index: 3;">Particulars</th>
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 150px;z-index: 3;" ng-hide="HideShow.CurrentBalance==true">Closing Stock</th>
+                                                    @*<th rowspan="2" class="text-center align-middle" style="width: 150px" ng-hide="HideShow.ProductLedger==true">Sales Ledger</th>*@
+                                                    <th ng-colspan=" HideShow.BilledQty==true ? 2 : 1" scope="colgroup" class="text-center" style="width: 200px;z-index: 3;">Quantity</th>
+                                                    @*<th colspan="2" scope="colgroup" class="text-center" style="width: 200px" ng-hide="HideShow.FreeQty==true">Fee</th>
+                                <th rowspan="2" class="text-center align-middle" style="width: 150px" ng-hide="HideShow.AlternetUnit==true">Alternate Unit</th>*@
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 100px;z-index: 3;">Rate</th>
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 100px;z-index: 3;">Per</th>
+                                                    @*<th colspan="2" scope="colgroup" class="text-center" style="width: 180px" ng-hide="HideShow.Discount==true">Discount</th>
+                                <th colspan="2" scope="colgroup" class="text-center" style="width: 150px" ng-hide="HideShow.Scheme==true">Scheme</th>*@
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 120px;z-index: 3;">Amount</th>
+                                                    <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px;">
+                                                        <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                            <option value="" disabled selected>Action</option>
+                                                            <option value="save">Save Layout</option>
+                                                            <option value="reset">Reset Layout</option>
+                                                        </select>
+                                                    </th>
+                                                </tr>
+
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="itemDet in beData.ItemDetailsColl">
+                                                    <th class="text-center" ng-click="ShowCurProductDetail(itemDet,$index)">
+                                                        <u>{{$index+1}}</u>
+                                                    </th>
+                                                    <td>
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId" style="width:100%"
+                                                                placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData"></select>
+                                                    </td>
+                                                    <td ng-hide="HideShow.CurrentBalance==true">
+                                                        <input type="text" class="form-control form-control-sm" readonly name="Current Balance" ng-model="itemDet.ClosingQty">
+                                                    </td>
+
+                                                    <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" name="ActualQty" style="text-align:center" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'aQty')" ng-model="itemDet.ActualQty" ng-style="itemDet.IsNegativeQty==true && { 'color' : 'red' }"></td>
+                                                    <td ng-hide="HideShow.BilledQty==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:center" name="BilledQty" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'bQty')" ng-model="itemDet.BilledQty"></td>
+                                                    <td ng-hide="HideShow.FreeQty==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:center" name="FreeQty" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'fQty')" ng-model="itemDet.FreeQty"></td>
+                                                    <td ng-hide="HideShow.FreeQty==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="TotalQty" onfocus="this.select();" ng-model="itemDet.TotalQty"></td>
+                                                    <td ng-hide="HideShow.AlternetUnit==true"><input type="text" class="form-control form-control-sm hideSideBar" name="Alternet Unit" ng-model="itemDet.AlternetUnitDet"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="Rate" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'rate')" ng-model="itemDet.Rate" ng-readonly="itemDet.CanEditRate==false"></td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm hideSideBar" readonly name="Unit" ng-model="itemDet.UnitName">
+                                                    </td>
+                                                    <td ng-hide="HideShow.Discount==true || HideShow.DiscountPer==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'disPer')" ng-model="itemDet.DiscountPer"></td>
+                                                    <td ng-hide="HideShow.Discount==true || HideShow.DiscountAmt==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'disAmt')" ng-model="itemDet.DiscountAmt"></td>
+                                                    <td ng-hide="HideShow.Scheme==true || HideShow.SchemePer==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'schPer')" ng-model="itemDet.SchamePer"></td>
+                                                    <td ng-hide="HideShow.Scheme==true || HideShow.SchemeAmt==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'schAmt')" ng-model="itemDet.SchameAmt"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" name="Amount" ng-model="itemDet.Amount" readonly ng-blur="AddRowInItemDetails($index,true)"></td>
+                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a class="btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Row" ng-click="AddRowInItemDetails($index,false)"><i class="fas fa-plus"></i></a>
+                                                            <a class="btn btn-danger text-white ml-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Row." ng-click="delRowFromItemDetails($index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end form fiels -->
+
+
+                            <section class="px-3  my-2">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <p class="text-primary"><strong>Production</strong></p>
+                                    </div>
+                                    <div class="col-md-4 col-xl-3">
+                                        <div class="form-inline">
+                                            <label>Code</label>
+                                            <input type="number" class="form-control form-control-sm ml-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <div class="table-scroll-x-y h-auto">
+                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                    <div class="table-h-scrollbar-fix table-scroll-wrapper">
+                                        <table id="main-table" make-table-resizable class="main-table col-shadow-table table table-sm table-bordered bg-white dynamic-uiux-table">
+                                            <thead>
+                                                <tr>
+                                                    <th rowspan="2" class="text-center align-middle sn-col-width" style="width: 80px; z-index: 3;">SN.</th>
+                                                    <th rowspan="2" class="text-center align-middle particular-col-width" style="width: 150px; z-index: 3;">Particulars</th>
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 130px;z-index: 3;" ng-hide="HideShow.CurrentBalance==true">Closing Stock</th>
+                                                    @*<th rowspan="2" class="text-center align-middle" style="width: 150px" ng-hide="HideShow.ProductLedger==true">Sales Ledger</th>*@
+                                                    <th ng-colspan=" HideShow.BilledQty==true ? 2 : 1" scope="colgroup" class="text-center" style="width: 140px;z-index: 3;">Quantity</th>
+                                                    @*<th colspan="2" scope="colgroup" class="text-center" style="width: 200px" ng-hide="HideShow.FreeQty==true">Fee</th>
+                                <th rowspan="2" class="text-center align-middle" style="width: 150px" ng-hide="HideShow.AlternetUnit==true">Alternate Unit</th>*@
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 90px;z-index: 3;">Rate</th>
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 90px;z-index: 3;">Per</th>
+                                                    @*<th colspan="2" scope="colgroup" class="text-center" style="width: 180px" ng-hide="HideShow.Discount==true">Discount</th>
+                                <th colspan="2" scope="colgroup" class="text-center" style="width: 150px" ng-hide="HideShow.Scheme==true">Scheme</th>*@
+                                                    <th rowspan="2" class="text-center align-middle" style="width: 90px;z-index: 3;">Amount</th>
+                                                    <th rowspan="2" class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px;">
+                                                        <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                            <option value="" disabled selected>Action</option>
+                                                            <option value="save">Save Layout</option>
+                                                            <option value="reset">Reset Layout</option>
+                                                        </select>
+                                                    </th>
+                                                </tr>
+
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="itemDet in beData.ProductionDetailsColl">
+                                                    <th align="center" ng-click="ShowCurProductDetail1(itemDet,$index)">
+                                                        <u>{{$index+1}}</u>
+                                                    </th>
+                                                    <td>
+                                                        <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="itemDet.ProductId" style="width:100%"
+                                                                placeholder="** Select Product  **" showdetails="true" confirm-action="ProductSelectionChange(itemDet)" product-detail="itemDet.productDetail" side-bar-data="itemDet.sideBarData"></select>
+                                                    </td>
+                                                    <td ng-hide="HideShow.CurrentBalance==true">
+                                                        <input type="text" class="form-control form-control-sm" readonly name="Current Balance" ng-model="itemDet.ClosingQty">
+                                                    </td>
+
+                                                    <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" name="ActualQty" style="text-align:center" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'aQty')" ng-model="itemDet.ActualQty" ng-style="itemDet.IsNegativeQty==true && { 'color' : 'red' }"></td>
+                                                    <td ng-hide="HideShow.BilledQty==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:center" name="BilledQty" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'bQty')" ng-model="itemDet.BilledQty"></td>
+                                                    <td ng-hide="HideShow.FreeQty==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:center" name="FreeQty" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'fQty')" ng-model="itemDet.FreeQty"></td>
+                                                    <td ng-hide="HideShow.FreeQty==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="TotalQty" onfocus="this.select();" ng-model="itemDet.TotalQty"></td>
+                                                    <td ng-hide="HideShow.AlternetUnit==true"><input type="text" class="form-control form-control-sm hideSideBar" name="Alternet Unit" ng-model="itemDet.AlternetUnitDet"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" name="Rate" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'rate')" ng-model="itemDet.Rate" ng-readonly="itemDet.CanEditRate==false"></td>
+                                                    <td>
+                                                        <input type="text" class="form-control form-control-sm hideSideBar" readonly name="Unit" ng-model="itemDet.UnitName">
+                                                    </td>
+                                                    <td ng-hide="HideShow.Discount==true || HideShow.DiscountPer==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'disPer')" ng-model="itemDet.DiscountPer"></td>
+                                                    <td ng-hide="HideShow.Discount==true || HideShow.DiscountAmt==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'disAmt')" ng-model="itemDet.DiscountAmt"></td>
+                                                    <td ng-hide="HideShow.Scheme==true || HideShow.SchemePer==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'schPer')" ng-model="itemDet.SchamePer"></td>
+                                                    <td ng-hide="HideShow.Scheme==true || HideShow.SchemeAmt==true"><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" ng-change="ChangeItemRowValue(itemDet,'schAmt')" ng-model="itemDet.SchameAmt"></td>
+                                                    <td><input type="text" number-input class="form-control form-control-sm serial hideSideBar" style="text-align:right" onfocus="this.select();" name="Amount" ng-model="itemDet.Amount" readonly ng-blur="AddRowInItemDetails($index,true)"></td>
+                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="z-index:3;">
+                                                        <div class="btn-group btn-group-sm">
+                                                            <a class="btn btn-info text-white" data-toggle="tooltip" data-placement="top" title="" data-original-title="Add Row" ng-click="AddRowInProductionDetails($index,false)"><i class="fas fa-plus"></i></a>
+                                                            <a class="btn btn-danger text-white ml-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete Row." ng-click="delRowFromProductionDetails($index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- /.card body -->
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+            </div>
+        </div>
+        <footer class="main-footer control-btns pt-0">
+            <div class="secondary-footer mb-2 mt-2">
+                <div class="row">
+                    <div class="col-md-8 col-xl-9">
+                        <div class="form-group">
+                            <input type="text" list="lstNarration" class="form-control form-control-sm hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                            <datalist id="lstNarration">
+                                <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                            </datalist>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-xl-3">    
+                        <div class="form-inline justify-content-end">
+                            <label for="inputEmail3" class="mb-0 mr-sm-2 font-weight-bold text-dark">Total:</label>
+                            <input type="text" number-input class="form-control form-control-sm hideSideBar" style="text-align:right;" placeholder="" readonly ng-model="beData.TotalAmount">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="col-sm-12">
+                    <form class="form-inline justify-content-end">
+
+                        <button type="button" class="btn btn-default ml-1" ng-click="SearchData()">Search</button>
+                        <button type="button" class="btn btn-outline-danger ml-1" ng-click="ClearData()">Reset</button>
+                        <button type="button" class="btn btn-primary ml-1" ng-click="SaveSalesQuotation()" ng-disabled="loadingstatus=='running'">Save</button>
+                    </form>
+                </div>
+            </div>
+        </footer>
+
+
+        <!-- Sales Quotation Details Modal demo 2 -->
+        <div class="modal fade bd-example-modal-xl dynamic-uiux-modal modal-static-esc cstm-sales-quatation-details-modal" id="frmSalesQuotationDetailsModel" @*tabindex="-1"*@ role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Sales Quotation Details</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body ">
+                        <div id="table-scroll">
+                            <div id="datatable" style="height: calc(55vh - 200px);width: 100%;" class="ag-theme-balham"></div>
+                        </div>
+                        <div class="sec3">
+                            <article>
+                                <h6 class="title">Dispatch Details</h6>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-lg-5 col-form-label">Dispatch Through:</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.DespatchThrough">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-lg-5 col-form-label">Destination:</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.Destination">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                            <article>
+                                <h6 class="title">Quotation Details</h6>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-lg-5 col-form-label">Mode/Terms Of Payments:</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.TermsOfPayment">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-lg-5 col-form-label">Other References:</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.OtherRefernces">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-group row">
+                                            <label for="inputEmail3" class="col-lg-5 col-form-label">Terms Of Delivery:</label>
+                                            <div class="col-lg-7">
+                                                <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.TermsOfDelivery">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                            <article>
+                                <h6 class="title">Buyer Details</h6>
+                                <div class="article-body">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-5 col-form-label">Buyer</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.Buyes">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Address</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.Address">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Contact No.</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" name="VoucherDate" ng-model="beData.SalesQuotationDetail.ContactNo" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-5 col-form-label">PAN/VAT No.</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="beData.SalesQuotationDetail.SalesTaxNo">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- end row -->
+                                </div>
+                            </article>
+                            <article>
+                                <h6 class="title">Vehicle Details</h6>
+                                <div class="article-body">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-5 col-form-label">Regd No. :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.RegdNo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Engine No. :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" ng-model="beData.SalesQuotationDetail.EngineNo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Ch.Srl.No. :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" ng-model="beData.SalesQuotationDetails.ChassisNo" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-5 col-form-label">Model :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="beData.SalesQuotationDetails.Model">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Vin No. :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="" ng-model="beData.SalesQuotationDetails.VinNo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Displacement</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" ng-model="beData.SalesQuotationDetails.Displacement" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-5 col-form-label">Variant :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" ng-model="beData.SalesQuotationDetails.Variant" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Fuel Type :</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" ng-model="beData.SalesQuotationDetails.FuelType" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-4 offset-lg-1 col-form-label">Transmission</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" ng-model="beData.SalesQuotationDetails.Transmission" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <div class="form-group row">
+                                                <label for="inputEmail3" class="col-lg-5 col-form-label">Color</label>
+                                                <div class="col-lg-7">
+                                                    <input type="text" class="form-control form-control-sm float-right" name="VoucherDate" ng-model="beData.SalesQuotationDetails.Color" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <!-- end row -->
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary dynamic-uiux-sm-btn" data-dismiss="modal">Cancel</button>
+                        @*<button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Edit</button>*@
+                        <button type="button" class="btn btn-sm btn-primary dynamic-uiux-sm-btn" ng-click="LoadRefProduct()">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <!--  Party's A/c No. right button Modal demo -->
+        <div class="modal fade sales-quotation-page-modal dynamic-uiux-modal modal-static-esc" id="partyAccRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle"></h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-1 col-form-label col-form-label-sm">Find</label>
+                                    <div class="col-sm-10">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm">
+                                                    <option>Contai</option>
+                                                    <option>2</option>
+                                                    <option>3</option>
+                                                    <option>4</option>
+                                                    <option>5</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control from-control-sm" placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-3 col-form-label col-form-label-sm text-center">Search By</label>
+                                    <div class="col-sm-9">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm">
+                                                    <option>Days</option>
+                                                    <option>2</option>
+                                                    <option>3</option>
+                                                    <option>4</option>
+                                                    <option>5</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control from-control-sm" placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="">
+                            <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>SN.</th>
+                                        <th>Days</th>
+                                        <th>Invoice No.</th>
+                                        <th>Date</th>
+                                        <th> Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>7</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>8</td>
+                                        <td>12</td>
+                                        <td>FB3633</td>
+                                        <td>2077/01/14</td>
+                                        <td>
+                                            1104633.76
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3"></td>
+                                        <td class="font-weight-bold">Total</td>
+                                        <td class="font-weight-bold">00.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer justify-content-between align-items-center py-2">
+                        <h6 class="mb-0">Total Record: 1</h6>
+                        <div class="">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Edit</button>
+                            <button type="button" class="btn btn-sm btn-primary">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--  Search Voucher right button Modal demo -->
+        <div class="modal fade sales-quotation-page-modal document-attach-modal modal-header-n-sec-scrollbar-fix" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header p-2">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Search ManufacturingStock Journal</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group row">
+                                    <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                    <div class="col-sm-10">
+                                        <div class="input-group input-group-sm mb-3">
+                                            <div class="input-group-prepend">
+                                                <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                    <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions">{{asp.text}}</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                                            <div class="input-group-append">
+                                                <div class="input-group-text">
+                                                    <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <form class="float-right">
+                                    <div class="form-row align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                            <input type="text" ng-model="paginationOptions.pageSize" class="form-control form-control-sm input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="">
+                            <table id="main-table" class="main-table table table-sm table-striped table-bordered dynamic-uiux-table">
+                                <thead>
+                                    <tr>
+                                        <th>Voucher No</th>
+                                        <th>RefNo</th>
+                                        <th>Voucher Date</th>
+                                        <th>Voucher Name</th>
+                                        <th>CostClass</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                        <td align="center">{{sd.VoucherNo}}</td>
+
+                                        <td>{{sd.RefNo}}</td>
+                                        <td align="center">{{sd.VoucherDate |dateFormat}}</td>
+                                        <td>{{sd.VoucherName}}</td>
+                                        <td>{{sd.CostClass}}</td>
+                                        <td>
+                                            <a class="p-1" href="#" ng-click="GetStockJournalById(TranId)">
+                                                <i class="fas fa-edit text-info"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="DelClassById(cl)">
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                            <a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                                <i class="fas fa-print text-primary"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                            <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                     on-page-change="ReSearchData(newPageNumber)">
+                            </dir-pagination-controls>
+                        </div>
+
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer justify-content-between align-items-center py-2">
+                        <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                        <div class="">
+                            <button type="button" class="btn btn-sm btn-outline-primary load dynamic-uiux-sm-btn" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Product Detail Modal Starts-->
+        <div class="modal cstm-ledger-detail-modal fade modal-static-esc modal-header-n-sec-scrollbar-fix" id="ProductDetail" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style="overflow-y: auto;">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content gradient-bg">
+                    <div class="modal-header p-2">
+                        <h6 class="modal-title text-primary">
+                            Product Detail of  <strong>  {{CurProductDet.Name}}</strong>
+                        </h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body py-0">
+
+
+                        @*New UIUX 4 Jun 2025*@
+                        <div class="cstm-ledger-detail-modal-data">
+                            <div class="timeline1 registration-form mt-2 mb-0">
+
+                                <!-- timeline item -->
+                                <div class="collapse show" id="lederDetailsCustomerInfo">
+                                    <div class="timeline-item mb-1 ml-0">
+
+                                        @*New added by UIUX*@
+                                        <div class="row no-gutters">
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">HSN Code</span>
+                                                    <span class="desc" ng-if="CurProductDet.HSCode">{{CurProductDet.HSCode }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.HSCode">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Bar Code</span>
+                                                    <span class="desc" ng-if="CurProductDet.Code">{{CurProductDet.Code }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.Code">---</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Group</span>
+                                                    <span class="desc" ng-if="CurProductDet.ProductGroup">{{CurProductDet.ProductGroup }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ProductGroup">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Product Type</span>
+                                                    <span class="desc" ng-if="CurProductDet.ProductType">{{CurProductDet.ProductType }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ProductType">---</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Closing Stock</span>
+                                                    <span class="desc" ng-if="CurProductDet.ClosingQty">{{CurProductDet.ClosingQty }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ClosingQty">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Godown/Location</span>
+                                                    <span class="desc" ng-if="CurProductDet.Godown">{{CurProductDet.Godown }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.Godown">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Rack/Bin</span>
+                                                    <span class="desc" ng-if="CurProductDet.Rack">{{CurProductDet.Rack }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.Rack">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Purchase Ledger</span>
+                                                    <span class="desc" ng-if="CurProductDet.PurchaseLedger">{{CurProductDet.PurchaseLedger }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.PurchaseLedger">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <span class="sm-title">Sales Rate</span><br />
+                                                            <span class="desc" ng-if="CurProductDet.SalesRate">{{CurProductDet.SalesRate |formatNumber }}</span>
+                                                            <span class="desc" ng-if="!CurProductDet.SalesRate">---</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <span class="sm-title">Applicable From</span><br />
+                                                            <span class="desc" ng-if="CurProductDet.SalesRateApplicableFromBS">{{CurProductDet.SalesRateApplicableFromBS }}</span>
+                                                            <span class="desc" ng-if="!CurProductDet.SalesRateApplicableFromBS">---</span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <span class="sm-title">MRP</span><br />
+                                                            <span class="desc" ng-if="CurProductDet.MRP">{{CurProductDet.MRP |formatNumber }}</span>
+                                                            <span class="desc" ng-if="!CurProductDet.MRP">---</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <span class="sm-title">Applicable From</span><br />
+                                                            <span class="desc" ng-if="CurProductDet.MRPApplicableFrom">{{CurProductDet.MRPApplicableFrom }}</span>
+                                                            <span class="desc" ng-if="!CurProductDet.MRPApplicableFrom">---</span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <span class="sm-title">Cost Rate</span><br />
+                                                            <span class="desc" ng-if="CurProductDet.PurchaseRate">{{CurProductDet.PurchaseRate |formatNumber }}</span>
+                                                            <span class="desc" ng-if="!CurProductDet.PurchaseRate">---</span>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <span class="sm-title">Applicable From</span><br />
+                                                            <span class="desc" ng-if="CurProductDet.PurchaseRateApplicableFromBS">{{CurProductDet.PurchaseRateApplicableFromBS }}</span>
+                                                            <span class="desc" ng-if="!CurProductDet.PurchaseRateApplicableFromBS">---</span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Base Unit</span>
+                                                    <span class="desc" ng-if="CurProductDet.BaseUnit">{{CurProductDet.BaseUnit }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.BaseUnit">---</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Category</span>
+                                                    <span class="desc" ng-if="CurProductDet.ProductCategories">{{CurProductDet.ProductCategories }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ProductCategories">---</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Brand</span>
+                                                    <span class="desc" ng-if="CurProductDet.ProductBrand">{{CurProductDet.ProductBrand }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ProductBrand">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Company</span>
+                                                    <span class="desc" ng-if="CurProductDet.ProductCompany">{{CurProductDet.ProductCompany }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ProductCompany">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">IsTaxable</span>
+                                                    <span class="desc" ng-if="CurProductDet.IsTaxable">{{CurProductDet.IsTaxable }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.IsTaxable">---</span>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Excise Duty Rate</span>
+                                                    <span class="desc" ng-if="CurProductDet.EXDutyRate">{{CurProductDet.EXDutyRate }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.EXDutyRate">---</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Excise Unit</span>
+                                                    <span class="desc" ng-if="CurProductDet.ExDutyUnit">{{CurProductDet.ExDutyUnit }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ExDutyUnit">---</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Excise On</span>
+                                                    <span class="desc" ng-if="CurProductDet.ExciseOn">{{CurProductDet.ExciseOn }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.ExciseOn">---</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 col-xl-3">
+                                                <div class="two-line-info">
+                                                    <span class="sm-title">Costing Method</span>
+                                                    <span class="desc" ng-if="CurProductDet.CostingMethod">{{CurProductDet.CostingMethod }}</span>
+                                                    <span class="desc" ng-if="!CurProductDet.CostingMethod">---</span>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                        @*end - added by UIUX*@
+
+                                        <!--Alternate Unit Detail Card Starts-->
+                                        <div class="mt-3" id="alternateunitecard" style="min-height:170px;">
+                                            <div class="card-heading">
+                                                <h6 class="text-primary"><b>Set Alternate Unit</b></h6>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="table-responsive mb-4" style="max-height: 250px;">
+                                                        <table id="main-table5" class="main-table table table-head-fixed table-sm table-bordered bg-white dynamic-uiux-table">
+                                                            <thead style="background-color: #e6f5fb;">
+
+                                                                <tr>
+                                                                    <th style="width: 130px;">Base Unit Value</th>
+                                                                    <th style="width: 130px;">Base Unit</th>
+                                                                    <th style="width: 130px;">Net Value</th>
+                                                                    <th style="width: 130px;">Gross Value</th>
+                                                                    <th style="width: 130px;">Alternate Unit</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="au in CurProductDet.AlternetUnitColl">
+                                                                    <td>{{au.BaseUnitValue}}</td>
+                                                                    <td>{{au.BaseUnitName}}</td>
+                                                                    <td>{{au.AlternetUnitValue}}</td>
+                                                                    <td>{{au.GrossValue}}</td>
+                                                                    <td>
+                                                                        {{au.UnitName}}
+                                                                    </td>
+
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <!--Alternate Unit Detail Card Ends-->
+                                    </div>
+                                </div>
+                                <!-- END timeline item -->
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--Product Detail Modal Starts-->
+
+        @RenderPage("~/Global/_ReportTemplates.cshtml");
+        @RenderPage("~/Views/Global/_IsValidTran.cshtml")
+    </div>
+</div>
+<script>
+    (function ($) {
+
+        "use strict";
+
+        var fullHeight = function () {
+
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+
+        $('.ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>
+
+
+<script>
+
+    $(document).ready(function () {
+
+        $(document).on('keyup', '.serial', function (e) {
+            if (e.which == 13) {
+                //var key = e.charCode ? e.charCode : e.keyCode ? e.keyCode : 0;
+                //if (key == 13) {
+                //    e.preventDefault();
+                //    var inputs = $(this).closest('form').find(':input:visible');
+                //    inputs.eq(inputs.index(this) + 1).focus();
+                //}
+
+                var index = $('.serial').index(this) + 1;
+                $('.serial').eq(index).focus();
+            }
+        });
+
+
+
+    });
+
+
+</script>
+<script>
+    angular.element(document).ready(function () {
+        $('.cstm-sales-invoice-table').on('select2:select', '.select2', function (e) {
+            const wrapper = $('.table-scroll-wrapper');
+
+            // Scroll to bottom
+            wrapper.animate({ scrollTop: wrapper[0].scrollHeight }, 300);
+        });
+    });
+
+</script>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

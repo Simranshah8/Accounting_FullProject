@@ -1,0 +1,590 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+</style>
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/hr/Master/EmployeePromotion.js"></script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="EmployeePromotionController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearDetails()">Employee Promotion</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm mr-2">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text cstm">Show</span>
+                                                </div>
+                                                <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.EmployeePromotion">
+                                                    <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="">{{pp.text}}</option>
+                                                </select>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text bg-white"><small>entries</small></span>
+                                                </div>
+                                            </div>
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input class="form-control form-control-navbar" type="search"
+                                                       placeholder="Search" aria-label="Search" ng-model="searchData.EmployeePromotion">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllEmpPromotion()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right"
+                                             aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'EmployeePromotion'" report-name="'List of Employee Promotion'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                            <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false',reportName:'EmployeePromotion',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                        </div>
+                                        <a print-tbl report-name="'Employee Promotion'" table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="mt-2 table-scroll-x-y table-container flex-grow-1 ">
+                                <div class="outer-scroll-wrapper-h-scrollbar-fix">
+                                    <div class="table-h-scrollbar-fix table-scroll-wrapper pb-2" style="height:auto; max-height: calc(100vh - 8rem)!important;">
+                                        <table id="main-table" make-table-resizable class="main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                            <thead style="background: #e6f5fb;">
+                                                <tr>
+                                                    <th style="width: 50px">S.NO</th>
+                                                    <th style="width: 100px">Code</th>
+                                                    <th style="width: 215px">Employee</th>
+                                                    <th style="width: 150px">Branch</th>
+                                                    <th style="width: 150px">Department</th>
+                                                    <th style="width: 150px">Category</th>
+                                                    <th style="width: 150px">Job Title</th>
+                                                    <th style="width: 150px">Grade</th>
+                                                    <th style="width: 150px">Service Type</th>
+                                                    <th style="width: 150px">Designation</th>
+                                                    <th style="width: 130px">Promotion Date</th>
+                                                    <th style="width: 130px ">Effective From</th>
+                                                    <th style="width: 130px ">Promotion By</th>
+                                                    <th style="width: 130px ">LogDate</th>
+                                                    <th style="width: 130px ">Update Time</th>
+                                                    <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 100px;">
+                                                        <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                            <option value="" disabled selected>Action</option>
+                                                            <option value="save">Save Layout</option>
+                                                            <option value="reset">Reset Layout</option>
+                                                        </select>
+                                                    </th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="beData in TableData | filter:searchData.EmployeePromotion| itemsPerPage:perPage.EmployeePromotion" current-page="currentPages.EmployeePromotion" pagination-id="EmployeePromotionPagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{beData.EmployeeCode}}</td>
+                                                    <td>{{beData.EmployeeName}}</td>
+                                                    <td>{{beData.BranchName}}</td>
+                                                    <td>{{beData.Department}}</td>
+                                                    <td>{{beData.CategoryName}}</td>
+                                                    <td>{{beData.NewJTitle}}</td>
+                                                    <td>{{beData.LevelName}}</td>
+                                                    <td>{{beData.ServiceTypeName}}</td>
+                                                    <td>{{beData.DesignationName}}</td>
+                                                    <td>{{beData.PromotionMitti}}</td>
+                                                    <td>{{beData.EffectiveMitti}}</td>
+                                                    <td>{{beData.PromotionBy}}</td>
+                                                    <td>{{beData.LogMitti}}</td>
+                                                    <td>{{beData.UpdateMitti}}</td>
+                                                    <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 80px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-info" ng-click="GetEmpPromotionById(beData)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a class="p-1" ng-click="PreviewDocument(beData)">
+                                                                <i class="fas fa-eye text-info"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="EmployeePromotionPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade pb-5" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+
+                                        <div class="col-sm-6 col-lg-6 col-md-6">
+                                            <div class="form-group">
+                                                <label>Employee Name<span class="text-danger">*</span></label>
+                                                <div class="input-group-prepend">
+                                                    <select class="input-group-text dropdown-toggle p-0" style="outline: none; border-top-right-radius: unset; border-bottom-right-radius: unset; margin-right: -3px; z-index: 1;" ng-model="newEmployeePromotion.SelectEmployee">
+                                                        <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==newEmployeePromotion.EmployeeSearchBy">{{ss.text}}</option>
+                                                    </select>
+                                                    <select class="form-control select2bs4 form-control-sm select2" all-employee ng-model="newEmployeePromotion.UserId" employee-detail="newEmployeePromotion.EmployeeDetails" side-bar-data="newEmployeePromotion.EmpSideBarData" search-by="newEmployeePromotion.EmployeeSearchBy" Confirm-action="getEmployeeById(newEmployeePromotion)">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @*<div class="col-sm-6 col-lg-6 col-md-6">
+                                            <div class="form-group">
+                                                <label>Employee Name<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.EmployeeId" ng-change=" (newEmployeePromotion)">
+                                                    <option ng-value="D.EmployeeId" ng-repeat="D in EmployeeList" ng-selected="D.EmployeeId==newEmployeePromotion.EmployeeId">{{D.Name}}-{{D.EmployeeCode}}</option>
+                                                </select>
+                                            </div>
+                                        </div>*@
+                                        <div class="col-md-3 pl-0">
+                                            <div class="form-group">
+                                                <label>Promotion Date<span class="text-danger">*</span></label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newEmployeePromotion.PromotionDate_TMP" date-detail="newEmployeePromotion.PromotionDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Effective Date<span class="text-danger">*</span></label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="newEmployeePromotion.EffectiveDate_TMP" date-detail="newEmployeePromotion.EffectiveDateDet">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 py-3 pr-0">
+                                            <div class="d-flex flex-column">
+                                                <label><strong>Current</strong></label>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Branch:</label>
+                                                        <select class="form-control form-control-sm" ng-model="newEmployeePromotion.BranchId" disabled>
+                                                            <option ng-value="D.id" ng-repeat="D in BranchList" ng-selected="D.id==newEmployeePromotion.BranchId">{{D.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Department:</label>
+                                                        <select class="form-control form-control-sm " ng-model="newEmployeePromotion.DepartmentId" disabled>
+                                                            <option ng-value="D.CostCenterDepartmentId" ng-repeat="D in DepartmentList" ng-selected="D.CostCenterDepartmentId==newEmployeePromotion.DepartmentId">{{D.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Category:</label>
+                                                        <select class="form-control form-control-sm" ng-model="newEmployeePromotion.CategoryId" disabled>
+                                                            <option ng-value="C.CategoryId" ng-repeat="C in CategoryList" ng-selected="C.CategoryId==newEmployeePromotion.CategoryId">{{C.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Job Title:</label>
+                                                        <input class="form-control form-control-sm" ng-model="newEmployeePromotion.JTitle" disabled />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Grade:</label>
+                                                        <select class="form-control form-control-sm" ng-model="newEmployeePromotion.ELevelId" disabled>
+                                                            <option ng-value="G.LevelId" ng-repeat="G in LevelList" ng-selected="G.LevelId==newEmployeePromotion.ELevelId">{{G.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Service Type:</label>
+                                                        <select class="form-control form-control-sm" ng-model="newEmployeePromotion.ServiceTypeId" disabled>
+                                                            <option ng-value="S.ServiceTypeId" ng-repeat="S in ServiceTypeList" ng-selected="S.ServiceTypeId==newEmployeePromotion.ServiceTypeId">{{S.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Designation:</label>
+                                                        <select class="form-control form-control-sm" ng-model="newEmployeePromotion.DesignationId" disabled>
+                                                            <option ng-value="D.DesignationId" ng-repeat="D in DesignationList" ng-selected="D.DesignationId==newEmployeePromotion.DesignationId">{{D.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 py-3 pr-0">
+                                            <div class="d-flex flex-column pr-0">
+                                                <label><strong>New</strong></label>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Branch:</label>
+                                                        <select class="form-control form-control-sm  select2" ng-model="newEmployeePromotion.NewBranchId">
+                                                            <option ng-value="B.id" ng-repeat="B in BranchList" ng-selected="B.id==newEmployeePromotion.NewBranchId">{{B.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Department:</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.NewDepartmentId">
+                                                            <option ng-value="D.CostCenterDepartmentId" ng-repeat="D in DepartmentList" ng-selected="D.CostCenterDepartmentId==newEmployeePromotion.NewDepartmentId">{{D.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Category:</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.NewCategoryId">
+                                                            <option ng-value="C.CategoryId" ng-repeat="C in CategoryList" ng-selected="C.CategoryId==newEmployeePromotion.NewCategoryId">{{C.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Job Title:</label>
+                                                        <input class="form-control form-control-sm" ng-model="newEmployeePromotion.NewJTitle" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Grade:</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.NewLevelId">
+                                                            <option ng-value="G.LevelId" ng-repeat="G in LevelList" ng-selected="G.id==newEmployeePromotion.NewLevelId">{{G.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Service Type:</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.NewServiceTypeId">
+                                                            <option ng-value="S.ServiceTypeId" ng-repeat="S in ServiceTypeList" ng-selected="S.ServiceTypeId==newEmployeePromotion.NewServiceTypeId">{{S.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 pl-0">
+                                                    <div class="form-group">
+                                                        <label>Designation:</label>
+                                                        <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.NewDesignationId">
+                                                            <option ng-value="D.DesignationId" ng-repeat="D in DesignationList" ng-selected="D.DesignationId==newEmployeePromotion.NewDesignationId">{{D.Name}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Recommended By:</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.RecommendedById">
+                                                    <option ng-value="R.EmployeeId" ng-repeat="R in EmployeeList" ng-selected="R.EmployeeId==newEmployeePromotion.RecommendedById">{{R.Name}}-{{R.EmployeeCode}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Verified By<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="newEmployeePromotion.VerifiedById">
+                                                    <option ng-value="V.EmployeeId" ng-repeat="V in EmployeeList" ng-selected="V.EmployeeId==newEmployeePromotion.VerifiedById">{{V.Name}}-{{V.EmployeeCode}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Recommended Remarks</label>
+                                                <textarea type="text" class="form-control form-control-sm" ng-model="newEmployeePromotion.RecommendedRemarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 ">
+                                            <div class="form-group">
+                                                <label>Verified Remarks<span class="text-danger">*</span></label>
+                                                <textarea type="text" class="form-control form-control-sm" ng-model="newEmployeePromotion.VerifiedRemarks"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newEmployeePromotion.Remarks" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <button type="button" class="btn btn-default dynamic-uiux" data-toggle="modal" data-target="#documentAttachModal">
+                                                Document Attach ({{ (newEmployeePromotion.AttechFiles.length+(newEmployeePromotion.DocumentColl ? newEmployeePromotion.DocumentColl.length : 0)) }} )
+                                            </button><spna class="text-danger">*</spna>
+                                        </div>
+                                        <div class="text-right control-btns col-sm-8">
+                                            <button type="button" class="btn btn-default" ng-click="ClearDetails()">Clear</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateEmpPromotion()">Save</button>
+                                        </div>
+                                    </div>
+                                </footer>
+                            </div>
+                            <div class="modal fade sales-invoice-page-modal document-attach-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body gradient-bg">
+                                            <div class="timeline-item">
+                                                <div class="add-more-than-one-form-block">
+                                                    <form>
+                                                        <article>
+                                                            <div class="row">
+
+                                                                @*UIUX code update: grid from col-sm-10 to col-sm-12*@
+                                                                <div class="col-sm-12">
+                                                                    <div class="row">
+                                                                        <div class="col-sm-6">
+                                                                            <div class="form-group">
+                                                                                <label>Attach Document</label>
+
+                                                                                <div class="new-cstm-file-upload">
+                                                                                    <div class="drop-area" file-drop>
+                                                                                        <div class="icon"></div>
+                                                                                        <h3>Drag & Drop Files Here</h3>
+                                                                                        <p>or <span>click to browse</span></p>
+                                                                                        <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                                        <div class="attached-list">
+                                                                                            <ul class="file-list"></ul>
+                                                                                            <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="d-flex flex-column h-100 justify-content-between">
+                                                                                <div class="form-group">
+                                                                                    <label>Description</label>
+                                                                                    <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                                                </div>
+                                                                                <div class="form-group">
+                                                                                    <div>
+                                                                                        <label class="invisible d-none">for height</label>
+                                                                                        <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </article>
+                                                    </form>
+                                                </div>
+                                                <div class="pb-3">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover border bg-white">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col" style="width: 20px">SN.</th>
+
+                                                                    <th scope="col">File Name</th>
+                                                                    <th scope="col">Description</th>
+                                                                    <th scope="col" style="width: 130px">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr ng-repeat="ac in newEmployeePromotion.DocumentColl">
+                                                                    <th scope="row">{{$index+1}}</th>
+
+                                                                    <td>{{ac.Name}}</td>
+                                                                    <td>{{ac.Description}}</td>
+                                                                    <td>
+                                                                        <div>
+                                                                            <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                                                <i class="fas fa-eye text-secondary"></i>
+                                                                            </a>
+
+                                                                            <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer py-2">
+                                            <button type="button" class="btn btn-sm btn-add btn-outline-secondary dynamic-uiux-sm-btn" style="width:50px" data-dismiss="modal">Ok</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-body mb-0 p-2">
+                                            <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="pdfViewer" style="width: 100%; height: 700px; border: none;"></iframe>
+                                            <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                                        </div>
+                                        <div class="modal-footer p-2">
+                                            <div><a href="{{viewImg.ContentPath}}" download class="btn btn-primary btn-sm dynamic-uiux-sm-btn">Download</a></div>
+                                            <button class="btn btn-secondary btn-sm dynamic-uiux-sm-btn" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <div class="modal fade sales-quotation-page-modal document-attach-modal" id="PreviewData" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header p-2">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Employee and Attachment Details</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg p-2">                    
+                    <div class="row mb-2">
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px;">Employee Name</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.EmployeeName}}({{TableData.EmployeeCode}}) </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Branch</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.BranchName}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Department</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.Department}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Category</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.CategoryName}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Level</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.LevelName}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Service Type</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.ServiceTypeName}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Designation</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.DesignationName}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Promotion Date</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.PromotionMitti}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Effective Date</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.EffectiveMitti}} </b></label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-lg-6">
+                            <label class="mb-0" style="min-width: 106px; ">Promotion By</label>
+                            <label class="mb-0"><b> :&nbsp;{{TableData.PromotionBy}} </b></label>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover border bg-white">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 20px">SN.</th>
+                                    <th scope="col" style="width: 350px">File Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col" style="width: 70px">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="ac in EmpPromotion.DocumentColl">
+                                    <th scope="row">{{$index+1}}</th>
+                                    <td>{{ac.Name}}</td>
+                                    <td>{{ac.Description}}</td>
+                                    <td style="text-align:center;">
+                                        <div>
+                                            <a class="p-1" href="#" ng-click="PreviewImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                <i class="fas fa-eye text-secondary"></i>
+                                            </a>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="Preview" role="dialog" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-body mb-0 p-2">
+                    <iframe class="responsive-iframe" ng-hide="viewImg.FileType === 'image'" id="previewPdf" style="width: 100%; height: 700px; border: none;"></iframe>
+                    <img ng-show="viewImg.FileType === 'image'" ng-src="{{viewImg.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd">
+                </div>
+                <div class="modal-footer p-2">
+                    <div><a href="{{viewImg.ContentPath}}" download class="btn btn-primary btn-sm dynamic-uiux-sm-btn">Download</a></div>
+                    <button class="btn btn-secondary btn-sm dynamic-uiux-sm-btn" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>

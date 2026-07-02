@@ -1,0 +1,1677 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using Dynamic.BusinessEntity.Global;
+namespace PivotalERP.Areas.Service.Controllers
+{
+    public class TransactionController : PivotalERP.Controllers.BaseController
+    {
+        string photoLocation = "/Attachments/JobWorkOrder";
+
+
+
+        #region "TransactionComplain"
+
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.View, (int)FormsEntity.Complain)]
+        public ActionResult ComplaintTicket(int? tranId = null)
+        {
+            if (tranId.HasValue)
+                ViewBag.TranId = tranId;
+            else
+                ViewBag.TranId = 0;
+
+            ViewBag.VoucherType = Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.Complain);
+            ViewBag.EntityId = Convert.ToInt32(FormsEntity.Complain);
+
+            return View();
+        }
+        //[PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.View, (int)FormsEntity.CompanyType)]
+
+        [HttpPost, ValidateInput(false)]
+        ////[PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.CompanyType)]
+        public JsonNetResult SaveTransactionComplain()
+        {
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Complain.TransactionComplain>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    if (!beData.TranId.HasValue)
+                        beData.TranId = 0;
+                    resVal = new Dynamic.BusinessLogic.Complain.TransactionComplain(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        [HttpPost]
+        //[PermissionsAttribute(Dynamic.BusinessEntity.Complain.Global.Actions.Modify, (int)FormsEntity.CompanyType)]
+        public JsonNetResult getTransactionComplainById(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new Dynamic.BusinessLogic.Complain.TransactionComplain(User.UserId, User.HostName, User.DBName).GetTransactionComplainById(0, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        //[PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Delete, (int)FormsEntity.CompanyType)]
+        public JsonNetResult DeleteTransactionComplain(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                if (TranId < 0)
+                {
+                    resVal.ResponseMSG = "can't delete default Company name";
+                    resVal.IsSuccess = false;
+                }
+                else
+                    resVal = new Dynamic.BusinessLogic.Complain.TransactionComplain(User.UserId, User.HostName, User.DBName).DeleteById(User.UserId, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        [HttpGet]
+        public JsonNetResult GetAllTransactionComplain()
+        {
+            Dynamic.BusinessEntity.Complain.TransactionComplainCollections dataColl = new Dynamic.BusinessEntity.Complain.TransactionComplainCollections();
+            try
+            {
+                dataColl = new Dynamic.BusinessLogic.Complain.TransactionComplain(User.UserId, User.HostName, User.DBName).GetAllTransactionComplain(0);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        #endregion
+
+
+        [HttpPost]
+        //[PermissionsAttribute(Dynamic.BusinessEntity.Complain.Global.Actions.Modify, (int)FormsEntity.TransactionComplain)]
+        public JsonNetResult GetAutoVoucherNo()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new Dynamic.BusinessLogic.Complain.TransactionComplain(User.UserId, User.HostName, User.DBName).GetAutoVoucherNo(User.UserId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetAllVehicle(int Top, string ColName, string Operator, string OrderByCol, string ColValue, int? VoucherId = null)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            { 
+                if (string.IsNullOrEmpty(ColName))
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = "Column Name Not Define";
+                }
+                else if (string.IsNullOrEmpty(ColName))
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = "Column Value Not Define";
+                }
+                else
+                {
+                    Dynamic.BusinessEntity.Common.AutoCompletePara para = new Dynamic.BusinessEntity.Common.AutoCompletePara();
+                    para.Top = Top;
+                    para.ColName = ColName;
+                    para.Operator = Operator;
+                    para.OrderByCol = OrderByCol;
+                    para.ColValue = ColValue;
+                    para.VoucherId = VoucherId;
+                    para.UserId = User.UserId;
+                    Dynamic.BusinessEntity.Service.VehicleEngChSrlRegdCollections dataColl = new Dynamic.DataAccess.Service.VehicleEntryDB(User.HostName, User.DBName).getAllVehicle(para);
+
+                    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetAllInspectionType(string ColValue, int? VehicleEntryId, int? InspectionGroupId, int? VehicleModelId, int? VehicleTypeId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+
+
+                if (string.IsNullOrEmpty(ColValue))
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = "Column Value Not Define";
+                }
+                else
+                {
+                    Dynamic.BusinessEntity.Service.InspectionTypeCollections dataColl = new Dynamic.DataAccess.Service.InspectionTypeDB(User.HostName, User.DBName).getAllInspectionType(User.UserId, ColValue, VehicleEntryId, InspectionGroupId, VehicleModelId, VehicleTypeId);
+
+                    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+
+        [HttpGet]
+        public JsonNetResult GetInspectionTypeById(int InspectionTypeId)
+        {
+            Dynamic.BusinessEntity.Service.InspectionType dataColl = new Dynamic.DataAccess.Service.InspectionTypeDB(User.HostName, User.DBName).getInspectionTypeById(User.UserId,InspectionTypeId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetJobTitle()
+        {
+            Dynamic.APIEnitity.CommonCollections dataColl = new Dynamic.APIEnitity.CommonCollections();
+            int id = 1;
+            foreach (string str in Enum.GetNames(typeof(Dynamic.BusinessEntity.Service.JOBTITLETYPES)))
+            {
+                Dynamic.APIEnitity.Common beData = new Dynamic.APIEnitity.Common();
+                beData.Id = id;
+                beData.Text = str;
+                dataColl.Add(beData);
+                id++;
+            }
+            dataColl.IsSuccess = true;
+            dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+        [HttpGet] 
+        public JsonNetResult GetJobCardFor()
+        {
+            Dynamic.APIEnitity.CommonCollections dataColl = new Dynamic.APIEnitity.CommonCollections();
+            int id = 0;
+            foreach (string str in Enum.GetNames(typeof(Dynamic.BusinessEntity.Service.JobCardFor)))
+            {
+                Dynamic.APIEnitity.Common beData = new Dynamic.APIEnitity.Common();
+                beData.Id = id;
+                beData.Text = str;
+                dataColl.Add(beData);
+                id++;
+            }
+            dataColl.IsSuccess = true;
+            dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetJobCardType()
+        {
+            //Dynamic.APIEnitity.CommonCollections dataColl = new Dynamic.APIEnitity.CommonCollections();
+            //int id = 0;
+            //foreach (string str in Enum.GetNames(typeof(Dynamic.BusinessEntity.Service.JobCardTypes)))
+            //{
+            //    Dynamic.APIEnitity.Common beData = new Dynamic.APIEnitity.Common();
+            //    beData.Id = id;
+            //    beData.Text = str;
+            //    dataColl.Add(beData);
+            //    id++;
+            //}
+            //dataColl.IsSuccess = true;
+            //dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            var dataColl = new Dynamic.DataAccess.Service.JobCardTypeDB(User.HostName, User.DBName).getAllJobCardType(User.UserId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetBillJobCardType()
+        {
+            //Dynamic.APIEnitity.CommonCollections dataColl = new Dynamic.APIEnitity.CommonCollections();
+            //int id = 0;
+            //foreach (string str in Enum.GetNames(typeof(Dynamic.BusinessEntity.Service.JobCardTypes)))
+            //{
+            //    Dynamic.APIEnitity.Common beData = new Dynamic.APIEnitity.Common();
+            //    beData.Id = id;
+            //    beData.Text = str;
+            //    dataColl.Add(beData);
+            //    id++;
+            //}
+            //dataColl.IsSuccess = true;
+            //dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+            var dataColl = new Dynamic.DataAccess.Service.JobCardTypeDB(User.HostName, User.DBName).getBillJobCardType(User.UserId);
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+
+        [HttpGet]
+        public JsonNetResult GetServiceType()
+        {
+            Dynamic.APIEnitity.CommonCollections dataColl = new Dynamic.APIEnitity.CommonCollections();
+      
+            dataColl.Add(new Dynamic.APIEnitity.Common() { Id = 0, Text = "PDI" });
+            dataColl.Add(new Dynamic.APIEnitity.Common() { Id = 1, Text = "Other" });
+      
+
+            for (int s = 1; s < 31; s++)
+            {
+                dataColl.Add(new Dynamic.APIEnitity.Common() { Id = s+1, Text = Dynamic.ReportEngine.RDL.VBFunctions.ToOrdinal(s) });                 
+            }
+            dataColl.Add(new Dynamic.APIEnitity.Common() { Id = dataColl.Count-1, Text = "Installation" });
+            dataColl.Add(new Dynamic.APIEnitity.Common() { Id = dataColl.Count - 1, Text = "Health Cheakup" });
+             
+            dataColl.IsSuccess = true;
+            dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+
+            return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetAllVehicleType()
+        {
+            Dynamic.BusinessEntity.Enquiry.VehicleTypeCollections dataColl = new Dynamic.BusinessEntity.Enquiry.VehicleTypeCollections();
+            try
+            {
+                dataColl = new Dynamic.DataAccess.Enquiry.VehicleTypeDB(User.HostName, User.DBName).getAllVehicleType(User.UserId);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetAllVehicleColor()
+        {
+            Dynamic.BusinessEntity.Enquiry.VehicleColorCollections dataColl = new Dynamic.BusinessEntity.Enquiry.VehicleColorCollections();
+            try
+            {
+                dataColl = new Dynamic.DataAccess.Enquiry.VehicleColorDB(User.HostName, User.DBName).getAllVehicleColor(User.UserId);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetAllVehicleModel()
+        {
+            Dynamic.BusinessEntity.Enquiry.VehicleModelCollections dataColl = new Dynamic.BusinessEntity.Enquiry.VehicleModelCollections();
+            try
+            {
+                dataColl = new Dynamic.DataAccess.Enquiry.VehicleModelDB(User.HostName, User.DBName).getAllVehicleModel(User.UserId);
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResultWithEnum GetVehicleDet(int TranId,int? PartyId=null)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+
+                if (TranId == 0 && (!PartyId.HasValue || PartyId==0) )
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = "Vehicle Not Found. Pls Select Valid Vehicle";
+                }
+                else
+                {
+                    Dynamic.BusinessEntity.Service.VehicleEntry dataColl = new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName).getVehicleEntryBy("EngineNo", "EngineNo", "",TranId,PartyId);
+
+                    //try
+                    //{
+                    //    int rid = new PivotalOtherLib.Global.Sipradi(User.UserId, User.HostName, User.DBName).CheckWarranty(dataColl.VinNo).RId;
+                    //    if (rid == 1)
+                    //        dataColl.Warranty = true;
+                    //}
+                    //catch { }
+
+                    //var url = new Uri(Request.Url, Url.Content("~")).AbsoluteUri.Trim().ToLower();
+                    //if(url.Contains("sipradi"))
+                    //{
+                    //    int rid = new PivotalOtherLib.Global.Sipradi(User.UserId, User.HostName, User.DBName).CheckWarranty(dataColl.VinNo).RId;
+                    //    if (rid == 1)
+                    //        dataColl.Warranty = true;
+                    //}
+                    return new JsonNetResultWithEnum() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResultWithEnum() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult ImportComplainCard()
+        {
+            ResponeValues resVal = new ResponeValues();
+
+            try
+            {
+                resVal = new PivotalOtherLib.Global.Sipradi(User.UserId, User.HostName, User.DBName).DownloadComplainCard(DateTime.Today);
+
+                return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResult GetAllComplainType()
+        {
+            Dynamic.BusinessEntity.Service.ComplainTypeCollections dataColl = new Dynamic.BusinessEntity.Service.ComplainTypeCollections();
+
+            try
+            {
+                dataColl = new Dynamic.DataAccess.Service.ComplainTypeDB(User.HostName, User.DBName).getAllComplainType(User.UserId);
+
+                return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpGet]
+        public JsonNetResultWithEnum GetAllServiceTechniciane(int? BranchId)
+        {
+            Dynamic.BusinessEntity.Service.ServiceTechnicianCollections dataColl = new Dynamic.BusinessEntity.Service.ServiceTechnicianCollections();
+
+            try
+            {
+                dataColl = new Dynamic.DataAccess.Service.ServiceTechnicianDB(User.HostName, User.DBName).getAllServiceTechnician(User.UserId,BranchId);
+
+                return new JsonNetResultWithEnum() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResultWithEnum() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetJobCardLst(bool forClosed, int? branchId, int? costClassId, TableFilter filter)
+        {
+            Dynamic.ReportEntity.Service.JobCardTransactionCollections dataColl = new Dynamic.ReportEntity.Service.JobCardTransactionCollections();
+            try
+            {
+                filter.UserId = User.UserId;
+                dataColl = new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName).getTransactionForPaging(forClosed,branchId, costClassId, "", filter);
+
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.TotalRows, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        // GET: Setup/JobCard
+        public ActionResult NewJobCard()
+        {
+            ViewBag.VoucherType = Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.AutoMobile_NewJobCard);
+            ViewBag.EntityId = Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.JobCard);
+
+            string flv = Flavour;
+            if (string.IsNullOrEmpty(flv))
+                return View();
+            else
+            {
+                flv ="NewJobCard_"+flv;
+                return View(flv);
+            }                
+        }
+
+        #region 'JobCard'
+
+       
+
+        [HttpPost]
+        public JsonNetResult getAutoJCNo(int BranchId, int CostClassId)
+        {
+            var tranBL = new Dynamic.BusinessLogic.Service.JobCard(User.HostName, User.DBName);
+            tranBL.BranchId = BranchId;
+            tranBL.CostClassId = CostClassId;
+
+            int autoNo = tranBL.getAutoNumber(User.UserId, CostClassId, BranchId);
+            var resVal = new ResponeValues();
+            resVal.IsSuccess = true;
+            resVal.ResponseMSG = GLOBALMSG.SUCCESS;
+            resVal.RId = autoNo;
+            return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobCard)]
+        public JsonNetResult SaveJobCard()
+        {
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCard>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    var existDoc = beData.DocumentColl;
+
+                    beData.DocumentColl = new Dynamic.BusinessEntity.GeneralDocumentCollections();
+                    if (Request.Files.Count > 0)
+                    {
+                        for (int fi = 0; fi < Request.Files.Count; fi++)
+                        {
+                            HttpPostedFileBase file = Request.Files["file" + fi];
+                            if (file != null)
+                            {
+                                beData.DocumentColl.Add(GetAttachmentDocuments("/Attachments/service/jobcard", file));
+                            }
+                        }
+                    }
+                    if (existDoc != null && existDoc.Count > 0)
+                    {
+                        foreach (var edoc in existDoc)
+                            beData.DocumentColl.Add(edoc);
+                    }
+
+                    beData.CUserId = User.UserId;                    
+                    var tranBL = new Dynamic.BusinessLogic.Service.JobCard(User.HostName, User.DBName);
+                    tranBL.BranchId = beData.BranchId;
+                    tranBL.CostClassId = beData.CostClassId;
+                    
+                    if (beData.TranId > 0)
+                        resVal = tranBL.ModifyFormData(beData);
+                    else
+                        resVal = tranBL.SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Modify, (int)FormsEntity.JobCard)]
+        public JsonNetResult UpdateKM(Dynamic.BusinessEntity.Service.JobCard beData)
+        {
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {                
+                if (beData != null)
+                {
+                    var existDoc = beData.DocumentColl;
+                     
+                    beData.CUserId = User.UserId;
+                    var tranBL = new Dynamic.BusinessLogic.Service.JobCard(User.HostName, User.DBName);
+                    tranBL.BranchId = beData.BranchId;
+                    tranBL.CostClassId = beData.CostClassId;
+                    resVal = tranBL.UpdateKM(beData.CUserId, beData.TranId, beData.RunningKM, beData.Remarks);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Modify, (int)FormsEntity.JobCard)]
+        public JsonNetResult GetJobCardById(int tranId)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName);
+            var beData = tranBL.getJobCardById(User.UserId, tranId);
+
+            return new JsonNetResult() { Data = beData, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+
+        [HttpGet] 
+        public JsonNetResult GetDealer(int BranchId)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName);
+            var beData = tranBL.getAllDealer(User.UserId, BranchId);
+
+            return new JsonNetResult() { Data = beData, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Delete, (int)FormsEntity.JobCard)]
+        public JsonNetResult DelJobCard(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                if (TranId < 0)
+                {
+                    resVal.ResponseMSG = "can't delete default";
+                    resVal.IsSuccess = false;
+                }
+                else
+                    resVal = new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName).Delete(User.UserId, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost] 
+        public JsonNetResult GetJobCardDetailsByJobNo(int jobNo,int costClassId,int branchId,bool ignoreClosed)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.JobCardSparePartsDemandDB(User.HostName, User.DBName);
+            var beData = tranBL.getJobCardDetailsByJobNo(User.UserId, jobNo, costClassId, branchId, ignoreClosed);
+
+            var newJob = new Dynamic.BusinessEntity.Service.JobCard();
+            newJob.TranId = beData.TranId;
+            new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName).getJobCardDetails(ref newJob);
+
+            beData.CompalinDetailsColl = newJob.CompalinDetailsColl;
+
+            return new JsonNetResult() { Data = beData, TotalCount = 1, IsSuccess = beData.IsSuccess, ResponseMSG = beData.ResponseMSG };
+        }
+
+        #endregion
+
+        public ActionResult VehicleEntry()
+        {
+            ViewBag.VoucherType = Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.AutoMobile_NewVehicleEntry);
+            ViewBag.EntityId = Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.VehilceEntry);
+            return View();
+        }
+
+        #region 'VechicleEntry'
+
+
+        [HttpPost]
+        public JsonNetResult GetVehicleLst(int? branchId, int? costClassId, TableFilter filter)
+        {
+            Dynamic.ReportEntity.Service.JobCardTransactionCollections dataColl = new Dynamic.ReportEntity.Service.JobCardTransactionCollections();
+            try
+            {
+                filter.UserId = User.UserId;
+                dataColl = new Dynamic.DataAccess.Service.VehicleEntryDB(User.HostName, User.DBName).getTransactionForPaging(branchId, costClassId, "", filter);
+
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.TotalRows, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult getVENo()
+        {
+            var tranBL = new Dynamic.BusinessLogic.Service.VehicleEntry(User.HostName, User.DBName);
+             
+            int autoNo = tranBL.getAutoNumber();
+            var resVal = new ResponeValues();
+            resVal.IsSuccess = true;
+            resVal.ResponseMSG = GLOBALMSG.SUCCESS;
+            resVal.RId = autoNo;
+            return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+
+        [HttpGet]
+        public JsonNetResultWithEnum GetVEFields(int VehicleTypeId)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.VehicleReceivingFieldDB(User.HostName, User.DBName);
+
+            var dataColl = tranBL.getVehicleReceivingFields(VehicleTypeId);
+          
+            return new JsonNetResultWithEnum() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Modify, (int)FormsEntity.VehilceEntry)]
+        public JsonNetResultWithEnum GetVEById(int tranId)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.VehicleEntryDB(User.HostName, User.DBName);
+            var beData = tranBL.getVehicleEntryById(User.UserId, tranId);
+
+            return new JsonNetResultWithEnum() { Data = beData, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.VehilceEntry)]
+        public JsonNetResult SaveVechicleEntry()
+        {
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.VehicleEntry>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.UserId = beData.CUserId;
+                    beData.BranchId = User.BranchId;
+
+                    var existDoc = beData.DocumentColl;
+
+                    beData.DocumentColl = new Dynamic.BusinessEntity.GeneralDocumentCollections();
+                    if (Request.Files.Count > 0)
+                    {
+                        for (int fi = 0; fi < Request.Files.Count; fi++)
+                        {
+                            HttpPostedFileBase file = Request.Files["file" + fi];
+                            if (file != null)
+                            {
+                                beData.DocumentColl.Add(GetAttachmentDocuments("/Attachments/service/vehicle", file));
+                            }
+                        }
+                    }
+                    if (existDoc != null && existDoc.Count > 0)
+                    {
+                        foreach (var edoc in existDoc)
+                            beData.DocumentColl.Add(edoc);
+                    }
+
+                    var tranBL = new Dynamic.BusinessLogic.Service.VehicleEntry(User.HostName, User.DBName);
+                    
+                    if (beData.TranId > 0)
+                        resVal = tranBL.ModifyFormData(beData);
+                    else
+                        resVal = tranBL.SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Delete, (int)FormsEntity.VehilceEntry)]
+        public JsonNetResult DelVehicleEntry(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                if (TranId < 0)
+                {
+                    resVal.ResponseMSG = "can't delete default";
+                    resVal.IsSuccess = false;
+                }
+                else
+                    resVal = new Dynamic.DataAccess.Service.VehicleEntryDB(User.HostName, User.DBName).Delete(TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+
+        public ActionResult ServiceMembers()
+        {
+            return View();
+        }
+
+        #region 'ServiceMembers'
+
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.ServiceTechnician)]
+        public JsonNetResult SaveServiceTechnician()
+        {
+            {
+                ResponeValues resVal = new ResponeValues();
+                try
+                {
+                    var beData = DeserializeObject<Dynamic.BusinessEntity.Service.ServiceTechnician>(Request["jsonData"]);
+                    if (beData != null)
+                    {
+                        beData.UserId = User.UserId;                        
+                        beData.CUserId = User.UserId;
+
+                        if(beData.BranchId==0)
+                            beData.BranchId = User.BranchId;
+
+                        var tranBL = new Dynamic.BusinessLogic.Service.ServiceTechnician(User.HostName, User.DBName, User.UserId);
+
+                        if(beData.TranId>0)
+                            resVal = tranBL.ModifyFormData(beData);
+                        else
+                            resVal = tranBL.SaveFormData(beData);
+                    }
+                    else
+                    {
+                        resVal.ResponseMSG = "Blank Data Can't be Accept";
+                    }
+
+                }
+                catch (Exception ee)
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = ee.Message;
+                }
+
+                return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+            }
+        }
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Modify, (int)FormsEntity.ServiceTechnician)]
+        public JsonNetResult GetServiceMemberById(int TranId)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.ServiceTechnicianDB(User.HostName, User.DBName);
+            var beData = tranBL.getServiceTechnicianById(User.UserId, TranId);
+
+            return new JsonNetResult() { Data = beData, TotalCount = 1, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+        }
+
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Delete, (int)FormsEntity.ServiceTechnician)]
+        public JsonNetResult DeleteServiceMember(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                if (TranId < 0)
+                {
+                    resVal.ResponseMSG = "can't delete default";
+                    resVal.IsSuccess = false;
+                }
+                else
+                    resVal = new Dynamic.DataAccess.Service.ServiceTechnicianDB(User.HostName, User.DBName).DeleteServiceTechnician(User.UserId, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+        public ActionResult PartyTransfer()
+        {
+            return View();
+        }
+
+        #region 'PartyTransfer'
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.VehiclePartyTransfor)]
+        public JsonNetResult SaveVehiclePartyTransfor()
+        {
+
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.VehiclePartyTransfor>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+                    resVal = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).SaveFormData(beData);
+
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+        
+
+        public ActionResult SparePartsReturn()
+        {
+
+            try
+            {
+                string flv = Flavour;
+                if (string.IsNullOrEmpty(flv))
+                    return View();
+                else
+                {
+                    flv = "SparePartsReturn_" + flv;
+                    return View(flv);
+                }
+            }
+            catch (Exception ee)
+            {
+                return View();
+            }
+
+        }
+
+        #region 'SparePartsReturn'
+        [HttpPost,ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.VehiclePartyTransfor)]
+        public JsonNetResult SaveSparePartsReturn()
+        {
+
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCardSparePartsDemand>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+                    resVal = new Dynamic.BusinessLogic.Service.JobCardSparePartsDemand(User.HostName, User.DBName).SaveFormData(beData);
+
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+
+
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.View, (int)FormsEntity.PartsDemandList)]
+        public ActionResult PartsDemandList()
+        {
+            return View();
+             
+        }
+
+        #region 'PartsDemandList'
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.PartsDemandList)]
+        public JsonNetResult SavePartsDemandList()
+        {
+            {
+                ResponeValues resVal = new ResponeValues();
+                try
+                {
+                    var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCardSparePartsDemand>(Request["jsonData"]);
+                    if (beData != null)
+                    {
+                        beData.CUserId = User.UserId;
+                        beData.BranchId = User.BranchId;
+                        resVal = new Dynamic.BusinessLogic.Service.JobCardSparePartsDemand(User.HostName, User.DBName).SaveFormData(beData);
+                    }
+                    else
+                    {
+                        resVal.ResponseMSG = "Blank Data Can't be Accept";
+                    }
+                }
+                catch (Exception ee)
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = ee.Message;
+                }
+                return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+            }
+        }
+
+
+        #endregion
+
+        public ActionResult SparePartsIssue()
+        {
+            try
+            {
+                string flv = Flavour;
+                if (string.IsNullOrEmpty(flv))
+                    return View();
+                else
+                {
+                    flv = "SparePartsIssue_" + flv;
+                    return View(flv);
+                }
+            }
+            catch (Exception ee)
+            {
+                return View();
+            }
+             
+        }
+
+       
+        public ActionResult CloseJobCard()
+        {
+            return View();
+        }
+
+        #region 'CloseJobCard'
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobCardClose)]
+        public JsonNetResult SaveCloseJobCard()
+        {
+            {
+                ResponeValues resVal = new ResponeValues();
+                try
+                {
+                    var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCard>(Request["jsonData"]);
+                    if (beData != null)
+                    {
+                        var usr = User; 
+                        beData.CUserName = usr.UserName;
+                        beData.ClosedBy = usr.UserName;
+                        beData.CUserId = usr.UserId;
+                        beData.ClosedByUserId = usr.UserId;
+
+                        var tranBL = new Dynamic.BusinessLogic.Service.ClosedJobCard(User.HostName, User.DBName);
+                        tranBL.BranchId = beData.BranchId;
+                        tranBL.CostClassId = beData.CostClassId;
+
+                        resVal = tranBL.SaveFormData(beData);
+                    }
+                    else
+                    {
+                        resVal.ResponseMSG = "Blank Data Can't be Accept";
+                    }
+
+                }
+                catch (Exception ee)
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = ee.Message;
+                }
+
+                return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+            }
+        }
+
+        #endregion
+
+
+        public ActionResult SparePartsDemand()
+        {
+            try
+            {
+                string flv = Flavour;
+                if (string.IsNullOrEmpty(flv))
+                    return View();
+                else
+                {
+                    flv = "SparePartsDemand_" + flv;
+                    return View(flv);
+                }
+            }
+            catch(Exception ee)
+            {
+                return View();
+            }
+           
+             
+        }
+
+        #region 'JobCardSparePartsDemand'
+
+        [HttpPost]
+        public JsonNetResult getPartsDemandNo(int BranchId,int CostClassId)
+        {
+            var tranBL = new Dynamic.BusinessLogic.Service.JobCardSparePartsDemand(User.HostName, User.DBName);
+            tranBL.BranchId = BranchId;
+            tranBL.CostClassId = CostClassId;
+
+            int autoNo = tranBL.getAutoNumber(User.UserId);
+            var resVal = new ResponeValues();
+            resVal.IsSuccess = true;
+            resVal.ResponseMSG = GLOBALMSG.SUCCESS;
+            resVal.RId = autoNo;
+            return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+
+        }
+
+        [HttpPost]
+        public JsonNetResult getPartsDemandByJobCardId(int BranchId,int CostClassId,int JobCardId,bool IgnoreBalanceQty=false,bool ForReturn=false)
+        {
+            var tranBL = new Dynamic.BusinessLogic.Service.JobCardSparePartsDemand(User.HostName, User.DBName);
+            Dynamic.BusinessEntity.Service.JobCardSparePartsDemandDetailsCollections dataColl=tranBL.getJobCardPartDemandByJobCardId(JobCardId, CostClassId, IgnoreBalanceQty,ForReturn);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = true, ResponseMSG = GLOBALMSG.SUCCESS };
+
+        }
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobCardSparePartsDemand)]
+        public JsonNetResult SaveJobCardSparePartsDemand()
+        {
+
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCardSparePartsDemand>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+
+                    if (beData.TranId > 0)
+                        resVal = new Dynamic.BusinessLogic.Service.JobCardSparePartsDemand(User.HostName, User.DBName).ModifyFormData(beData);
+                    else
+                        resVal = new Dynamic.BusinessLogic.Service.JobCardSparePartsDemand(User.HostName, User.DBName).SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobCardSparePartsIssue)]
+        public JsonNetResult SaveJobCardSparePartsIssue()
+        {
+
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCardSparePartsDemand>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+                    var usr = User;
+                    foreach(var det in beData.DetailsColl)
+                    {
+                        if (det.IssueQty1 > 0)
+                            det.IssueBy1 = usr.UserName;
+
+                        if (det.IssueQty2 > 0)
+                            det.IssueBy2 = usr.UserName;
+
+                        if (det.IssueQty3 > 0)
+                            det.IssueBy3 = usr.UserName;
+
+                    }
+                    resVal=new Dynamic.DataAccess.Service.JobCardSparePartsDemandDB(User.HostName, User.DBName).SaveUpdateIssueDetails(beData.UserId, beData.DetailsColl);
+                    
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobCardSparePartsReturn)]
+        public JsonNetResult SaveJobCardSparePartsReturn()
+        {
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCardSparePartsDemand>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+                    var usr = User;
+                    int ind = 1;
+                    bool isValid = true;
+                    foreach (var det in beData.DetailsColl)
+                    {
+                        double totalIssue = det.IssueQty1 + det.IssueQty2 + det.IssueQty3;
+                        double retQty = det.ReturnQty;
+
+                        if (retQty > totalIssue)
+                        {
+                            resVal.IsSuccess = false;
+                            resVal.ResponseMSG = "Please ! Enter Return Qty less then equal "+totalIssue.ToString()+" at row "+ind.ToString();
+                            isValid = false;
+                        }
+
+                        
+                        if(det.ReturnQty>0 && string.IsNullOrEmpty(det.ReturnRemarks))
+                        {
+                            resVal.IsSuccess = false;
+                            resVal.ResponseMSG = "Please ! Enter Return Reason at row "+ind.ToString();
+                            isValid = false;
+                        }
+                        ind++;
+                    }
+
+                    if(isValid)
+                        resVal= new Dynamic.DataAccess.Service.JobCardSparePartsDemandDB(User.HostName, User.DBName).SaveUpdateReturnDetails(beData.UserId, beData.DetailsColl);
+                    
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+
+
+        public ActionResult ComplainInspection()
+        {
+      
+            try
+            {
+                string flv = Flavour;
+                if (string.IsNullOrEmpty(flv))
+                    return View();
+                else
+                {
+                    flv = "ComplainInspection_" + flv;
+                    return View(flv);
+                }
+            }
+            catch (Exception ee)
+            {
+                return View();
+            }
+
+        }
+
+        #region 'JobCardComplainInspection'
+
+        [HttpPost]
+        public JsonNetResult getComplainInspectionByJobCard(int JobCardTranId)
+        {
+            var tranBL = new Dynamic.DataAccess.Service.JobCardComplainInspectionDB(User.HostName, User.DBName);
+            Dynamic.BusinessEntity.Service.JobCardComplainInspection dataColl = tranBL.getByJobCardId(User.UserId, JobCardTranId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+
+        }
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobCardComplainInspection)]
+        public JsonNetResult SaveJobCardComplainInspection()
+        {
+
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobCardComplainInspection>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+                    if (beData.TranId > 0)
+                        resVal = new Dynamic.BusinessLogic.Service.JobCardComplainInspection(User.HostName, User.DBName).ModifyFormData(beData);
+                    else
+                        resVal = new Dynamic.BusinessLogic.Service.JobCardComplainInspection(User.HostName, User.DBName).SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+        public ActionResult JobAssign()
+        {
+            return View();
+        }
+
+
+        #region 'JobAsign'
+
+        [HttpPost, ValidateInput(false)]
+        [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.JobAsign)]
+        public JsonNetResult SaveJobAsign()
+        {
+
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BusinessEntity.Service.JobAsign>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+                    beData.BranchId = User.BranchId;
+                    var tranBL = new Dynamic.DataAccess.Service.JobCardDB(User.HostName, User.DBName);                    
+                    resVal = tranBL.JobAsign(beData);
+
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+
+        #region"PartyTrnsor"
+
+        public ActionResult PartyTransfor()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonNetResult SavePartyTransfor()
+        {
+            {
+                ResponeValues resVal = new ResponeValues();
+                try
+                {
+                    var beData = DeserializeObject<Dynamic.BusinessEntity.Service.VehiclePartyTransfor>(Request["jsonData"]);
+                    if (beData != null)
+                    {
+                        bool isModify = false;
+                        beData.CUserId = User.UserId;
+                        beData.UserId = User.UserId;
+                        beData.BranchId = User.BranchId;
+                        if (beData.TranId > 0)
+                        {
+                            resVal = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).ModifyFormData(beData);
+                        }
+                        else
+                        {
+                            resVal = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).SaveFormData(beData);
+                        }
+                    }
+                    else
+                    {
+                        resVal.ResponseMSG = "Blank Data Can't be Accept";
+                    }
+                }
+                catch (Exception ee)
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = ee.Message;
+                }
+                return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+            }
+        }
+
+        [HttpPost]
+        public JsonNetResult GetAllPartyTransfor()
+        {
+            IEnumerable<Dynamic.BusinessEntity.Service.VehiclePartyTransfor> dataColl = new List<Dynamic.BusinessEntity.Service.VehiclePartyTransfor>();
+            try
+            {
+                dataColl = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).getAll(User.UserId);
+
+                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count(), IsSuccess = true, ResponseMSG = "Success" };
+            }
+            catch (Exception ee)
+            {
+                return new JsonNetResult()
+                {
+                    Data = "",
+                    TotalCount = 0,
+                    IsSuccess = false,
+                    ResponseMSG = ee.Message
+                };
+
+            }
+            //return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetPartyTransforById(int TranId, string EngineNo)
+        {
+            Dynamic.BusinessEntity.Service.VehiclePartyTransfor dataColl = new Dynamic.BusinessEntity.Service.VehiclePartyTransfor();
+            try
+            {
+                dataColl = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).getVehicleTransforByVehicleEntryId(TranId, EngineNo, User.UserId);
+
+                return new JsonNetResult() { Data = dataColl, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = dataColl, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult getVehiclePartyTransforById(int TranId)
+        {
+            Dynamic.BusinessEntity.Service.VehiclePartyTransfor dataColl = new Dynamic.BusinessEntity.Service.VehiclePartyTransfor();
+            try
+            {
+                dataColl = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).getVehiclePartyTransforById(User.UserId,TranId);
+
+                return new JsonNetResult() { Data = dataColl, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            }
+            catch (Exception ee)
+            {
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = dataColl, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult DelVehiclePartyTransforById(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                if (TranId < 0)
+                {
+                    resVal.ResponseMSG = "can't delete default Vehicle Party Transfor";
+                    resVal.IsSuccess = false;
+                }
+                else
+                    resVal = new Dynamic.BusinessLogic.Service.VehiclePartyTransfor(User.HostName, User.DBName).DeleteById(User.UserId, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+
+        #endregion
+
+        #region "JobType"
+
+        [HttpPost]
+
+        public JsonNetResult SaveJobWorkOrder()
+        {
+
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BE.JobWorkOrder>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    beData.CUserId = User.UserId;
+
+                    if (!beData.TranId.HasValue)
+                        beData.TranId = 0;
+
+                    resVal = new Dynamic.BL.JobWorkOrder(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        #endregion
+
+        public ActionResult NewJobCard_Dugar()
+        {
+            return View();
+        }
+
+        #region "JobWorksOrder"
+        public ActionResult JobWorkOrder()
+        {
+            return View();
+        }
+
+        #region "JobWorksOrder"
+        [HttpPost]
+        public JsonNetResult SaveJobWorksOrder()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BE.JobWorksOrder>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    if (Request.Files.Count > 0)
+                    {
+                        var allFiles = Request.Files;
+                        int find = 0;
+                        foreach (var doc in beData.DocumentColl)
+                        {
+                            HttpPostedFileBase file = allFiles["file" + find];
+                            if (file != null)
+                            {
+                                var newDoc = GetAttachmentDocuments(photoLocation, file);
+                                if (newDoc != null)
+                                {
+                                    doc.Name = newDoc.Name;
+                                    doc.Extension = newDoc.Extension;
+                                    doc.DocPath = newDoc.DocPath;
+                                    doc.DocFullPath = newDoc.DocFullPath;
+                                    doc.ParaName = newDoc.ParaName;
+                                }
+                            }
+                            find++;
+                        }
+                    }
+
+                    bool isModify = false;
+                    beData.CUserId = User.UserId;
+                    if (!beData.TranId.HasValue)
+                        beData.TranId = 0;
+                    resVal = new Dynamic.BL.JobWorksOrder(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+
+        }
+        [HttpPost]
+        public JsonNetResult GetAllJobWorksOrder()
+        {
+            var dataColl = new Dynamic.BL.JobWorksOrder(User.UserId, User.HostName, User.DBName).GetAllJobWorksOrder(0);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetJobWorksOrderById(int TranId)
+        {
+            var dataColl = new Dynamic.BL.JobWorksOrder(User.UserId, User.HostName, User.DBName).GetJobWorksOrderById(0, TranId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult DelJobWorksOrder(int TranId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new Dynamic.BL.JobWorksOrder(User.UserId, User.HostName, User.DBName).DeleteById(0, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        #endregion
+
+        #endregion
+    }
+}

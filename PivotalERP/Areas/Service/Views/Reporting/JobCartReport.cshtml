@@ -1,0 +1,509 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/Fraction/BillList.js"></script>
+<style>
+
+    #datatable1 {
+        width: 100%;
+        min-width: 800px;
+    }
+
+        #datatable1 thead th,
+        #datatable1 tbody td {
+            text-align: center;
+            padding: 8px;
+        }
+
+    .table-container {
+        overflow: auto;
+    }
+
+    .table-scroll {
+        max-height: 100%;
+        overflow-y: auto;
+    }
+
+    .table {
+        margin: 0;
+        width: 100%;
+    }
+</style>
+<div class="hold-transition layout-navbar-fixed" ng-app="myApp" ng-controller="JobCardReportController">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Anything to be added here-->
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <!-- Main content -->
+                <section>
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card p-2">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="BillList.DateFrom_TMP" style="max-width:100px" date-detail="BillList.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="" style="max-width:100px" date-detail="BillList.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-4">
+
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <div class="form-group d-flex  mb-0">
+                                                    <label class="mr-2 mt-1">PatientId</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="BillList.PatientId" ng-change="loadBreakItemDetails(selectedPatientId)" style="max-width :80%"
+                                                            placeholder="* Select Patient  *" showdetails="true">
+                                                        <option ng-repeat="patient in patients" value="{{patient.id}}">
+                                                            {{patient.name}}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-1">
+                                                <div class="form-group">
+                                                    <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 75px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetBillList()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card p-2" id="grid-table">
+                                        <header class="row">
+                                            <div class="col-md-5 col-sm-5">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        <div class="input-group input-group-sm mr-sm-2">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text cstm">Find:</span>
+                                                            </div>
+                                                            <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                                <option>Contain</option>
+                                                                <option>Prefix</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="input-group input-group-sm" style="width: 150px;">
+                                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                                            <div class="input-group-append">
+                                                                <button type="submit" class="btn btn-default">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-7 col-sm-7 text-right">
+                                                <form class="form-inline float-right">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Search By:</span>
+                                                        </div>
+                                                        <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                            <option ng-value="cl.field" ng-repeat="cl in columnDefs">{{cl.headerName}}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="input-group input-group-sm" style="width: 170px;">
+                                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+                                                        <div class="input-group-append">
+                                                            <button type="submit" class="btn btn-default">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="dropdown dnld-file ml-2">
+                                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="fas fa-download"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                            <span class="dropdown-item">Choose an option:</span>
+                                                            <a class="dropdown-item" href="#" ng-click="onBtExport()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image">
+                                                                Excel
+                                                            </a>
+                                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon">
+                                                                CSV
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image">
+                                                                PDF
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image">
+                                                                Word
+                                                            </a>
+                                                            <a class="dropdown-item" href="#">
+                                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image">
+                                                                Mail
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" title="Print" ng-click="Print()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                        <i class="fas fa-filter"></i>
+                                                    </a>
+                                                </form>
+                                            </div>
+                                        </header>
+                                        <div id="datatable" style="height: 80vh; width: 100%;" class="ag-theme-alpine"></div>
+                                    </div>
+                                    @*Detail*@
+                                    <div id="patientDetailDiv" class="container-fluid">
+                                        <div class="card p-2">
+                                            <div class="timeline registration mt-3">
+                                                <!-- Timeline for  Bill Details* -->
+                                                <div class="time-label">
+                                                    <span style="border: 2px solid #dee2e6;">
+                                                        Bill Details
+                                                    </span>
+                                                </div>
+                                                <div class="ml-5">
+                                                    <div class="">
+                                                        <div class="table-container">
+                                                            <div class="card table-scroll-x-y" style="height: auto !important; max-height: 300px !important; overflow: auto !important;">
+                                                                <table cellpadding="12" class="main-table table table-sm table-bordered" id="datatable1" style="white-space: nowrap;">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th style="text-align: center; width: 60px; background-color: #ececec !important; z-index: 2;">
+                                                                                S.No.
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                Date
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 80px; background-color: #ececec !important; z-index: 2;">
+                                                                                Time
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                Bill No
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                Bill Date
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                Doc
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                Other Doc
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 150px; background-color: #ececec !important; z-index: 2;">
+                                                                                Test Name
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                Department
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                Amount
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 80px; background-color: #ececec !important; z-index: 2;">
+                                                                                Qty
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                Dis. Per
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                Dis. Amt
+                                                                            </th>
+                                                                            <th style="text-align: center; width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                Grand Total
+                                                                            </th>
+                                                                            @*<th style="text-align: center; width: 80px;">Action</th>*@
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr ng-repeat="E in FormList">
+                                                                            <td style="text-align: center; margin: auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                                {{ Index+1 }}
+                                                                            </td>
+                                                                            <td style="text-align:center;margin:auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                                {{ E.Date }}
+                                                                            </td>
+                                                                            <td style="text-align:left;margin:auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                                {{ E.Time }}
+                                                                            </td>
+                                                                            <td style="text-align:left;margin:auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                                {{ E.BillNo }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.BillDate }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.Doc }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.OtherDoc }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.TestName }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.Department }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.Amount }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.Qty }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.DisPer }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.DisAmt }}
+                                                                            </td>
+                                                                            <td style="text-align: left; margin: auto; background-color: #ffffff !important; z-index: 2;">
+                                                                                {{ E.GrandTotal }}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                    <tfoot>
+                                                                        <tr style="height: 35px;">
+                                                                            <td colspan="9" style="text-align: center; background-color: #f9f9f9;">
+                                                                                Total
+                                                                            </td>
+                                                                            <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                {{ totalAmount }}
+                                                                            </td>
+                                                                            <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                {{ totalQty }}
+                                                                            </td>
+                                                                            <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                {{ totalDisPer }}
+                                                                            </td>
+                                                                            <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                {{ totalDisAmt }}
+                                                                            </td>
+                                                                            <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                {{ totalGrandTotal }}
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!-- Timeline for  Break Item Details -->
+                                                <div class="time-label d-flex align-content-between">
+                                                    <span style="border: 2px solid #dee2e6;">
+                                                        Break Item Details
+                                                    </span>
+                                                    <div class="ml-3">
+                                                        <div class="text-right control-btns ">
+                                                            <button type="button" class="btn  btn-success px-1" style="min-width: 75px" id="">Update</button>
+                                                            <button type="button" class="btn  btn-primary px-1" style="min-width: 75px" id="">Reset</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <div>
+                                                    <div class="ml-5">
+                                                        <div class="">
+                                                            <div class="mt-2">
+                                                                <!-- table input start  -->
+                                                                <div class="table-container">
+                                                                    <div class="card table-scroll-x-y" style="height: auto !important; max-height: 300px !important; overflow: auto !important;">
+                                                                        <table cellpadding="12" id="main-table" class="main-table table table-sm table-bordered" style="white-space: nowrap;">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 60px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Action
+                                                                                    </th>
+                                                                                    <th style="width: 56px; background-color: #ececec !important; z-index: 2;">
+                                                                                        S.No.
+                                                                                    </th>
+                                                                                    <th style="width: 150px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Name
+                                                                                    </th>
+                                                                                    <th style="width: 250px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Description
+                                                                                    </th>
+                                                                                    <th style="width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Amount
+                                                                                    </th>
+                                                                                    <th style="width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Discount
+                                                                                    </th>
+                                                                                    <th style="width: 120px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Net Amount
+                                                                                    </th>
+                                                                                    <th style="width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Rate %
+                                                                                    </th>
+                                                                                    <th style="width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                                        Rate (Rs)
+                                                                                    </th>
+                                                                                </tr>
+                                                                            </thead>
+
+                                                                            <tbody>
+                                                                                <tr ng-repeat="E in FormList">
+                                                                                    <td class="project-actions" style="text-align:center">
+                                                                                        <div class="btn-group-sm">
+                                                                                            <a class="btn btn-success" ng-click="editBreakItem(item)"><i class="fas fa-pencil-alt"></i></a>
+                                                                                            <a class="btn btn-danger" ng-click="deleteBreakItem(item)"><i class="fas fa-trash"></i></a>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                    <td>{{$index+1}}</td>
+                                                                                    <td>
+                                                                                        <input type="text" class="form-control form-control-sm" ng-model="item.Name" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="text" class="form-control form-control-sm" ng-model="item.Description" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" class="form-control form-control-sm" ng-model="item.Amount" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" class="form-control form-control-sm" ng-model="item.Discount" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" class="form-control form-control-sm" ng-model="item.NetAmount" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" class="form-control form-control-sm" ng-model="item.RatePercentage" />
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" class="form-control form-control-sm" ng-model="item.RateRs" />
+                                                                                    </td>
+                                                                            </tbody>
+                                                                            <tfoot>
+                                                                                <tr style="height: 35px;">
+                                                                                    <td colspan="4" style="text-align: center; background-color: #f9f9f9;">
+                                                                                        Total
+                                                                                    </td>
+                                                                                    <td style="text-align: right; background-color: #f9f9f9; min-width: 150px;">
+                                                                                        {{ totalAmount }}
+                                                                                    </td>
+                                                                                    <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                        {{ totalDiscount }}
+                                                                                    </td>
+                                                                                    <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                        {{ totalNetAmt }}
+                                                                                    </td>
+                                                                                    <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                        {{ totalRatePer }}
+                                                                                    </td>
+                                                                                    <td style="text-align: right; background-color: #f9f9f9;">
+                                                                                        {{ totalRate }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tfoot>
+                                                                        </table>
+                                                                    </div>
+
+                                                                    <!-- tabel input end -->
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="cold-md-12 ml-3 d-flex">
+                                                                        <p style="min-width: 160px">Total Fraction Amount</p><p> :  {{totalFractionAmount}}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="time-label">
+                                                    <span style="border: 2px solid #dee2e6;">
+                                                        Doctor's Fraction
+                                                    </span>
+                                                </div>
+                                                <div class="ml-5">
+                                                    <div class="search-toolbar mb-3 mt-2">
+                                                        <div class="card table-scroll-x-y" style="height: auto !important; max-height: 300px !important; overflow: auto !important;">
+                                                            <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable1" style="white-space: nowrap;">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="text-align: center; width: 54px; background-color: #ececec !important; z-index: 2;">
+                                                                            S.No.
+                                                                        </th>
+                                                                        <th style="text-align: center; width: 200px; background-color: #ececec !important; z-index: 2;">
+                                                                            Doctor Name
+                                                                        </th>
+                                                                        <th style="text-align: center; width: 150px; background-color: #ececec !important; z-index: 2;">
+                                                                            Total Amount
+                                                                        </th>
+                                                                        <th style="text-align: center; width: 100px; background-color: #ececec !important; z-index: 2;">
+                                                                            Fraction
+                                                                        </th>
+
+                                                                    </tr>
+                                                                </thead>
+
+                                                                <tbody>
+                                                                    <tr dir-paginate="E in FormList | filter:searchData.Form | itemsPerPage: perPage.Form" current-page="currentPages.Form" pagination-id="FormPagination">
+                                                                        <td style="text-align: center; margin: auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                            {{ Index+1 }}
+                                                                        </td>
+                                                                        <td style="text-align:center;margin:auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                            {{ E.Date }}
+                                                                        </td>
+                                                                        <td style="text-align:left;margin:auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                            {{ E.Time }}
+                                                                        </td>
+                                                                        <td style="text-align:left;margin:auto; background-color: #ffffff !important; z-index: 2; ">
+                                                                            {{ E.BillNo }}
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                                <tfoot>
+                                                                    <tr style="height: 30px;">
+                                                                        <td colspan="2" style="text-align: center; background-color: #f9f9f9;">
+                                                                            Total
+                                                                        </td>
+                                                                        <td style="text-align: right; background-color: #f9f9f9;">
+                                                                            {{ totalAmount }}
+                                                                        </td>
+                                                                        <td style="text-align: right; background-color: #f9f9f9;">
+                                                                            {{ totalDiscount }}
+                                                                        </td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <footer class="main-footer">
+                                            <div class="text-right control-btns">
+                                                <button type="button" class="btn btn-secondary" id="back-to-table">Back to List</button>
+                                            </div>
+                                        </footer>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+

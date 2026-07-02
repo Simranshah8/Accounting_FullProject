@@ -1,0 +1,155 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    .center-header {
+        justify-content: center !important;
+    }
+
+    .header-center .ag-header-cell-label {
+        justify-content: center !important;
+    }
+    .ag-theme-alpine .ag-header-group-cell-label {
+        justify-content: center; /* flex container for header text */
+    }
+
+    .header-right .ag-header-cell-label {
+        justify-content: flex-end !important;
+    }
+   
+</style>
+<script>
+    var EntityId = 0;
+</script>
+
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+<script src="~/jslib/account/reporting/BudgetSummary.js"></script>
+<div ng-app="myApp" ng-controller="BudgetSummaryController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="tab-content">
+                    <div class="root">
+                        <div class="card-primary card-tabs ">
+                            <div class="tab-content" id="myTabContent">
+                                <div class="card p-2">
+                                    <div class="row">
+                                        <div class="col-sm-3">
+                                            <div class="d-inline-block">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">From:</span>
+                                                    </div>
+                                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newFilter.DateFrom_TMP" style="max-width:100px" date-detail="newFilter.DateFromDet" />
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">To:</span>
+                                                    </div>
+                                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newFilter.DateTo_TMP" style="max-width:100px" date-detail="newFilter.DateToDet" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-8"></div>
+                                        <div class="col-sm-1 text-right">
+                                            <button type="button" class="btn btn-primary load " style="min-width: 90px;" ng-click="GetData()"><i class="fas fa-sync-alt"> &nbsp;&nbsp;Load</i></button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="card p-2 ">
+                                    <header class="row">
+                                        <div class="col-md-8">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0" type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4 text-right">
+                                            <div class="dropdown dnld-file">
+                                                <a class="btn btn-secondary btn-light btn-sm wait"
+                                                   title="Refresh" ng-click="GetData()">
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </a>
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false" title="Download">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                        <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                             class="img-fluid exports-icon" alt="Excel image">
+                                                        Excel
+                                                    </a>
+                                                    <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                        <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                             class="img-fluid exports-icon">
+                                                        CSV
+                                                    </a>
+                                                </div>
+
+                                                @*<a print-tbl report-name="'List of BudgetSummary Report  '" table-id="'#TableData'" class="btn btn-secondary btn-light btn-sm wait" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                     </a>*@
+
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                   title="Print" ng-click="Print()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                   data-placement="bottom" title="Save Budget Summary  Report" ng-click="saveRptListState()">
+                                                    <i class="fas fa-save"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </header>
+
+                                    <div class="">
+                                        <div id="TableData" style="height: calc(100vh - 6.2rem); width: 100%;" class="ag-theme-alpine"></div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

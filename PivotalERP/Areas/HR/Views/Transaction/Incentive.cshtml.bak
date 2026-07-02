@@ -1,0 +1,560 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script src="~/jslib/hr/transaction/Incentive.js"></script>
+<div ng-app="myApp" ng-controller="IncentiveController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="pt-1"></div>
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header navheader p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link bluenav active" id="payheadgroup-tab" data-toggle="pill" href="#expenseGroup" role="tab" aria-controls="expenseGroup" aria-selected="true"> Incentive</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheadcategory-tab" data-toggle="pill" href="#expenseCategory" role="tab" aria-controls="expenseCategory" aria-selected="false">Incentive Type</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link bluenav" id="payheading-tab" data-toggle="pill" href="#allowcategory" role="tab" aria-controls="allowcategory" aria-selected="false">Brand</a>
+                            </li>
+                            
+                        </ul>
+                    </div>
+                    <div class="p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="expenseGroup" role="tabpanel" aria-labelledby="expenseGroup-tab">
+                                <div id="Incentivelist" class=" py-2 mb-0">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Incentive">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Incentive">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.Incentive">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file ml-2">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#Incentive'" sheet-name="'IncentiveList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#Incentive').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+
+                                                <a print-tbl table-id="'#Incentive'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-add btn-success"
+                                                        id="add-Incentive"
+                                                        style="min-width: 90px" ng-click="$scope.ClearIncentive();">
+                                                    <i class="fas fa-plus w-t"></i> Add Incentive
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll">
+                                            <table id="Incentive"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px">S.No.</th>
+                                                        <th style="width: 140px">Incentive Type</th>
+                                                        <th style="width: 130px">Brand</th>
+                                                        <th style="width: 100px">Amount</th>
+                                                        <th style="width: 100px">Date</th>
+                                                        <th style="width: 200px">Remarks</th>
+                                                        <th style="width: 70px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in IncentiveList | filter:searchData.Incentive | itemsPerPage: perPage.Incentive" current-page="currentPages.Incentive" pagination-id="IncentivePagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.IncentiveType}}</td>
+                                                        <td>{{cl.Brand}}</td>
+                                                        <td>{{cl.Amount}}</td>
+                                                        <td>{{cl.IncDate}}</td>
+                                                        <td>{{cl.Remarks}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetIncentiveById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelIncentiveById(cl)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="IncentivePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+                                <!-- source form starts -->
+                                <div id="Incentive-form" class=" mb-0">
+                                    <div class="row  py-2 px-0">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Date</label>
+                                                <input type="text" class="form-control form-control-sm" date-picker ng-model="newIncentive.IncDate" date-detail="newIncentive.IncDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Brand</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newIncentive.BrandId">
+                                                    <option ng-repeat="Inc in BrandList" ng-value="Inc.TranId" ng-selected="Inc.TranId==newIncentive.BrandId">{{Inc.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-4 col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Incentive Type</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newIncentive.IncentiveTypeId">
+                                                    <option ng-repeat="T in IncentiveTypeList" ng-value="T.TranId" ng-selected="T.TranId==newIncentive.IncentiveTypeId">{{T.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-scroll-x-y table-scroll p-2">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 60px">S.No.</th>
+                                                        <th style="width: 250px">Employee</th>
+                                                        <th style="width: 100px">Amount</th>
+                                                        <th class="text-center" style="width: 70px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="pDet in newIncentive.EmployeeDetailsColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            @*<select class="form-control select2bs4 form-control-sm" ng-model="pDet.EmployeeId">
+                                                                <option ng-repeat="E in EmployeeList" ng-value="E.EmployeeId" ng-selected="pDet.EmployeeId==E.EmployeeId">{{E.FirstName}}</option>
+                                                            </select>*@
+                                                            <select class="form-control select2bs4 form-control-sm" all-employee ng-model="pDet.EmployeeId" employee-detail="pDet.EmployeeDetails" side-bar-data="pDet.EmpSideBarData" search-by="pDet.SelectEmployee">
+        </select>
+                                                        </td>
+
+                                                        <td><input type="text" number-input onfocus="this.select();" class="form-control form-control-sm" ng-model="pDet.Amount"></td>
+                                                        <td class="text-center">
+                                                            <a class="p-1" ng-click="AddIncentiveDetails($index)">
+                                                                <i class="fas fa-plus text-secondary"></i>
+                                                            </a>
+                                                            <a class="p-1" ng-click="delIncentiveDetails($index)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="col-sm-12 col-md-12">
+                                            <div class="form-group">
+                                                <label>Remarks</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newIncentive.Remarks">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-add btn-info"
+                                                    id="Incentiveback-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearIncentive()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateIncentive()">{{newIncentive.Mode}}</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="expenseCategory" role="tabpanel" aria-labelledby="expenseCategory-tab">
+                                <div id="IncentiveType-section" class=" py-2">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.IncentiveType">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.IncentiveType">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.IncentiveType">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file ml-2">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#IncentiveType'" sheet-name="'IncentiveTypeList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#IncentiveType').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+
+                                                <a print-tbl table-id="'#IncentiveType'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-add btn-success"
+                                                        id="add-IncentiveType"
+                                                        style="min-width: 90px">
+                                                    <i class="fas fa-plus w-t"></i> Add IncentiveType
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll">
+                                            <table id="IncentiveType"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">S.No.</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 100px">Code</th>
+                                                        <th style="width: 250px">Description</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in IncentiveTypeList | filter:searchData.IncentiveType | itemsPerPage: perPage.IncentiveType" current-page="currentPages.IncentiveType" pagination-id="IncentiveTypePagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.Code}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetIncentiveTypeById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelIncentiveTypeById(cl)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="IncentiveTypePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+                                <div id="IncentiveType-form">
+                                    <div class="row card-body">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label for="">Name</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newIncentiveType.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">Code</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newIncentiveType.Code" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label for="">PayHeading</label>
+                                                <select class="form-control form-control-sm select2" ng-model="newIncentiveType.PayHeadingId">
+                                                    <option ng-repeat="p in PayHeadingList" ng-value="p.PayHeadingId" ng-selected="p.PayHeadingId==newIncentiveType.PayHeadingId">{{p.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="">S.No.</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newIncentiveType.SNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newIncentiveType.Description"
+                                                          rows="2"
+                                                          placeholder=""></textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-add btn-info"
+                                                    id="IncentiveTypeback-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearIncentiveType()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateIncentiveType()">{{newIncentiveType.Mode}}</button>
+                                        </span>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="tab-pane fade" id="allowcategory" role="tabpanel" aria-labelledby="allowcategory-tab">
+                                <div id="Brand-section" class=" py-2">
+                                    <header class="row">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Brand">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Brand">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.Brand">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file ml-2">
+                                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#Brand'" sheet-name="'BrandList'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#Brand').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                </div>
+
+                                                <a print-tbl table-id="'#Brand'" href="#" class="btn btn-secondary btn-light btn-sm"
+                                                   data-toggle="tooltip" data-placement="top" title="Print">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-add btn-success"
+                                                        id="add-Brand"
+                                                        style="min-width: 90px" ng-click="$scope.ClearBrand();">
+                                                    <i class="fas fa-plus w-t"></i> Add Brand
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll">
+                                            <table id="Brand"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 100px">S.No.</th>
+                                                        <th style="width: 200px">Name</th>
+                                                        <th style="width: 100px">Code</th>
+                                                        <th style="width: 250px">Description</th>
+                                                        <th style="width: 100px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in BrandList | filter:searchData.Brand | itemsPerPage: perPage.Brand" current-page="currentPages.Brand" pagination-id="BrandPagination">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.Code}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetBrandById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelBrandById(cl)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <!-- table end -->
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="BrandPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+                                <div id="Brand-form">
+                                    <div class="row card-body">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="">Name</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newBrand.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">Code</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newBrand.Code" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="">S.No.</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" ng-model="newBrand.SNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" ng-model="newBrand.Description"
+                                                          rows="2"
+                                                          placeholder=""></textarea>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <div class="time-label">
+                                        <span class="d-block border-0 p-3 text-center">
+                                            <button type="button"
+                                                    class="btn btn-sm btn-add btn-info"
+                                                    id="Brandback-btn"
+                                                    style="min-width: 90px">
+                                                Back to List
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-add btn-default" style="min-width: 90px;" ng-click="ClearBrand()">Reset</button>
+                                            <button type="button" class="btn btn-sm btn-add btn-success" style="min-width: 90px;" ng-click="SaveUpdateBrand()">{{newBrand.Mode}}</button>
+                                        </span>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                           
+
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+
+
+
+
+    </div>
+
+</div>
+
+

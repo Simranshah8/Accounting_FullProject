@@ -1,0 +1,880 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+@*<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />*@
+
+<script>
+    var VoucherType = "@Convert.ToInt32(Dynamic.BusinessEntity.Account.VoucherTypes.Receipt)";
+	  var DefaultKeyValues = "";
+</script>
+
+<script src="~/jslib/GateMaster/GateEntry.js"></script>
+<style>
+
+    .date-col {
+        max-width: 140px; /* controls column width */
+    }
+
+    .date-input {
+        width: 90px; /* reduce input width */
+    }
+
+    .date-label {
+        width: 120px; /* same as input width */
+        text-align: center; /* center label text */
+    }
+
+    .table.table tbody th, .dynamic-uiux-table.table tbody td {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+    }
+
+    #DocView .modal-body {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+</style>
+
+<div id="ActionDiv" ng-app="myApp" ng-controller="GateEntryController" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div>
+                            <form class="mb-0">
+                                <div class="card">
+                                    <div class="card-body p-2">
+                                        <div class="row mb-2" @*align-items-end>*@>
+                                           
+                                            <div class="col-md-3">
+                                                <div class="form-group mb-2 d-flex">
+                                                    <label style="min-width:120px">Gate Entry No.</label>
+                                                    <input type="text" class="form-control form-control-sm serial" placeholder="" ng-model="beData.AutoManualNo" readonly ng-hide="HideShow.AutoVoucherNo==true" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+                                                    <input type="text" class="form-control form-control-sm serial hideSideBar" placeholder="" ng-model="beData.ManualVoucherNO" ng-hide="HideShow.AutoVoucherNo==false" title="{{beData.TranId>0 ? beData.TranId : ''}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <div class="d-flex justify-content-between dynamic-uiux-page-wrap" style="gap: 8px">
+                                                    <div style="display: flex; flex-grow: 1;">
+                                                        <div class="cstm-three-elems-wrap">
+                                                            <div>
+                                                                <div class="form-group row mb-0" ng-hide="HideShow.VoucherType==true">
+                                                                    <label for="inputEmail3" class="col-sm-6 col-form-label">Voucher Type<span style="color:red">*</span></label>
+                                                                    <div class="col-md-6">
+                                                                        <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.VoucherId" ng-change="GetAutoGateEntryNo()" ng-disabled="beData.TranId>0">
+                                                                            <option ng-repeat="vt in VoucherTypeColl track by vt.VoucherId" ng-value="vt.VoucherId" ng-selected="vt.VoucherId == beData.VoucherId">
+                                                                                {{vt.VoucherName}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <div class="form-group d-flex" ng-hide="HideShow.CostClass==true">
+                                                                    <label style="min-width: 60px;">Fiscal Year</label>
+                                                                    <div class="col-sm-8">
+                                                                        <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="beData.CostClassId" ng-change="GetAutoGateEntryNo()" ng-disabled="beData.TranId>0">
+                                                                            <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId">
+                                                                                {{cc.Name}}
+                                                                            </option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="cstm-voucher-date-group-field section-wrapper">
+                                                            <div class="form-group d-flex">
+                                                                <label for="" title="Voucher Date">Voucher Date</label>
+                                                                <div id="dvDTVoucher">
+                                                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="beData.VoucherDate_TMP" style="max-width:100px" date-detail="beData.VoucherDateDet" id="dtVoucherDate" confirm-action="getVoucherNoOnly(2)" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width: 114px;">Pass Type<span class="text-danger">*</span></label>
+                                                    <select class="form-control form-control-sm" style="width: 46%;" ng-model="beData.PassType" ng-change="GetVehiclesForOutWard()">
+                                                        <option ng-value="vt.text" ng-repeat="vt in PassTypeColl" ng-selected="vt.text==beData.PassType">{{vt.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width: 114px;">Entry Type<span class="text-danger">*</span></label>
+                                                    <select class="form-control form-control-sm" style="width: 71%;" ng-model="beData.EntryType" ng-change="ChangeArray()">
+                                                        <option ng-value="E.text" ng-repeat="E in EntryTypeColl" ng-selected="E.text==beData.EntryType">{{E.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width: 114px;">Transaction Type</label>
+                                                    <select class="form-control form-control-sm" style="width: 96%;" ng-model="beData.TransactionType">
+                                                        <option ng-value="T.text" ng-repeat="T in TransactionTypeColl" ng-selected="T.text==beData.TransactionType">{{T.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8" ng-show="beData.EntryType=='Materials' || beData.EntryType=='Vehicles With Goods'">
+                                                <div class="form-group d-flex">
+                                                    <label style="min-width: 114px;">Party Ledger</label>
+                                                    <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="ledAllocation.LedgerId" ledgertype="8" fortransaction="true"
+                                                            placeholder="** Select Ledger Name **" showdetails="true" ledger-detail="ledAllocation.LedgerDetails" side-bar-data="ledAllocation.partySideBarData" voucher-id="SelectedVoucher.VoucherId" vouchertype="4"></select>
+                                                    @*<select class="form-control form-control-sm" style="width: 100%;" ng-model="beData.TransactionType">
+                                                        <option ng-value="T.text" ng-repeat="T in TransactionTypeColl" ng-selected="T.text==beData.TransactionType">{{T.text}}</option>
+                                                    </select>*@
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <div class="card-header p-2" style="background-color: #e6f5fb">
+                                        <label><b>Vehicle Details</b></label>
+                                    </div>
+                                    <div class="card-body p-2">
+                                        <div class="row mt-2">
+                                            
+                                            @*<div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Ref No.</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.RefNo">
+
+                                                </div>
+                                            </div>*@
+                                           
+                                            @*<div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Attributes</label>
+                                                    <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.Attributes">
+
+                                                </div>
+                                            </div>*@
+                                           
+                                            <div class="col-md-10">
+                                                <div class="row">
+                                                    <div class="col-md-3" @*ng-show="beData.EntryType == 'Vehicles' || beData.EntryType == 'Vehicles With Goods'|| beData.EntryType == 'Vehicles Empty'"*@>
+                                                        <div class="form-group">
+                                                            <label>Vehicle </label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.VehicleId" ng-change="onVehicleChange()">
+                                                                <option ng-value="T.VehicleId" ng-repeat="T in VehicleList" ng-selected="T.VehicleId==beData.VehicleId">{{T.VehicleType}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" @*ng-show="beData.EntryType == 'Vehicles' || beData.EntryType == 'Vehicles With Goods'|| beData.EntryType == 'Vehicles Empty'"*@>
+                                                        <div class="form-group">
+                                                            <label>Vehicle No. </label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.VehicleNo">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" @*ng-show="beData.EntryType == 'Vehicles'"*@>
+                                                        <div class="form-group">
+                                                            <label>Driver Name</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.DriverName">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" @*ng-show="beData.EntryType == 'Vehicles'"*@>
+                                                        <div class="form-group">
+                                                            <label>Driver Mobile</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.DriverMobile">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" @*ng-show="beData.EntryType == 'Vehicles'"*@>
+                                                        <div class="form-group">
+                                                            <label>Driver License No.</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.DriverLicenseNo">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Purpose</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.Purpose">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Invoice No.</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.InvoiceNo">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Invoice Date</label>
+                                                            <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.InvoiceDate_TMP" date-detail="beData.InvoiceDateDet" />
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Way Bill No.</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.EWayBillNo">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" ng-show="beData.PassType=='In ward'">
+                                                        <div class="form-group">
+                                                            <label>Expected Out Date</label>
+                                                            <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.ExpectedOutDate_TMP" date-detail="beData.ExpectedOutDateDet" />
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" ng-show="beData.PassType=='In ward' &&( beData.EntryType=='Vehicles' || beData.EntryType=='Materials' || beData.EntryType=='Vehicles With Goods' || beData.EntryType=='Vehicles Empty')">
+                                                        <div class="form-group">
+                                                            <label>In Weight</label>
+                                                            <input type="number" class="form-control form-control-sm" style="width:100%" ng-model="beData.InWeight" >
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" ng-show="beData.PassType=='Out ward' &&( beData.EntryType=='Vehicles' || beData.EntryType=='Materials' || beData.EntryType=='Vehicles With Goods' || beData.EntryType=='Vehicles Empty')">
+                                                        <div class="form-group">
+                                                            <label>Out Weight</label>
+                                                            <input type="number" class="form-control form-control-sm" style="width:100%" ng-model="beData.OutWeight">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-3" ng-show="beData.PassType=='In ward'">
+                                                        <div class="form-group">
+                                                            <label>In Gate</label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.InGateId">
+                                                                <option ng-value="E.GateId" ng-repeat="E in GateMasterList" ng-selected="E.GateId==beData.InGateId">{{E.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3" ng-show="beData.PassType=='Out ward'">
+                                                        <div class="form-group">
+                                                            <label>Out Gate</label>
+                                                            <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="beData.OutGateId">
+                                                                <option ng-value="E.GateId" ng-repeat="E in GateMasterList" ng-selected="E.GateId==beData.OutGateId">{{E.Name}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    @*<div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Approval Status</label>
+                                                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="beData.ApprovalStatus">
+                                                                <option ng-value="A.text" ng-repeat="A in ApprovalStatusColl" ng-selected="A.text==beData.ApprovalStatus">{{A.text}}</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>*@
+                                                    <div class="col-md-3">
+                                                        <div class="form-group">
+                                                            <label>Seal No.</label>
+                                                            <input type="text" class="form-control form-control-sm" style="width:100%" ng-model="beData.SealNo">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2 mt-4" ng-show="beData.EntryType == 'Vehicles With Goods' || beData.EntryType == 'Materials'">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="Returnable" ng-model="beData.IsReturnable">
+                                                            <label for="Returnable"
+                                                                   class="custom-control-label">
+                                                                Is Returnable ?<span class="text-danger">*</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-2">
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;"> Photo</label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{beData.PhotoData || beData.PhotoPath }}" class="img-fluid" alt="" id="imgPhoto1" style="height:130px; width:165px; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-sfile" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Choose Photo</label>
+                                                    @*<button type="button" class="btn btn-outline-secondary btn-sm" ng-click="takePhotoFromCamera()" id="start-camera">
+                                                        <i class="fas fa-camera w-t"></i> {{webCam.Start==true ? 'Take Photo' :'Start Camera'  }}
+                                                    </button>*@
+                                                    <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="beData.PhotoPath_TMP" fileread="beData.PhotoData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                                <!--<label for="" class="invisible">Photo</label>
+    <div class="person-photo-attachment-wrap text-center">
+        <div class="img-wrap mx-auto" style="height:110px;">
+            <img ng-hide="webCam.Start==true" ng-src="{{beData.PhotoData || beData.PhotoPath}}" class="img-fluid" alt="" id="imgPhoto1">
+            <video ng-show="webCam.Start==true" id="video" class="img-fluid" autoplay></video>
+        </div>
+        <canvas id="canvas" width="320" height="240" style="display:none"></canvas>-->
+                                                @*Button trigger modal*@
+                                                <!--<button type="button" class="btn btn-outline-secondary btn-sm" ng-click="takePhotoFromCamera()" id="start-camera">
+            <i class="fas fa-camera w-t"></i> {{webCam.Start==true ? 'Take Photo' :'Start Camera'  }}
+        </button>
+    </div>-->
+                                            </div>
+                                            @*<div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>In Date Time</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.InDateTime_TMP" date-detail="beData.InDateTimeDet" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Out Date Time</label>
+                                                    <input class="form-control form-control-sm" type="text" date-picker ng-model="beData.OutDateTime_TMP" date-detail="beData.OutDateTimeDet" />
+                                                </div>
+                                            </div>*@
+                                            @*<div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>In User</label>
+                                                    <select class="form-control form-control-sm" style="width: 100%;" ng-model="beData.InUserId">
+                                                        <option ng-value="cl.UserId" ng-repeat="cl in UserList" ng-selected="E.UserId==beData.InUserId">{{cl.UserName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Out User</label>
+                                                    <select class="form-control form-control-sm" style="width: 100%;" ng-model="beData.OutUserId">
+                                                        <option ng-value="E.UserId" ng-repeat="E in UserList" ng-selected="E.UserId==beData.OutUserId">{{E.UserName}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>*@
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-2" ng-show="beData.EntryType == 'Vehicles With Goods'">
+                                    <label><b>Item Details Gate Entry:</b></label>
+                                    <div class="mt-2 table-scroll-x-y table-container " style="height:calc(100vh - 25rem) !important;">
+                                        <div class="  outer-scroll-wrapper-h-scrollbar-fix">
+                                            <div class="  table-h-scrollbar-fix table-scroll-wrapper">
+                                                <table id="main-table" make-table-resizable class=" main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th class="text-center" style="width: 50px;background-color: #e6f5fb !important;">S.No.</th>
+                                                            <th class="text-left" style="width: 305px;background-color: #e6f5fb !important;">Product@*<span class="text-danger">*</span>*@</th>
+                                                            <th class="text-left" style="width: 250px;">Description</th>
+                                                            <th class="text-center" style="width:90px">@*Actual*@ Qty<span class="text-danger">*</span></th>
+                                                            @*<th class="text-center" style="width:90px">Billed Qty<span class="text-danger">*</span></th>*@
+                                                            <th class="text-center" style="width:131px">Unit</th>
+                                                            <th class="text-center" style="width:100px">Batch</th>
+                                                            <th class="text-center" style="width: 100px"> MFG Date</th>
+                                                            <th class="text-center" style="width: 100px"> EXP. Date</th>
+                                                            <th class="text-center" style="width: 100px">Serial No</th>
+                                                            <th class="text-center" style="width:150px">Material Condition</th>
+                                                            <th class="text-center" style="width:110px">Is Returnable?<span class="text-danger">*</span></th>
+                                                            <th class="text-center" style="width:150px">Return Due Date</th>
+                                                            <th class="text-center" style="width:150px">Remarks</th>
+                                                            <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px;">
+                                                                <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                    <option value="" disabled selected>Action</option>
+                                                                    <option value="save">Save Layout</option>
+                                                                    <option value="reset">Reset Layout</option>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="pDet in beData.ItemDetailsGateEntryColl">
+                                                            <td class=" text-center" style="background-color: #ffffff !important;">{{$index+1}}</td>
+                                                            <td class="text-left">
+                                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-product ng-model="pDet.ProductId" style="width:100%"
+                                                                        placeholder="** Select Product  **" showdetails="true" product-detail="pDet.productDetail" @*confirm-action="ProductSelectionChange(itemDet)"*@ side-bar-data="pDet.sideBarData"></select>
+
+                                                                @*<select class="form-control form-control-sm" active-select2 ng-model="pDet.ProductId" data-placeholder="**Select Products**">
+            <option ng-value="tt.ProductId" ng-repeat="tt in ProductList" ng-selected="tt.ProductId==pDet.ProductId">{{tt.Name}}</option>
+        </select>*@
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet.Description">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" number-input class="form-control form-control-sm text-center" ng-model="pDet.ActualQty">
+                                                            </td>
+                                                            @*<td>
+                                                                <input type="text" number-input class="form-control form-control-sm text-center" ng-model="pDet.BilledQty">
+                                                            </td>*@
+                                                            <td>
+                                                                <select class="form-control form-control-sm" active-select2 ng-model="pDet.UnitId" data-placeholder="**Select Unit**">
+                                                                    <option ng-value="U.UnitId" ng-repeat="U in UnitList" ng-selected="U.id==pDet.UnitId">{{U.Name}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet.Batch">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm " style="width: 100%" date-picker ng-model="pDet.MFGDate_TMP" date-detail="pDet.MFGDateDet" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm " style="width: 100%" date-picker ng-model="pDet.EXPDate_TMP" date-detail="pDet.EXPDateDet" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet.SerialNo">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet.MaterialCondition">
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox"
+                                                                           id="ReturnableC{{$index+1}}" ng-model="pDet.IsReturnable">
+                                                                    <label for="ReturnableC{{$index+1}}"
+                                                                           class="custom-control-label">
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" date-picker ng-model="pDet.ReturnDueDate_TMP" date-detail="pDet.ReturnDueDateDet" ng-disabled="pDet.IsReturnable==false"/>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet.Remarks">
+                                                            </td>
+                                                            <td class="text-center cstm-sticky sticky-action-col" style=" background-color: #ffffff !important; z-index: 3; right: 0;">
+                                                                <a ng-click="AddPHDDetails($index)" class="mr-2"><i class="fas fa-plus"></i></a>
+                                                                <a ng-click="delPHDDetails($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                            </td>
+
+
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="mt-2" ng-show="beData.EntryType == 'Person'">
+                                    <label><b>Person Details Gate Entry:</b></label>
+                                    <div class="mt-2 table-scroll-x-y table-container " style="height: calc(100vh - 25rem) !important;">
+                                        <div class="  outer-scroll-wrapper-h-scrollbar-fix">
+                                            <div class="  table-h-scrollbar-fix table-scroll-wrapper">
+                                                <table id="main-table" make-table-resizable class=" main-table table table-sm table-bordered bg-white cstm-sales-invoice-table border-0 dynamic-uiux-table">
+                                                    <thead class="text-center">
+                                                        <tr>
+                                                            <th class="cstm-sticky text-center" style="width: 50px;background-color: #e6f5fb !important;">S.No.</th>
+                                                            @*<th class="cstm-sticky text-left" style="width: 205px;background-color: #e6f5fb !important;">Gate Pass<span class="text-danger">*</span></th>*@
+                                                            <th class="text-left" style="width: 250px;">Person Name<span class="text-danger">*</span></th>
+                                                            <th class="text-center" style="width:120px">Gender</th>
+                                                            <th class="text-center" style="width:180px">Mobile No. </th>
+                                                            <th class="text-center" style="width: 180px">Email</th>
+                                                            <th class="text-center" style="width:200px">Company</th>
+                                                            <th class="text-center" style="width: 150px">Department</th>
+                                                            <th class="text-center" style="width: 150px"> Designation</th>
+                                                            <th class="text-center" style="width: 150px">ID Proof Type</th>
+                                                            <th class="text-center" style="width:150px">ID Proof No.</th>
+                                                            <th class="text-center" style="width:110px">Address Line1</th>
+                                                            <th class="text-center" style="width:150px">Purpose</th>
+                                                            <th class="text-center" style="width:150px">In Date Time<span class="text-danger">*</span></th>
+                                                            <th class="text-center" style="width:150px">Out Date Time</th>
+                                                            <th class="text-center" style="width:130px">Is Active<span class="text-danger">*</span></th>
+                                                            <th class="text-center align-middle cstm-sticky sticky-action-col highlight-on-scroll" style="width: 76px;">
+                                                                <select id="table-action-select" class="form-control form-control-sm action-dropdown">
+                                                                    <option value="" disabled selected>Action</option>
+                                                                    <option value="save">Save Layout</option>
+                                                                    <option value="reset">Reset Layout</option>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr ng-repeat="pDet1 in beData.PersonDetailsGateEntryColl">
+                                                            <td class="cstm-sticky text-center" style=" background-color: #ffffff !important;">{{$index+1}}</td>
+                                                            <!--<td class="text-left">
+                                                                <select class="form-control form-control-sm" active-select2 ng-model="pDet1.ProductId" data-placeholder="**Select Gate Pass**">-->
+                                                                    @*ng-change="onParticularChange($index,pDet)"*@
+                                                                    <!--<option ng-value="tt.ProductId" ng-repeat="tt in " ng-selected="tt.ProductId==para.ProductId">{{tt.Name}}</option>
+                                                                </select>
+                                                            </td>-->
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.PersonName">
+                                                            </td>
+                                                            <td>
+                                                                <select class="form-control form-control-sm" ng-model="pDet1.Gender" data-placeholder="**Select Gender**">
+
+                                                                    <option ng-value="R.text" ng-repeat="R in GenderColl" ng-selected="R.text==pDet1.Gender">{{R.text}}</option>
+                                                                </select>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.MobileNo">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm " ng-model="pDet1.EmailId">
+
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.CompanyName">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.DepartmentName">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.Designation">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.IDProofType">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.IDProofNo">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.AddressLine1">
+                                                            </td>
+
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" ng-model="pDet1.Purpose">
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm " style="width: 100%" date-picker ng-model="pDet1.InDateTime_TMP" date-detail="pDet1.InDateTimeDet" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control form-control-sm" style="width: 100%" date-picker ng-model="pDet1.OutDateTime_TMP" date-detail="pDet1.OutDateTimeDet" />
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="custom-control custom-checkbox">
+                                                                    <input class="custom-control-input" type="checkbox"
+                                                                           id="IsActiveP{{$index+1}}" ng-model="pDet1.IsActive">
+                                                                    <label for="IsActiveP{{$index+1}}"
+                                                                           class="custom-control-label">
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center cstm-sticky sticky-action-col" style=" background-color: #ffffff !important; z-index: 3; right: 0;">
+                                                                <a ng-click="AddPersonDet($index)" class="mr-2"><i class="fas fa-plus"></i></a>
+                                                                <a ng-click="delPersonDet($index)"><i class="fas fa-trash-alt text-danger"></i></a>
+                                                            </td>
+
+
+                                                        </tr>
+
+                                                    </tbody>
+                                                </table>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </form>
+                            <footer class="main-footer">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="form-group">
+                                            <input type="text" list="lstNarration" class="form-control form-control-sm hideSideBar" name="" id="" rows="3" placeholder="Narration" ng-model="beData.Narration">
+                                            <datalist id="lstNarration">
+                                                <option ng-repeat="x1 in NarrationList track by $index" value="{{x1}}">
+                                            </datalist>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <button type="button" class="btn btn-default" data-toggle="modal" data-target="#documentAttachModal">
+                                            Document Attach ({{ (beData.AttechFiles.length+(beData.DocumentColl ? beData.DocumentColl.length : 0)) }} )
+                                        </button>
+                                    </div>
+                                    <div class="text-right control-btns col-sm-8">
+                                        <button type="button" class="btn btn-default dynamic-uiux" style="min-width: 90px;" ng-click="SearchData()">Search</button>
+                                        <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                        <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateGateEntry()"><span class="glyphicon glyphicon-save"></span>{{beData.Mode}}</button>
+                                    </div>
+                                </div>
+                            </footer>
+                        </div>
+                        @*</div>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade sales-invoice-page-modal document-attach-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="documentAttachModal" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Document Attach</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="timeline-item">
+                            <div class="add-more-than-one-form-block">
+                                <form>
+                                    <article>
+                                        <div class="row">
+                                            @*UIUX code update: grid from col-sm-10 to col-sm-12*@
+                                            <div class="col-sm-12">
+                                                <div class="row">
+                                                    <div class="col-sm-6">
+                                                        <div class="form-group">
+                                                            <label>Attach Document</label>
+
+                                                            <div class="new-cstm-file-upload">
+                                                                <div class="drop-area" file-drop>
+                                                                    <div class="icon"></div>
+                                                                    <h3>Drag & Drop Files Here</h3>
+                                                                    <p>or <span>click to browse</span></p>
+                                                                    <input type="file" id="flMoreFiles" multiple file-model ng-model="attachFile">
+                                                                    <div class="attached-list">
+                                                                        <ul class="file-list"></ul>
+                                                                        <button class="btn btn-sm text-danger clear-files" style="display: none;">Clear</button>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex flex-column h-100 justify-content-between">
+                                                            <div class="form-group">
+                                                                <label>Description</label>
+                                                                <textarea class="form-control form-control-sm dynamic-uiux" rows="4" ng-model="docDescription"></textarea>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <div>
+                                                                    <label class="invisible d-none">for height</label>
+                                                                    <button type="button" class="btn btn-sm btn-outline-primary btn-block py-1" ng-click="AddMoreFiles(attachFile,docDescription)"><i class="fas fa-plus"></i> Add More</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                </form>
+                            </div>
+                            <div class="pb-3">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+
+                                                <th scope="col">File Name</th>
+                                                <th scope="col">Description</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="ac in beData.DocumentColl">
+                                                <th scope="row">{{$index+1}}</th>
+                                                <td>{{ac.Name}}</td>
+                                                <td>{{ac.Description}}</td>
+                                                <td>
+                                                    <div>
+                                                        <a class="p-1" href="#" ng-click="ShowPersonalImg(ac)" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc">
+                                                            <i class="fas fa-eye text-secondary"></i>
+                                                        </a>
+
+                                                        <a class="p-1" data-toggle="tooltip" data-placement="top" title="" data-original-title="Delete doc." ng-click="delAttachmentFiles($index)">
+                                                            <i class="fas fa-trash-alt text-danger"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-add btn-outline-secondary dynamic-uiux-sm-btn" style="width:50px" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-body mb-0 p-2">
+                        <iframe class="responsive-iframe1" ng-hide="viewImg1.FileType === 'image'" id="pdfViewer1" style="width: 100%; height: 700px; border: none;"></iframe>
+                        <img ng-show="viewImg1.FileType === 'image'" ng-src="{{viewImg1.ContentPath}}" alt="" style="width: 100%; height: auto;" id="imgPreviewAdd1">
+                    </div>
+                    <div class="modal-footer p-2">
+                        <div><a href="{{viewImg1.ContentPath}}" download>Download</a></div>
+                        <button class="btn btn-success btn-rounded btn-sm ml-4 btn-add text-center" data-dismiss="modal" type="button" style="min-width: 70px;">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade sales-quotation-page-modal document-attach-modal dynamic-uiux-modal modal-static-esc" id="searVoucherRightBtn" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content" style="min-width:1000px">
+                    <div class="modal-header">
+                        <h6 class="modal-title" id="exampleModalCenterTitle">Search Gate Entry Details</h6>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body gradient-bg">
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="form-group d-flex">
+                                    <label style="min-width: 65px;">Pass Type</label>
+                                    <select class="form-control form-control-sm" style="width: 46%;" ng-model="newFilter.PassType" ng-change="SearchData()">
+                                        <option ng-value="vt.text" ng-repeat="vt in PassTypeColl" ng-selected="vt.text==newFilter.PassType">{{vt.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!--<div class="col-sm-6">-->
+                            @*<div class="form-group row">
+                <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                <div class="col-sm-10">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <select class="form-control form-control-sm" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions">{{asp.text}}</option>
+                            </select>
+                        </div>
+                        <input type="text" class="form-control form-control-sm" placeholder="" ng-model="paginationOptions.SearchVal" ng-change="ReSearchData(-1)">
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>*@
+                            <!--</div>-->
+
+                            <div class="col-lg-6">
+                                <form class="float-right">
+                                    <div class="form-row align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                            <input type="text" ng-model="paginationOptions.pageSize" class="form-control form-control-sm input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="table-scroll-x-y mb-1 table-container card" style="height:auto !important;">
+                            <table id="main-table" class="main-table table table-sm table-bordered bg-white text-nowrap table-hover" style="table-layout: auto;">
+                                <thead>
+                                    <tr>
+                                        <th style="z-index: 3;">S.No.</th>
+                                        <th style="z-index: 3;">Pass Type</th>
+                                        <th style="z-index: 3;">Entry Type</th>
+                                        <th style="z-index: 3;">Transaction Type</th>
+                                        @*<th style="z-index: 3;">
+                                            Party Ledger
+                                        </th>*@
+                                        <th style="z-index: 3;">Vehicle</th>
+                                        <th style="z-index: 3;">
+                                            Vehicle No.
+                                        </th>
+                                        <th style="z-index: 3;">
+                                            Driver Name
+                                        </th>
+                                        <th style="z-index: 3;">Driver Mobile</th>
+                                        <th style="z-index: 3;">
+                                            Purpose
+                                        </th>
+                                        <th class="cstm-sticky" style="right: 0; z-index: 4;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr dir-paginate="sd in SearchDataColl | filter:searchData.GateEntry |orderBy:sortKey:reverse|itemsPerPage:perPage.GateEntry" total-items="paginationOptions.TotalRows">
+                                        @*<tr ng-repeat="sd in SearchDataColl ">*@
+                                        <td align="center">{{$index+1}}</td>
+                                        <td >{{sd.PassType}}</td>
+
+                                        <td>{{sd.EntryType}}</td>
+                                        <td >{{sd.TransactionType}}</td>
+                                        @*<td>{{sd.LedgerId}}</td>*@
+                                        <td>{{sd.VehicleType}}</td>
+                                        <td>{{sd.VehicleNo}}</td>
+                                        <td>{{sd.DriverName}}</td>
+                                        <td>{{sd.DriverMobile}}</td>
+                                        <td>{{sd.Purpose}}</td>
+                                        <td class="cstm-sticky" style="right: 0; z-index: 3; background-color: white !important;">
+                                            <a class="p-1" href="#" ng-click="GetGateEntryById(sd)" @*ng-hide="ButtonED.IRD==true"*@>
+                                                <i class="fas fa-edit text-info"></i>
+                                            </a>
+                                            @*<a class="p-1" href="#" ng-click="GetTransactionById(sd)" ng-hide="ButtonED.IRD==false">
+                                <i class="fa fa-eye text-info"></i>
+                            </a>*@
+                                            <a class="p-1" href="#" ng-click="DelGateEntryById(sd)" @*ng-hide="ButtonED.IRD==true"*@>
+                                                <i class="fas fa-trash-alt text-danger"></i>
+                                            </a>
+                                            @*<a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                <i class="fas fa-print text-primary"></i>
+                            </a>*@
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        @*<div class="col-md-12">
+                            <dir-pagination-controls max-size="perPage.Employee" direction-links="true" boundary-links="true" on-page-change="ReSearchData(newPageNumber)">
+                            </dir-pagination-controls>
+                        </div>*@
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+
+                    </div>
+                    <!-- end modal body -->
+                    <div class="modal-footer justify-content-between align-items-center py-2">
+                        <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                        <div class="">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
+
+<script>
+    document.querySelector('.responsive-iframe').onload = function () {
+        const iframeDocument = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+<script>
+    document.querySelector('.responsive-iframe1').onload = function () {
+        const iframeDocument1 = this.contentDocument || this.contentWindow.document;
+        const img = iframeDocument1.querySelector('img');
+        if (img) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        }
+    };
+</script>
+
+
+
+
+
+
+

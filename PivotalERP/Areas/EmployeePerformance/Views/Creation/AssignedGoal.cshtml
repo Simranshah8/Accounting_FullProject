@@ -1,0 +1,407 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/EmployeePerformance/AssignedGoal.js"></script>
+
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AssignedGoalController" ng-init="LoadData()">
+    <section>
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="page-content-wrapper">
+                    <div id="Employee-section">
+                        <div class="card p-2">
+                            <div class="card-body py-2 px-0">
+                                <header class="row">
+                                    <div class="col-md-9">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control form-control-sm form-select border-left-0 border-right-0" ng-model="perPage.AssignedGoal">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AssignedGoal">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed mr-sm-2">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.AssignedGoal">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm mr-sm-2" ng-hide="HideShow.CostClass==true">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Fiscal Year</span>
+                                                    </div>
+                                                    <select class="form-control form-control-sm form-select border-left-0" ng-model="newFilter.CostClassId" ng-change="GetEmployeeAssignedGoal()">
+                                                        <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == newFilter.CostClassId"> {{cc.Name}} </option>
+                                                    </select>
+                                                </div>
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">For</span>
+                                                    </div>
+                                                    <select class="form-control form-control-sm form-select border-left-0" ng-model="newFilter.ForId" ng-change="GetEmployeeAssignedGoal()">
+                                                        <option ng-value="pp.id" ng-repeat="pp in ForColl" ng-selected="pp.id==newFilter.ForId"> {{pp.value}} </option>
+                                                    </select>
+                                                </div>
+
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 text-right">
+                                        <div class="dropdown dnld-file" data-placement="top" title="Download File">
+                                            <a class="btn btn-secondary btn-light btn-sm wait" title="Refresh" ng-click="GetEmployeeAssignedGoal()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'GoalReleased'" report-name="'List of GoalReleased'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'GoalReleased',ignoreColumn:'3' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </header>
+
+                            </div>
+
+                            <div class="card collapsed-card" dir-paginate="User in AssignedGoalList | filter:searchData.AssignedGoal | itemsPerPage: perPage.AssignedGoal" current-page="currentPages.AssignedGoal" pagination-id="AssignedGoalPagination">
+                                <div class="card-header p-0">
+                                    <div class="row" data-card-widget="collapse" data-toggle="tooltip">
+                                        <div class="col-md-12">
+                                            <div class="px-2" style="background-color: white; border: 2px solid #dee2e6;">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label class="my-1">{{User.EmployeeName}} ({{User.EmployeeCode}})</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label class="my-1">{{User.Department}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label class="my-1">{{User.BranchName}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <div class="form-group d-flex mb-0">
+                                                            <label class="my-1">{{User.CompanyRelationship}}</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-1">
+                                                        <div class="form-inline float-right">
+                                                            <div class="card-tools">
+                                                                <button type="button" class="mt-1 btn btn-tool" data-card-widget="collapse"  data-toggle="tooltip" title="Click to expand it">
+                                                                    <i class="fas fa-plus text-info"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body p-0 expand">
+                                    <div class="row p-2 px-2">
+                                        <div class="col-md-12 pb-3" ng-repeat="AG in User.ChildColl">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="col-md-9 d-flex">
+                                                        <label class="mb-0" style="min-width: 105px;">From Date</label>
+                                                        <label class="mb-0"><b> : {{AG.FromDateBS}}</b></label>
+                                                        <label class="mb-0 ml-2" style="min-width: 60px;">To Date</label>
+                                                        <label class="mb-0"><b> : {{AG.ToDateBS}}</b></label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="mb-0" style="min-width: 100px;" title="Goal Type">Goal Type</label>
+                                                        <label class="mb-0"><b> : {{AG.GoalType}}</b></label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="mb-0" style="min-width: 100px;" title="Description">Description</label>
+                                                        <label class="mb-0"><b> : {{AG.Description}}</b></label>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="mb-0" style="min-width: 100px;" title="Target Type">Target Type</label>
+                                                        <label class="mb-0"><b> : {{AG.GoalTargetType}}</b></label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 d-flex align-items-start justify-content-end">
+                                                    <button type="button" class="btn btn-sm load btn-success mr-1" ng-hide="AG.IsSubmit" ng-click="openKPIModal(AG)">
+                                                        <i class="fas fa-plus w-t"></i> Add KPI
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm load btn-primary" ng-disabled="AG.IsSubmit" ng-click="SubmitAssigneGoal(AG)">
+                                                        <i class="fas fa-save"></i> Submit
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="mb-0" style="min-width: 100px; margin-left: 8px" title="TargetValue">Target Value</label>
+                                                    <label class="mb-0"><b> : {{AG.TargetValue}}</b>   {{AG.GoalMeasurement}}</label>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label class="mb-0" style="min-width: 100px;" title="TotalTargetAchievement">Total Target Achievement</label>
+                                                    <label class="mb-0"><b> : {{AG.TotalAchievedTarget}} <span ng-show="AG.WeightedId == 3">%</span> </b>  {{AG.GoalMeasurement}}</label>
+                                                </div>
+                                            </div>
+                                            <div class="table-responsive" ng-hide="AG.IsSubmit">
+                                                <div class="table-scroll-x-y" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                                    <table id="main-table" class="main-table table table-sm table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 8%">S.No.</th>
+                                                                <th style="width: 50%">Target Achievement</th>
+                                                                <th style="width: 30%">Description</th>
+                                                                <th style="width: 12%">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-repeat="item in AG.KPIColl">
+                                                                <td>{{$index+1}}</td>
+                                                                <td>{{item.TargetAchievement}}</td>
+                                                                <td>{{item.AchievedDescription}}</td>
+                                                                @* <td>{{beData.IsActive}}</td>*@
+                                                                <td class="project-actions no-print text-center cstm-sticky sticky-action-col highlight-on-scroll" style="width: 30px; right: 0; z-index: 3; background-color: #FFF !important;text-align:center;">
+                                                                    <div class="btn-group-sm">
+                                                                        <a href="#" class="btn btn-info" ng-hide="AG.IsSubmit" ng-click="GetAssignedGoalById(item,$index)"><i class="fas fa-pencil-alt"></i></a>
+                                                                        <a href="#" class="btn btn-danger" ng-hide="AG.IsSubmit" ng-click="DelAssignedGoal(item,$index)"><i class="fas fa-trash"></i></a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div class="card mt-1" ng-show="newFilter.ForId == 2">
+                                                <div class="card-header p-2">
+                                                    <div class="row align-items-center">
+                                                        <div class="col-md-8">
+                                                            <h6 class="mb-0">Self Created Goal Setup</h6>
+                                                        </div>
+                                                        <div class="col-md-4 text-right">
+                                                            <button class="btn btn-sm load  btn-success" ng-click="openGoalSetupModal(AG)" ng-disabled="AG.IsSubmit" >
+                                                                <i class="fas fa-plus"></i> Add Goal Setup
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="" ng-show="newFilter.ForId == 2">
+                                                    <div class="table-responsive">
+                                                        <div class="table-scroll-x-y" style="height: auto !important; max-height: calc(100Vh - 18rem) !important; overflow: auto !important;">
+                                                            <table id="main-table" class="main-table table table-sm table-bordered">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width: 8%;">S.No.</th>
+                                                                        <th style="width: 65%">Name</th>
+                                                                        <th style="width: 17px">Target Value</th>
+                                                                        <th style="width: 8%;">Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr ng-repeat="item in AG.GoalSetupAssignedGoalColl">
+                                                                        <td>{{$index+1}}</td>
+                                                                        <td>{{item.Description}}</td>
+                                                                        <td>{{item.TargetValue}}</td>
+                                                                        <td>
+                                                                            <a ng-click="GetGoalSetupById(item,$index)"><i class="fas fa-pencil-alt text-info"></i></a>
+                                                                            <a ng-click="deleteGoalSetup(item,$index)"><i class="fas fa-trash text-danger"></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="AssignedGoalPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+                        
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="kpiModal" @*tabindex="-1"*@ role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header text-white" style="background-color: #068abf;">
+                            <h5 class="modal-title">Add KPI</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal"> &times; </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group d-flex align-items-center">
+                                <label style="min-width:140px;">Target Achievement</label>
+                                <input type="number" class="form-control form-control-sm" ng-model="newDet.TargetAchievement">
+                            </div>
+                            <div class="form-group d-flex align-items-center">
+                                <label style="min-width:140px;">Description</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="newDet.AchievedDescription">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary btn-sm load" ng-click="clearKPI()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                            <button class="btn btn-primary btn-sm load" ng-click="SaveUpdateAssignedGoal()">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal modal-static-esc modal-header-n-sec-scrollbar-fix" id="goalSetupModal" @*tabindex="-1"*@ role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header text-white" style="background-color: #068abf; ">
+                            <h5 class="modal-title">Add Goal Setup</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        </div>
+                        <!-- Body -->
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-sm-4" ng-hide="HideShow.CostClass==true">
+                                        <div class="form-group row mb-0">
+                                            <label for="" class="col-sm-4 col-form-label text-nowrap">Fiscal Year</label>
+                                            <div class="col-sm-8">
+                                                <select class="form-control form-control-sm hideSideBar" style="width: 100%;" ng-model="goalSetup.CostClassId" disabled>
+                                                    <option ng-repeat="cc in CostClassColl track by cc.CostClassId" ng-value="cc.CostClassId" ng-selected="cc.CostClassId == beData.CostClassId"> {{cc.Name}} </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="form-group">
+                                            <label>Parental Goal</label>
+                                            <select class="form-control form-control-sm" ng-model="goalSetup.ParentSetupId" disabled>
+                                                <option ng-repeat="pp in GoalSetupList" ng-value="pp.id"> {{pp.text}} </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Goal Type</label>
+                                            <select class="form-control form-control-sm select2" ng-model="goalSetup.GoalTypeId" disabled>
+                                                <option ng-repeat="pp in GoalTypeList" ng-value="pp.id" ng-selected="pp.id==goalSetup.GoalTypeId">{{pp.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>From Date</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="goalSetup.FromDate_TMP" date-detail="goalSetup.FromDateDet" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>To Date</label>
+                                            <input type="text" class="form-control form-control-sm" date-picker ng-model="goalSetup.ToDate_TMP" date-detail="goalSetup.ToDateDet" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Description</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="goalSetup.Description">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 d-flex align-items-center mt-3">
+                                        <div class="custom-control custom-checkbox mr-3">
+                                            <input class="custom-control-input" type="checkbox" id="customIsMeasurement" ng-model="goalSetup.IsMeasurement" disabled>
+                                            <label for="customIsMeasurement" class="custom-control-label"> Is measurement</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox" id="customIsActive" ng-model="goalSetup.IsActive" disabled>
+                                            <label for="customIsActive" class="custom-control-label"> Is Active </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row" ng-show="goalSetup.IsMeasurement">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Target Value</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="goalSetup.TargetValue">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Goal Measurement </label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="goalSetup.GoalMeasurement" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="">Weighted</label>
+                                            <select class="form-control form-control-sm" ng-model="goalSetup.WeightedId" disabled>
+                                                <option ng-repeat="pp in WeightedColl" ng-value="pp.id" ng-selected="pp.id==goalSetup.WeightedId">{{pp.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="">Target Type</label>
+                                            <select class="form-control form-control-sm select2" ng-model="goalSetup.GoalTargetTypeId" disabled>
+                                                <option ng-repeat="pp in GoalTargetTypeList" ng-value="pp.id" ng-selected="pp.id==goalSetup.GoalTargetTypeId">{{pp.text}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <div class="modal-footer">
+                            <button class="btn btn-secondary load btn-sm" ng-click="clearGoalSetup()">
+                                <i class="fas fa-eraser"></i> Clear
+                            </button>
+                            <button class="btn btn-primary load btn-sm" ng-click="saveGoalSetup()">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+</div>
+

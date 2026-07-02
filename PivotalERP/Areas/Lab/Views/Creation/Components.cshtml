@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/Lab/Components.js"></script>
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Lab_Components)";
+</script>
+<div id="ActionDiv" ng-app="myApp" ng-controller="Components" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="ClearFields()">Components </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-2">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <header class="row">
+                                <div class="col-md-8">
+                                    <div class="clearfix">
+                                        <form class="form-inline">
+                                            <div class="input-group input-group-sm table-search-filed">
+                                                <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-default border-left-0" type="submit">
+                                                        <i class="fas fa-search"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-right">
+                                    <div class="dropdown dnld-file"
+                                         data-placement="top" title="Download File">
+                                        <a class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Refresh" ng-click="GetAllComponents()">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </a>
+                                        <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                id="dropdownMenuButton" data-toggle="dropdown"
+                                                aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <span class="dropdown-item">Choose an option:</span>
+                                            <a class="dropdown-item" href="#" ng-click="DownloadAsXls()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                     class="img-fluid exports-icon" alt="Excel image">
+                                                Excel
+                                            </a>
+                                            <a class="dropdown-item" href="#" ng-click="onBtExportCSV()">
+                                                <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                     class="img-fluid exports-icon">
+                                                CSV
+                                            </a>
+                                        </div>
+                                        <a print-tbl report-name="'List Of Specimen'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                           title="Print">
+                                            <i class="fas fa-print"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                           data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                            <i class="fas fa-save"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </header>
+
+                            <div class="">
+                                <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div>
+                                <form>
+                                    <div class="row">
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Test <span style="color:red">*</span></label>
+                                            <select class="form-control form-control-sm" ng-model="newDet.TestId">
+                                                <option value="">--Select--</option>
+                                                <option ng-value="T.LabTestId" ng-repeat="T in TestColl" ng-selected="T.LabTestId==newDet.TestId">{{T.TestName}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Name <span style="color:red">*</span></label>
+                                            <input id="txtName" type="text" class="form-control form-control-sm" ng-model="newDet.Name">
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Code</label>
+                                            <input id="txtCode" type="text" class="form-control form-control-sm" ng-model="newDet.Code" readonly>
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Type</label>
+                                            <select class="form-control form-control-sm form-select" ng-model="newDet.TypeId">
+                                                <option value="">--Select--</option>
+                                                <option ng-value="Ty.id" ng-repeat="Ty in TypeList" ng-selected="Ty.id==newDet.TypeId">{{Ty.text}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Unit</label>
+                                            <select class="form-control form-control-sm form-select" ng-model="newDet.UnitId">
+                                                <option value="">--Select--</option>
+                                                <option ng-value="U.UnitId" ng-repeat="U in UnitColl" ng-selected="U.UnitId==newDet.UnitId">{{U.Symbol}}</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Decimal</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newDet.Decimal">
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix">
+                                                    <label for="" class="invisible d-block">Is Calculated?</label>
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary1" ng-model="newDet.IsCalculated">
+                                                        <label for="checkboxPrimary1">Is Calculated?</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-sm-3 mb-3" ng-show="newDet.IsCalculated">
+                                            <label>Formula</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.Formula">
+                                        </div>
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <label>
+                                                    Answer Set
+                                                    <span style="color:red"></span>
+                                                </label>
+                                                <select class="form-control form-control-sm" ng-model="newDet.AnswerSetId">
+                                                    <option ng-value="pp.LookupId" ng-repeat="pp in AnswerSetColl" ng-selected="pp.LookupId==newDet.AnswerSetId">{{pp.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Sort Order</label>
+                                            <input type="number" class="form-control form-control-sm" ng-model="newDet.SortOrder">
+                                        </div>
+
+                                        <div class="col-sm-3 mb-3">
+                                            <label>Component Group</label>
+                                            <input type="text" class="form-control form-control-sm" ng-model="newDet.ComponentGroup">
+                                        </div>
+
+
+                                        <div class="col-3">
+                                            <div class="form-group">
+                                                <div class="form-group clearfix">
+                                                    <label for="" class="invisible d-block">Is Active?</label>
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="checkboxPrimary2" ng-model="newDet.IsActive">
+                                                        <label for="checkboxPrimary2">Is Active?</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span> Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateComponents()"><span class="glyphicon glyphicon-save"></span> Save</button>
+                                        </div>
+                                    </footer>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,155 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>
+
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Payroll_AllowPayHeading)";
+</script>
+
+<script src="~/jslib/hr/transaction/AllowPayHeading.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="AllowPayHeadingController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="pb-1"></div>
+                <div class="card p-2">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1">Company</label>
+                                <select class="form-control form-control-sm select2" style="width: 78%;" ng-model="newFilter.CompanyRelationshipId">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="tdc in CompanyRelationshipList" ng-value="tdc.TranId" ng-selected="tdc.TranId==newFilter.CompanyRelationshipId"> {{tdc.Name}} </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1">Branch</label>
+                                <select class="form-control form-control-sm select2" ng-model="newFilter.BranchId" style="width:100%">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-repeat="B in BranchList" ng-value="B.BranchId" ng-selected="B.BranchId==newFilter.BranchId">{{B.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1">Department</label>
+                                <select class="form-control form-control-sm select2" style="width: 90%;" ng-model="newFilter.DepartmentId" style="width:100%">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.id" ng-repeat="c in DepartmentList" ng-selected="c.id==newFilter.DepartmentId">{{c.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group d-flex">
+                                <label class="mr-2 mt-1">Category</label>
+                                <select class="form-control form-control-sm select2" style="width: 90%;" ng-model="newFilter.CategoryId" style="width:100%">
+                                    <option ng-value="0">**Select All**</option>
+                                    <option ng-value="c.CategoryId" ng-repeat="c in CategoryList" ng-selected="c.CategoryId==newFilter.CategoryId">{{c.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <header class="row">
+                        <div class="col-md-7">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.AllowPayHeading">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.AllowPayHeading">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" ng-model="searchData.AllowPayHeading">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0" type="submit"><i class="fas fa-search"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-right">
+                            <div class="dropdown dnld-file">
+                                <button class="btn btn-sm btn-default load mx-2" ng-click="GetPayHeadingForAllow()"><i class="fas fa-redo-alt mr-1"></i> Load</button>
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#AllowPayheading'" sheet-name="'AllowPayheading'" report-name="'Allow Payheading'" ignore-column="'3'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#AllowPayheading').tableExport({type:'csv',escape:'false', reportName:'AllowPayheading',ignoreColumn:'3'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+                                <button class="btn btn-sm btn-add btn-success load" ng-click="SaveAllowPayHeading()"><i class="fas fa-save mr-1"></i> Save</button>
+                                <button class="btn btn-sm btn-add btn-danger load"><i class="far fa-trash-alt"></i> Delete</button>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="table-scroll-x-y table-scroll mt-1" style="max-height: calc(100vh - 8rem);">
+                        <table id="AllowPayheading"
+                               class="main-table table table-sm table-bordered bg-white">
+                            <thead>
+                                <tr>
+                                    <th class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #e9ecef!important">Code</th>
+                                    <th class="text-center align-middle cstm-sticky" style="width: 80px; left: 70px; z-index: 3; background-color: #e9ecef !important">Enroll No</th>
+                                    <th class="align-middle cstm-sticky" style="width: 180px; left: 150px; z-index: 3; background-color: #e9ecef !important">Name</th>
+                                    <th class="text-center" style="width: 120px; z-index: 2; background-color: #e9ecef !important" ng-repeat="Ph in PayHeadingList">
+                                        <label for="customCheckboxHeader{{$index}}">{{Ph.Name}}</label>
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckboxHeader{{$index}}" ng-model="Ph.IsAllow" ng-change="CheckUnCheckAll(Ph)">
+                                            <label for="customCheckboxHeader{{$index}}" class="custom-control-label"></label>
+                                        </div>
+                                    </th>
+
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="cl in AllowPayHeadingList | filter:searchData.AllowPayHeading | itemsPerPage: perPage.AllowPayHeading" current-page="currentPages.AllowPayHeading" pagination-id="AllowPayHeadingPagination">
+                                    <td class="align-middle text-center cstm-sticky" style="width: 70px; left: 0; z-index: 2; background-color: #fff!important">{{cl.EmployeeCode}}</td>
+                                    <td class="align-middle text-center cstm-sticky" style="width: 80px; left: 70px; z-index: 2; background-color: #fff!important">{{cl.EnrollNo}}</td>
+                                    <td class="align-middle cstm-sticky" style="width: 250px; left: 150px; z-index: 2; background-color: #fff!important">{{cl.EmployeeName}}</td>
+                                    <td class="text-center" ng-repeat="Ph in cl.PayHeadColl">
+                                        <div class="custom-control custom-checkbox">
+                                            <input class="custom-control-input" type="checkbox" id="customCheckbox{{cl.EmployeeId}}_{{Ph.PayHeadingId}}" value="option11" ng-model="Ph.IsAllow">
+                                            <label for="customCheckbox{{cl.EmployeeId}}_{{Ph.PayHeadingId}}" class="custom-control-label">
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <footer class="row align-items-center">
+                        <div class="col-md-12">
+                            <dir-pagination-controls pagination-id="AllowPayHeadingPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                            </dir-pagination-controls>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </div>
+    </section>
+
+</div>

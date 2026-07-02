@@ -1,0 +1,2250 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+<link href="~/wwwroot/dynamic-erp/css/treeview.css" rel="stylesheet" />
+
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .card-body {
+        overflow-x: auto;
+        overflow: hidden;
+        padding: 8px;
+    }
+
+    .paper {
+        background: #fff;
+        box-shadow: 2px 2px 1px rgb(199, 196, 196);
+    }
+
+    .foldtl {
+        position: relative;
+    }
+
+        .foldtl:before {
+            content: "";
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 0px;
+            height: 0px;
+            border-bottom: 20px solid #eee;
+            border-left: 25px solid transparent;
+        }
+
+        .foldtl:after {
+            content: "";
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            width: 0px;
+            height: 0px;
+            border-top: 20px solid #f4f6f9;
+            border-right: 25px solid #bcc3c9;
+        }
+</style>
+<style type="text/css" media="all">
+    .clickcur {
+        cursor: pointer !important;
+    }
+</style>
+<script src="~/jslib/service/reporting/Dashboard.js?v=1"></script>
+<div ng-app="myApp" ng-controller="serviceDashboardCtrl" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+
+    <div class="content  third-level-scroll-only">
+        <div class="container-fluid">
+
+            <section class="iframe-content-starts-here">
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="d-inline-block">
+                            <div class="input-group input-group-sm">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">From:</span>
+                                </div>
+                                <input class="form-control text-dark input-sm" type="text" date-picker ng-model="para.DateFrom_TMP" style="max-width:100px" date-detail="para.DateFromDet" />
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">To:</span>
+                                </div>
+                                <input class="form-control text-dark input-sm" type="text" date-picker ng-model="para.DateTo_TMP" style="max-width:100px" date-detail="para.DateToDet" />
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" ng-click="GetData()">Load</span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" ng-click="onBtExportCSV()">
+                            Export
+                            <i class="fas fa-file"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <!--Card Heirarchy added by suresh on 1 MAngsir-->
+                    <div class="container-fluid">
+                        <div class="row ">
+                            <div class="col-md-6 card p-2">
+                                <div class="text-center">
+                                    <ul class="heirarchy vertical">
+                                        <li>
+                                            <div class="blue clickcur" ng-click="getJobCardCallingRpt(0)">TOTAL POPULATION <b>({{DB.C28}})</b></div>
+                                            <ul>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(22)">New Stock ({{ DB.C22 }})</div>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(23)">
+                                                        Active Population ({{ DB.C23 }})
+                                                    </div>
+                                                    <ul>
+                                                        <li>
+                                                            <div class="yellow clickcur" ng-click="getJobCardCallingRpt(20)">Under Warranty ({{DB.C20}})</div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="yellow clickcur" ng-click="getJobCardCallingRpt(21)">Out Of Warranty ({{DB.C21}})</div>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(24)">
+                                                        Pulled MHPL ({{ DB.C24 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(25)">
+                                                        Pulled ({{ DB.C25 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(26)">
+                                                        Scrap ({{ DB.C26 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(27)">
+                                                        TO BE SOLD ({{ DB.C27 }})
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 card p-2">
+                                <div class="text-center">
+                                    <ul class="heirarchy vertical">
+                                        <li>
+                                            <div class="blue clickcur" ng-click="getJobCardCallingRpt(9)">
+                                                Retention
+                                                <b>({{DB.C9 |number:0}})</b>
+                                            </div>
+                                            <ul>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(15)">
+                                                        Repair Retention
+                                                        ({{ DB.C15 |number:0}})
+                                                    </div>
+                                                    <ul>
+                                                        <li>
+                                                            <div class="yellow clickcur" ng-click="getJobCardCallingRpt(16)">Under Warranty ({{DB.C16 |number:0}})</div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="yellow clickcur" ng-click="getJobCardCallingRpt(17)">Out Of Warranty ({{DB.C17 |number:0}})</div>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(12)">
+                                                        Service Retention ({{ DB.C12 |number:0 }})
+                                                    </div>
+                                                    <ul>
+                                                        <li>
+                                                            <div class="yellow clickcur" ng-click="getJobCardCallingRpt(13)">Under Warranty ({{DB.C13 |number:0}})</div>
+                                                        </li>
+                                                        <li>
+                                                            <div class="yellow clickcur" ng-click="getJobCardCallingRpt(14)">Out Of Warranty ({{DB.C14 |number:0}})</div>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(10)">
+                                                        UW Retention
+                                                        ({{ DB.C10 |number:0 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="green clickcur" ng-click="getJobCardCallingRpt(11)">
+                                                        OW retention
+                                                        ({{ DB.C11 |number:0 }})
+                                                    </div>
+                                                </li>
+
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 card p-2">
+                                <div class="text-center">
+                                    <ul class="heirarchy vertical">
+                                        <li>
+                                            <div class="red">
+                                                CRO’S Calling 
+                                            </div>
+                                            <ul>
+                                                <li class="clickcur" ng-click="getJobCardCallingRpt(1)">
+                                                    <div class="sidebar-dark-pink">
+                                                        4th Call Pending
+                                                        ({{ DB.C1 }})
+                                                    </div>
+                                                </li>
+                                                <li class="clickcur" ng-click="getJobCardCallingRpt(2)">
+                                                    <div class="sidebar-dark-pink">
+                                                        5th Call Pending
+                                                        ({{ DB.C2 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="sidebar-dark-pink">
+                                                        6th Call Pending
+                                                    </div>
+                                                    <ul>
+                                                        <li class="clickcur" ng-click="getJobCardCallingRpt(3)">
+                                                            <div class="blue">
+                                                                6th call non retained Pending
+                                                                ({{DB.C3}})
+                                                            </div>
+                                                        </li>
+                                                        <li class="clickcur" ng-click="getJobCardCallingRpt(4)">
+                                                            <div class="blue">
+                                                                Potential Customer Pending
+                                                                ({{DB.C4}})
+                                                            </div>
+                                                        </li>
+                                                        <li class="clickcur" ng-click="getJobCardCallingRpt(6)">
+                                                            <div class="blue">
+                                                                6th Call Retained Pending
+                                                                ({{DB.C6}})
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li>
+                                                    <div class="sidebar-dark-pink clickcur" ng-click="getJobCardCallingRpt(8)">
+                                                        Feedback Call Pending
+                                                        ({{ DB.C8 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="sidebar-dark-pink clickcur">
+                                                        Birthday Celebration
+                                                        ({{ DB.C18 }})
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <div class="sidebar-dark-pink clickcur" ng-click="getJobCardCallingRpt(7)">
+                                                        Open JobCard
+                                                        ({{ DB.C18 }})
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--Ends-->
+                </div>
+                <div class="row mt-4">
+                 
+                    <div class="col-md-2 text-center clickcur" ng-click="getJobCardCallingRpt(5)">
+                        <div class="paper foldtl">
+                            <div class="">
+                                <p class="py-3">Pending Installation</p>
+                            </div>
+                            <div class="card-body text-white" style="background-color: #33B8FF;">
+                                {{DB.C5}}
+                            </div>
+                        </div>
+                    </div>
+                    
+               
+                    <div class="col-md-2 text-center clickcur" ng-click="getJobCardCallingRpt(8)">
+                        <div class="paper foldtl">
+                            <div class="">
+                                <p class="py-3">Pending Service Reminder</p>
+                            </div>
+                            <div class="card-body text-white" style="background-color: #87CEEB;">
+                                {{DB.C8}}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div id="datatable" style="height: calc(100vh - 255px);width: 100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                    </div>
+                </div>
+
+
+            </section>
+            <!-- /.row -->
+        </div>
+    </div>
+    <!-- Main content -->
+    <!--Forth Call Modal starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="fourthcall" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+                    <h6 class="modal-title text-center col-md-11" id="exampleModalCenterTitle">Feedback for 4th Week Call</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div id="forthcallsuccess" ng-show="CurCall.IsFailed==false">
+                        <div class="row">
+                            <div class="col-md-7" style="text-align: right;">
+                                <label><b>Is it your repeat Purchase?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="text-center">
+                                    <div class="switch-field">
+                                        <input type="radio" id="purchase_yes" name="switch_3" ng-value="true" @*onclick="myFunction1()"*@ ng-model="CurCall.IsRepeatPurchase" />
+                                        <label for="purchase_yes">Yes</label>
+                                        <input type="radio" id="purchase_no" name="switch_3" ng-value="false" @*onclick="myFunction1()"*@ ng-model="CurCall.IsRepeatPurchase" />
+                                        <label for="purchase_no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-md-7" style="text-align: right;">
+                                <label><b>Is Installation Done?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field">
+                                    <input type="radio" id="switch_left" name="switch_2" ng-value="true" @*onclick="myFunction()"*@ ng-model="CurCall.IsInstallationDone" />
+                                    <label for="switch_left">Yes</label>
+                                    <input type="radio" id="switch_right" name="switch_2" ng-value="false" @*onclick="myFunction()"*@ ng-model="CurCall.IsInstallationDone" />
+                                    <label for="switch_right">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="installation" ng-show="CurCall.IsInstallationDone==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-7" style="text-align: right;">
+                                    <label><b>Which implement has been used for installation?</b></label>
+                                </div>
+                                <div class="col-md-5">
+                                    <select class="form-control form-control-sm select2" ng-model="CurCall.VehicleImplementId">
+                                        <option ng-value="0">**Select Implement**</option>
+                                        <option ng-repeat="il in VehicleImplementsList" ng-value="il.id" ng-selected="il.id==CurCall.VehicleImplementId">{{il.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7" style="text-align: right;">
+                                    <label><b>Are you satisfied with delivery and Installation Process?</b></label>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="switch-field text-center">
+                                        <input type="radio" id="satisfy_yes" name="switch_4" ng-value="true" @*onclick="myFunction3()"*@ ng-model="CurCall.AreYouSatisfied" />
+                                        <label for="satisfy_yes">Yes</label>
+                                        <input type="radio" id="satisfy_no" name="switch_4" ng-value="false" @*onclick="myFunction3()"*@ ng-model="CurCall.AreYouSatisfied" />
+                                        <label for="satisfy_no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="noninstallation" ng-show="CurCall.IsInstallationDone==false">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Ticket will be raised against non-installation</b></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label><b>Comment on Non Installation</b></label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.SatisfiedYes"></textarea>
+                            </div>
+                        </div>
+                        <div id="commentdiv" ng-show="CurCall.AreYouSatisfied==false">
+                            <div class="form-group">
+                                <label><b>Comment(Not Satisfied)</b></label>
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.SatisfiedNo"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <label><b>Do you have any open Complaints?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field text-center">
+                                    <input type="radio" id="complaints_yes_4P" name="switch_4PO" ng-value="true" ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_yes_4P">Yes</label>
+                                    <input type="radio" id="complaints_no_4P" name="switch_4PO" ng-value="false" ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_no_4P">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="CurCall.AnyComplaints==true">
+                        <div class="row form-group text-center">
+                            <div class="col-md-12" style="background-color: lightgreen;">
+                                <label><b>Complaint Ticket No <b>TKCXXXXXXXXXXX</b></b></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Complaint Type</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6" ng-repeat="ct in ComplainTypeList">
+                                        <div class="form-group">
+                                            <div class="icheck-primary d-inline">
+                                                <input type="checkbox" id="Service{{$index}}" ng-model="ct.IsSelected">
+                                                <label for="Service{{$index}}">{{ct.text}}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>Comments</label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.Comments"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-1">
+                        <button type="button" class="btn btn-success"
+                                style="min-width: 50px;padding:2px 4px;" ng-click="CallSaveUpdateFourthCall()">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" aria-label="Close"
+                                style="min-width: 50px;padding:2px 4px;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--Fifth Call Modal starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="fifthcall" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11" id="exampleModalCenterTitle">Feedback for 5th Week Call</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div ng-show="CurCall.IsFailed==false">
+                        <label><b>How would you rate the quality of Dealer Service Experience?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="detractor" name="rate1" ng-value="1" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="detractor" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="neutral" name="rate1" ng-value="2" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="neutral" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="promotor" name="rate1" ng-value="3" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="promotor" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.ServiceComment"></textarea>
+                            </div>
+                        </div>
+
+                        <label><b>How likely are you to recommend this product?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="rdetractor" name="rate2" ng-value="1" ng-model="CurCall.RecommendRate" />
+                                <label for="rdetractor" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="rneutral" name="rate2" ng-value="2" ng-model="CurCall.RecommendRate" />
+                                <label for="rneutral" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="rpromotor" name="rate2" ng-value="3" ng-model="CurCall.RecommendRate" />
+                                <label for="rpromotor" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.RecommendComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <label><b>Have you done 1st Service?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field text-center">
+                                    <input type="radio" id="complaints_yes_ST" name="switch_1st" ng-value="true" ng-model="CurCall.Service1" />
+                                    <label for="complaints_yes_ST">Yes</label>
+                                    <input type="radio" id="complaints_no_ST" name="switch_1st" ng-value="false" ng-model="CurCall.Service1" />
+                                    <label for="complaints_no_ST">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-8">
+                                <label><b>Current Running HMR</b></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" class="form-control form-control-sm" ng-model="CurCall.RunningHMR" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" rows="1" ng-model="CurCall.RunningComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <label><b>Do you have any open Complaints?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field text-center">
+                                    <input type="radio" id="complaints_yes_P" name="switch_5PO" ng-value="true" ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_yes_P">Yes</label>
+                                    <input type="radio" id="complaints_no_P" name="switch_5PO" ng-value="false" ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_no_P">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="complaintnodiv" ng-show="CurCall.CurCall==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Update Feedback</b></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="complaintyesdiv" ng-show="CurCall.AnyComplaints==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Complaint Ticket No <b>TKCXXXXXXXXXXX</b></b></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Complaint Type</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-6" ng-repeat="ct in ComplainTypeList">
+                                            <div class="form-group">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="Service{{$index}}" ng-model="ct.IsSelected">
+                                                    <label for="Service{{$index}}">{{ct.text}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Comments</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.Comments"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-success"
+                                style="min-width: 50px;padding:2px 4px;" ng-click="CallSaveUpdateFifthCall()">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                style="min-width: 50px;padding:2px 4px;" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!--Non Retained Feedback Modal Starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="nonretained" @*tabindex="-1"*@ role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11" id="exampleModalCenterTitle">Feedback-Non Retained Customer</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div id="nonretainedcallsuccess" ng-show="CurCall.IsFailed==false">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label><b>Are you still using your John Deere tractor?</b></label>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="switch-field float-right">
+                                    <input type="radio" id="use_yes" name="switch_6" ng-value="true" ng-model="CurCall.AreYouUsing" />
+                                    <label for="use_yes">Yes</label>
+                                    <input type="radio" id="use_no" name="switch_6" ng-value="false" ng-model="CurCall.AreYouUsing" />
+                                    <label for="use_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="usingyesdiv" ng-show="CurCall.AreYouUsing==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Details of Product History</b></label>
+                                </div>
+                                <div class="table-scroll-x-y">
+                                    <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                        <tbody>
+                                            <tr>
+                                                <td class="col1">Last Service Date</td>
+                                                <td class="col2">{{CurCall.JobCard.OpenDateTime |dateFormat}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">AAU</td>
+                                                <td class="col2">{{CurCall.JobCard.AAU | formatNumber}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">Chassis No.</td>
+                                                <td class="col2">{{CurCall.ChSrlNo}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">Engine No.</td>
+                                                <td class="col2">{{CurCall.EngineNo}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">Branch</td>
+                                                <td class="col2">{{CurCall.Branch}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">Service Type</td>
+                                                <td class="col2">{{CurCall.JobCard.ServiceType}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">HMR</td>
+                                                <td class="col2">{{CurCall.JobCard.RunningHR}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="col1">Warrenty Status</td>
+                                                <td class="col2">{{CurCall.JobCard.Warranty==true ? 'Under Warrenty' : 'No Warrenty'}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 px-0">
+                                    <label><b>From where are you availing services?</b></label>
+                                </div>
+                                <div class="col-md-6 px-0">
+                                    <select class="form-control form-control-sm select2" ng-model="CurCall.ServiceFrom">
+                                        <option ng-value="0">Others</option>
+                                        <option ng-repeat="b in BranchList" ng-value="b.BranchId" ng-selected="b.BranchId==CurCall.ServiceFrom">{{b.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row" ng-show="CurCall.ServiceFrom==0">
+                                <div class="col-md-3">
+                                    <label><b>Comments</b></label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control ml-2" rows="1" ng-model="CurCall.ServiceFromComment"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 px-0">
+                                    <label><b>From where are you availing spare parts?</b></label>
+                                </div>
+                                <div class="col-md-6 px-0">
+                                    <select class="form-control form-control-sm select2" ng-model="CurCall.SparePartFrom">
+                                        <option ng-value="0">Others</option>
+                                        <option ng-repeat="b in BranchList" ng-value="b.BranchId" ng-selected="b.BranchId==CurCall.SparePartFrom">{{b.Name}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row" ng-show="CurCall.SparePartFrom==0">
+                                <div class="col-md-3">
+                                    <label><b>Comments</b></label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control ml-2" " rows="1" ng-model="CurCall.SparePartFromComment"></textarea>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 px-0">
+                                    <label><b>Why are you not preferring JD  dealerships/service center?</b></label>
+                                </div>
+                                <div class="col-md-6 px-0">
+                                    <select class="form-control form-control-sm select2" ng-model="CurCall.WhyNotJDService">
+                                        <option ng-value="0">**Select Reason**</option>
+                                        <option ng-repeat="b in JDReasonList" ng-value="b.id" ng-selected="b.id==CurCall.WhyNotJDService">{{b.text}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <label><b>Do you have any open Complaints?</b></label>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="switch-field text-center">
+                                        <input type="radio" id="complaints_yes5" name="switch_8" ng-value="true" @*onclick="myFunction5()"*@ ng-model="CurCall.AnyComplaints" />
+                                        <label for="complaints_yes5">Yes</label>
+                                        <input type="radio" id="complaints_no5" name="switch_8" @*onclick="myFunction5()"*@ ng-value="false" ng-model="CurCall.AnyComplaints" />
+                                        <label for="complaints_no5">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" ng-show="CurCall.AnyComplaints==true">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>Complaint Type</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-md-6" ng-repeat="ct in ComplainTypeList">
+                                                <div class="form-group">
+                                                    <div class="icheck-primary d-inline">
+                                                        <input type="checkbox" id="Service{{$index}}" ng-model="ct.IsSelected">
+                                                        <label for="Service{{$index}}">{{ct.text}}</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label>Comments</label>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.Comments"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <div ng-show="CurCall.AreYouUsing==false">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Not Using</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.NotUsedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in JDVehicleReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.NotUsedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.NotUsedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <label><b>Are you interested in buying new tractor ?</b></label>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="switch-field text-center">
+                                <input type="radio" id="complaints_yes_RC" name="switch_5RC" ng-value="true" @*onclick="myFunction5()"*@ ng-model="CurCall.AreYouInterested" />
+                                <label for="complaints_yes_RC">Yes</label>
+                                <input type="radio" id="complaints_no_RC" name="switch_5RC" @*onclick="myFunction5()"*@ ng-value="false" ng-model="CurCall.AreYouInterested" />
+                                <label for="complaints_no_RC">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="CurCall.AreYouInterested==true">
+                        <div class="row">
+                            <div class="col-md-7 px-0">
+                                <label><b>When you will be planning to buy a new tractor ?</b></label>
+                            </div>
+                            <div class="col-md-5 px-0">
+                                <input class="text-dark input-sm" type="text" date-picker ng-model="CurCall.Plantobuydate_TMP" style="max-width:100px" date-detail="CurCall.PlantobuydateDet" />
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Model Interested</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.VehicleModelId">
+                                    <option ng-value="0">**select Model**</option>
+                                    <option ng-repeat="cr in VehicleModelList" ng-value="cr.id" ng-selected="cr.id==CurCall.VehicleModelId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>User Comment</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.UserComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Friend/Relative Name</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.RelativeName">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Contact No</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.ContactNo">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Village</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.Village">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Relation</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.Relation">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-success"
+                                style="min-width: 50px;padding:2px 4px;" ng-click="CallSaveUpdateSixthCall()">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                style="min-width: 50px;padding:2px 4px;" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!--Retained Call Modal starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="retained" @*tabindex="-1"*@ role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11">Feedback for Retained Call</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div ng-show="CurCall.IsFailed==false">
+                        <label><b>How would you rate the quality of Dealer Service Experience?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="detractorR" name="rateR1" ng-value="1" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="detractorR" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="neutralR" name="rateR1" ng-value="2" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="neutralR" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="promotorR" name="rateR1" ng-value="3" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="promotorR" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.ServiceComment"></textarea>
+                            </div>
+                        </div>
+
+                        <label><b>How likely are you to recommend this product?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="rdetractorR" name="rateR2" ng-value="1" ng-model="CurCall.RecommendRate" />
+                                <label for="rdetractorR" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="rneutralR" name="rateR2" ng-value="2" ng-model="CurCall.RecommendRate" />
+                                <label for="rneutralR" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="rpromotorR" name="rateR2" ng-value="3" ng-model="CurCall.RecommendRate" />
+                                <label for="rpromotorR" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.RecommendComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <label><b>Do you have any open Complaints?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field text-center">
+                                    <input type="radio" id="complaints_yes_R" name="switch_5" ng-value="true" @*onclick="myFunction5()"*@ ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_yes_R">Yes</label>
+                                    <input type="radio" id="complaints_no_R" name="switch_5" @*onclick="myFunction5()"*@ ng-value="false" ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_no_R">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="complaintnodiv" ng-show="CurCall.CurCall==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Update Feedback</b></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="complaintyesdiv" ng-show="CurCall.AnyComplaints==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Complaint Ticket No <b>TKCXXXXXXXXXXX</b></b></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Complaint Type</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-6" ng-repeat="ct in ComplainTypeList">
+                                            <div class="form-group">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="RService{{$index}}" ng-model="ct.IsSelected">
+                                                    <label for="RService{{$index}}">{{ct.text}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Comments</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.Comments"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-7">
+                            <label><b>Are you interested in buying new tractor ?</b></label>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="switch-field text-center">
+                                <input type="radio" id="complaints_yes_RC" name="switch_5RC" ng-value="true" @*onclick="myFunction5()"*@ ng-model="CurCall.AreYouInterested" />
+                                <label for="complaints_yes_RC">Yes</label>
+                                <input type="radio" id="complaints_no_RC" name="switch_5RC" @*onclick="myFunction5()"*@ ng-value="false" ng-model="CurCall.AreYouInterested" />
+                                <label for="complaints_no_RC">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="CurCall.AreYouInterested==true">
+                        <div class="row">
+                            <div class="col-md-7 px-0">
+                                <label><b>When you will be planning to buy a new tractor ?</b></label>
+                            </div>
+                            <div class="col-md-5 px-0">
+                                <input class="text-dark input-sm" type="text" date-picker ng-model="CurCall.Plantobuydate_TMP" style="max-width:100px" date-detail="CurCall.PlantobuydateDet" />
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Model Interested</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.VehicleModelId">
+                                    <option ng-value="0">**select Model**</option>
+                                    <option ng-repeat="cr in VehicleModelList" ng-value="cr.id" ng-selected="cr.id==CurCall.VehicleModelId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>User Comment</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.UserComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Friend/Relative Name</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.RelativeName">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Contact No</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.ContactNo">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Village</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.Village">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Relation</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.Relation">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-success"
+                                style="min-width: 50px;padding:2px 4px;" ng-click="CallSaveUpdateRetainedCall()">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                style="min-width: 50px;padding:2px 4px;" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!--Potential Call Modal starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="potential" @*tabindex="-1"*@ role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11">Feedback for Potential Call</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div ng-show="CurCall.IsFailed==false">
+                        <label><b>How would you rate the quality of Dealer Service Experience?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="detractorP" name="rateP1" ng-value="1" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="detractorP" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="neutralP" name="rateP1" ng-value="2" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="neutralP" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="promotorP" name="rateP1" ng-value="3" ng-model="CurCall.ServiceQualityRate" />
+                                <label for="promotorP" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" rows="1" ng-model="CurCall.ServiceComment"></textarea>
+                            </div>
+                        </div>
+
+                        <label><b>How likely are you to recommend this product?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="rdetractorP" name="rateP2" ng-value="1" ng-model="CurCall.RecommendRate" />
+                                <label for="rdetractorP" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="rneutralP" name="rateP2" ng-value="2" ng-model="CurCall.RecommendRate" />
+                                <label for="rneutralP" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="rpromotorP" name="rateP2" ng-value="3" ng-model="CurCall.RecommendRate" />
+                                <label for="rpromotorP" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" rows="1" ng-model="CurCall.RecommendComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-7">
+                                <label><b>Do you have any open Complaints?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field text-center">
+                                    <input type="radio" id="complaints_yes_P" name="switch_5P" ng-value="true" @*onclick="myFunction5()"*@ ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_yes_P">Yes</label>
+                                    <input type="radio" id="complaints_no_P" name="switch_5P" @*onclick="myFunction5()"*@ ng-value="false" ng-model="CurCall.AnyComplaints" />
+                                    <label for="complaints_no_P">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="complaintnodiv" ng-show="CurCall.CurCall==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Update Feedback</b></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="complaintyesdiv" ng-show="CurCall.AnyComplaints==true">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Complaint Ticket No <b>TKCXXXXXXXXXXX</b></b></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Complaint Type</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-6" ng-repeat="ct in ComplainTypeList">
+                                            <div class="form-group">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="RPService{{$index}}" ng-model="ct.IsSelected">
+                                                    <label for="RPService{{$index}}">{{ct.text}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Comments</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control" rows="1" ng-model="CurCall.Comments"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-7">
+                            <label><b>Are you interested in buying new tractor ?</b></label>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="switch-field text-center">
+                                <input type="radio" id="complaints_yes_RCP" name="switch_5RCP" ng-value="true" @*onclick="myFunction5()"*@ ng-model="CurCall.AreYouInterested" />
+                                <label for="complaints_yes_RCP">Yes</label>
+                                <input type="radio" id="complaints_no_RCP" name="switch_5RCP" @*onclick="myFunction5()"*@ ng-value="false" ng-model="CurCall.AreYouInterested" />
+                                <label for="complaints_no_RCP">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="CurCall.AreYouInterested==true">
+                        <div class="row">
+                            <div class="col-md-7 px-0">
+                                <label><b>When you will be planning to buy a new tractor ?</b></label>
+                            </div>
+                            <div class="col-md-5 px-0">
+                                <input class="text-dark input-sm" type="text" date-picker ng-model="CurCall.Plantobuydate_TMP" style="max-width:100px" date-detail="CurCall.PlantobuydateDet" />
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Model Interested</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.VehicleModelId">
+                                    <option ng-value="0">**select Model**</option>
+                                    <option ng-repeat="cr in VehicleModelList" ng-value="cr.id" ng-selected="cr.id==CurCall.VehicleModelId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>User Comment</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.UserComment"></textarea>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Friend/Relative Name</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.RelativeName">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Contact No</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.ContactNo">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Village</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.Village">
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Relation</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <input type="text" class="form-control" ng-model="CurCall.Relation">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-success"
+                                style="min-width: 50px;padding:2px 4px;" ng-click="CallSaveUpdatePotentialCall()">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                style="min-width: 50px;padding:2px 4px;" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!--Service Remainder Modal Starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="remainder" @*tabindex="-1"*@ role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11" id="exampleModalCenterTitle">Service Reminder</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body pt-0 gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div id="remainderdiv">
+                        <div class="row" style="border: 1px solid #068abf">
+                            <div class="col-md-8" style="background-color: #068abf; color: #fff; border: 1px solid #068abf;">
+                                <h6 class="modal-title"> Thank you for using John Deere Product(In case of not using mark as No)</h6>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="switch-field text-center mt-2">
+                                    <input type="radio" id="thanks_yes" name="switch_10" ng-value="true" ng-model="CurCall.AreYouUsing" />
+                                    <label for="thanks_yes">Yes</label>
+                                    <input type="radio" id="thanks_no" name="switch_10" ng-value="false" ng-model="CurCall.AreYouUsing" />
+                                    <label for="thanks_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-2" id="thanks" ng-show="CurCall.AreYouUsing==false">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label><b>Reason</b></label>
+                                </div>
+                                <div class="col-md-8">
+                                    <select class="form-control form-control-sm select2" ng-model="CurCall.Reason">
+                                        <option ng-value="Tractor Sold to Othe">Tractor Sold to Other</option>
+                                        <option ng-value="Tractor Lost">Tractor Lost</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row  mt-2">
+                                <div class="col-md-4">
+                                    <label><b>Comment</b></label>
+                                </div>
+                                <div class="col-md-8">
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="1" ng-model="CurCall.Comments"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="" style="border-top: 1px solid #068abf;">
+                            <div id="usingyesdiv">
+                                <div class="row form-group text-center">
+                                    <div class="col-md-12" style="background-color: lightgreen;">
+                                        <label><b>Details of Product History</b></label>
+                                    </div>
+                                    <div class="table-scroll-x-y">
+                                        <table id="main-table" class="main-table table table-sm table-bordered bg-white">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="col1">Last Service Date</td>
+                                                    <td class="col2">{{CurCall.JobCard.OpenDateTime |dateFormat}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">AAU</td>
+                                                    <td class="col2">{{CurCall.JobCard.AAU | formatNumber}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">Chassis No.</td>
+                                                    <td class="col2">{{CurCall.ChSrlNo}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">Engine No.</td>
+                                                    <td class="col2">{{CurCall.EngineNo}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">Branch</td>
+                                                    <td class="col2">{{CurCall.Branch}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">Service Type</td>
+                                                    <td class="col2">{{CurCall.JobCard.ServiceType}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">HMR</td>
+                                                    <td class="col2">{{CurCall.JobCard.RunningHR}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="col1">Warrenty Status</td>
+                                                    <td class="col2">{{CurCall.JobCard.Warranty==true ? 'Under Warrenty' : 'No Warrenty'}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="CurCall.IsFailed==false">
+                        <div class="col-md-5">
+                            <div>
+                                <label style="background-color: #e7a83c;width:208px;">Shall I book your Service/Repair?</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="switch-field">
+                                <input type="radio" id="book_yes" name="switch_12" ng-value="true" ng-model="CurCall.BookServiceRepair" />
+                                <label for="book_yes" style="width:35px;">Yes</label>
+                                <input type="radio" id="book_no" name="switch_12" ng-value="false" ng-model="CurCall.BookServiceRepair" />
+                                <label for="book_no" style="width:35px;">No</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3" ng-show="CurCall.BookServiceRepair==true">
+                            <input type="text"
+                                   class="form-control form-control-sm" date-picker ng-model="CurCall.ServiceRepairDate_TMP" date-detail="CurCall.ServiceRepairDateDet">
+                        </div>
+                    </div>
+                    <div class="row  mt-2" ng-show="CurCall.IsFailed==false">
+                        <div class="col-md-4">
+                            <label><b>Comment</b></label>
+                        </div>
+                        <div class="col-md-8">
+                            <textarea class="form-control" rows="1" ng-model="CurCall.ServiceRepaitComment"></textarea>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="CurCall.IsFailed==false">
+                        <div class="col-md-5">
+                            <div>
+                                <label style="background-color: #e7a83c; width: 208px;" class="text-nowrap">Do you want me to call you later?</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="switch-field text-center">
+                                <input type="radio" id="call_yes" name="switch_13" ng-value="true" ng-model="CurCall.CallLater" />
+                                <label for="call_yes" style="width:35px;">Yes</label>
+                                <input type="radio" id="call_no" name="switch_13" ng-value="false" ng-model="CurCall.CallLater" />
+                                <label for="call_no" style="width:35px;">No</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3" ng-show="CurCall.CallLater==true">
+                            <input type="text"
+                                   class="form-control form-control-sm" date-picker ng-model="CurCall.CallDate_TMP" date-detail="CurCall.CallDateDet">
+                        </div>
+                    </div>
+                    <div class="row  mt-2" ng-show="CurCall.IsFailed==false">
+                        <div class="col-md-4">
+                            <label><b>Comment</b></label>
+                        </div>
+                        <div class="col-md-8">
+                            <textarea class="form-control" rows="1" ng-model="CurCall.CallComment"></textarea>
+                        </div>
+                    </div>
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-2 mb-2">
+                    <button type="button" class="btn btn-success"
+                            style="min-width: 50px;padding:2px 4px;" ng-click="CallSaveUpdateServiceReminderCall()">
+                        Save
+                    </button>
+                    <button type="button" class="btn btn-danger"
+                            style="min-width: 50px;padding:2px 4px;" data-dismiss="modal" aria-label="Close">
+                        Cancel
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!--Feedback-Post Service  Modal starts-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="postservice" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11" id="exampleModalCenterTitle">Feedback-Post Service</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <h6 class="modal-title">{{CurCall.PartyName}}({{CurCall.Address}})</h6>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Date Of Sale: <b>{{CurCall.InvoiceDate | dateFormat}} (A.D.) - {{CurCall.InvoiceMiti}} (B.S.)</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-12 text-center">
+                            <h6 class="modal-title">Branch: <b>{{CurCall.Branch}}</b></h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-9 text-center">
+                            <h6 class="modal-title">Mobile No: <b>{{CurCall.MobileNo}}</b> (Model-{{CurCall.Model}})</h6>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="float-right">
+                                <button class="btn btn-success" style="padding:2px 4px;" ng-click="ClickOnFailedCall()">Failed Call</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body gradient-bg" style="border-top: 1px solid #068abf;">
+                    <div id="feedbackcallsuccess">
+                        <label><b>How would you rate the quality of Dealer Service Experience?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="postdetractor" name="post" value="Average" />
+                                <label for="postdetractor" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="postneutral" name="post" value="Good" />
+                                <label for="postneutral" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="postpromotor" name="post" value="Excellent" />
+                                <label for="postpromotor" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" rows="1"></textarea>
+                            </div>
+                        </div>
+
+                        <label><b>How likely are you to recommend this product?</b></label>
+                        <div class="text-center">
+                            <div class="switch-field">
+                                <input type="radio" id="postrdetractor" name="post2" value="Average" />
+                                <label for="postrdetractor" style="width:100px">0-6 Detractor</label>
+                                <input type="radio" id="postrneutral" name="post2" value="Good" />
+                                <label for="postrneutral" style="width:100px">7-8 Neutral</label>
+                                <input type="radio" id="postrpromotor" name="post2" value="Excellent" />
+                                <label for="postrpromotor" style="width:100px">9-10 Promotor</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <label><b>Comments</b></label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea class="form-control ml-2" id="exampleFormControlTextarea1" rows="1"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-7">
+                                <label><b>Do you have any open Complaints?</b></label>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="switch-field text-center">
+                                    <input type="radio" id="postcomplaints_yes" name="postcomplain" value="yes" onclick="myFunction16()" />
+                                    <label for="postcomplaints_yes">Yes</label>
+                                    <input type="radio" id="postcomplaints_no" name="postcomplain" onclick="myFunction16()" value="no" />
+                                    <label for="postcomplaints_no">No</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="postcomplaintnodiv" style="display: none;">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Update Feedback</b></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="postcomplaintyesdiv" style="display: none;">
+                            <div class="row form-group text-center">
+                                <div class="col-md-12" style="background-color: lightgreen;">
+                                    <label><b>Complaint Ticket No <b>TKCXXXXXXXXXXX</b></b></label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Complaint Type</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="row">
+                                        <div class="col-md-6" ng-repeat="ct in ComplainTypeList">
+                                            <div class="form-group">
+                                                <div class="icheck-primary d-inline">
+                                                    <input type="checkbox" id="Service{{$index}}" ng-model="ct.IsSelected">
+                                                    <label for="Service{{$index}}">{{ct.text}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Comments</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="1"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div ng-show="CurCall.IsFailed==true">
+                        <div class="row">
+                            <div class="col-md-4 px-0">
+                                <label><b>Reason for Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <select class="form-control form-control-sm select2" ng-model="CurCall.CallFailedReasonId">
+                                    <option ng-value="0">**select reason**</option>
+                                    <option ng-repeat="cr in FailedReasonList" ng-value="cr.id" ng-selected="cr.id==CurCall.CallFailedReasonId">{{cr.text}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row my-2">
+                            <div class="col-md-4 px-0">
+                                <label><b>Comment on Failure</b></label>
+                            </div>
+                            <div class="col-md-8 px-0">
+                                <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" ng-model="CurCall.CallFailedComment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" class="btn btn-success"
+                                style="min-width: 50px;padding:2px 4px;">
+                            Save
+                        </button>
+                        <button type="button" class="btn btn-danger"
+                                style="min-width: 50px;padding:2px 4px;" data-dismiss="modal" aria-label="Close">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!--Search Modal Starts-->
+    <div class="modal fade sales-quotation-page-modal document-attach-modal" id="searchmodel" tabindex="-1" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Search Journal</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-2 col-form-label col-form-label-sm text-center">Search By</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <div class="input-group-prepend">
+                                            <select class="form-control form-control-sm select2bs4" style="width: 100%;" ng-model="paginationOptions.SearchColDet">
+                                                <option ng-value="asp" ng-repeat="asp in VoucherSearchOptions">{{asp.text}}</option>
+                                            </select>
+                                        </div>
+                                        <input type="text" class="form-control" placeholder="" ng-model="paginationOptions.SearchVal">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-search" ng-click="ReSearchData(-1)"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <form class="float-right">
+                                <div class="form-row align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <label class="mr-sm-2 mb-0" for="inlineFormCustomSelect">Show</label>
+                                        <input type="text" ng-model="paginationOptions.pageSize" class="form-control input-sm" placeholder="NoOfRows" @*ng-blur="ReSearchData(-2)"*@>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <table id="main-table" class="main-table table table-sm table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Voucher No</th>
+                                    <th>RefNo</th>
+                                    <th>Voucher Date</th>
+                                    <th>Voucher Name</th>
+                                    <th>CostClass</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr dir-paginate="sd in SearchDataColl |orderBy:sortKey:reverse|itemsPerPage:paginationOptions.pageSize" total-items="paginationOptions.TotalRows">
+                                    <td align="center">{{sd.VoucherNo}}</td>
+
+                                    <td>{{sd.RefNo}}</td>
+                                    <td align="center">{{sd.VoucherDate |dateFormat}}</td>
+                                    <td>{{sd.VoucherName}}</td>
+                                    <td>{{sd.CostClass}}</td>
+                                    <td>
+                                        <a class="p-1" href="#" ng-click="GetStockJournalById(TranId)">
+                                            <i class="fas fa-edit text-info"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="DelClassById(cl)">
+                                            <i class="fas fa-trash-alt text-danger"></i>
+                                        </a>
+                                        <a class="p-1" href="#" ng-click="PrintVoucher(sd.TranId,sd.VoucherId)">
+                                            <i class="fas fa-print text-primary"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                        <dir-pagination-controls max-size="paginationOptions.pageSize" direction-links="true" boundary-links="true"
+                                                 on-page-change="ReSearchData(newPageNumber)">
+                        </dir-pagination-controls>
+                    </div>
+
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <h6 class="mb-0">Total Record: {{paginationOptions.TotalRows}}</h6>
+                    <div class="">
+                        <button type="button" class="btn load btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--Job Closed Modal Starts:Added by Suresh on 30 Kartik-->
+    <div class="modal fade sales-invoice-page-modal document-attach-modal ml-2" id="jobclosed" tabindex="-1" role="dialog" aria-labelledby="documentAttachModalTitle" aria-hidden="true" style="max-width:1050px!important;margin-right:">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="row p-2" style="background-color: #7abe5a; color: #fff;">
+
+                    <h6 class="modal-title text-center col-md-11" id="exampleModalCenterTitle">Branch : {{CurJob.BranchName}}</h6>
+                    <button type="button" class="close col-md-1" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="px-2 py-1 text-center" style="background-color: #068abf; color: #fff;">
+                    <div class="col-md-11">
+                        <h5 class="modal-title"><b>JOB CARD</b></h5>
+                    </div>
+                </div>
+                <div class="px-2 py-1">
+                    <div class="row" style="">
+                        <div class="col-md-3">
+                            <h6 class="modal-title">Job No.: <b>{{CurJob.AutoNumber}}</b></h6>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="text-center">
+                                <h6 class="modal-title">Date: <b>{{CurJob.EntryDate |dateFormat}} ~ {{CurJob.NY}}-{{CurJob.NM}}-{{CurJob.ND}}</b></h6>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="float-right">
+                                <h6 class="modal-title">Close Date: <b>{{CurJob.ClosedDateTime |dateFormat}}</b></h6>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-body gradient-bg pt-1" style="border-top: 1px solid #068abf;">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header p-2">
+                                    <h5 class="mb-0">Customer Information</h5>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p>Name</p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            : {{CurJob.PartyName}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p>Address</p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            : {{CurJob.Address}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p>Phone No</p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            : {{CurJob.ContactNo}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <p>MobileNo</p>
+                                        </div>
+                                        <div class="col-md-9">
+                                            : {{CurJob.MobileNo}}
+                                        </div>
+                                    </div>
+                                    <br /><br />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header p-2">
+                                    <h5 class="mb-0">Vehicle Information</h5>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p>Regd. No</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            : {{CurJob.RegdNo}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p>Engine No</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            : {{CurJob.EngineNo}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p>Chasis No.</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            : {{CurJob.ChSrlNo}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p>Dt. Of Sale</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            : {{CurJob.SalesDate | dateFormat}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p>Model</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            : {{CurJob.VehicleModel}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p>Dealer</p>
+                                        </div>
+                                        <div class="col-md-8">
+                                            : {{CurJob.Dealer}}
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header p-2">
+                                    <h5 class="mb-0">Service Information</h5>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <p>Service Type</p>
+                                        </div>
+                                        <div class="col-md-7">
+                                            : {{CurJob.JobCardType}}
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <p>Service No</p>
+                                        </div>
+                                        <div class="col-md-7">
+                                            : {{CurJob.ServiceType}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <p>Running HR</p>
+                                        </div>
+                                        <div class="col-md-7">
+                                            : {{CurJob.RunningHR}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <p>Mechanic's Name</p>
+                                        </div>
+                                        <div class="col-md-7">
+                                            : {{CurJob.Mechanic}}
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <p>Time</p>
+                                        </div>
+                                        <div class="col-md-7">
+                                            : {{CurJob.EstimatedTime}}
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p><b>Total Charge : {{CurJob.TotalCharge |number:2}}</b></p>
+                    <p><b>Job To be Attended :{{CurJob.JobToBeAttended}}</b></p>
+                    <p><b>Remarks : {{CurJob.Remarks}}</b></p>
+                    <p><b>Closed Remarks: {{CurJob.CloseRemarks}}</b></p>
+
+
+                    <div class="table-scroll-x-y" style="height:170px!important;">
+                        <table class="main-table table table-sm table-bordered ">
+                            <thead class=" text-center">
+                                <tr>
+                                    <th style="width: 50px; background-color: #f5f5f9 !important;">S.No.</th>
+                                    <th style="width: 120px; background-color: #f5f5f9 !important;">Part No</th>
+                                    <th style="width: 200px; background-color: #f5f5f9 !important;">Name</th>
+                                    <th style="width: 80px; background-color: #f5f5f9 !important;">Qty</th>
+                                    <th style="width: 100px; background-color: #f5f5f9 !important;">Rate</th>
+                                    <th style="width: 130px; background-color: #f5f5f9 !important;">Amount</th>
+                                    <th style="width: 50px; background-color: #f5f5f9 !important;">U.W.</th>
+                                    <th style="width: 200px; background-color: #f5f5f9 !important;">Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="id in CurJob.ItemDetailsColl">
+                                    <td class="text-center">{{$index+1}}</td>
+                                    <td>{{id.Name}}</td>
+                                    <td>{{id.Code}}</td>
+                                    <td class="text-center">{{id.Qty |number:2}} {{id.Unit}}</td>
+                                    <td style="text-align:right">{{id.Rate |number:2}}</td>
+                                    <td style="text-align:right">{{id.Amount |number:2}}</td>
+                                    <td class="text-center">{{id.IsUnderWarrency}}</td>
+                                    <td>{{id.Remarks}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--Job Closed Modal Ends-->
+
+</div>

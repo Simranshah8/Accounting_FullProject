@@ -1,0 +1,516 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/inventory/transaction/Dairypurchasesetup.js"></script>
+<div ng-app="myApp" ng-controller="DairyPurchaseController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()" ng-cloak>
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-purchase" data-toggle="pill" href="#Purchase" role="tab" aria-controls="custom-tabs-purchase" aria-selected="true"> Purchase Setup</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-partywise" data-toggle="pill" href="#Partywise" role="tab" aria-controls="custom-tabs-partywise" aria-selected="false">Partywise Setup</a>
+                            </li>
+                            @*<li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-shift" data-toggle="pill" href="#Shift" role="tab" aria-controls="custom-tabs-shift" aria-selected="false">Shift</a>
+                            </li>*@
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="custom-tabs-purchase">
+                            <div class="tab-pane fade show active" id="Purchase" role="tabpanel" aria-labelledby="custom-tabs-purchase">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card m-0">
+                                            <div class="card-header pb-1" style="background-color: #068abf; color: #fff;">
+                                                <h6 class="mb-0">
+                                                    Raw Milk Purchase Setup
+                                                </h6>
+                                                <button class="btn btn-success btn-sm float-right" style="position:relative;margin-top:-23px;font-size:16px;width:60px;" ng-click="SaveProductWise()" ng-disabled="loadingstatus=='running'">Save</button>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                                    <table id="maintable" class="table table-bordered table-hover table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:200px; z-index: 3; background-color: #ececec !important">Parameter</th>
+                                                                <th style="width:200px; z-index: 3; background-color: #ececec !important">Values</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>For Product</td>
+                                                                <td>
+                                                                    <select class="form-control form-control-sm select2" ng-model="CurData.ProductId" data-placeholder="**select product**" ng-change="ChangeProduct()">
+                                                                        <option ng-repeat="sh in ProductColl" ng-value="sh.ProductId">{{sh.Name}}</option>
+                                                                    </select>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Fat Rate</td>
+                                                                <td>
+                                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="CurData.FAT" onfocus="this.select()" style="text-align: right;">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>SNF Rate</td>
+                                                                <td>
+                                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="CurData.SNF" onfocus="this.select()" style="text-align: right;">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>TS %</td>
+                                                                <td>
+                                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="CurData.TS" onfocus="this.select()" style="text-align: right;">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Topping Charge</td>
+                                                                <td>
+                                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="CurData.Topping" onfocus="this.select()" style="text-align: right;">
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Maximum Rate</td>
+                                                                <td>
+                                                                    <input type="text" number-input class="form-control form-control-sm" ng-model="CurData.MaxRate" onfocus="this.select()" style="text-align: right;">
+                                                                </td>
+                                                            </tr>
+
+                                                        </tbody>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card m-0">
+                                            <div class="card-header py-2" style="background-color: #068abf; color: #fff;">
+                                                <h6 class="mb-0">
+                                                    Log Table Data
+                                                </h6>
+                                            </div>
+                                            <div class="card-body p-0">
+                                                <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                                    <table id="maintable" class="table table-bordered table-hover table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:200px; z-index: 3; background-color: #ececec !important">Last Update</th>
+                                                                <th style="width:200px; z-index: 3; background-color: #ececec !important">Update By</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            <tr ng-repeat="cl in CurData.LogDateColl">
+                                                                <td>{{cl.LogDateTime}}</td>
+                                                                <td>{{cl.UserName}} </td>
+                                                            </tr>                                                           
+
+                                                        </tbody>
+
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="Partywise" role="tabpanel" aria-labelledby="custom-tabs-partywise">
+                                <div id="showtable">
+                                    <header class="row mb-2">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Partywise">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Partywise">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.Partywise">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file">
+                                                <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                                <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-primary"
+                                                        id="addpartywise" style="font-size:14px;">
+                                                    <i class="fas fa-plus w-t"></i> Add Partywise
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                        <table id="datatable" class="table table-bordered table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:70px; z-index: 3; background-color: #ececec !important">S.No</th>
+                                                    <th style="width:120px; z-index: 3; background-color: #ececec !important">Product</th>
+                                                    <th style="width:250px; z-index: 3; background-color: #ececec !important">Party Name</th>
+                                                    <th style="width:100px; z-index: 3; background-color: #ececec !important">Fat Rate</th>
+                                                    <th style="width:100px; z-index: 3; background-color: #ececec !important">SNF Rate</th>
+                                                    <th style="width:100px; z-index: 3; background-color: #ececec !important">TS %</th>
+                                                    <th style="width:120px; z-index: 3; background-color: #ececec !important">Topping Charge</th>
+                                                    <th style="width:100px; z-index: 3; background-color: #ececec !important">Maximum Rate</th>
+                                                    <th style="width:100px; z-index: 3; background-color: #ececec !important">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="pw in AllPartyWiseColl|orderBy:sortKey:reverse|filter:searchData.Partywise|itemsPerPage:perPage.Partywise" current-page="currentPages.Partywise" pagination-id="PartywisePagination">
+                                                    <td>{{$index+1}}</td>
+                                                    <td>{{pw.Product}} </td>
+                                                    <td>{{pw.PartyName}} </td>
+                                                    <td>{{pw.FAT}}</td>
+                                                    <td>{{pw.SNF}}</td>
+                                                    <td>{{pw.TS}}</td>
+                                                    <td>{{pw.Topping}}</td>
+                                                    <td>{{pw.MaxRate}}</td>
+                                                    <td class="project-actions" style="text-align:center">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-primary" ng-click="GetDairyPurchaseSetupById(pw)"><i class="fas fa-edit"></i></a>
+                                                            <a href="#" class="btn btn-danger" ng-click="deletePartyWise(pw,$index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                    <div class="col-md-12">
+                                        <dir-pagination-controls pagination-id="PartywisePagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                        </dir-pagination-controls>
+                                    </div>
+                                </div>
+
+                                <div class="card m-0" id="tableform">
+
+                                    <div class="card-header py-2" style="background-color: #068abf; color: #fff;">
+                                        <h6 class="mb-0">
+                                            Raw Milk Setup Partywise
+                                        </h6>
+
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                            <table id="maintable" class="table table-bordered table-hover table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:70px; z-index: 3; background-color: #ececec !important">S.No</th>
+                                                        <th style="width:100px; z-index: 3; background-color: #ececec !important">Product</th>
+                                                        <th style="width:200px; z-index: 3; background-color: #ececec !important">Party Name</th>
+                                                        <th style="width:120px; z-index: 3; background-color: #ececec !important">Fat Rate</th>
+                                                        <th style="width:120px; z-index: 3; background-color: #ececec !important">SNF Rate</th>
+                                                        <th style="width:120px; z-index: 3; background-color: #ececec !important">TS %</th>
+                                                        <th style="width:140px; z-index: 3; background-color: #ececec !important">Topping Charge</th>
+                                                        <th style="width:130px; z-index: 3; background-color: #ececec !important">Maximum Rate</th>
+                                                        <th style="width:100px; z-index: 3; background-color: #ececec !important">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="itemDet in CurPartyWiseColl">
+                                                        <td>{{$index+1}}</td>
+                                                        <td>
+                                                            <select class="form-control form-control-sm select2" ng-model="itemDet.ProductId" data-placeholder="**select product**">
+                                                                <option ng-repeat="sh in ProductColl" ng-value="sh.ProductId" ng-selected="sh.id==itemDet.ProductId">{{sh.Name}}</option>
+                                                            </select>
+                                                        </td>
+                                                        <td>
+                                                            <select autoShowHide="true" class="select2 serial form-control-sm" all-ledger ng-model="itemDet.PartyId" style="width:95%" ledgertype="2" fortransaction="true"
+                                                                    placeholder="** Select Party Name **" showdetails="true" confirm-action="PartySelectionChange(itemDet)" ledger-detail="itemDet.PartyLedger" side-bar-data="itemDet.partySideBarData" voucher-id="8" vouchertype="8"></select>
+
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="itemDet.FAT">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="itemDet.SNF">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="itemDet.TS">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="itemDet.Topping">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="itemDet.MaxRate">
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <div class="btn-group-sm">
+                                                                <a class="btn btn-info" ng-click="AddRowInTable($index)"><i class="fas fa-plus"></i></a>
+                                                                <a href="#" class="btn btn-danger" ng-click="delRowFromTable($index)"><i class="fas fa-trash"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" id="backpartywise">Back to List</button>
+                                            <button type="button" class="btn btn-default" ng-click="ClearPartywise()">Cancel</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SavePartyWise()" ng-disabled="loadingstatus=='running'">Save</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+
+
+                                <div class="m-0" id="tableformById">
+
+                                    <div class="card-body p-0">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Product</label>
+                                                    <select class="form-control form-control-sm select2" ng-model="newDetById.ProductId" data-placeholder="**select product**">
+                                                        <option ng-repeat="sh in ProductColl" ng-value="sh.ProductId" ng-selected="sh.id==newDetById.ProductId">{{sh.Name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Party Name</label><select autoShowHide="true" class="select2 serial form-control-sm" all-ledger ng-model="newDetById.PartyId" style="width:95%" ledgertype="2" fortransaction="true"
+                                                                                     placeholder="** Select Party Name **" showdetails="true" confirm-action="PartySelectionChange(itemDet)" ledger-detail="newDetById.PartyLedger" side-bar-data="newDetById.partySideBarData" voucher-id="8" vouchertype="8"></select>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Fat Rate</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="newDetById.FAT">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>SNF Rate</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="newDetById.SNF">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>TS %</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="newDetById.TS">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Topping Charge</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="newDetById.Topping">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="form-group">
+                                                    <label>Maximum Rate</label>
+                                                    <input type="text" number-input class="form-control form-control-sm" onfocus="this.select()" style="text-align: right;" ng-model="newDetById.MaxRate">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" id="backpartywiseById">Back to List</button>
+                                            <button type="button" class="btn btn-default" ng-click="ClearUPartyWise()">Cancel</button>
+                                            <button type="button" class="btn btn-primary" ng-click="UpdatePartyWise()" ng-disabled="loadingstatus=='running'">Update</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+
+                            </div>
+                            <div class="tab-pane fade" id="Shift" role="tabpanel" aria-labelledby="custom-tabs-shift">
+                                <div id="showshifttable">
+                                    <header class="row mb-2">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Shift">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Shift">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.Shift">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <!-- end col-md-8 -->
+
+                                        <div class="col-md-5 text-right">
+                                            <div class="dropdown dnld-file">
+                                                <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                                        aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-download"></i>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right"
+                                                     aria-labelledby="dropdownMenuButton">
+                                                    <span class="dropdown-item">Choose an option:</span>
+                                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                                </div>
+                                                <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-primary"
+                                                        id="addshift" style="font-size:14px;">
+                                                    <i class="fas fa-plus w-t"></i> Add Shift
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </header>
+                                    <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                        <table id="maintable" class="table table-bordered table-hover table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:70px; z-index: 3; background-color: #ececec !important">S.No</th>
+                                                    <th style="width:200px; z-index: 3; background-color: #ececec !important">Party Name</th>
+                                                    <th style="width:120px; z-index: 3; background-color: #ececec !important">Fat Rate</th>
+                                                    <th style="width:120px; z-index: 3; background-color: #ececec !important">SNF Rate</th>
+                                                    <th style="width:120px; z-index: 3; background-color: #ececec !important">TS %</th>
+                                                    <th style="width:140px; z-index: 3; background-color: #ececec !important">Topping Charge</th>
+                                                    <th style="width:130px; z-index: 3; background-color: #ececec !important">Maximum Rate</th>
+                                                    <th style="width:100px; z-index: 3; background-color: #ececec !important">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>1</td>
+                                                    <td>2 </td>
+                                                    <td>5</td>
+                                                    <td>4.5</td>
+                                                    <td>30%</td>
+                                                    <td>10</td>
+                                                    <td>10</td>
+                                                    <td>10</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div id="shiftform">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Name</label>
+                                                <input type="text" class="form-control form-control-sm" ng-model="newDet.Name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Order No</label>
+                                                <input type="number" class="form-control form-control-sm" ng-model="newDet.OrderNo" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label>Status</label>
+                                                <select class="form-control form-control-sm " ng-model="newDet.Status">
+                                                    <option>Active</option>
+                                                    <option>Deactive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                <textarea class="form-control form-control-sm" rows="1" ng-model="newDet.Description"></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default" id="backshift">Back to List</button>
+                                            <button type="button" class="btn btn-default" ng-click="Clearshift()">Cancel</button>
+                                            <button type="button" class="btn btn-primary" ng-click="SaveUpdateshift()" ng-disabled="loadingstatus=='running'">Save</button>
+                                        </div>
+
+                                    </footer>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>

@@ -1,0 +1,169 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.BalanceSheet)";
+</script>
+<script src="~/jslib/account/reporting/BalanceSheet.js?v=20250701"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BalanceSheetController" ng-init="LoadData()">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Add the required Contents of sidebar-->
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <div class="form-group">
+                                    <label class="mr-2 mt-1">Project</label>
+                                    <multi-select-option ng-model="newBalanceSheet.ProjectIdColl" data="ProjectColl" label="Name" value="ProjectId" confirm-action="LoadReport()"></multi-select-option>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <section class="">
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card p-2">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newBalanceSheet.DateFrom_TMP" style="max-width:100px" date-detail="newBalanceSheet.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="newBalanceSheet.DateTo_TMP" style="max-width:100px" date-detail="newBalanceSheet.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3" ng-show="BranchList.length>1">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label>Branch</label>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control form-control-sm select2" ng-model="newBalanceSheet.BranchId" data-placeholder="*Select Branch*" multiple>
+                                                            <option ng-value="cl.id" ng-repeat="cl in BranchList" ng-selected="cl.id==newBalanceSheet.BranchId">{{cl.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <div class="form-group mb-0">
+                                                    <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 80px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="LoadReport()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                </div>
+                                            </div>
+
+                                            @*<div class="col-sm-2">
+
+                                                    <div class="form-group mb-0">
+                                                        <a href="#" class="btn btn-primary" style="min-width: 100px" data-toggle="tooltip" data-placement="top" title="Export To Excel" data-original-title="Export To Excel" ng-click="DownloadAsXls()" ng-disabled="loadingstatus=='running'"><i class="fas fa-file-excel"> &nbsp;&nbsp;Excel</i></a>
+                                                    </div>
+
+                                                </div>*@
+
+                                            <div class="col-sm-5 text-right">
+                                                <div class="form-inline float-right">
+                                                    <div class="form-group mb-0 mx-3">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   id="customCheckbox1" value="option1" ng-model="newBalanceSheet.ExpandCollapse" ng-change="toggleExpandCollapse()">
+                                                            <label for="customCheckbox1"
+                                                                   class="custom-control-label">
+                                                                {{newBalanceSheet.ExpandCollapse==true ? 'Collapse': 'Expand' }}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <a href="#" class="btn btn-secondary btn-light btn-sm" data-toggle="tooltip" data-placement="top" title="Export To Excel" data-original-title="Export To Excel" ng-click="DownloadAsXls()" ng-disabled="loadingstatus=='running'"><i class="fas fa-file-excel" style="font-size:14px"></i></a>
+                                                    </div>
+
+                                                    <div>
+                                                        <a href="#" class="btn btn-secondary btn-light btn-sm ml-2" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="Print()" ng-disabled="loadingstatus=='running'"><i class="fas fa-print" style="font-size: 14px;"></i></a>
+                                                    </div>
+
+
+                                                </div>
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 ">
+                                        <div id="datatable" style="height: calc(100vh - 5rem);width:100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </section>
+                        <!-- /.row -->
+                    </div>
+                    <!--/. container-fluid -->
+                </section>
+                <!-- /.content -->
+                <!-- Add ReportTemplates Modal Dailog -->
+                <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+         
+
+    </div>
+
+
+    @RenderPage("~/Views/Global/_EditTran.cshtml")
+	@RenderPage("~/Views/Global/_RptContentMenu.cshtml")
+</div>
+    <script>
+        (function ($) {
+            "use strict";
+            var fullHeight = function () {
+                $('.js-fullheight').css('height', $(window).height());
+                $(window).resize(function () {
+                    $('.js-fullheight').css('height', $(window).height());
+                });
+
+            };
+            fullHeight();
+            $('#ctmRightSidebarCollapse').on('click', function () {
+                $('#sidebarzz').toggleClass('active');
+            });
+
+        })(jQuery);
+    </script>

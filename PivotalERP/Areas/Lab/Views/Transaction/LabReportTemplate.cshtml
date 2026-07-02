@@ -1,0 +1,1106 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table th, .table td {
+        padding: 0.35rem;
+    }
+</style>
+<script>
+        var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.FormsEntity.Lab_TemplateTypes)";
+</script>
+<script src="~/jslib/Lab/Transcation/LabReportTemplate.js"></script>
+<div ng-app="myApp" ng-controller="ReportTemplate" ng-init="LoadData()">
+    <div class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                        <!--.
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                        </li>
+                            -->
+                        <li class="nav-item">
+                            <a class="nav-link active" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" aria-selected="false" ng-click="GetReportTemplateById()">Report Template </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="custom-tabs-four-three-tab" data-toggle="pill" href="#custom-tabs-four-three" role="tab" aria-controls="custom-tabs-four-three" aria-selected="false" ng-click="GetAllHeaderFooterConfig()">Header Footer Config </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <!-- List
+                                                <div class="tab-pane fade show hide" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div class="p-2">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.ReportTemplate">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.ReportTemplate">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed ml-2">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file">
+                                            <a class="btn btn-secondary btn-light btn-sm wait"
+                                               title="Refresh" ng-click="GetAllReportTemplate()">
+                                                <i class="fas fa-sync-alt"></i>
+                                            </a>
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#ReportTemplate'" sheet-name="'Report Template'" report-name="'List Of Report Template'" ignore-column="'6'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#ReportTemplate').tableExport({type:'csv',escape:'false',reportName:'Repor tTemplate',ignoreColumn:'6' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Report Template'" table-id="'#ReportTemplate'" class="btn btn-secondary btn-light btn-sm wait">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                            <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                               data-placement="bottom" title="Save List State" ng-click="saveRptListState()">
+                                                <i class="fas fa-save"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </header>
+                                <div class="">
+                                    <div id="datatable" style="height: calc(100vh - 7rem); width: 100%;" class="ag-theme-alpine"></div>
+                                </div>
+                            </div>
+                        </div>-->
+
+                        <div class="tab-pane fade show active" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                            <div class="row">
+                                <!-- Configuration Panel -->
+                                <div class="col-md-3">
+                                    <div class="card shadow-sm mb-4">
+                                        <div class="card-header bg-light fw-bold p-2">
+                                            <b>Template Configuration</b>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="mb-3">
+                                                <label>Report Template Type</label>
+                                                <select class="form-control form-control-sm" ng-model="newDet.TemplateTypeId" ng-change="GetReportTemplateById()">
+                                                    <option ng-repeat="T in TemplateTypeColl" ng-value="T.id" ng-selected="newDet.TemplateTypeId==T.id">{{T.text}}</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label>Report Template Name</label>
+                                                <input class="form-control form-control-sm" style="margin-left:1px;" type="text" ng-model="newDet.TemplateName">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <div class="form-group">
+                                                    <label>Report Print Name</label>
+                                                    <input class="form-control form-control-sm" style="margin-left:1px;" type="text" ng-model="newDet.ReportPrintName">
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-1" ng-show="newDet.TemplateTypeId==1"
+                                                 style="margin-bottom:60px!important;">
+                                                <h5 class="border-bottom pb-2 mb-2 ">Layout Options</h5>
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showGroupRow" ng-model="newDet.IsGroupRow">
+                                                        <label class="form-check-label ms-2" for="showGroupRow" ng-show="!isEditingGroupName">
+                                                            {{ newDet.GroupName || 'Show group row' }}
+                                                        </label>
+                                                        <input type="text" class="form-control form-control-sm ms-2" style="width: 200px;" ng-show="isEditingGroupName" ng-model="newDet.GroupName" ng-blur="stopEditingGroupName()" />
+                                                        <i class="fas fa-edit ms-1 text-primary ml-2" style="cursor:pointer;" ng-click="toggleEditGroup()"></i>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showTestNameWise" ng-model="newDet.IsTestNameOrComponent">
+                                                        <label class="form-check-label ms-2" for="showTestNameWise" >
+                                                           Show By TestName
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showInvestigation" disabled ng-model="newDet.IsInvestigation">
+                                                        <label class="form-check-label ms-2" for="showInvestigation" ng-show="!isInvestigation">
+                                                            {{ newDet.InvestigationName || 'Show Investigation' }}
+                                                        </label>
+                                                        <input type="text" class="form-control form-control-sm ms-2" disabled style="width: 200px;" ng-show="isInvestigation" ng-model="newDet.InvestigationName" ng-blur="stopEditingInvestigation()" />
+                                                        <i class="fas fa-edit ms-1 text-primary ml-2" style="cursor:pointer;" ng-click="toggleEditInvestigation()"></i>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showIsResult" ng-model="newDet.IsResult" disabled>
+                                                        <label class="form-check-label ms-2" for="showIsResult" ng-show="!isEditingResult">
+                                                            {{ newDet.ResultName || 'Show Result' }}
+                                                        </label>
+                                                        <input class="form-control form-control-sm ms-2" style="width: 200px;" type="text" readonly ng-show="isEditingResult"
+                                                               ng-model="newDet.ResultName" ng-blur="stopEditingResult()" />
+                                                        <i class="fas fa-edit ms-2 text-primary ml-2" style="cursor:pointer;" ng-click="toggleResultEdit()"> </i>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showRefRange" ng-model="newDet.IsReferenceRange">
+                                                        <label class="form-check-label ms-2" for="showRefRange" ng-show="!isEditingRefRange"> {{ newDet.RefRangeColName || 'Show reference range' }} </label>
+                                                        <input class="form-control form-control-sm ms-2" style="width: 200px;" type="text" ng-show="isEditingRefRange" ng-model="newDet.RefRangeColName" ng-blur="stopEditingRefRange()" />
+                                                        <i class="fas fa-edit ms-2 text-primary ml-2" style="cursor:pointer;" ng-click="toggleRefRangeEdit()"> </i>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showUnitColumn" ng-model="newDet.IsUnitCol">
+                                                        <label class="form-check-label ms-2" for="showUnitColumn" ng-show="!isEditingUnit">{{ newDet.UnitColName || 'Show unit' }} </label>
+                                                        <input class="form-control form-control-sm ms-2" style="width: 200px;" type="text" ng-show="isEditingUnit" ng-model="newDet.UnitColName" ng-blur="stopEditingUnit()" />
+                                                        <i class="fas fa-edit ms-2 text-primary ml-2" style="cursor:pointer;" ng-click="toggleEditUnit()"></i>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showMethod" ng-model="newDet.IsMethod">
+                                                        <label class="form-check-label ms-2" for="showMethod" ng-show="!isEditingMethod">{{ newDet.MethodColName || 'Show Method' }} </label>
+                                                        <input class="form-control form-control-sm ms-2" style="width: 200px;" type="text" ng-show="isEditingMethod" ng-model="newDet.MethodColName" ng-blur="stopEditingMethod()" />
+                                                        <i class="fas fa-edit ms-2 text-primary ml-2" style="cursor:pointer;" ng-click="toggleEditMethod()"></i>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check d-flex align-items-center">
+                                                        <input class="form-check-input" type="checkbox" id="showRemarkColumn" ng-model="newDet.IsRemark">
+                                                        <label class="form-check-label ms-2" for="showRemarkColumn" ng-show="!isEditingRemark"> {{ newDet.RemarkColName || 'Show Remark' }} </label>
+                                                        <input class="form-control form-control-sm ms-2" style="width: 200px;" type="text" ng-show="isEditingRemark" ng-model="newDet.RemarkColName" ng-blur="stopEditingRemark()" />
+                                                        <i class="fas fa-edit ms-2 text-primary ml-2" style="cursor:pointer;" ng-click="toggleEditRemark()"> </i>
+                                                    </div>
+                                                </div>
+
+
+                                                <!-- Flag Style -->
+                                                <div class="mb-2">
+                                                    <h6 class="border-bottom pb-2 mb-3 fw-bold">Flag style (HIGH / LOW / CRIT)</h6>
+                                                    <div class="mb-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flagSymbol" id="flagSymbol" ng-value="1" ng-model="newDet.FlagStyle">
+                                                            <label class="form-check-label" for="flagSymbol">
+                                                                Symbol (H / L / I next to value)
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flagSymbol" id="flagText" ng-value="2" ng-model="newDet.FlagStyle">
+                                                            <label class="form-check-label" for="flagText">
+                                                                Text in remark column (HIGH / LOW / CRIT)
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio" name="flagSymbol" id="flagBoth" ng-value="3" ng-model="newDet.FlagStyle">
+                                                            <label class="form-check-label" for="flagBoth">
+                                                                Symbol + text
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-1">
+                                                    <div class="mb-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="highlightAbnormal" ng-model="newDet.IsAbnormalRow">
+                                                            <label class="form-check-label" for="highlightAbnormal">
+                                                                Highlight abnormal  rows
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-1">
+                                                    <div class="mb-2">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="showClinicalNotes" ng-model="newDet.IsClinicalNotes">
+                                                            <label class="form-check-label" for="showClinicalNotes">
+                                                                Show Lab Test Interpretation / Notes
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Preview Panel -->
+                                <div class="col-md-9">
+                                    <!-- Numeric Panel (CBC / Biochemistry) Preview -->
+                                    <div class="card shadow-sm mb-4" @*ng-show="newFilter.TemplateId == 1"*@>
+                                        <div class="card-header p-2 bg-light fw-bold">
+                                            <b>Preview</b>
+                                        </div>
+                                        <div class="card-body bg-white border rounded p-2">
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    <h5 class=" fw-bold">HAEMATOLOGY</h5>
+                                                    <p>Complete Blood Count</p>
+                                                </div>
+
+                                                <div class="col-6 text-left">
+                                                    <div><strong>Name</strong>: BABITA CHAUDHARY (ANC)</div>
+                                                    <div><strong>Age/Sex</strong>: 30 YEAR / FEMALE</div>
+                                                    <div><strong>Lab ID</strong>: 8231517</div>
+                                                    <div><strong>Receipt</strong>: N/A</div>
+                                                    <div><strong>Date</strong>: 2082-03-15</div>
+                                                    <div><strong>Ref. By</strong>: SELF</div>
+                                                </div>
+                                            </div>
+                                            @*<h5 class=" fw-bold"><b>COMPLETE BLOOD COUNT</b></h5>*@
+                                            <div ng-show="newDet.TemplateTypeId==1">
+                                                <div class="table-responsive mb-3">
+                                                    <table class="table table-bordered">
+                                                        <thead class="table-light">
+                                                            <tr style="background: #ebeff2;">
+                                                                <th ng-show="newDet.IsInvestigation">{{newDet.InvestigationName}}</th>
+                                                                <th ng-show="newDet.IsResult">{{newDet.ResultName}}</th>
+                                                                <th ng-show="newDet.IsUnitCol">{{newDet.UnitColName}}</th>
+                                                                <th ng-show="newDet.IsReferenceRange">{{newDet.RefRangeColName}}</th>
+                                                                <th ng-show="newDet.IsMethod">{{newDet.MethodColName}}</th>
+                                                                <th ng-show="newDet.IsRemark">{{newDet.RemarkColName}}</th>
+                                                            </tr>
+                                                            <tr ng-show="newDet.IsGroupRow">
+                                                                <th colspan="6"><b>{{ newDet.GroupName || 'Group Name' }}</b></th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th colspan="6" ng-show="!newDet.IsTestNameOrComponent">Component Group</th>
+                                                            </tr>
+                                                            <tr>
+                                                                <th colspan="6" ng-show="newDet.IsTestNameOrComponent">Test Name</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+
+                                                                <td ng-show="newDet.IsInvestigation">Haemoglobin</td>
+                                                                <td ng-show="newDet.IsResult">
+                                                                    15.5
+                                                                    <span ng-show="newDet.FlagStyle == 1 || newDet.FlagStyle == 3" class="badge bg-danger">L</span>
+                                                                </td>
+                                                                <td ng-show="newDet.IsUnitCol">g/dL</td>
+                                                                <td ng-show="newDet.IsReferenceRange">F: 11 – 14.5</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">
+                                                                    <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">LOW</span>
+                                                                </td>
+
+                                                            </tr>
+                                                            <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+
+                                                                <td ng-show="newDet.IsInvestigation">RBC Count</td>
+                                                                <td ng-show="newDet.IsResult">
+                                                                    3.80
+                                                                    <span ng-show="newDet.FlagStyle == 1 || newDet.FlagStyle == 3" class="badge bg-danger">L</span>
+                                                                </td>
+                                                                <td ng-show="newDet.IsUnitCol">million/cu mm</td>
+                                                                <td ng-show="newDet.IsReferenceRange">4.5 – 5.5</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">
+                                                                    <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">LOW</span>
+                                                                </td>
+
+                                                            </tr>
+                                                            <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+
+                                                                <td ng-show="newDet.IsInvestigation">MCV</td>
+                                                                <td ng-show="newDet.IsResult">
+                                                                    67.4
+                                                                    <span ng-show="newDet.FlagStyle == 1 || newDet.FlagStyle == 3" class="badge bg-danger">L</span>
+                                                                </td>
+                                                                <td ng-show="newDet.IsUnitCol">fL</td>
+                                                                <td ng-show="newDet.IsReferenceRange">80 – 100</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">
+                                                                    <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">LOW</span>
+                                                                </td>
+
+                                                            </tr>
+                                                            <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+
+                                                                <td ng-show="newDet.IsInvestigation">MCHC</td>
+                                                                <td ng-show="newDet.IsResult">
+                                                                    36.8
+                                                                    <span ng-show="newDet.FlagStyle == 1|| newDet.FlagStyle == 3" class="badge bg-danger">H</span>
+                                                                </td>
+                                                                <td ng-show="newDet.IsUnitCol">%</td>
+                                                                <td ng-show="newDet.IsReferenceRange">32 – 36</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">
+                                                                    <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">HIGH</span>
+                                                                </td>
+
+                                                            </tr>
+                                                            <tr>
+
+                                                                <td ng-show="newDet.IsInvestigation">Total Leucocyte Count</td>
+                                                                <td ng-show="newDet.IsResult">10,100</td>
+                                                                <td ng-show="newDet.IsUnitCol">/cu mm</td>
+                                                                <td ng-show="newDet.IsReferenceRange">4,000 – 11,000</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">NORMAL</td>
+
+                                                            </tr>
+                                                            <tr>
+
+                                                                <td ng-show="newDet.IsInvestigation">Neutrophil</td>
+                                                                <td ng-show="newDet.IsResult">70</td>
+                                                                <td ng-show="newDet.IsUnitCol">%</td>
+                                                                <td ng-show="newDet.IsReferenceRange">50 – 70</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">NORMAL</td>
+
+                                                            </tr>
+                                                            <tr>
+
+                                                                <td ng-show="newDet.IsInvestigation">Platelet Count</td>
+                                                                <td ng-show="newDet.IsResult">2.23</td>
+                                                                <td ng-show="newDet.IsUnitCol">LaK/cu mm</td>
+                                                                <td ng-show="newDet.IsReferenceRange">1.5 – 4.5</td>
+                                                                <td ng-show="newDet.IsMethod">Method1</td>
+                                                                <td ng-show="newDet.IsRemark">NORMAL</td>
+
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="mt-1" style="margin-bottom:48px;" ng-show="newDet.IsClinicalNotes">
+                                                    <h6 class="fw-bold">Clinical Significance:</h6>
+                                                    <p>Description of per-template clinical significance</p>
+                                                </div>
+                                            </div>
+                                            <div style="margin-bottom: 60px!important;" ng-show="newDet.TemplateTypeId==2">
+                                                <div class="mb-4" style="border-top:2px solid #000000">
+                                                    <!-- Heading 1 -->
+                                                    <h5 class="mt-2" style="font-weight: bold; text-decoration: underline; margin-bottom: 0.5rem;">General Recommendations</h5>
+                                                    <ul style="margin-bottom: 1.5rem; padding-left: 20px;">
+                                                        <li>Maintain proper hydration; drink at least 2–3 liters of water daily.</li>
+                                                        <li>Follow a balanced diet rich in iron, vitamins, and proteins.</li>
+                                                        <li>Keep a record of all lab results for future reference.</li>
+                                                        <li>Get at least 7–8 hours of sleep daily to support overall health.</li>
+                                                        <li>Engage in regular physical activity, such as walking or light exercise.</li>
+                                                        <li>Avoid smoking, alcohol, and other harmful substances.</li>
+                                                        <li>Practice stress management techniques, such as meditation or yoga.</li>
+                                                    </ul>
+
+                                                    <!-- Heading 2 -->
+                                                    <h5 style="font-weight: bold; text-decoration: underline; margin-bottom: 0.5rem;">Specific Medical Advice</h5>
+                                                    <ul style="margin-bottom: 1.5rem; padding-left: 20px;">
+                                                        <li>Repeat CBC test in 3 months or earlier if symptoms persist.</li>
+                                                        <li>If hemoglobin or RBC values are low, consult with a hematologist.</li>
+                                                        <li>For any abnormal WBC count, monitor for signs of infection.</li>
+                                                        <li>Follow prescribed medications or supplements as directed by your doctor.</li>
+                                                        <li>Monitor blood sugar and blood pressure levels regularly if applicable.</li>
+                                                        <li>Schedule follow-up visits with your doctor for personalized advice.</li>
+                                                        <li>Consider additional tests like iron studies, vitamin B12, or folate if abnormalities persist.</li>
+                                                    </ul>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <footer class="main-footer mt-2">
+                                <div class="text-right control-btns">
+                                    <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span> Clear</button>
+                                    <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateReportTemplate()"><span class="glyphicon glyphicon-save"></span> Save</button>
+                                </div>
+                            </footer>
+                        </div>
+
+                        <div class="tab-pane fade" id="custom-tabs-four-three" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                            <div class="row">
+                                <!-- Configuration Panel -->
+                                <div class="col-md-3">
+                                    <div class="card shadow-sm mb-4">
+                                        <div class="card-body p-2">
+                                            <div class="mb-1"
+                                                 style="margin-bottom:60px!important;">
+                                                <h6 class="border-bottom pb-2 mb-2 "><b>Header Configuration</b></h6>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="iccompdet" ng-model="newHead.IsHeader">
+                                                        <label class="form-check-label" for="iccompdet">
+                                                            Show Header
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="PatientId" ng-model="newHead.IsPatientId">
+                                                        <label class="form-check-label" for="PatientId">
+                                                            Show PatientId
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="PatientName" ng-model="newHead.IsPatientName">
+                                                        <label class="form-check-label" for="PatientName">
+                                                            Show Patient Name
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="SampleNo" ng-model="newHead.IsSampleNo">
+                                                        <label class="form-check-label" for="SampleNo">
+                                                            Show Sample No
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="Age" ng-model="newHead.IsAge">
+                                                        <label class="form-check-label" for="Age">
+                                                            Show Age
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="Gender" ng-model="newHead.IsGender">
+                                                        <label class="form-check-label" for="Gender">
+                                                            Show Gender
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="SampleCollection" ng-model="newHead.IsSampleCollectDate">
+                                                        <label class="form-check-label" for="SampleCollection">
+                                                            Show Sample Collection Date
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ReportingDate" ng-model="newHead.IsReportingDate">
+                                                        <label class="form-check-label" for="ReportingDate">
+                                                            Show Reporting Date
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ReferredBy" ng-model="newHead.IsReferredBy">
+                                                        <label class="form-check-label" for="ReferredBy">
+                                                            Show Referred By
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="SampleCollectionAt" ng-model="newHead.IsSampleCollectionAt">
+                                                        <label class="form-check-label" for="SampleCollectionAt">
+                                                            Show Sample Collection At
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ShowBarCode" ng-model="newHead.IsBarCode">
+                                                        <label class="form-check-label" for="ShowBarCode">
+                                                            Show BarCode
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                @*added*@
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ShowNotes" ng-model="newHead.ShowNotes">
+                                                        <label class="form-check-label" for="ShowNotes">
+                                                            Show Notes/Description
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="isFooterid" ng-model="newHead.IsFooter" ng-change="toggleFooter()">
+                                                        <label class="form-check-label" for="isFooterid">
+                                                            Show Footer
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="isallsignature" ng-model="newHead.IsAllSignature">
+                                                        <label class="form-check-label" for="isallsignature">
+                                                            Show All Signature
+                                                        </label>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="from-group">
+                                                        <label>Header Height</label>
+                                                        <input class="form-control form-control-sm" type="number" id="ShowSig" ng-model="newHead.HeaderHeight">
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="from-group">
+                                                        <label>Footer Height</label>
+                                                        <input class="form-control form-control-sm" type="number" id="Footerheight" ng-disabled="!newHead.IsFooter" ng-model="newHead.FooterHeight">
+                                                    </div>
+                                                </div>
+
+                                                <h6 class="border-bottom pb-2 mb-2 "><b>Footer Configuration</b></h6>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ShowQR" ng-model="newHead.IsQR">
+                                                        <label class="form-check-label" for="ShowQR">
+                                                            Show QR
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ShowSig1" ng-model="newHead.IsSignature1">
+                                                        <label class="form-check-label" for="ShowSig1">
+                                                            Show Signature1
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="from-group">
+                                                        <label>Signature Lebel1</label>
+                                                        <input class="form-control form-control-sm" type="text" id="ShowSig" ng-model="newHead.SignatureLebel1">
+
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="ShowSig2" ng-model="newHead.IsSignature2">
+                                                        <label class="form-check-label" for="ShowSig2">
+                                                            Show Signature2
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <div class="from-group">
+                                                        <label>Signature Lebel2</label>
+                                                        <input class="form-control form-control-sm" type="text" id="ShowSig" ng-model="newHead.SignatureLebel2">
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Preview Panel -->
+                                <div class="col-md-9">
+                                    <!-- Numeric Panel (CBC / Biochemistry) Preview -->
+                                    <div class="card shadow-sm mb-4" @*ng-show="newFilter.TemplateId == 1"*@>
+                                        <div class="card-header p-2 bg-light fw-bold">
+                                            <b>Preview</b>
+                                        </div>
+                                        <div class="card-body bg-white border rounded p-2">
+                                            @*<div class="row">
+            <div class="col-md-6">
+                <div ng-model="newHead.IsPanVatNo"><strong>Patient ID</strong>: P001</div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <div><strong>Patient Name</strong>: Sita Kumari Sharma</div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <div><strong>Age/Gender</strong>: 30 YEAR / FEMALE</div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <div><strong>Address</strong>: New Baneshwor Kathmandu</div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <div><strong>Contact No</strong>: 9877653925</div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <div><strong>Sample Collection At</strong>: 20 Mangsir 2082</div>
+            </div>
+            <div class="col-md-6"></div>
+        </div>*@
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="text-center" @*ng-style="{'height': newHead.HeaderHeight + 'px'}"*@ ng-style="{'height': (newHead.HeaderHeight && newHead.HeaderHeight >= 90 ? newHead.HeaderHeight : 100) + 'px'}">
+                                                        <div ng-show="newHead.IsHeader">
+                                                            <h4 class="mb-0" ng-model="newHead.IsCompanyDetail"><b>Company Name</b></h4>
+                                                            <h5 class="mb-0" ng-model="newHead.IsCompanyDetail"><b>Company Address</b></h5>
+                                                            <h6 class="mb-0" ng-model="newHead.IsContactDetail"><b>Contact No., Email</b></h6>
+                                                            <h6 class="mb-0" ng-model="newHead.IsPanVatNo"><b>Pan Vat No</b></h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-4">
+                                                <div class="col-6 text-left">
+                                                    <div ng-model="newHead.IsPanVatNo" ng-show="newHead.IsPatientId"><strong>Patient ID</strong>: P001</div>
+                                                    <div ng-show="newHead.IsPatientName"><strong>Patient Name</strong>: Sita Kumari Sharma</div>
+                                                    <div ng-show="newHead.IsGender"><strong>Gender</strong>: FEMALE</div>
+                                                    <div ng-show="newHead.IsAge"><strong>Age</strong>: 30 YEAR </div>
+                                                    <div><strong>Address</strong>: New Baneshwor Kathmandu</div>
+                                                    <div><strong>Contact No</strong>: 9877653925</div>
+                                                    <div ng-show="newHead.IsSampleCollectionAt"><strong>Sample Collection At</strong>: 20 Mangsir 2082</div>
+                                                </div>
+                                                <div class="col-6 text-left">
+                                                    <div ng-show="newHead.IsBarCode">
+                                                        <img src="~/wwwroot/dynamic-erp/images/barcode.png" style="height: 34px; width: 250px;" />
+                                                    </div>
+                                                    <div ng-show="newHead.IsSampleNo"><strong>Sample No</strong>: 1212</div>
+                                                    <div ng-show="newHead.IsSampleCollectDate"><strong>Sample Collection Date</strong>: 20 Mangsir 2082</div>
+                                                    <div ng-show="newHead.IsReportingDate"><strong>Reporting Date</strong>: 20 Mangsir 2082</div>
+                                                    <div ng-show="newHead.IsReferredBy"><strong>Referred By</strong>: Dr. Shyam Patel</div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6  text-left">
+                                                    <div ng-show="newHead.ShowNotes"><strong>Notes(Clinical Implication):</strong> This Test (CBC) is Normal</div>
+                                                </div>
+                                            </div>
+                                            <div style="height:200px"></div>
+                                            @*<div class="foot mb-4"  ng-style="{'height': ( newHead.FooterHeight >= 90 ? newHead.FooterHeight : 100) + 'px'}">*@
+                                            <div class="foot mb-4"  ng-show="newHead.IsAllSignature">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="sigupload1">
+                                                            <label for="" class="invisible">Photo</label>
+                                                            <div class="person-photo-attachment-wrap" ng-show="newHead.IsSignature1">
+                                                                <div class="img-wrap mx-auto">
+                                                                    <img ng-src="{{newHead.Signature1 || newHead.Signature1Data}}" class="img-fluid mt-2" id="Signature1" style="max-height:100px; max-width:100px;">
+                                                                </div>
+                                                                <label for="choose-file" type="button" class="btn btn-outline-secondary btn-sm mt-2"><i class="fas fa-camera w-t"></i> Upload Signature1</label>
+                                                                <input id="choose-file" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="newHead.Signature1_TMP" fileread="newHead.Signature1Data" />
+                                                            </div>
+                                                        </div>
+                                                        <p><b>Lab Technician</b></p>
+                                                        <p><b>New M.D.</b></p>
+                                                    </div>
+                                                    <div class="col-md-4" ng-show="newHead.IsQR">
+                                                        <img src="~/wwwroot/dynamic-erp/images/QR.png" style="height: 120px;" />
+                                                    </div>
+                                                    <div class="col-md-4 text-right">
+                                                        <div class="sigupload2">
+                                                            <label for="" class="invisible">Photo</label>
+                                                            <div class="person-photo-attachment-wrap" ng-show="newHead.IsSignature2">
+                                                                <div class="img-wrap mx-auto">
+                                                                    <img ng-src="{{newHead.Signature2 || newHead.Signature2Data}}" class="img-fluid mt-2" id="Signature2" style="max-height:100px; max-width:100px;">
+                                                                </div>
+                                                                <label for="choose-file-father" type="button" class="btn btn-outline-secondary btn-sm mt-2"><i class="fas fa-camera w-t"></i> Upload Signature2</label>
+                                                                <input id="choose-file-father" type="file" accept=".jpg,.jpeg,.png" style="display: none;" file-model ng-model="newHead.Signature2_TMP" fileread="newHead.Signature2Data" />
+                                                            </div>
+
+                                                        </div>
+                                                        <p><b>Crystal Khetan Chavan</b></p>
+                                                        <p><b>M.D. M.B.B.S.</b></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Footer Section start -->
+                                            <div ng-show="newHead.IsFooter" id="printFooter" style="border:1px solid red;" ng-style="{'height': (newHead.FooterHeight && newHead.FooterHeight >= 50 ? newHead.FooterHeight : 50) + 'px'}"  >
+                                                this is the footer section
+                                            </div>
+                                            <!--end-->
+
+
+                                            <div style="margin-bottom:60px!important;">
+                                                <div class="form-group">
+                                                    <label>Footer Note</label>
+                                                    <textarea class="form-control form-control-sm" rows="2" ng-model="newHead.FooterNote"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Urine Routine & Microscopy Preview
+                                                                            <!--<div class="card shadow-sm mb-4" ng-show="newFilter.TemplateId == 2">
+                                    <div class="card-header bg-light fw-bold">
+                                        Preview
+                                    </div>
+                                    <div class="card-body bg-white border rounded">
+                                        <div>
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    <h6 class="mb-2 fw-bold"><strong> URINE ROUTINE & MICROSCOPIC EXAMINATION </strong></h6>
+                                                </div>
+                                                <div class="col-6 text-left">
+
+                                                    <div><strong>Name</strong>: LALTARA KHATUN (PPT)</div>
+                                                    <div><strong>Age/Sex</strong>: 21 YEAR / FEMALE</div>
+                                                    <div><strong>Lab ID</strong>: 8232912</div>
+                                                    <div><strong>Receipt</strong>: LAB/354</div>
+                                                    <div><strong>Date</strong>: 2082-03-29</div>
+                                                    <div><strong>Ref. By</strong>: BELPATH HEALTH CLINIC</div>
+
+                                                </div>
+
+                                            </div>
+                                            <hr class="border border-2 w-100">
+                                            <h6 class="mt-2 mb-2 fw-bold"><strong> URINE ROUTINE & MICROSCOPIC EXAMINATION </strong></h6>-->
+                                    <!-- Physical Examination -->
+                                    <!--<div class="mb-3">
+                                        <h6 class="mb-2 fw-bold"><strong>Physical Examination</strong> </h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead class="table-light">
+                                                    <tr style="background: #ebeff2;">
+                                                        <th>Parameter</th>
+                                                        <th>Result</th>
+                                                        <th ng-show="newDet.IsUnitCol">Unit</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Volume</td>
+                                                        <td>10</td>
+                                                        <td ng-show="newDet.IsUnitCol">ml</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Colour</td>
+                                                        <td>Pale Yellow</td>
+                                                        <td ng-show="newDet.IsUnitCol"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Appearance</td>
+                                                        <td>Clear</td>
+                                                        <td ng-show="newDet.IsUnitCol"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Specific Gravity</td>
+                                                        <td>1.015</td>
+                                                        <td ng-show="newDet.IsUnitCol"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>-->
+                                    <!-- Chemical Examination -->
+                                    <!--<div class="mb-3">
+                                        <h6 class="mb-2 fw-bold"><strong>Chemical Examination</strong></h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead class="table-light">
+                                                    <tr style="background: #ebeff2;">
+                                                        <th>Parameter</th>
+                                                        <th>Result</th>
+                                                        <th ng-show="newDet.IsUnitCol">Unit</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Sugar</td>
+                                                        <td>Nil</td>
+                                                        <td ng-show="newDet.IsUnitCol"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Albumin</td>
+                                                        <td>Nil</td>
+                                                        <td ng-show="newDet.IsUnitCol"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Reaction</td>
+                                                        <td>Acidic</td>
+                                                        <td ng-show="newDet.IsUnitCol"></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>-->
+                                    <!-- Microscopic Examination -->
+                                    <!--<div class="mb-3">
+                                                    <h6 class="mb-2 fw-bold"><strong>Microscopic Examination</strong></h6>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead class="table-light">
+                                                                <tr style="background: #ebeff2;">
+                                                                    <th>Parameter</th>
+                                                                    <th>Result</th>
+                                                                    <th ng-show="newDet.IsUnitCol">Unit</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>RBC</td>
+                                                                    <td>Nil</td>
+                                                                    <td ng-show="newDet.IsUnitCol">/HPF</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Pus Cell</td>
+                                                                    <td>1 – 2</td>
+                                                                    <td ng-show="newDet.IsUnitCol">/HPF</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Epithelial Cell</td>
+                                                                    <td>1 – 2</td>
+                                                                    <td ng-show="newDet.IsUnitCol">/HPF</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Granular Cast</td>
+                                                                    <td>Nil</td>
+                                                                    <td ng-show="newDet.IsUnitCol">/HPF</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Hyaline Cast</td>
+                                                                    <td>Nil</td>
+                                                                    <td ng-show="newDet.IsUnitCol">/HPF</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>-->
+                                    <!-- Qualitative + Clinical Significance Preview -->
+                                    <!--<div class="card shadow-sm mb-2" ng-show="newFilter.TemplateId == 3">
+                                    <div class="card-header bg-light fw-bold">
+                                        Preview
+                                    </div>
+                                    <div class="card-body bg-white border rounded">
+
+
+                                        <div>
+                                            <div class="row">
+
+                                                <div class="col-6">
+                                                    <h5 class="mb-2 fw-bold"> <strong>MICROBIOLOGY / SEROLOGY</strong></h5>
+                                                    <p class="mb-2">Screening Panel</p>
+
+                                                </div>
+                                                <div class="col-6">
+
+                                                    <div><strong>Name</strong>: BABITA CHAUDHARY (ANC)</div>
+                                                    <div><strong>Age/Sex</strong>: 30 YEAR / FEMALE</div>
+                                                    <div><strong>Lab ID</strong>: 8231517</div>
+                                                    <div><strong>Receipt</strong>: N/A</div>
+                                                    <div><strong>Date</strong>: 2082-03-15</div>
+                                                    <div><strong>Ref. By</strong>: SELF</div>
+
+                                                </div>
+                                            </div>
+
+                                            <hr class="my-2">-->
+                                    <!-- Qualitative Tests -->
+                                    <!--<div class="mb-3">
+                                        <h6 class="mb-2 fw-bold"><strong>QUALITATIVE TESTS</strong></h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead class="table-light">
+                                                    <tr style="background: #ebeff2;">
+                                                        <th>Investigation</th>
+                                                        <th>Result</th>
+                                                        <th ng-show="newDet.IsRemark">Remark</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>HIV I & II</td>
+                                                        <td>NEGATIVE</td>
+                                                        <td ng-show="newDet.IsRemark">NON-REACTIVE</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>HBsAg</td>
+                                                        <td>NEGATIVE</td>
+                                                        <td ng-show="newDet.IsRemark">NON-REACTIVE</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>VDRL</td>
+                                                        <td>NON-REACTIVE</td>
+                                                        <td ng-show="newDet.IsRemark">NON-REACTIVE</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-2">-->
+                                    <!-- Clinical Significance -->
+                                    <!--<div class="mt-2" ng-show="newDet.IsClinicalNotes">
+                                                    <h6 class="mb-2 fw-bold"> <strong>Clinical Significance:</strong></h6>
+                                                    <ul class="list-unstyled">
+                                                        <li class="mb-1">
+                                                            <strong>HIV I & II:</strong> HIV causes AIDS by slowly destroying the immune system. Screening tests detect antibodies to HIV-1 & HIV-2 in blood.
+                                                        </li>
+                                                        <li class="mb-1">
+                                                            <strong>HBsAg:</strong> HBsAg is the surface antigen of hepatitis B virus. Its presence indicates hepatitis B infection.
+                                                        </li>
+                                                        <li class="mb-1">
+                                                            <strong>VDRL:</strong> Treponema pallidum is the causative agent of syphilis. VDRL is used as a screening test for syphilis.
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>-->
+                                    <!-- Time-Series Glucose Preview -->
+                                    <!--<div class="card shadow-sm mb-4" ng-show="newFilter.TemplateId == 4">
+                                    <div class="card-header bg-light fw-bold">
+                                        Preview
+                                    </div>
+                                    <div class="card-body bg-white border rounded">
+                                        <div>
+
+                                            <div class="row">
+                                                <div class="col-6 text-left">
+                                                    <h5 class="mb-2 fw-bold"><strong>BIOCHEMISTRY</strong></h5>
+                                                    <p class="mb-2">Oral Glucose Tolerance Test (OGTT)</p>
+                                                </div>
+                                                <div class="col-6 text-left">
+
+                                                    <div><strong>Name</strong>: PRABHAITI DEVI</div>
+                                                    <div><strong>Age/Sex</strong>: 25 YEAR / FEMALE</div>
+                                                    <div><strong>Lab ID</strong>: 823211</div>
+
+                                                    <div><strong>Receipt</strong>: LAB/275</div>
+                                                    <div><strong>Date</strong>: 2082-03-21</div>
+                                                    <div><strong>Ref. By</strong>: DR. BABITA CHAUDHARY (MBBS; MD)</div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <hr class="my-2">-->
+                                    <!-- OGTT Results -->
+                                    <!--<div class="mb-2">
+                                        <h6 class="mb-1 fw-bold"><strong>ORAL GLUCOSE TOLERANCE TEST (OGTT)</strong></h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered">
+                                                <thead class="table-light">
+                                                    <tr style="background: #ebeff2;">
+                                                        <th>Timepoint</th>
+                                                        <th>Result</th>
+                                                        <th ng-show="newDet.IsUnitCol">Unit</th>
+                                                        <th ng-show="newDet.IsReferenceRange">Reference</th>
+                                                        <th ng-show="newDet.IsRemark">Remark</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Fasting (0 hr)</td>
+                                                        <td>95</td>
+                                                        <td ng-show="newDet.IsUnitCol">mg/dL</td>
+                                                        <td ng-show="newDet.IsReferenceRange">&lt;95</td>
+                                                        <td ng-show="newDet.IsRemark">NORMAL</td>
+                                                    </tr>
+                                                    <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+                                                        <td>1 hour (100g oral glucose)</td>
+                                                        <td>
+                                                            189
+                                                            <span ng-show="newDet.FlagStyle == 1 || newDet.FlagStyle == 3" class="badge bg-danger">H</span>
+                                                        </td>
+                                                        <td ng-show="newDet.IsUnitCol">mg/dL</td>
+                                                        <td ng-show="newDet.IsReferenceRange">&lt;180</td>
+                                                        <td ng-show="newDet.IsRemark">
+                                                            <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">HIGH</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+                                                        <td>2 hour (100g oral glucose)</td>
+                                                        <td>
+                                                            160
+                                                            <span ng-show="newDet.FlagStyle == 1 || newDet.FlagStyle == 3" class="badge bg-danger">H</span>
+                                                        </td>
+                                                        <td ng-show="newDet.IsUnitCol">mg/dL</td>
+                                                        <td ng-show="newDet.IsReferenceRange">&lt;155</td>
+                                                        <td ng-show="newDet.IsRemark">
+                                                            <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">HIGH</span>
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-class="{'table-warning': newDet.IsAbnormalRow}">
+                                                        <td>3 hour (100g oral glucose)</td>
+                                                        <td>
+                                                            145
+                                                            <span ng-show="newDet.FlagStyle == 1 || newDet.FlagStyle == 3" class="badge bg-danger">H</span>
+                                                        </td>
+                                                        <td ng-show="newDet.IsUnitCol">mg/dL</td>
+                                                        <td ng-show="newDet.IsReferenceRange">&lt;140</td>
+                                                        <td ng-show="newDet.IsRemark">
+                                                            <span ng-show="newDet.FlagStyle == 2 || newDet.FlagStyle == 3">HIGH</span>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-2">-->
+                                    <!-- Template Interpretation Hint -->
+                                    <!--<div class="mt-1" ng-show="newDet.IsClinicalNotes">
+                                                    <h6 class="mb-1 fw-bold">Template Interpretation Hint:</h6>
+                                                    <p class="mb-0">Results suggest impaired glucose tolerance. Correlate with clinical findings and HbA1c as per gestational diabetes criteria.</p>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>-->
+                                </div>
+                            </div>
+                            <footer class="main-footer mt-2">
+                                <div class="text-right control-btns">
+                                    <button type="button" class="btn btn-default btn" ng-click="ClearConfigFields()"> <span class="glyphicon glyphicon-remove"></span> Clear</button>
+                                    <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateHeaderFooterConfig()"><span class="glyphicon glyphicon-save"></span> Save</button>
+                                </div>
+                            </footer>
+                        </div>
+
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

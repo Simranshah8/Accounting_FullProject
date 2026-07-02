@@ -1,0 +1,243 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .month {
+        padding: 5px 25px;
+        background: #025a58;
+        text-align: center;
+    }
+
+        .month ul {
+            margin: 0;
+            padding: 0;
+        }
+
+            .month ul li {
+                color: white;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 2px;
+            }
+
+
+    .weekdays {
+        margin: 0;
+        padding: 5px 5px;
+        background-color: #ddd;
+    }
+
+        .weekdays li {
+            list-style-type: none;
+            display: inline-block;
+            width: 13% !important;
+            text-align: center;
+            background-color: #76be4e;
+            border: 1px solid #ccc;
+            font-size: 13px;
+            padding: 4px;
+            font-weight: 600;
+        }
+
+    .days {
+        padding: 0px 5px;
+        background: #eee;
+        margin: 0;
+    }
+
+        .days li {
+            list-style-type: none;
+            display: inline-block;
+            width: 13.5% !important;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 5px;
+            padding: 7px;
+            font-family: "Lucida Console", "Courier New", monospace;
+            font-size: 13px;
+            background-color: #fff;
+            box-shadow: rgb(40 40 40 / 94%) 0px -1px 1px 0px;
+        }
+
+            .days li .active {
+                display: block;
+                width: 30px;
+                height: 30px;
+                padding: 5px;
+                border: 1px solid #ccc;
+                background: linear-gradient(to right, red 30%, orange 30% 60%, yellow 60% 100%);
+            }
+
+    .underlinered:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: red;
+    }
+
+    .underlineblue:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: blue;
+    }
+
+    .underlineyellow:after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 4px;
+        background-color: yellow;
+    }
+
+    .tooltip-inner {
+        background-color: #025a58 !important;
+        color: #fff;
+    }
+</style>
+<script src="~/jslib/appcms/academiccalendar.js?v=20220902"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="npCalenderController" @*ng-init="LoadData()"*@>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="">Year</label>
+                            <select class="form-control form-control-sm select2" ng-change="getNepaliCalendar()" ng-model="AcademicCalendar.YearId">
+                                <option ng-value="yc.id" ng-repeat="yc in YearColl" ng-selected="AcademicCalendar.YearId==yc.id">{{yc.text}}</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-10">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-md-3" ng-repeat="et in EventTypeList">
+                                    <label><i class="fas fa-square mr-2" ng-style="{ 'color' : et.ColorCode }"></i> {{et.Name}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-4 mt-2" ng-repeat="mn in AcademicCalendar.MonthColl">
+                        <div class="month">
+                            <ul>
+                                <li>
+                                    {{mn.MonthName}}
+                                </li>
+                            </ul>
+                        </div>
+                        <ul class="weekdays">
+                            <li>Su</li>
+                            <li>Mo</li>
+                            <li>Tu</li>
+                            <li>We</li>
+                            <li>Th</li>
+                            <li>Fr</li>
+                            <li>Sa</li>
+                        </ul>
+                        <ul class="days">
+                            <li ng-repeat="dd in mn.BlankDaysColl track by $index">&emsp;</li>
+                            <li class="wait" ng-repeat="dd in mn.DataColl" ng-click="ClickOnDay(dd)">
+                                {{dd.ND}}
+                                <span ng-show="dd.IsWeekend==true" style="content: ''; display: block;  height: 24px; width: 100%; margin-top: -21px; border: 1px solid #ccc;border-radius: 50%;" ng-style="{ 'background-color' : dd.WeekendColorCode }"> </span>
+                                <span style="content: ''; display: block;  height: 24px; width: 100%; margin-top: -21px; border: 1px solid #ccc;border-radius: 50%;" ng-style="{ 'background-color' : ec.ColorCode }" ng-repeat="ec in dd.EventColl"> </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            <!-- /.row -->
+        </div>
+        <!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+
+    <div class="modal fade" id="modal-xl">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title">Manage Holiday/Event</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Event/Holiday</label>
+                                <select class="form-control form-control-sm select2" ng-model="currentEvent.EventTypeId" ng-change="ChangeEventType()">
+                                    <option ng-selected="currentEvent.EventTypeId==et.EventTypeId" ng-value="et.EventTypeId" ng-repeat="et in EventTypeList">{{et.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Name</label>
+                                <input type="text" class="form-control form-control-sm" ng-model="currentEvent.Name">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="currentEvent.Description"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">From Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="currentEvent.FromDate_TMP" date-detail="currentEvent.FromDateDet" before-days="365" after-days="365">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="">To Date</label>
+                                <input type="text"
+                                       class="form-control form-control-sm" date-picker ng-model="currentEvent.ToDate_TMP" date-detail="currentEvent.ToDateDet" before-days="365" after-days="365">
+                            </div>
+                        </div>
+                        <div class="col-md-6" ng-show="ShowAtTime==true">
+                            <div class="form-group">
+                                <label for="">At Time</label>
+                                <input type="time"
+                                       class="form-control form-control-sm" ng-model="currentEvent.AtTime_TMP">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="">Applied For</label>
+                                <select class="form-control form-control-sm select2" multiple="multiple" ng-model="currentEvent.ApplicableForClassColl">
+                                    <option ng-value="0" selected>All</option>
+                                    <option ng-value="c.ClassId" ng-repeat="c in ClassList.ClassList">{{c.Name}}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button ng-show="currentEvent.EventHolidayId>0" type="button" class="btn btn-sm btn-danger" style="min-width: 90px;" ng-click="DelEvent()">Delete</button>
+                        <button type="button" class="btn btn-sm btn-default" style="min-width: 90px;">Reset</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveUpdateEvent()">Save</button>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+</div>
+

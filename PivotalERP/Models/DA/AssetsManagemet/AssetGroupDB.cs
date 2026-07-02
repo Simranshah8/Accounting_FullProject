@@ -1,0 +1,210 @@
+﻿using Dynamic.DataAccess.Global;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace Dynamic.DA.AssetManagement
+{
+    public class AssetGroupDB
+    {
+        DataAccessLayer1 dal = null;
+
+        public AssetGroupDB(string hostName, string dbName)
+        {
+            dal = new DataAccessLayer1(hostName, dbName);
+        }
+		public ResponeValues SaveUpdate(BE.AssetManagement.AssetGroup beData, bool isModify)
+		{
+			ResponeValues resVal = new ResponeValues();
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@GroupName", beData.GroupName);
+			cmd.Parameters.AddWithValue("@GroupCode", beData.GroupCode);
+			cmd.Parameters.AddWithValue("@GroupParentId", beData.GroupParentId);
+
+			cmd.Parameters.AddWithValue("@UserId", beData.CUserId);
+			cmd.Parameters.AddWithValue("@EntityId", beData.EntityId);
+			cmd.Parameters.AddWithValue("@AssetGroupId", beData.AssetGroupId);
+
+			if (isModify)
+			{
+				cmd.CommandText = "usp_UpdateAssetGroup";
+			}
+			else
+			{
+				cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+				cmd.CommandText = "usp_AddAssetGroup";
+			}
+			cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+			cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+			cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+			cmd.Parameters[6].Direction = System.Data.ParameterDirection.Output;
+			cmd.Parameters[7].Direction = System.Data.ParameterDirection.Output;
+			cmd.Parameters[8].Direction = System.Data.ParameterDirection.Output;
+			try
+			{
+				cmd.ExecuteNonQuery();
+				if (!(cmd.Parameters[5].Value is DBNull))
+					resVal.RId = Convert.ToInt32(cmd.Parameters[5].Value);
+
+				if (!(cmd.Parameters[6].Value is DBNull))
+					resVal.ResponseMSG = Convert.ToString(cmd.Parameters[6].Value);
+
+				if (!(cmd.Parameters[7].Value is DBNull))
+					resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[7].Value);
+
+				if (!(cmd.Parameters[8].Value is DBNull))
+					resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[8].Value);
+
+				if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+					resVal.ResponseMSG = resVal.ResponseMSG + "(" + resVal.ErrorNumber.ToString() + ")";
+
+			}
+			catch (System.Data.SqlClient.SqlException ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+
+			return resVal;
+
+		}
+
+		public ResponeValues DeleteById(int UserId, int EntityId, int AssetGroupId)
+		{
+			ResponeValues resVal = new ResponeValues();
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@EntityId", EntityId);
+			cmd.Parameters.AddWithValue("@AssetGroupId", AssetGroupId);
+			cmd.CommandText = "usp_DelAssetGroupById";
+			cmd.Parameters.Add("@ResponseMSG", System.Data.SqlDbType.NVarChar, 254);
+			cmd.Parameters.Add("@IsSuccess", System.Data.SqlDbType.Bit);
+			cmd.Parameters.Add("@ErrorNumber", System.Data.SqlDbType.Int);
+			cmd.Parameters[3].Direction = System.Data.ParameterDirection.Output;
+			cmd.Parameters[4].Direction = System.Data.ParameterDirection.Output;
+			cmd.Parameters[5].Direction = System.Data.ParameterDirection.Output;
+			try
+			{
+				cmd.ExecuteNonQuery();
+
+				if (!(cmd.Parameters[3].Value is DBNull))
+					resVal.ResponseMSG = Convert.ToString(cmd.Parameters[3].Value);
+
+				if (!(cmd.Parameters[4].Value is DBNull))
+					resVal.IsSuccess = Convert.ToBoolean(cmd.Parameters[4].Value);
+
+				if (!(cmd.Parameters[5].Value is DBNull))
+					resVal.ErrorNumber = Convert.ToInt32(cmd.Parameters[5].Value);
+
+				if (!resVal.IsSuccess && resVal.ErrorNumber > 0)
+					resVal.ResponseMSG = resVal.ResponseMSG + "(" + resVal.ErrorNumber.ToString() + ")";
+
+			}
+			catch (System.Data.SqlClient.SqlException ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			catch (Exception ee)
+			{
+				resVal.IsSuccess = false;
+				resVal.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+			return resVal;
+		}
+		public BE.AssetManagement.AssetGroupCollections getAllAssetGroup(int UserId, int EntityId)
+		{
+			BE.AssetManagement.AssetGroupCollections dataColl = new BE.AssetManagement.AssetGroupCollections();
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@EntityId", EntityId);
+			cmd.CommandText = "usp_GetAllAssetGroup";
+			try
+			{
+				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+				while (reader.Read())
+				{
+					BE.AssetManagement.AssetGroup beData = new BE.AssetManagement.AssetGroup();
+					if (!(reader[0] is DBNull)) beData.AssetGroupId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.GroupName = reader.GetString(1);
+					if (!(reader[2] is DBNull)) beData.GroupCode = reader.GetString(2);
+					if (!(reader[3] is DBNull)) beData.GroupParentName = reader.GetString(3);
+					dataColl.Add(beData);
+				}
+				reader.Close();
+				dataColl.IsSuccess = true;
+				dataColl.ResponseMSG = GLOBALMSG.SUCCESS;
+			}
+			catch (Exception ee)
+			{
+				dataColl.IsSuccess = false;
+				dataColl.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+
+			return dataColl;
+
+		}
+		public BE.AssetManagement.AssetGroup getAssetGroupById(int UserId, int EntityId, int AssetGroupId)
+		{
+			BE.AssetManagement.AssetGroup beData = new BE.AssetManagement.AssetGroup();
+			dal.OpenConnection();
+			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.Parameters.AddWithValue("@AssetGroupId", AssetGroupId);
+			cmd.Parameters.AddWithValue("@UserId", UserId);
+			cmd.Parameters.AddWithValue("@EntityId", EntityId);
+			cmd.CommandText = "usp_GetAssetGroupById";
+			try
+			{
+				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
+				if (reader.Read())
+				{
+					beData = new BE.AssetManagement.AssetGroup();
+					if (!(reader[0] is DBNull)) beData.AssetGroupId = reader.GetInt32(0);
+					if (!(reader[1] is DBNull)) beData.GroupName = reader.GetString(1);
+					if (!(reader[2] is DBNull)) beData.GroupCode = reader.GetString(2);
+					if (!(reader[3] is DBNull)) beData.GroupParentId = reader.GetInt32(3);
+				}
+				reader.Close();
+				beData.IsSuccess = true;
+				beData.ResponseMSG = GLOBALMSG.SUCCESS;
+			}
+			catch (Exception ee)
+			{
+				beData.IsSuccess = false;
+				beData.ResponseMSG = ee.Message;
+			}
+			finally
+			{
+				dal.CloseConnection();
+			}
+
+			return beData;
+
+		}
+	}
+}

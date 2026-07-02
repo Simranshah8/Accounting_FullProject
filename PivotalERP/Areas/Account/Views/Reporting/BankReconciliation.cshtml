@@ -1,0 +1,942 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<style>
+    .table-scroll-x-y {
+        height: auto !important;
+    }
+
+    tfoot tr td {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+    }
+</style>
+<script>
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.BankReconciliation)";
+    var SalesVatEntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.AccountSalesRegister)";
+</script>
+<script src="~/jslib/account/reporting/BankReconciliation.js?v=1"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="BankReconciliation" ng-init="LoadData()">
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <ul class="list-group list-group-flush">
+                            <li>
+                                @*<div class="form-group">
+                                        <label>Aditional Ledger</label>
+                                        <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="LedgerVoucher.LedgerTypeIdColl" data-placeholder="** Select Type **" ng-change="ShowAditionalLedger()" multiple>
+                                            <option ng-value="pl.id" ng-repeat="pl in LedgerTypeList">{{pl.text}}</option>
+                                        </select>
+                                    </div>*@
+                            </li>
+
+                        </ul>
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+            <div class="content-wrapper-new">
+                <section class="">
+                    <div class="container-fluid">
+                        <section class="iframe-content-starts-here">
+                            <div class="tab-content">
+                                <div id="day-book-section">
+                                    <div class="card pt-2 pb-0 px-2 mb-0">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <div class="d-inline-block">
+                                                    <div class="input-group input-group-sm">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">From:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="LedgerVoucher.DateFrom_TMP" style="max-width:100px" date-detail="LedgerVoucher.DateFromDet" />
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text">To:</span>
+                                                        </div>
+                                                        <input class="form-control text-dark input-sm" type="text" date-picker ng-model="LedgerVoucher.DateTo_TMP" style="max-width:100px" date-detail="LedgerVoucher.DateToDet" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="comDet.Maintain==3">
+                                                <div class="form-group row">
+                                                    <label for="inputEmail3" class="col-lg-6">Patient Id <span style="color:red">*</span></label>
+                                                    <div class="col-lg-6">
+                                                        <input type="text" class="form-control form-control-sm float-right" ng-model="LedgerVoucher.PatientNo" onfocus="this.select();" ng-blur="GetPatientById()" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-3" ng-show="BranchList.length>1">
+                                                <div class="form-group row">
+                                                    <label for="inputEmail3" class="col-lg-3">Branch</label>
+                                                    <div class="col-lg-9">
+                                                        <select class="form-control form-control-sm hideSideBar" active-select2 style="width: 100%;" ng-model="LedgerVoucher.BranchId" ng-change="GetLedgerVoucher()" placeholder="*select branch*">
+                                                            <option ng-repeat="vt in BranchList track by vt.BranchId" ng-value="vt.BranchId">
+                                                                {{vt.Name}}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <div class="form-group row">
+                                                    <div class="col-md-3">
+                                                        <label class="mt-1">Select Ledger</label>
+                                                    </div>
+                                                    <div class="col-md-9">
+                                                        <div class="d-flex">
+                                                            <select class="form-control form-control-sm select2 serial" all-ledger ng-model="LedgerVoucher.LedgerId" style="width:80%" id="cboLedger" ledgertype="1"
+                                                                    placeholder="** Select Ledger Name **" showdetails="true" confirm-action="GetLedgerVoucher()" ledger-detail="LedgerVoucher.LedgerDetails" side-bar-data="LedgerVoucher.partySideBarData">
+                                                            </select>
+
+                                                            <a class="btn py-0 btn-default" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px; margin-left: -2px;">
+                                                                <span data-toggle="modal" data-target="#ledgerdetailid">
+                                                                    Detail
+                                                                </span>
+
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <div class="form-group">
+                                                    <a href="#" class="btn btn-primary load px-1" style="float: right; min-width: 75px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetLedgerVoucher()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                </div>
+                                            </div>
+                                            @*<div class="col-md-6">
+                                                    <div class="form-group row">
+                                                        <div class="col-md-2">
+                                                            <label class="mt-1">Select Ledger</label>
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-ledger ng-model="LedgerVoucher.LedgerId" id="cboLedger" style="width:75%" ledgertype="1"
+                                                                    placeholder="** Select Ledger Name **" showdetails="true" confirm-action="GetLedgerVoucher()" ledger-detail="LedgerVoucher.LedgerDetails" side-bar-data="LedgerVoucher.partySideBarData"></select>
+                                                            <a class="btn py-0 btn-default" style="border-top-left-radius: 0px; border-bottom-left-radius: 0px; margin-left: -2px;">
+                                                                <span data-toggle="modal" data-target="#ledgerdetailid">
+                                                                    Detail
+                                                                </span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="form-group">
+                                                        <a href="#" class="btn btn-primary load" style="float: right; min-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetLedgerVoucher()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                                    </div>
+                                                </div>*@
+
+                                        </div>
+                                    </div>
+                                    <div class="card p-2 ">
+                                        <header class="row">
+                                            <div class="col-md-2 col-sm-2">
+                                                <div class="clearfix">
+                                                    <form class="form-inline">
+                                                        @*<div class="input-group input-group-sm mr-sm-2">
+                                                                <div class="input-group-prepend">
+                                                                    <span class="input-group-text cstm">Find:</span>
+                                                                </div>
+                                                                <select class="form-control pr-0"
+                                                                        id="exampleFormControlSelect1">
+                                                                    <option>Contain</option>
+                                                                    <option>Prefix</option>
+                                                                </select>
+                                                            </div>*@
+                                                        <div class="input-group input-group-sm" style="width: 200px;">
+                                                            <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                            <div class="input-group-append">
+                                                                <button type="submit" class="btn btn-default">
+                                                                    <i class="fas fa-search"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">Clearance Date As:</span>
+                                                    </div>
+                                                    <select class="form-control form-control-sm " ng-model="LedgerVoucher.ClearanceDateAs" ng-change="ChangeClearanceDateAs()">
+                                                        <option ng-repeat="F in ClearanceDateList" ng-value="F.id" ng-selected="LedgerVoucher.ClearanceDateAs==F.id">{{F.text}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 col-sm-6 text-right">
+                                                <form class="form-inline  float-right"> 
+
+                                                    <div class="d-inline-block">
+                                                        <div class="input-group input-group-sm">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text">Filter As:</span>
+                                                            </div>
+                                                            <select class="form-control form-control-sm " ng-model="LedgerVoucher.TranType">
+                                                                <option ng-value="0" selected>All Transaction</option>
+                                                                <option ng-repeat="F in Filterlist" ng-value="F.id" ng-selected="LedgerVoucher.TranType==F.id">{{F.text}}</option>
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" class="btn btn-sm load btn-primary mx-2" ng-click="ReconciliationModal()"><i class="fas fa-save mr-2"></i>Save </button>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       title="Export To Excel" ng-click="DownloadAsXls()">
+                                                        <i class="fas fa-file-excel"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                       title="Print" ng-click="Print()">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+                                                 
+                                                </form>
+                                            </div>
+                                        </header>
+                                     
+                                        <div class="table-scroll-x-y  table-container" style="max-height:calc(100vh - 7rem)!important;">
+                                            <table id="main-table" class="main-table table table-sm table-bordered bg-white table-hover">
+                                                <thead class="text-center">
+                                                    <tr>
+                                                        <th class="cstm-sticky" style="width: 30px;left:0; background-color: #ececec !important;z-index:4">
+                                                            <div class="icheck-primary d-inline">
+                                                                <input type="checkbox" id="checkboxPrimary11" ng-change="CheckAll()" ng-model="LedgerVoucher.CheckAll">
+                                                                <label for="checkboxPrimary11"></label>
+                                                            </div>
+                                                        </th>
+                                                        <th class="cstm-sticky" style="width: 90px;left:30px;z-index:4; background-color: #ececec !important;">Date</th>
+                                                        <th class="cstm-sticky" style="width: 90px; left: 120px; z-index: 4; background-color: #ececec !important ">Vch Type</th>
+                                                        <th class="cstm-sticky" style="width: 90px; left: 210px; z-index: 4; background-color: #ececec !important ">Vch No.</th>
+                                                        <th class="cstm-sticky" style="width: 200px; left: 300px; z-index: 4; background-color: #ececec !important ">Particulars</th>
+                                                        <th style="width: 120px; background-color: #ececec !important">Cheque No.</th>
+                                                        <th style="width: 92px; background-color: #ececec !important">Cheque Date</th>
+                                                        <th style="width: 100px; background-color: #ececec !important">Cheque Type</th>
+                                                        <th style="width: 107px; background-color: #ececec !important">Clearance  Date</th>
+                                                        <th style="width: 100px; background-color: #ececec !important">Debit</th>
+                                                        <th style="width: 100px; background-color: #ececec !important">Credit</th>
+                                                        <th style="width: 120px; background-color: #ececec !important">Current Closing</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Account No</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Remarks</th>
+                                                        <th style="width: 110px; background-color: #ececec !important">Clearance Miti</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Clearance Remarks</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Clearance By</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Verify Remarks</th>
+                                                        <th style="width: 120px; background-color: #ececec !important">Party Code</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Ledger Narration</th>
+                                                        <th style="width: 150px; background-color: #ececec !important">Narration</th>
+                                                        <th style="width: 100px; background-color: #ececec !important">Miti</th>
+                                                        <th style="width: 100px; background-color: #ececec !important">Reconcile By</th>
+                                                        <th style="width: 100px; background-color: #ececec !important">Effect On</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <!--In case of Reconciled data (If it contains clearance date )the background of the row must be light green-->
+
+                                                    <tr>
+                                                        <td class="cstm-sticky" style="left: 0; z-index: 3; background-color: {{B.RowColorCode}} !important;">
+                                                          
+                                                        </td>
+                                                        <td class="cstm-sticky" style="left: 30px; z-index: 3; background-color: {{B.RowColorCode}} !important;">{{B.VoucherDate |dateFormat}}</td>
+                                                        <td class="cstm-sticky" style="left: 120px; z-index: 3; background-color: {{B.RowColorCode}} !important;">{{B.VoucherName}}</td>
+                                                        <td class="cstm-sticky" style="left: 210px; z-index: 3; background-color: {{B.RowColorCode}} !important;" align="center">{{B.VoucherNo}}</td>
+                                                        <td class="cstm-sticky" style="left: 300px; z-index: 3; background-color: {{B.RowColorCode}} !important;">
+                                                            Opening
+                                                        </td>
+                                                        <td>Opening</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td>                                                            
+                                                        </td>
+                                                        <td class="text-right">{{LedgerVoucher.ODr  |number:2}}</td>
+                                                        <td class="text-right">{{LedgerVoucher.OCr  |number:2}}</td>
+                                                        <td class="text-right">{{LedgerVoucher.OpeningAmt |number:2}}</td>
+                                                        <td class="text-right"> </td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                    <tr ng-repeat="B in DataColl  | filter:search" style="background-color: {{ B.RowColorCode }}  ">
+                                                        <td class="cstm-sticky" style="left: 0; z-index: 3; background-color: {{B.RowColorCode}} !important;">
+                                                            <div class="icheck-primary d-inline ml-1" ng-show="B.IsCleared==false">
+                                                                <input type="checkbox" id="checkboxPrimaryR{{$index}}" ng-model="B.IsSelected">
+                                                                <label for="checkboxPrimaryR{{$index}}"></label>
+                                                            </div>
+                                                        </td>
+                                                        <td class="cstm-sticky" style="left: 30px; z-index: 3; background-color: {{B.RowColorCode}} !important;">{{B.VoucherDate |dateFormat}}</td>
+                                                        <td class="cstm-sticky" style="left: 120px; z-index: 3; background-color: {{B.RowColorCode}} !important;">{{B.VoucherName}}</td>
+                                                        <td class="cstm-sticky" style="left: 210px; z-index: 3; background-color: {{B.RowColorCode}} !important;" align="center">{{B.VoucherNo}}</td>
+                                                        <td class="cstm-sticky" style="left: 300px; z-index: 3; background-color: {{B.RowColorCode}} !important;">
+                                                            <label class="mb-0">{{B.LedgerName}}</label><br />
+                                                            <label class="mb-0" style="font-size:11px"><b>({{B.PartyName}})</b></label>
+
+                                                        </td>
+                                                        <td>{{B.CheckNo}}</td>
+                                                        <td>{{B.ChequeDate |dateFormat}}</td>
+                                                        <td>{{B.ChequeType}}</td>
+                                                        <td>
+                                                            <span ng-show="B.IsCleared==true">
+                                                                {{B.ClearanceDate |dateFormat}}
+                                                            </span>
+                                                            <input ng-hide="B.IsCleared==true" class="form-control form-control-sm" type="text" date-picker ng-model="B.ClearanceDate_TMP" style="max-width:100px" date-detail="B.ClearanceDateDet" />
+                                                        </td>
+                                                        <td class="text-right">{{B.DrAmt  |number:2}}</td>
+                                                        <td class="text-right">{{B.CrAmt  |number:2}}</td>
+                                                        <td class="text-right">{{B.ClosingAmt |number:2}}</td>
+                                                        <td class="text-right">{{B.AccountNo}}</td>
+                                                        <td>{{B.Remarks}}</td>
+                                                        <td>{{B.EffectiveDateBS}}</td>
+                                                        <td><textarea class="form-control form-control-sm" rows="1" ng-model="B.ClearanceRemarks" ng-disabled="B.IsCleared==true"></textarea></td>
+                                                        <td><textarea class="form-control form-control-sm" rows="1" ng-model="B.ClearanceBy" ng-disabled="B.IsCleared==true"></textarea></td>
+                                                        <td>{{B.VerifyRemarks}}</td>
+
+                                                        <td>{{B.PartyCode}}</td>
+                                                        <td>{{B.LedgerNarration}}</td>
+                                                        <td>{{B.Narration}}</td>
+                                                        <td>{{B.NPVoucherDate}}</td>
+                                                        <td>{{B.ReconcileBY}}</td>
+
+                                                        <td>{{B.EffectOnBank==true ? 'BANK' : ''}} {{B.EffectOnCompany==true ? 'Ledger' : ''}}</td>
+                                                    </tr>
+
+
+                                                </tbody>
+                                                <tfoot style="position: -webkit-sticky; position: sticky; bottom: 0; background: #f0f2f5; color: #000000; z-index: 4; ">
+
+                                                    <tr>
+                                                        <td colspan="5" class="cstm-sticky" style="left: 0; z-index: 4; background-color: #f0f2f5 !important;"></td>
+                                                        <td class="text-right  pr-2" colspan="4"><b>Amounts not reflected in banks =></b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.DrAmtB_N |number:2}}</b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.CrAmtB_N |number:2}}</b></td>
+                                                        <td colspan="13"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" class="cstm-sticky" style="left: 0; z-index: 4; background-color: #f0f2f5 !important;"></td>
+                                                        <td class="text-right  pr-2" colspan="4"><b>Amounts not reflected in ledger =></b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.DrAmtC_N |number:2}}</b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.CrAmtC_N |number:2}}</b></td>
+                                                        <td colspan="13"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" class="cstm-sticky" style="left: 0; z-index: 4; background-color: #f0f2f5 !important;"></td>
+                                                        <td class="text-right pr-2" colspan="4"><b>Balance as per ledger books =></b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.CompanyClosing_DR |number:2}}</b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.CompanyClosing_CR |number:2}}</b></td>
+                                                        <td colspan="13"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" class="cstm-sticky" style="left: 0; z-index: 4; background-color: #f0f2f5 !important;"></td>
+                                                        <td class="text-right pr-2" colspan="4"><b>Balance as per bank =></b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.BankClosing_DR |number:2}}</b></td>
+                                                        <td class="text-right"><b>{{LedgerVoucher.BankClosing_CR |number:2}}</b></td>
+                                                        <td colspan="13"></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <!-- /.row -->
+                    </div>
+                    <!--/. container-fluid -->
+                </section>
+                <!-- /.content -->
+            </div>
+            <!-- Add ReportTemplates Modal Dailog -->
+            <div class="modal fade bd-example-modal-xl sales-invoice-page-modal" id="FrmPrintReport" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">Report Viewer</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <iframe id="frmRpt" style='width: 100%; height: 600px; background-color: white; visibility:visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Ledger Detail Modal Starts-->
+            <div class="modal fade" id="ledgerdetailid" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="p-2 px-4">
+                            <div class="row">
+                                <div class="col-md-10">
+
+                                    <label style="font-size:18px;"> Ledger Detail OF <strong>  ( {{LedgerVoucher.LedgerDetails.Name}} )</strong></label>
+
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="modal-body pt-0">
+                            <div class="card p-2">
+                                <div class="row">
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Alias</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.Alias}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Code</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.Code}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Group Name </b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.GroupName}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Agent </b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.Agent}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Credit Limit Amt</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.CreditLimitAmt  |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Credit Limit Days</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.CreditLimitDays}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Area</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.Area}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Address</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.Address}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Debtor Type</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.DebtorType}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Debtor Route </b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.DebtorRoute}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>PanVat</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.PanVat}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>MobileNo1</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.MobileNo1}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>MobileNo2</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.MobileNo2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>EmailId</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.EmailId}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Opening Balance</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.Opening  |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Dr Amt.</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.DrAmt  |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Cr Amt.</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.CrAmt  |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Closing Balance</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.Closing  |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Tran Amt.</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b>  {{LedgerVoucher.LedgerDetails.TranAmt  |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Last Tran Date </b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.LastTranDateAD}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>Last Tran Miti </b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.LastTranDateBS}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>BGAmt </b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.BGAmt |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>PDCAmt</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.PDCAmt |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-5">
+                                                <label><b>ODCAmt</b></label>
+                                            </div>
+                                            <div class="col-md-7">
+                                                <b>: </b> {{LedgerVoucher.LedgerDetails.ODCAmt |number:2}}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Ledger Detail Modal Starts-->
+            <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+            <div class="modal fade" id="modal-showDocument">
+                <div class="modal-dialog modal-md">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title" id="exampleModalCenterTitle">{{SelectedTran.VoucherName}}-{{SelectedTran.AutoManualNo}}</h6>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="table-responsive">
+                                    <table class="table table-hover border">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style="width: 20px">SN.</th>
+                                                <th scope="col" style="width:150px">Name</th>
+                                                <th scope="col" style="width: 130px">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="dcc in SelectedTran.DocumentColl">
+                                                <th scope="row">{{$index+1}}</th>
+                                                <td>{{dcc.Name}}</td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="{{dcc.DocumentData || dcc.DocPath}}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="" data-original-title="Download doc." download="{{dcc.Name}}"><i class="fas fa-download"></i></a>
+                                                        <a href="#" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="" data-original-title="View doc" ng-click="ShowPersonalImg(dcc)"><i class="fas fa-eye"></i></a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="time-label">
+                            <span class="d-block border-0 p-3 text-center">
+                                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Close</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.modal-content -->
+            </div>
+            <!--Ends-->
+
+
+            <div aria-hidden="true" aria-labelledby="myModalLabel" class="modal fade" id="PersonalImg" role="dialog" tabindex="-1">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body mb-0 p-0">
+                            <img ng-src="{{viewImg.FileData || viewImg.ContentPath}}" alt="" style="width:100%; height: 70vh;">
+                        </div>
+                        <div class="modal-footer">
+                            <div><a href="{{viewImg.FileData || viewImg.ContentPath}}" download>Download</a></div>
+                            <button class="btn btn-success btn-rounded btn-sm ml-4 text-center" data-dismiss="modal" type="button" style="min-width: 90px;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <div class="modal fade sales-invoice-page-modal document-attach-modal" id="frmMdlInterest" role="dialog" aria-labelledby="partyAccRightBtn" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document" style="min-width:1000px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">{{CurParty.CustomerName}}</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body gradient-bg">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-6 col-form-label col-form-label-sm">Interest Rate</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="number" class="form-control" placeholder="" ng-model="CurParty.InterestRate" ng-blur="ReCalculateInt()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-6 col-form-label col-form-label-sm">Credit Days</label>
+                                <div class="col-sm-6">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="number" class="form-control" placeholder="" ng-model="CurParty.CreditDays" ng-blur="ReCalculateInt()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-5 col-form-label col-form-label-sm">CutOff Date</label>
+                                <div class="col-sm-7">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <input type="text" class="form-control form-control-sm" date-picker ng-model="CurParty.IntCutOffDate_TMP" date-detail="CurParty.IntCutOffDateDet" ng-blur="ReCalculateInt()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group row">
+                                <label for="" class="col-sm-4 col-form-label col-form-label-sm">On</label>
+                                <div class="col-sm-7">
+                                    <div class="input-group input-group-sm mb-3">
+                                        <select class="form-control form-control-sm  hideSideBar" style="width: 100%;" ng-model="CurParty.InterestOn" ng-change="ReCalculateInt()">
+                                            <option ng-repeat="vt in InterestCalculationOnColl" ng-value="vt.id" ng-selected="vt.id == CurParty.InterestOn">
+                                                {{vt.text}}
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="form-group form-inline">
+                                <a print-tbl table-id="'#main-table-intDet'" class="btn btn-secondary btn-light btn-sm wait"
+                                   data-toggle="tooltip" data-placement="bottom"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                     data-placement="top" title="Download File">
+                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right"
+                                         aria-labelledby="dropdownMenuButton">
+                                        <span class="dropdown-item">Choose an option:</span>
+                                        <a class="dropdown-item wait" export-excel table-id="'#main-table-intDet'" sheet-name="'Interest Details'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                        <a class="dropdown-item wait" onClick="$('#main-table-intDet').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="table-scroll-x-y" style="max-height: 400px; overflow-x: auto;">
+                        <table id="main-table-intDet" class="main-table table table-sm table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th colspan="3" style="width: 270px; left: 0; z-index: 3; background-color: #fff !important;">
+                                        Party : {{CurParty.CustomerName}}
+                                    </th>
+                                    <th colspan="3" style="width: 300px; left: 0; z-index: 3; background-color: #fff !important;">
+                                        Address : {{CurParty.Address}}
+                                    </th>
+                                    <th style="width: 100px; left: 0; z-index: 3; background-color: #fff !important;">
+                                        {{CurParty.PrintOn}}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <thead>
+                                <tr>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 70px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">SN.</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px ">Date</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Dr. Amt.</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Cr. Amt.</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Balance</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Extra Days</th>
+                                    <th align="center" class="text-center align-middle cstm-sticky" style="width: 100px; left: 0; z-index: 3; background-color: #fff !important; top: 29px">Interest</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr ng-repeat="ic in CurParty.InterestColl">
+                                    <td align="center">{{ic.AutoId}}</td>
+                                    <td align="center">{{ic.VoucherDate |dateFormat}}</td>
+                                    <td align="right">{{ic.DrAmount |number:2}}</td>
+                                    <td align="right">{{ic.CrAmount |number:2}}</td>
+                                    <td align="right">{{ic.Balance |number:2}}</td>
+                                    <td align="center">{{ic.ExtraDays}}</td>
+                                    <td align="right">{{ic.Interest |number:2}}</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="font-weight-bold" colspan="2">Total</td>
+                                    <td class="font-weight-bold" align="right">{{(CurParty.InterestColl | sumOfValue:'DrAmount') | number:2}}</td>
+                                    <td class="font-weight-bold" align="right">{{(CurParty.InterestColl | sumOfValue:'CrAmount') | number:2}}</td>
+                                    <td></td>
+                                    <td class="font-weight-bold" align="right">{{(CurParty.InterestColl | sumOfValue:'ExtraDays') }}</td>
+                                    <td class="font-weight-bold" align="right">{{(CurParty.InterestColl | sumOfValue:'Interest') | number:2}}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <!-- end modal body -->
+                <div class="modal-footer justify-content-between align-items-center py-2">
+                    <div class="">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Modal Added by suresh on mangsir 6 for view icon of table starts-->
+    <div class="modal fade" id="modal-reconsile">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalCenterTitle">Reconcil Of  {{SelectedVoucher.VoucherName}} - {{ SelectedVoucher.VoucherNo }} </h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label>Cheque No.:</label>
+                            <input class="form-control text-dark input-sm" type="text" ng-model="SelectedVoucher.CheckNo" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Clearance Date</label>
+                            <input class="form-control text-dark input-sm" type="text" date-picker ng-model="SelectedVoucher.ClearanceDate_TMP" date-detail="SelectedVoucher.ClearanceDateDet" />
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <label>Clearance By</label>
+                        <textarea class="form-control form-control-sm" placeholder="" ng-model="SelectedVoucher.ClearanceBy"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Remarks</label>
+                        <textarea class="form-control form-control-sm" rows="2" placeholder="" ng-model="SelectedVoucher.ClearanceRemarks"></textarea>
+                    </div>
+                </div>
+                <div class="time-label">
+                    <span class="d-block border-0 p-3 text-center">
+                        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="min-width: 90px;">Cancel</button>
+                        <button type="button" class="btn btn-sm btn-success" style="min-width: 90px;" ng-click="SaveRecon()">Save</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!--Ends-->
+	
+	@*@RenderPage("~/Views/Global/_RptContentMenu.cshtml")*@
+</div>
+<script>
+    (function ($) {
+        "use strict";
+        var fullHeight = function () {
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+    })(jQuery);
+</script>

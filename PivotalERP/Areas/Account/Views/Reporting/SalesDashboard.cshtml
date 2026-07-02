@@ -1,0 +1,331 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<style>
+    #lineChart {
+        width: 100% !important;
+        height: 300px;
+    }
+</style>
+
+<link href="~/wwwroot/dist/css/Dashboard.css" rel="stylesheet" />
+
+<script src="~/jslib/dashboard/inventory/SalesDashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div ng-app="myApp" ng-controller="SalesDashboard" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="float-right py-2">
+                            <button class="btn btn-sm btn-primary mt-1" ng-click="GetSalesDashboard()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card p-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p>
+                                        <img src="~/wwwroot/dist/img/dashboard/Wallet.png" class="mr-2 icondesign" />
+                                        Total Sales
+                                    </p>
+                                </div>
+                                @*<div><p class="yellowbg" style="color: #00C317;">16% <img src="~/wwwroot/dist/img/dashboard/trend-up.png" /> </p></div>*@
+                            </div>
+                            <h3 class="mb-0 mt-2"><b>Rs.{{beData.TotalSales | number:2}}</b></h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p>
+                                        <img src="~/wwwroot/dist/img/dashboard/peoplegrp.png" class="mr-2 icondesign" />
+                                        Total Customers
+                                    </p>
+                                </div>
+                                @*<div><p class="redbg" style="color: #C62921;">16% <img src="~/wwwroot/dist/img/dashboard/trend-down.png" /> </p></div>*@
+                            </div>
+                            <h3 class="mb-0 mt-2"><b>{{beData.TotalCustomer }}</b></h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p>
+                                        <img src="~/wwwroot/dist/img/dashboard/Wallet.png" class="mr-2 icondesign" />
+                                        Total Transaction
+                                    </p>
+                                </div>
+                                @*<div><p style="color: #C62921;" class="redbg">16% <img src="~/wwwroot/dist/img/dashboard/trend-down.png" /> </p></div>*@
+                            </div>
+                            <h3 class="mb-0 mt-2"><b>{{beData.TotalTransaction }}</b></h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card p-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <p>
+                                        <img src="~/wwwroot/dist/img/dashboard/bag.png" class="mr-2 icondesign" />
+                                        Total Products
+                                    </p>
+                                </div>
+                                @*<div><p class="yellowbg" style="color: #00C317;">16% <img src="~/wwwroot/dist/img/dashboard/trend-up.png" /> </p></div>*@
+                            </div>
+                            <h3 class="mb-0 mt-2"><b>{{beData.TotalProduct }}</b></h3>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <!--  Weekly Sales Starts-->
+                    <div class="col-md-7">
+                        <div class="card p-2">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <p>
+                                            Weekly Sales
+                                        </p>
+                                        <h5 class="mb-0"><b>Rs. {{ TotalWeeklySales | number:2}}</b> @*<span class="yellowbg" style="color: #00C317;">16% <img src="~/wwwroot/dist/img/dashboard/trend-up.png" /> </span>*@</h5>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <button class="btn btn-sm btn-primary" ng-click="WeeklySalesOverview()"><i class="fas fa-sync-alt"></i></button>
+                                </div>
+                            </div>
+                            <div class="chart-container mt-3">
+                                <canvas id="lineChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  Weekly Sales Ends-->
+                    <!--  Top Products Starts-->
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header p-2">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h3 class="card-title">Top Products</h3>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-primary mt-1"><i class="fas fa-sync-alt"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-scroll-x-y table-scroll" style="max-height:290px">
+                                    <table id="main-table-source"
+                                           class="main-table table table-sm table-striped  bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50px; background-color: #d9ecff !important; color: #08608E">S.No.</th>
+                                                <th style="width: 100px; background-color: #d9ecff !important; color: #08608E; z-index: 2 ">Product Code</th>
+                                                <th style="width: 150px; background-color: #d9ecff !important; color: #08608E">Product Name</th>
+                                                <th style="width: 100px; background-color: #d9ecff !important; color: #08608E">Brand</th>
+                                                <th style="width: 80px; background-color: #d9ecff !important; color: #08608E">Sales</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="P in beData.TopProductColl">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{P.ProductCode}}</td>
+                                                <td>{{P.ProductName}}</td>
+                                                <td>{{P.Brand}}</td>
+                                                <td>{{P.SalesRate | number:2}}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  Top Products Ends-->
+                </div>
+
+
+                <div class="row">
+                    <!--  Area Wise Sales Starts-->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header p-2">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h3 class="card-title">Area Wise Sales</h3>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-primary mt-1"><i class="fas fa-sync-alt"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-scroll-x-y table-scroll" style="max-height: 341px;">
+                                    <table id="main-table-source"
+                                           class="main-table table table-sm table-striped  bg-white">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 45px; background-color: #d9ecff !important; color: #08608E">S.No.</th>
+                                                <th style="width: 80px; background-color: #d9ecff !important; color: #08608E">Area Code</th>
+                                                <th style="width: 120px; background-color: #d9ecff !important; color: #08608E">Area</th>
+                                                <th style="width: 70px; background-color: #d9ecff !important; color: #08608E">Growth</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            <tr ng-repeat="A in beData.AreaWiseSalesColl">
+                                                <td>{{$index+1}}</td>
+                                                <td>{{A.AreaCode}}</td>
+                                                <td>{{A.AreaName}}</td>
+                                                <td>
+                                                    <label ng-class="{'decreasetext': A.Growth < 0, 'growthtext': A.Growth >= 0}">
+                                                        {{A.Growth | number:1}} %
+                                                    </label>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--  Area Wise Sales Ends-->
+                    <!--  Weekly Target Vs Sales Starts-->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header p-2">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h3 class="card-title">Weekly Target Vs Sales</h3>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-primary mt-1"><i class="fas fa-sync-alt"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="chart-container1 mt-3">
+                                    <canvas id="weeklyChart" height="360" style="width:100%"></canvas>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!--  Weekly Target Vs Sales Ends-->
+                    <!--Monthly Revenue Growth Starts-->
+                    <div class="col-md-4">
+                        <div class="card" style="min-height: 380px;">
+                            <div class="card-header p-2">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h3 class="card-title">Monthly Revenue Growth</h3>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-primary mt-1" ng-click="MonthlyRevenueChart()"><i class="fas fa-sync-alt"></i></button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <canvas id="revenueChart"></canvas>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!--Monthly Revenue Growth Ends-->
+                </div>
+
+                <div class="row">
+                    <!--Invoice Statistics Starts-->
+                    <div class="col-md-5">
+                        <div class="card">
+                            <div class="card-header p-2">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h3 class="card-title">Invoice Statistics</h3>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-primary mt-1"><i class="fas fa-sync-alt"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-2" style="height: 100%; /* Allow the card body to fill the available height */ display: flex; justify-content: center; align-items: center; padding: 0; /* ">
+                                <canvas id="donutChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Invoice Statistics Ends-->
+                    <!--Sales Distribution Starts-->
+                    <div class="col-md-7">
+                        <div class="card">
+                            <div class="card-header p-2">
+                                <div class="row">
+                                    <div class="col-md-11">
+                                        <h3 class="card-title">Sales Distribution</h3>
+                                    </div>
+                                    <div class="col-md-1 text-right">
+                                        <button class="btn btn-sm btn-primary mt-1" ng-click="AnnualSalesLineChart()"><i class="fas fa-sync-alt"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body p-2" style="height:315px;">
+                                <canvas id="newSalesChart" style="max-height: 400px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Sales Distribution Ends-->
+                </div>
+
+                <div class="row">
+                    <!-- Annually Sales Starts-->
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body p-2">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h3 class="card-title">Annually Sales</h3>
+                                        @*<div class="mb-2">
+                                                <p>
+                                                    Annually Sales
+                                                </p>
+                                                <h5 class="mb-0"><b>Rs.{{TotalAnnuallySale  | number:1}}</b> <span class="yellowbg" style="color: #00C317;">16% <img src="~/wwwroot/dist/img/dashboard/trend-up.png" /> </span></h5>
+                                            </div>*@
+                                    </div>
+                                    <div class="col-md-4 text-right">
+                                        <a class="btn btn-sm btn-primary mt-1" ng-click="AnnualSalesChart()" style="color: white;"><i class="fas fa-sync-alt"></i></a>
+                                    </div>
+                                </div>
+                                <div class="chart-container1 mt-3">
+                                    <canvas id="annualChart" height="360" style="width:100%"></canvas>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Annually Sales Ends-->
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+</div>
+
+
+
+

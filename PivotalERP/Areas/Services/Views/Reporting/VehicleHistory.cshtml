@@ -1,0 +1,104 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script> 
+    var EntityId = "@Convert.ToInt32(Dynamic.BusinessEntity.Global.RptFormsEntity.VehicleHistory)";
+    var VTranId=@ViewBag.VTranId;
+</script>
+<script src="~/jslib/service/reporting/VehicleHistory.js?v=2"></script>
+<div ng-app="myApp" ng-controller="VehicleHistoryController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()">
+    @RenderPage("~/Views/Global/_WaitDialog.cshtml")
+    <!-- Main content -->
+    <div class="sale-page-wrap" data-bind="nextFieldOnEnter:true">
+        <div class="overflow-hidden">
+            <nav id="sidebarzz" class="order-last float-right active active">
+                <div class="custom-menu">
+                    <button type="button" id="ctmRightSidebarCollapse" class="btn btn-primary"></button>
+                </div>
+                <div class="" id="firstpanel">
+                    <div class="right-box-wrap">
+                        <!--Add the required Contents of sidebar-->
+                        <div class="d-xl-block" style="height: 200px;"></div>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="content-wrapper-new">
+                <div class="">
+                    <!-- Page Content  -->
+                    <div class="container-fluid">
+                        <div class="card">
+                            <div class="card-header py-1 px-2">
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        
+                                    </div>
+                                    <div class="col-sm-5" ng-hide="VTranId>0">
+                                        <div class="col-sm-12 col-lg-12 col-md-12">
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none; border-top-right-radius: unset;border-bottom-right-radius: unset;margin-right: -3px;z-index: 1;" ng-model="beData.SearchOption">
+
+                                                    <option ng-repeat="ss in VehicleSearchOptions" ng-value="ss.value" ng-selected="ss.value==beData.SearchOption">
+                                                        {{ss.text}}
+                                                    </option>
+                                                </select>
+                                                <select autoShowHide="true" class="form-control form-control-sm select2 serial" all-vehicle ng-model="beData.VehicleEntryId" style="width:100%"
+                                                        placeholder="** Select Vehicle  **" showdetails="true" confirm-action="VehicleSelectionChange(beData)" vehicle-detail="beData.vehicleDetail" side-bar-data="beData.sideBarData" voucher-id="SelectedBranch.BranchId" search-by="beData.SearchOption"></select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-3">
+                                        <select name="comment-group" id="" form="" class="form-control form-control-sm select2" ng-change="PrintVH()" ng-model="beData.RptTranId">
+                                            <option ng-value="0" ng-selected="true">**Select Report**</option>
+                                            <option ng-value="rt.RptTranId" ng-repeat="rt in TemplatesColl" ng-selected="rt.RptTranId==beData.RptTranId">{{rt.ReportName}}</option>
+                                        </select>
+
+                                    </div>
+                                    <div class="col-sm-1">
+                                        <div class="form-group mb-0">
+                                            <a href="#" class="btn btn-primary load px-1 load" style="float: right; min-width: 75px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="PrintVH()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <iframe id="frmRptVH" style='width: 100%;height:calc(100vh - 200px);background-color: white;visibility: visible;' frameborder='0' scrolling='yes'></iframe>
+                            </div>
+                        </div>
+ 
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    (function ($) {
+
+        "use strict";
+
+        var fullHeight = function () {
+
+            $('.js-fullheight').css('height', $(window).height());
+            $(window).resize(function () {
+                $('.js-fullheight').css('height', $(window).height());
+            });
+
+        };
+        fullHeight();
+
+        $('#ctmRightSidebarCollapse').on('click', function () {
+            $('#sidebarzz').toggleClass('active');
+        });
+
+
+    })(jQuery);
+</script>

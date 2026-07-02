@@ -1,0 +1,109 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+
+<script src="~/jslib/account/SSFReport/BookingData.js"></script>
+<div ng-app="myApp" ng-controller="BookingDataController" ng-class="{waiting: loadingstatus=='running'}" ng-init="GetOnlyBookingDataAsync()" ng-cloak>
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card">
+                <div class="card-body px-2">
+                    <header class="row">
+                        <div class="col-md-8">
+                            <div class="clearfix">
+                                <form class="form-inline">
+                                    <div class="input-group input-group-sm">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text cstm">Show</span>
+                                        </div>
+                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.BookingData">
+                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.BookingData">{{pp.text}}</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                        </div>
+                                    </div>
+                                    <div class="input-group input-group-sm table-search-filed">
+                                        <input class="form-control form-control-navbar" type="search"
+                                               placeholder="Search" aria-label="Search" ng-model="searchData.BookingData">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-default border-left-0" type="submit">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- end col-md-8 -->
+                        <div class="col-md-4 text-right">
+                            <div class="dropdown dnld-file" title="Download File">
+                                <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                        id="dropdownMenuButton" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right"
+                                     aria-labelledby="dropdownMenuButton">
+                                    <span class="dropdown-item">Choose an option:</span>
+                                    <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'BankGaurantee'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                    <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                </div>
+                                <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait"
+                                   title="Print">
+                                    <i class="fas fa-print"></i>
+                                </a>
+
+                            </div>
+
+
+                        </div>
+                    </header>
+                    <div class="search-toolbar mt-2">
+                        <div class="">
+                            <table cellpadding="12" class="table table-bordered table-striped table-hover table-sm" id="datatable">
+                                <tr>
+                                    <th style="text-align: center; width: 60px;" title="S.No"> S.No</th>
+                                    <th style="text-align: center; width: 70px;" title="Scheme"> Scheme</th>
+                                    <th style="text-align: center; width: 70px;" title="chfid">Chfid</th>
+                                    <th style="text-align: center; width: 150px;" title="Sub Product"> Sub Product</th>
+                                    <th style="text-align: center; width: 70px;" title="Booked"> Booked</th>
+                                    <th style="text-align: center; width: 100px;" title="Booked By"> Booked By</th>
+                                    <th style="text-align: center; width: 70px;" title="Date"> Date</th>
+                                    <th style="text-align: center; width: 150px;" title="Client Invoice Number"> Client Invoice Number</th>
+                                </tr>
+                                <tr dir-paginate="beData in BookingDataList | filter:searchData.BookingData | itemsPerPage:perPage.BookingData" current-page="currentPages.BookingData" pagination-id="BookingDataPagination">
+                                    <td style="text-align:center;">{{$index+1}} </td>
+                                    <td>{{beData.scheme}}</td>
+                                    <td>{{beData.chfid}}</td>
+                                    <td>{{beData.subProduct}}</td>
+                                    <td>{{beData.booked}}</td>
+                                    <td>{{beData.booked_by}}</td>
+                                    <td>{{beData.date | dateFormat}}</td>
+                                    <td>{{beData.clientInvoiceNumber}}</td>
+                                </tr>
+                            </table>
+                            <div class="col-md-12">
+                                <dir-pagination-controls pagination-id="BookingDataPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                </dir-pagination-controls>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+
+
+</div>

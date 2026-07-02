@@ -1,0 +1,298 @@
+﻿
+
+app.controller('LeaveQuoteController', function ($scope, $http, $timeout, $filter, GlobalServices) {
+	$scope.Title = 'Leave Quote';
+	var gSrv = GlobalServices;
+	OnClickDefault();
+
+	$scope.LoadData = function () {
+		$scope.confirmMSG = gSrv.getConfirmMSG();
+		$scope.perPageColl = gSrv.getPerPageList();
+		//$scope.MonthList = GlobalServices.getMonthList();
+
+		$scope.currentPages = {
+			LeaveQuote: 1,
+		};
+
+		$scope.searchData = {
+			LeaveQuote: '',
+		};
+
+		$scope.perPage = {
+			LeaveQuote: gSrv.getPerPageRow(),
+		};
+
+		$scope.newLeaveQuote = {
+			LeaveQuoteId: null,			
+			Mode: 'Save'
+		};
+
+		$scope.PeriodList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/GetAllFinancialPeriodList",
+			dataType: "json"
+		}).then(function (res) {			
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.PeriodList = res.data.Data;
+			} 
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.LeaveTypeList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/GetAllLeaveTypeList",
+			dataType: "json"
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.LeaveTypeList = res.data.Data;
+				$scope.newLeaveQuote.LeaveQuotaDetail = [];
+				angular.forEach($scope.LeaveTypeList, function (lc) {
+					$scope.newLeaveQuote.LeaveQuotaDetail.push(
+						{
+							Name: lc.Name,
+							LeaveId: lc.LeaveTypeId,
+							NoOfLeave: 0
+						})
+				});
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.BranchList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Setup/Security/GetAllBranchList",
+			dataType: "json"
+		}).then(function (res) {
+		 	if (res.data.IsSuccess && res.data.Data) {
+				  $scope.BranchList = res.data.Data;
+
+				  if($scope.BranchList.length>0)
+					$scope.BranchList.insert(0, { BranchId: 0, Name: 'All' });
+			}  
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.DepartmentList = [];
+		gSrv.getDepartmentList().then(function (res) {
+			$scope.DepartmentList = res.data.Data;
+
+			if($scope.DepartmentList.length>0)
+				$scope.DepartmentList.insert(0, { DepartmentId: 0, Name: 'All' });
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.DesignationList = [];
+		gSrv.getDesignationList().then(function (res) {
+			$scope.DesignationList = res.data.Data;
+
+			if($scope.DesignationList.length>0)
+				$scope.DesignationList.insert(0, { DesignationId: 0, Name: 'All' });
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.ServiceTypeList = [];
+		gSrv.getServiceTypeList().then(function (res) {
+			$scope.ServiceTypeList = res.data.Data;
+
+			if($scope.ServiceTypeList.length>0)
+				$scope.ServiceTypeList.insert(0, { ServiceTypeId: 0, Name: 'All' });
+
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.EmployeeList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Academic/Transaction/GetAllEmpShortList",
+			dataType: "json"
+		}).then(function (res) {
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.EmployeeList = res.data.Data;
+
+				if($scope.EmployeeList.length>0)
+					$scope.EmployeeList.insert(0, { EmployeeId: 0, CodeName: 'All' });
+			} 
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+
+		$scope.GetAllLeaveQuoteList();
+	}
+
+	function OnClickDefault() {
+		document.getElementById('LeaveQuote-form').style.display = "none";
+
+		document.getElementById('add-LeaveQuote').onclick = function () {
+			document.getElementById('LeaveQuote-section').style.display = "none";
+			document.getElementById('LeaveQuote-form').style.display = "block";
+		}
+		document.getElementById('LeaveQuote-btn').onclick = function () {
+			document.getElementById('LeaveQuote-form').style.display = "none";
+			document.getElementById('LeaveQuote-section').style.display = "block";
+		}
+	}
+
+	$scope.ClearLeaveQuote = function () {
+		$scope.newLeaveQuote = {			
+			Mode: 'Save'
+		};
+	}
+	//************************* LeaveQuote *********************************
+	$scope.IsValidLeaveQuote = function () {
+		if ($scope.newLeaveQuote.Name.isEmpty()) {
+			Swal.fire('Please ! Enter Name');
+			return false;
+		}
+		return true;
+	}
+
+	$scope.SaveUpdateLeaveQuote = function () {
+		if ($scope.IsValidLeaveQuote() == true) {
+			if ($scope.confirmMSG.Accept == true) {
+				var saveModify = $scope.newLeaveQuote.Mode;
+				Swal.fire({
+					title: 'Do you want to ' + saveModify + ' the current data?',
+					showCancelButton: true,
+					confirmButtonText: saveModify,
+				}).then((result) => {
+					/* Read more about isConfirmed, isDenied below */
+					if (result.isConfirmed) {
+						$scope.CallSaveUpdateLeaveQuote();
+					}
+				});
+			} else
+				$scope.CallSaveUpdateLeaveQuote();
+		}
+	};
+
+	$scope.CallSaveUpdateLeaveQuote = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var findP = mx($scope.PeriodList).firstOrDefault(p1 => p1.PeriodId == $scope.newLeaveQuote.PeriodId);
+		if (findP) {
+			$scope.newLeaveQuote.DateFrom = $filter('date')(new Date(findP.StartDate_AD), 'yyyy-MM-dd');
+			$scope.newLeaveQuote.DateTo = $filter('date')(new Date(findP.EndDate_AD), 'yyyy-MM-dd');
+        }
+		
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/SaveLeaveQuota",
+			headers: { 'Content-Type': undefined },
+			transformRequest: function (data) {
+				var formData = new FormData();
+				formData.append("jsonData", angular.toJson(data.jsonData));
+				return formData;
+			},
+			data: { jsonData: $scope.newLeaveQuote }
+		}).then(function (res) {
+			$scope.loadingstatus = "stop";
+			hidePleaseWait();
+			Swal.fire(res.data.ResponseMSG);
+			if (res.data.IsSuccess == true) {
+				$scope.ClearLeaveQuote();
+				$scope.GetAllLeaveQuoteList();
+			}
+		}, function (errormessage) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+		});
+	}
+
+	$scope.GetAllLeaveQuoteList = function () {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		$scope.LeaveQuoteList = [];
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/GetAllLeaveQuotaList",
+			dataType: "json"
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.LeaveQuoteList = res.data.Data;
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	}
+
+	$scope.GetLeaveQuoteById = function (refData) {
+		$scope.loadingstatus = "running";
+		showPleaseWait();
+		var para = {
+			LeaveQuotaId: refData.LeaveQuotaId
+		};
+		$http({
+			method: 'POST',
+			url: base_url + "Attendance/Creation/GetLeaveQuotaById",
+			dataType: "json",
+			data: JSON.stringify(para)
+		}).then(function (res) {
+			hidePleaseWait();
+			$scope.loadingstatus = "stop";
+			if (res.data.IsSuccess && res.data.Data) {
+				$scope.newLeaveQuote = res.data.Data;
+				$scope.newLeaveQuote.Mode = 'Modify';
+
+				document.getElementById('LeaveQuote-section').style.display = "none";
+				document.getElementById('LeaveQuote-form').style.display = "block";
+
+			} else {
+				Swal.fire(res.data.ResponseMSG);
+			}
+		}, function (reason) {
+			Swal.fire('Failed' + reason);
+		});
+	};
+
+	$scope.DelLeaveQuoteById = function (refData) {
+		Swal.fire({
+			title: 'Do you want to delete the selected data?',
+			showCancelButton: true,
+			confirmButtonText: 'Delete',
+		}).then((result) => {
+			/* Read more about isConfirmed, isDenied below */
+			if (result.isConfirmed) {
+				$scope.loadingstatus = "running";
+				showPleaseWait();
+				var para = {
+					LeaveQuotaId: refData.LeaveQuotaId
+				};
+				$http({
+					method: 'POST',
+					url: base_url + "Attendance/Creation/DelLeaveQuota",
+					dataType: "json",
+					data: JSON.stringify(para)
+				}).then(function (res) {
+					hidePleaseWait();
+					$scope.loadingstatus = "stop";
+					if (res.data.IsSuccess) {
+						$scope.GetAllLeaveQuoteList();
+					} else {
+						Swal.fire(res.data.ResponseMSG);
+					}
+				}, function (reason) {
+					Swal.fire('Failed' + reason);
+				});
+			}
+		});
+	};
+
+	$scope.pageChangeHandler = function (num) {
+		console.log('page changed to ' + num);
+	};
+
+});

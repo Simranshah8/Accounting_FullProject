@@ -1,0 +1,461 @@
+﻿
+@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+<script src="~/jslib/Setup/DairyPurchaseReport.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="DairyPurchaseReportCntrl" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="p-1"></div>
+            <div class="container-fluid">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-purchase" data-toggle="pill" href="#Purchase" role="tab" aria-controls="custom-tabs-purchase" aria-selected="true"> Milk Purchase Register(Summary)</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-partywise" data-toggle="pill" href="#Partywise" role="tab" aria-controls="custom-tabs-partywise" aria-selected="false">Milk Purchase Register(Detail)</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-Ledgerwise" data-toggle="pill" href="#Ledgerwise" role="tab" aria-controls="custom-tabs-Ledgerwise" aria-selected="false">Ledgerwise</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body px-2">
+                        <div class="tab-content" id="custom-tabs-purchase">
+                            <div class="tab-pane fade show active" id="Purchase" role="tabpanel" aria-labelledby="custom-tabs-purchase">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>From Date</label>
+                                            <input type="date" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>To Date</label>
+                                            <input type="date" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Suppliers</label>
+                                            <select class="form-control form-control-sm ">
+                                                <option>All</option>
+                                                <option>Option</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Item</label>
+                                            <select class="form-control form-control-sm ">
+                                                <option>All</option>
+                                                <option>Option</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="custom-control custom-checkbox mt-4">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox1" value="option1">
+                                            <label for="customCheckbox1"
+                                                   class="custom-control-label">
+                                                Is Summary?
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button"
+                                                class="btn btn-sm btn-primary float-right mt-4" style="font-size:14px; width:70px">
+                                            Load
+                                        </button>
+                                    </div>
+                                </div>
+                                <header class="row mb-2">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Partywise">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Partywise">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.Partywise">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+
+                                    <div class="col-md-5 text-right">
+                                        <div class="dropdown dnld-file">
+                                            <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                            <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                </header>
+                                <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                    <table id="maintable" class="table table-bordered table-hover table-sm">
+                                        <thead>
+                                            <tr>
+
+                                                <th style="width:200px; z-index: 3; background-color: #ececec !important">Suppliers</th>
+                                                <th style="width:120px; z-index: 3; background-color: #ececec !important">Item</th>
+                                                <th style="width:120px; z-index: 3; background-color: #ececec !important">Quantity</th>
+                                                <th style="width:120px; z-index: 3; background-color: #ececec !important">FAT %</th>
+                                                <th style="width:140px; z-index: 3; background-color: #ececec !important">SNF %</th>
+                                                <th style="width:130px; z-index: 3; background-color: #ececec !important">Water Mix %</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">TS Amount</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Topping</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Rate</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>2 </td>
+                                                <td>5</td>
+                                                <td>4.5</td>
+                                                <td>30%</td>
+                                                <td>10</td>
+                                                <td>10</td>
+                                                <td>10</td>
+                                                <td>1</td>
+                                                <td>
+                                                    2
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="ProductCompanyPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="Partywise" role="tabpanel" aria-labelledby="custom-tabs-partywise">
+                                <div class="row">
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>From Date</label>
+                                            <input type="date" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>To Date</label>
+                                            <input type="date" class="form-control form-control-sm" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Suppliers</label>
+                                            <select class="form-control form-control-sm ">
+                                                <option>All</option>
+                                                <option>Option</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Item</label>
+                                            <select class="form-control form-control-sm ">
+                                                <option>All</option>
+                                                <option>Option</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="custom-control custom-checkbox mt-4">
+                                            <input class="custom-control-input" type="checkbox"
+                                                   id="customCheckbox1" value="option1">
+                                            <label for="customCheckbox1"
+                                                   class="custom-control-label">
+                                                Is Summary?
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button"
+                                                class="btn btn-sm btn-primary float-right mt-4" style="font-size:14px; width:70px">
+                                            Load
+                                        </button>
+                                    </div>
+                                </div>
+                                <header class="row mb-2">
+                                    <div class="col-md-7">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <!-- <input type="text" class="form-control border-left-0" placeholder=""> -->
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Partywise">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Partywise">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar"
+                                                           type="search" placeholder="Search"
+                                                           aria-label="Search" ng-model="searchData.Partywise">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0"
+                                                                type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+
+                                    <div class="col-md-5 text-right">
+                                        <div class="dropdown dnld-file">
+                                            <button class="btn btn-secondary btn-light dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'debtorcreditortypes'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'pdf',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png" class="img-fluid exports-icon" alt="Excel image"> PDF</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'doc',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/word.png" class="img-fluid exports-icon" alt="Excel image"> Word</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'json',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png" class="img-fluid exports-icon" alt="Excel image"> JSON</a>
+                                            </div>
+                                            <a print-tbl table-id="'#datatable'" class="btn btn-secondary btn-light wait">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+
+                                        </div>
+                                    </div>
+                                </header>
+                                <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                    <table id="maintable" class="table table-bordered table-hover table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Date</th>
+                                                <th style="width:200px; z-index: 3; background-color: #ececec !important">Suppliers</th>
+                                                <th style="width:120px; z-index: 3; background-color: #ececec !important">Item</th>
+                                                <th style="width:120px; z-index: 3; background-color: #ececec !important">Quantity</th>
+                                                <th style="width:120px; z-index: 3; background-color: #ececec !important">FAT %</th>
+                                                <th style="width:140px; z-index: 3; background-color: #ececec !important">SNF %</th>
+                                                <th style="width:130px; z-index: 3; background-color: #ececec !important">Water Mix %</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">TS Amount</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Topping</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Rate</th>
+                                                <th style="width:100px; z-index: 3; background-color: #ececec !important">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>1</td>
+                                                <td>2 </td>
+                                                <td>5</td>
+                                                <td>4.5</td>
+                                                <td>30%</td>
+                                                <td>10</td>
+                                                <td>10</td>
+                                                <td>10</td>
+                                                <td>1</td>
+                                                <td>
+                                                    2
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-12">
+                                    <dir-pagination-controls pagination-id="ProductCompanyPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                    </dir-pagination-controls>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="Ledgerwise" role="tabpanel" aria-labelledby="custom-tabs-Ledgerwise">
+                                <div id="day-book-section">
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            <div class="d-inline-block">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">From:</span>
+                                                    </div>
+                                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="LedgerVoucher.DateFrom_TMP" style="max-width:100px" date-detail="LedgerVoucher.DateFromDet" />
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text">To:</span>
+                                                    </div>
+                                                    <input class="form-control text-dark input-sm" type="text" date-picker ng-model="LedgerVoucher.DateTo_TMP" style="max-width:100px" date-detail="LedgerVoucher.DateToDet" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="d-flex form-group">
+                                                <label class="mt-1" style="min-width:120px;">Select Ledger</label>
+                                                <select class="form-control form-control-sm select2" all-ledger ng-model="LedgerVoucher.LedgerId" style="width:100%%">
+                                                    <option ng-value="cl.LedgerId" ng-repeat="cl in LedgerList" ng-selected="cl.LedgerId==LedgerVoucher.LedgerId">{{cl.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <a href="#" class="btn btn-primary load" style="float: right; min-width: 100px" data-toggle="tooltip" data-placement="top" title="" data-original-title="Load" ng-click="GetLedgerVoucher()" ng-disabled="loadingstatus=='running'"><i class="fas fa-download"> &nbsp;&nbsp;Load</i></a>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                    <header class="row">
+                                        <div class="col-md-5 col-sm-5">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Find:</span>
+                                                        </div>
+                                                        <select class="form-control pr-0"
+                                                                id="exampleFormControlSelect1">
+                                                            <option>Contain</option>
+                                                            <option>Prefix</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="input-group input-group-sm" style="width: 150px;">
+                                                        <input type="text" name="table_search" class="form-control float-right" placeholder="Search" ng-model="search" ng-change="onFilterTextBoxChanged()">
+
+                                                        <div class="input-group-append">
+                                                            <button type="submit" class="btn btn-default">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7 col-sm-7 text-right">
+                                            <form class="form-inline  float-right">
+                                                <div class="input-group input-group-sm mr-sm-2">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Search By:</span>
+                                                    </div>
+                                                    <select class="form-control pr-0" id="exampleFormControlSelect1">
+                                                        <option ng-value="cl.field" ng-repeat="cl in columnDefs">{{cl.headerName}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="input-group input-group-sm" style="width: 150px;">
+                                                    <input type="text" name="table_search" class="form-control float-right" placeholder="Search">
+
+                                                    <div class="input-group-append">
+                                                        <button type="button" class="btn btn-default">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="dropdown dnld-file ml-2">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item" href="#" ng-click="onBtExport()">
+                                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image">
+                                                            Excel
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png"
+                                                                 class="img-fluid exports-icon">
+                                                            CSV
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/pdf.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image">
+                                                            PDF
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/word.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image">
+                                                            Word
+                                                        </a>
+                                                        <a class="dropdown-item" href="#">
+                                                            <img src="~/wwwroot/dynamic-erp/images/flaticons/gmail.png"
+                                                                 class="img-fluid exports-icon" alt="Excel image">
+                                                            Mail
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                   title="Print" ng-click="Print()">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                                <a href="#" class="btn btn-secondary btn-light btn-sm ml-2"
+                                                   data-toggle="modal" data-target="#itemAllocationForModal" data-placement="bottom" title="Filter">
+                                                    <i class="fas fa-filter"></i>
+                                                </a>
+                                            </form>
+                                        </div>
+                                    </header>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="datatable" style="height: calc(100vh - 14rem);width:100%;" class="ag-theme-alpine" ag-grid="gridOptions"></div>
+                                            <div id="myGridBottom" style="height: 115px;" class="ag-theme-alpine"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+    </div>
+    <!-- /.container-fluid -->
+</div>

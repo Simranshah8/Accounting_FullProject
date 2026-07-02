@@ -1,0 +1,143 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<link href="~/wwwroot/dynamic-erp/css/newCss.css" rel="stylesheet" />
+
+<script src="~/jslib/hr/Master/GrievanceForm.js"></script>
+<div ng-app="myApp" ng-controller="GrievanceFormController" ng-init="LoadData()">
+    <div class="box-body">
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card my-1 card-primary card-outline card-outline-tabs">
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div>
+                                <form class="mb-0">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>For</label>
+                                                <select class="form-control form-control-sm" ng-model="beData.EmployeeOrSalesman" >
+                                                    <option ng-value="it.id" ng-repeat="it in ForColl" ng-selected="it.id==beData.EmployeeOrSalesman">{{it.text}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-6 col-md-6" ng-show="beData.EmployeeOrSalesman==2">
+                                            <div class="form-group">
+                                                <label>Salesman</label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.UserId" ng-change="AddEmpData(beData, 2)">
+                                                    <option ng-value="pg.AgentId" ng-repeat="pg in SalesManList" ng-selected="pg.AgentId=beData.UserId">{{pg.Name}}-{{pg.Code}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6 col-lg-6 col-md-6 " id="selectEmp" ng-show="beData.EmployeeOrSalesman==1">
+                                            <label @*class="sr-only" *@ for="inlineFormInputGroup">Select Employee<span class="text-danger">*</span></label>
+                                            <div class="input-group-prepend">
+                                                <select class="input-group-text dropdown-toggle p-0"
+                                                        style="outline: none;  border-top-right-radius: unset;   border-bottom-right-radius: unset;  margin-right: -3px; z-index: 1;  font-size: 13px;  " ng-model="beData.SelectEmployee">
+                                                    <option class="dropdown-item" ng-repeat="ss in EmployeeSearchOptions" ng-value="ss.value" ng-selected="ss.value==beData.SelectEmployee">
+                                                        {{ss.text}}
+                                                    </option>
+                                                </select>
+                                                <select class="form-control select2 form-control-sm" all-employee ng-model="beData.UserId" id="User" employee-detail="beData.EmployeeDetails" side-bar-data="beData.EmpSideBarData" search-by="beData.SelectEmployee" style="width: 100%;" confirm-action="AddEmpData(beData,1)">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2 card-body" style="background-color:aliceblue;">
+                                        <div class="col-md-4">
+                                            <label class="mb-0" style="min-width: 100px;">Designation </label>
+                                            <label class="mb-0"><b> :{{EmpDetails.Designation}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-0" style="min-width: 100px;">Department </label>
+                                            <label class="mb-0"><b> :{{EmpDetails.Department}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-0" style="min-width: 100px;">Contact No. </label>
+                                            <label class="mb-0"><b> :{{EmpDetails.ContactNo}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-0" style="min-width: 100px;">Email</label>
+                                            <label class="mb-0"><b> :{{EmpDetails.EmailId}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-0" style="min-width: 100px;">Branch</label>
+                                            <label class="mb-0"><b> :{{EmpDetails.BranchName}} </b></label>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-0" style="min-width: 100px;">EnrollNo</label>
+                                            <label class="mb-0"><b> :{{EmpDetails.EnrollNumber}} </b></label>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Grievance Type<span class="text-danger">*</span></label>
+                                                <select class="form-control form-control-sm select2" ng-model="beData.GrievanceTypeId" id="GrievanceType">
+                                                    <option ng-value="it.TranId" ng-repeat="it in GrievanceTypeList" ng-selected="it.TranId==beData.GrievanceTypeId">{{it.Name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label>Description<span class="text-danger">*</span></label>
+                                                <textarea id="Description" type="text" rows="1" ng-model="beData.Description" class="form-control form-control-sm"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group mb-1">
+                                                <label for="">Date of Incident</label>
+                                                <input type="text"
+                                                       class="form-control form-control-sm" date-picker ng-model="beData.IncidentDate_TMP" date-detail="beData.IncidentDateDet">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Location of Incident </label>
+                                                <input type="text" rows="1" ng-model="beData.LocationOfInc" class="form-control form-control-sm" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Suggestion/Solution </label>
+                                                <textarea type="text" rows="1" ng-model="beData.Suggestion" class="form-control form-control-sm"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <div class="custom-control custom-checkbox">
+                                                <input class="custom-control-input" type="checkbox"
+                                                       id="chkGenerateVoucher" value="option" ng-model="beData.Declaration">
+                                                <label for="chkGenerateVoucher"
+                                                       class="custom-control-label">
+                                                    I confirm that the information provided above is true and accurate to the best of my knowledge.
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mt-3">
+                                            <div class="form-group">
+                                                <label class="d-flex">Attachment</label>
+                                                <input id="choose-file" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" file-model ng-model="beData.Attachment_TMP" fileread="beData.AttachmentData" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </form>
+                                <footer class="main-footer">
+                                    <div class="text-right control-btns">
+                                        <button type="button" class="btn btn-default" ng-click="ClearDetails()">Clear</button>
+                                        <button type="button" class="btn btn-primary" ng-click="SaveUpdateGrievance()">{{beData.Mode}}</button>
+                                    </div>
+                                </footer>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/wwwroot/dist/js/cstmjs.js"></script>
