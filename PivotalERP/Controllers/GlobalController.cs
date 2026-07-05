@@ -127,33 +127,33 @@ namespace PivotalERP.Controllers
             return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        //[HttpGet]
-        //public JsonNetResult GetProductDetail(int ProductId, int? LedgerId, int? VoucherType, DateTime? VoucherDate, DateTime? DateFrom, DateTime? DateTo)
-        //{
-        //    ResponeValues resVal = new ResponeValues();
-        //    try
-        //    {
+        [HttpGet]
+        public JsonNetResult GetProductDetail(int ProductId, int? LedgerId, int? VoucherType, DateTime? VoucherDate, DateTime? DateFrom, DateTime? DateTo, int? VoucherId, int? GodownId, int? RateTypeId, int? PatientId = null, int? EntityId = null)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
 
-        //        if (ProductId == 0)
-        //        {
-        //            resVal.IsSuccess = false;
-        //            resVal.ResponseMSG = "Product Not Found. Pls Select Valid Product";
-        //        }
-        //        else
-        //        {
-        //            Dynamic.BusinessEntity.Common.ProductDetails dataColl = new Dynamic.DataAccess.Common.ProductDB(User.HostName, User.DBName).getProductDetails(User.UserId, ProductId, LedgerId, VoucherDate, DateFrom, DateTo, VoucherType, User.BranchId);
+                if (ProductId == 0)
+                {
+                    resVal.IsSuccess = false;
+                    resVal.ResponseMSG = "Product Not Found. Pls Select Valid Product";
+                }
+                else
+                {
+                    Dynamic.BusinessEntity.Common.ProductDetails dataColl = new Dynamic.DataAccess.Common.ProductDB(User.HostName, User.DBName).getProductDetails(User.UserId, ProductId, LedgerId, VoucherDate, DateFrom, DateTo, VoucherType, User.BranchId, VoucherId, GodownId, RateTypeId, PatientId = null, 0);
 
-        //            return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        //        }
-        //    }
-        //    catch (Exception ee)
-        //    {
-        //        resVal.IsSuccess = false;
-        //        resVal.ResponseMSG = ee.Message;
+                    return new JsonNetResult() { Data = dataColl, TotalCount = 1, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
 
-        //    }
-        //    return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        //}
+            }
+            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
 
         //[HttpGet]
         //public JsonNetResult GetAllCostCenter(int Top, string ColName, string Operator, bool ForTransaction, string OrderByCol, string ColValue, int LedgerType = 0)

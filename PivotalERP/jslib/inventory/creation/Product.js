@@ -50,6 +50,24 @@
             Swal.fire('Failed' + reason);
         });
 
+        $scope.HerbsList = [];
+        $http({
+            method: 'POST',
+            url: base_url + "AppCMS/Creation/GetAllHerbs",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.HerbsList = res.data.Data;
+
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
         $scope.newProduct = {
 
             SNo: 0,
@@ -145,6 +163,7 @@
             Sal_MaxRate: null,
             DefaultRackColl:[],
             VideoLink:'',
+            HerbsId:null,
         }
 
         $scope.newProduct.UDFColl.push({ ColWidth: 3 });
@@ -857,6 +876,7 @@
                 Sal_MinRate: null,
                 Sal_MaxRate: null,
                 VideoLink: '',
+                HerbsId: null,
             };
 
             $scope.newProduct.UDFColl.push({ ColWidth: 3 });

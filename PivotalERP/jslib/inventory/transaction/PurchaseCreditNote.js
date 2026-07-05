@@ -843,7 +843,7 @@
             itemDet.CanEditRate = itemDet.productDetail.CanEditRatePurchase;
             // itemDet.Rate = itemDet.productDetail.PurchaseRate;
 
-  itemDet.ProductName = itemDet.productDetail.Name;
+             itemDet.ProductName = itemDet.productDetail.Name;
             itemDet.ProductCode = itemDet.productDetail.Code;
 			
             var refStockItem = false;
