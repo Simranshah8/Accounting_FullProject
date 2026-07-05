@@ -1,0 +1,254 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+<script src="~/jslib/export/tableExport.js"></script>
+<script src="~/jslib/export/jquery.base64.js"></script>
+
+<script src="~/jslib/export/jspdf/libs/sprintf.js"></script>
+<script src="~/jslib/export/jspdf/jspdf.js"></script>
+<script src="~/jslib/export/jspdf/libs/base64.js"></script>
+<link href="~/wwwroot/dynamic-erp/css/stock-flow.css" rel="stylesheet" />
+<script src="~/jslib/AppCMS/Herbs.js"></script>
+<div ng-app="myApp" ng-controller="HerbsController" ng-class="{waiting: loadingstatus=='running'}" ng-init="LoadData()" ng-cloak>
+
+    <div class="box-body1 ">
+        <div class="content">
+            <div class="container-fluid p-1">
+                <div class="card card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" aria-controls="custom-tabs-four-profile" ng-click="ClearFields()" aria-selected="false">Herbs</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <header class="row">
+                                    <div class="col-md-8">
+                                        <div class="clearfix">
+                                            <form class="form-inline">
+                                                <div class="input-group input-group-sm">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text cstm">Show</span>
+                                                    </div>
+                                                    <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.Herbs">
+                                                        <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.Herbs">{{pp.text}}</option>
+                                                    </select>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-white"><small>entries</small></span>
+                                                    </div>
+                                                </div>
+                                                <div class="input-group input-group-sm table-search-filed">
+                                                    <input class="form-control form-control-navbar" type="search"
+                                                           placeholder="Search" aria-label="Search" ng-model="searchData.Herbs">
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-default border-left-0" type="submit">
+                                                            <i class="fas fa-search"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <!-- end col-md-8 -->
+                                    <div class="col-md-4 text-right">
+                                        <div class="dropdown dnld-file">
+                                            <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                    id="dropdownMenuButton" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <div class="dropdown-menu dropdown-menu-right"
+                                                 aria-labelledby="dropdownMenuButton">
+                                                <span class="dropdown-item">Choose an option:</span>
+                                                <a class="dropdown-item wait" export-excel table-id="'#datatable'" sheet-name="'Herbs'" report-name="'List Of Herbs'" ignore-column="'6'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                <a class="dropdown-item wait" onClick="$('#datatable').tableExport({type:'csv',escape:'false',reportName:'Herbs',ignoreColumn:'6' });"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+                                            </div>
+                                            <a print-tbl report-name="'List Of Herbs'" table-id="'#datatable'" class="btn btn-secondary btn-light btn-sm wait">
+                                                <i class="fas fa-print"></i>
+                                            </a>
+                                        </div>
+
+
+                                    </div>
+                                </header>
+                                <div class="search-toolbar mt-2">
+                                    <div class="">
+                                        <table cellpadding="12" class="main-table table table-bordered table-striped table-hover table-sm" id="datatable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="text-align: center; width:50px;">S.No. </th>
+                                                    <th>Name</th>
+                                                    <th>Scientific Name</th>
+                                                    <th>Badge</th>
+                                                    <th>Hero Sub Title</th>
+                                                    <th>SEO Title</th>
+                                                    <th>Tag</th>
+                                                    <th>Description</th>
+                                                    <th>SEO Description</th>
+                                                    <th>About Paragraph</th>
+                                                    <th style="text-align:center;width: 60px;" class="no-print">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr dir-paginate="H in HerbsList | filter:searchData.Herbs | itemsPerPage:perPage.Herbs" current-page="currentPages.Herbs" pagination-id="HerbsPagination">
+                                                    <td style="text-align:center;">{{$index+1}}</td>
+                                                    <td>{{H.Name}}</td>
+                                                    <td>{{H.ScientificName}}</td>
+                                                    <td>{{H.Badge}}</td>
+                                                    <td>{{H.HsubTitle}}</td>
+                                                    <td>{{H.SEOTitle}}</td>
+                                                    <td>{{H.Tag}}</td>
+                                                    <td>{{H.Description}}</td>
+                                                    <td>{{H.SEODescription}}</td>
+                                                    <td>
+                                                        <p ng-bind-html="H.AboutPara |unsafe"></p> 
+                                                    </td>
+                                                    <td class="project-actions no-print text-center">
+                                                        <div class="btn-group-sm">
+                                                            <a href="#" class="btn btn-sm btn-info" ng-click="GetHerbsById(H)"><i class="fas fa-pencil-alt"></i></a>
+                                                            <a href="#" class="btn btn-sm btn-danger" ng-click="DeleteHerbs(H,$index)"><i class="fas fa-trash"></i></a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+
+                                        </table>
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="HerbsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+
+                                <div>
+                                    <form>
+                                        <div class="row">
+                                            <div class="col-sm-10 col-md-10 col-lg-10">
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Name<span style="color:red">*</span></label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Name">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Scientific Name</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="beData.ScientificName">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Badge</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Badge">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Hero Sub Title</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="beData.HsubTitle">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>SEO Title</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="beData.SEOTitle">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>Tag</label>
+                                                            <input type="text" class="form-control form-control-sm" ng-model="beData.Tag">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <div class="form-group">
+                                                            <label>SEO Description</label>
+                                                            <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="beData.SEODescription"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <div class="form-group">
+                                                            <label>Description<span style="color:red">*</span></label>
+                                                            <textarea class="form-control form-control-sm" rows="1" placeholder="" ng-model="beData.Description"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <div class="form-group">
+                                                            <label>About Paragraph</label>
+                                                            <textarea class="textarea" placeholder="Place some text here"
+                                                                      style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" ng-model="beData.AboutPara" html-editor></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-2 col-md-2 col-lg-2">
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Photo<span style="color:red">*</span></label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{beData.PhotoData || beData.Photo }}" class="img-fluid" alt="" id="imgPhoto1" style="height:130px; width:165px; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-sfile" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Choose Photo</label>
+                                                    <input id="choose-sfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="beData.Photo_TMP" fileread="beData.PhotoData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Banner<span style="color:red">*</span></label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{beData.BannerData || beData.Banner }}" class="img-fluid" alt="" id="BannerPhoto" style="height:130px; width:100%; border:1px solid #ccc">
+                                                    </div>
+                                                    <label for="choose-Bfile" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Choose Banner</label>
+                                                    <input id="choose-Bfile" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="beData.Banner_TMP" fileread="beData.BannerData" />
+                                                    <canvas id="canvas" width="320" height="240" style="display:none"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </form>
+                                    <footer class="main-footer mt-4">
+                                        <div class="text-right control-btns">
+                                            <button type="button" class="btn btn-default btn" ng-click="ClearFields()"> <span class="glyphicon glyphicon-remove"></span>Clear</button>
+                                            <button type="button" class="btn btn-primary btn" ng-click="SaveUpdateHerbs()" ng-disabled="loadingstatus=='running'"><span class="glyphicon glyphicon-save"></span>{{beData.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+
+
+    </div>
+</div>
+
+
+<style>
+
+    .table table-bordered table-striped table-hover table-sm td {
+        font-size: x-small;
+        line-height: 10px;
+    }
+</style>

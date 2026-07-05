@@ -2073,6 +2073,85 @@ namespace PivotalERP.Areas.AppCMS.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
         #endregion
+        public ActionResult Herbs()
+        {
+            return View();
+        }
+        #region "Herbs"
+        [ValidateInput(false)]
+        [HttpPost]
+        public JsonNetResult SaveHerbs()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BE.AppCMS.Herbs>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    if (Request.Files.Count > 0)
+                    {
+                        var filesColl = Request.Files;
+                        var HPhoto = filesColl["photo"];
+                        var BPhoto = filesColl["Bannerphoto"];
+                        if (HPhoto != null)
+                        {
+                            var photoDoc = GetAttachmentDocuments(photoLocation, HPhoto, true);
+                            beData.PhotoB = photoDoc.Data;
+                            beData.Photo = photoDoc.DocPath;
+                        } 
+                        if (BPhoto != null)
+                        {
+                            var photoDoc = GetAttachmentDocuments(photoLocation, BPhoto, true);
+                            beData.BannerB = photoDoc.Data;
+                            beData.Banner = photoDoc.DocPath;
+                        }
+                    }
+                    beData.CUserId = User.UserId;
+                    if (!beData.HerbsId.HasValue)
+                        beData.HerbsId = 0;
 
+                    resVal = new Dynamic.BL.AppCMS.Herbs(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetAllHerbs()
+        {
+            var dataColl = new Dynamic.BL.AppCMS.Herbs(User.UserId, User.HostName, User.DBName).GetAllHerbs(0);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetHerbsById(int HerbsId)
+        {
+            var dataColl = new Dynamic.BL.AppCMS.Herbs(User.UserId, User.HostName, User.DBName).GetHerbsById(0, HerbsId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult DelHerbs(int HerbsId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new Dynamic.BL.AppCMS.Herbs(User.UserId, User.HostName, User.DBName).DeleteById(0, HerbsId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        #endregion
     }
 }
