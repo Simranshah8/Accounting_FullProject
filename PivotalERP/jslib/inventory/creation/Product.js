@@ -5,15 +5,6 @@
     $scope.LoadData = function () {
         $scope.confirmMSG = GlobalServices.getConfirmMSG();
 
-        $scope.GenConfig = {};
-        GlobalServices.getGenConfig().then(function (res) {
-            if (res.data.IsSuccess && res.data.Data) {
-                $scope.GenConfig = res.data.Data;
-            }
-        }, function (reason) {
-            alert('Failed' + reason);
-        });
-
         $('.select2').select2({
             allowClear: true,
             placeholder: '**select data**',
@@ -50,6 +41,7 @@
             Swal.fire('Failed' + reason);
         });
 
+        //Added by Simran
         $scope.HerbsList = [];
         $http({
             method: 'POST',
@@ -67,7 +59,7 @@
         }, function (reason) {
             Swal.fire('Failed' + reason);
         });
-
+        //End
         $scope.newProduct = {
 
             SNo: 0,
@@ -126,7 +118,6 @@
             AlterNetUnitColl: [],
             CostRateColl: [],
             SellingRateColl: [],
-            SlabSellingRateColl: [],
             TradeRateColl: [],
             MRPRateColl: [],
             OpeningColl: [],
@@ -161,9 +152,11 @@
             Pur_MaxRate: null,
             Sal_MinRate: null,
             Sal_MaxRate: null,
-            DefaultRackColl:[],
-            VideoLink:'',
-            HerbsId:null,
+            DefaultRackColl: [],
+            //Added by Simran
+            VideoLink:'', 
+            HerbsId: null,
+            //End
         }
 
         $scope.newProduct.UDFColl.push({ ColWidth: 3 });
@@ -183,65 +176,6 @@
             Swal.fire('Failed' + reason);
         });
 
-
-        $scope.PurRate1 = null;
-        $scope.PurRate2 = null;
-        $scope.PurRate3 = null;
-        $scope.PurRate4 = null;
-        $http({
-            method: 'GET',
-            url: base_url + "Inventory/Creation/GetAllPurchaseRateTypes",
-            dataType: "json"
-        }).then(function (res) {             
-            if (res.data.IsSuccess && res.data.Data) {
-                res.data.Data.forEach(function (rt) {
-                    if (rt.SNo > 0 && rt.IsActive==true && rt.Id>1) {
-                        if (rt.SNo == 1)
-                            $scope.PurRate1 = rt;
-                        else if (rt.SNo == 2)
-                            $scope.PurRate2 = rt;
-                        else if (rt.SNo == 3)
-                            $scope.PurRate3 = rt;
-                        else if (rt.SNo == 4)
-                            $scope.PurRate4 = rt;
-                    }
-                });
-            } 
-        }, function (reason) {
-            alert('Failed' + reason);
-        });
-
-        $scope.SalRate1 = null;
-        $scope.SalRate2 = null;
-        $scope.SalRate3 = null;
-        $scope.SalRate4 = null;
-        $scope.SalRate5 = null;
-        $http({
-            method: 'GET',
-            url: base_url + "Inventory/Creation/GetAllSalesRateTypes",
-            dataType: "json"
-        }).then(function (res) {
-            if (res.data.IsSuccess && res.data.Data) {
-                res.data.Data.forEach(function (rt) {
-                    if (rt.SNo > 0 && rt.IsActive == true && rt.Id>1) {
-                        if (rt.SNo == 1)
-                            $scope.SalRate1 = rt;
-                        else if (rt.SNo == 2)
-                            $scope.SalRate2 = rt;
-                        else if (rt.SNo == 3)
-                            $scope.SalRate3 = rt;
-                        else if (rt.SNo == 4)
-                            $scope.SalRate4 = rt;
-                        else if (rt.SNo == 5)
-                            $scope.SalRate5 = rt;
-                    }
-                });
-            }
-        }, function (reason) {
-            alert('Failed' + reason);
-        });
-
-
         $scope.RackColl = [];
         $http({
             method: 'GET',
@@ -250,19 +184,6 @@
         }).then(function (res) {
             if (res.data.IsSuccess && res.data.Data) {
                 $scope.RackColl = res.data.Data;
-            }
-        }, function (reason) {
-            Swal.fire('Failed' + reason);
-        });
-
-        $scope.DebtorTypeList = []; 
-        $http({
-            method: 'GET',
-            url: base_url + "Account/Creation/GetAllDebtorTypeList",
-            dataType: "json"
-        }).then(function (res) {      
-            if (res.data.IsSuccess && res.data.Data) {
-                $scope.DebtorTypeList = res.data.Data; 
             }
         }, function (reason) {
             Swal.fire('Failed' + reason);
@@ -438,7 +359,6 @@
             Swal.fire('Failed' + reason);
         });
 
-        $scope.AllProductGroupList = [];
         $scope.ProductGroupList = [];
         $http({
             method: 'GET',
@@ -447,34 +367,12 @@
         }).then(function (res) {
             if (res.data.IsSuccess && res.data.Data) {
                 var tmpDataCC = res.data.Data;
-                 
-                $scope.InvConfig = {};
-                GlobalServices.getInvConfig().then(function (res1) {
-                    if (res1.data.IsSuccess && res1.data.Data) {
-                        $scope.InvConfig = res1.data.Data;
-
-                        $scope.ProductGroupList = [];
-                        $scope.AllProductGroupList = [];
-
-                        angular.forEach(tmpDataCC, function (d) {
-                            if (d.ShowInProductMaster == true) {
-                                $scope.AllProductGroupList.push(d);
-
-                                if ($scope.InvConfig.AllowSubGroupSequence == true) {
-                                    if (d.ParentGroupId<=1) {
-                                        $scope.ProductGroupList.push(d);
-                                    }
-                                } else {
-                                    $scope.ProductGroupList.push(d);
-                                }
-                            }
-                        });
-
+                $scope.ProductGroupList = [];
+                angular.forEach(tmpDataCC, function (d) {
+                    if (d.ShowInProductMaster == true) {
+                        $scope.ProductGroupList.push(d);
                     }
-                }, function (reason) {
-                    Swal.fire('Failed' + reason);
                 });
-
             }
         }, function (reason) {
             Swal.fire('Failed' + reason);
@@ -603,13 +501,6 @@
         else
             return "***Label***";
     }
-
-    $scope.ChangeProductType = function (id) {
-        var findPT = mx($scope.ProductTypeList).firstOrDefault(p1 => p1.ProductTypeId == id);
-        if (findPT) {
-            $scope.newProduct.TypeOfProduct = findPT.TypeOfProduct;
-        }
-    }
     $scope.GenerateCode = function () {
 
         if ($scope.newProduct.ProductId > 0 && $scope.newProduct.Code.length > 0)
@@ -634,123 +525,7 @@
         }, function (reason) {
             Swal.fire('Failed' + reason);
         });
-
-        $scope.ChangeGroup(1, $scope.newProduct.ProductGroupId, false);
-
     };
-
-    $scope.ChangeGroup = function (ind, gid, isModify) {
-        if (ind == 1) {
-            $scope.SubGroupColl1 = [];
-
-            if (isModify == true) {
-
-            } else {
-                $scope.newProduct.SubGroup1 = null;
-                $scope.newProduct.SubGroup2 = null;
-                $scope.newProduct.SubGroup3 = null;
-                $scope.newProduct.SubGroup4 = null;
-                $scope.newProduct.SubGroup5 = null;
-            }
-
-            angular.forEach($scope.AllProductGroupList, function (d) {
-                if (d.ShowInProductMaster == true) {
-                    if (d.ParentGroupId == gid) {
-                        $scope.SubGroupColl1.push(d);
-                    }
-                }
-            });
-
-            if (isModify == true) {
-                $scope.ChangeGroup(2, $scope.newProduct.SubGroup1, isModify);
-            }
-
-
-        }
-        else if (ind == 2) {
-            $scope.SubGroupColl2 = [];
-            if (isModify == true) {
-
-            } else {
-                $scope.newProduct.SubGroup2 = null;
-                $scope.newProduct.SubGroup3 = null;
-                $scope.newProduct.SubGroup4 = null;
-                $scope.newProduct.SubGroup5 = null;
-            }
-
-            angular.forEach($scope.AllProductGroupList, function (d) {
-                if (d.ShowInProductMaster == true) {
-                    if (d.ParentGroupId == gid) {
-                        $scope.SubGroupColl2.push(d);
-                    }
-                }
-            });
-
-            if (isModify == true) {
-                $scope.ChangeGroup(3, $scope.newProduct.SubGroup2, isModify);
-            }
-        }
-        else if (ind == 3) {
-            $scope.SubGroupColl3 = [];
-            if (isModify == true) {
-
-            } else {
-                $scope.newProduct.SubGroup3 = null;
-                $scope.newProduct.SubGroup4 = null;
-                $scope.newProduct.SubGroup5 = null;
-            }
-
-            angular.forEach($scope.AllProductGroupList, function (d) {
-                if (d.ShowInProductMaster == true) {
-                    if (d.ParentGroupId == gid) {
-                        $scope.SubGroupColl3.push(d);
-                    }
-                }
-            });
-
-            if (isModify == true) {
-                $scope.ChangeGroup(4, $scope.newProduct.SubGroup3, isModify);
-            }
-        }
-        else if (ind == 4) {
-            $scope.SubGroupColl4 = [];
-            if (isModify == true) {
-
-            } else {
-                $scope.newProduct.SubGroup4 = null;
-                $scope.newProduct.SubGroup5 = null;
-            }
-
-            angular.forEach($scope.AllProductGroupList, function (d) {
-                if (d.ShowInProductMaster == true) {
-                    if (d.ParentGroupId == gid) {
-                        $scope.SubGroupColl4.push(d);
-                    }
-                }
-            });
-
-            if (isModify == true) {
-                $scope.ChangeGroup(5, $scope.newProduct.SubGroup4, isModify);
-            }
-        }
-        else if (ind == 5) {
-            $scope.SubGroupColl5 = [];
-            if (isModify == true) {
-
-            } else {
-                $scope.newProduct.SubGroup5 = null;
-            }
-
-            angular.forEach($scope.AllProductGroupList, function (d) {
-                if (d.ShowInProductMaster == true) {
-                    if (d.ParentGroupId == gid) {
-                        $scope.SubGroupColl5.push(d);
-                    }
-                }
-            });
-        }
-
-    }
 
     $scope.ClearProduct = function () {
 
@@ -778,7 +553,7 @@
         });
 
         $timeout(function () {
-            $('input[type=file]').val('');
+
             $('#imgProductPhoto').attr('src', '');
 
             $scope.newProduct.BaseUnitId = 0;
@@ -840,8 +615,7 @@
                 TermCondition: '',
                 AlterNetUnitColl:[],
                 CostRateColl:[],
-                SellingRateColl: [],
-                SlabSellingRateColl: [],
+                SellingRateColl:[],
                 TradeRateColl:[],
                 MRPRateColl:[],
                 OpeningColl: [],
@@ -875,8 +649,10 @@
                 Pur_MaxRate: null,
                 Sal_MinRate: null,
                 Sal_MaxRate: null,
+                //Added by Simran
                 VideoLink: '',
                 HerbsId: null,
+                //End
             };
 
             $scope.newProduct.UDFColl.push({ ColWidth: 3 });
@@ -896,7 +672,7 @@
                 if ($scope.EPColl) {
                     angular.forEach($scope.EPColl, function (ep) {
                         $scope.newProduct[ep.Name] = ep.DefaultValue;
-                        //console.log(ep);
+                        console.log(ep);
                     });
                 }                 
             });
@@ -952,7 +728,6 @@
         var AlterNetUnitColl = $scope.newProduct.AlterNetUnitColl;
         var CostRateColl = $scope.newProduct.CostRateColl;
         var SellingRateColl = $scope.newProduct.SellingRateColl;
-        var SlabSellingRateColl = $scope.newProduct.SlabSellingRateColl;
         var OpeningColl = $scope.newProduct.OpeningColl;
         var TradeRateColl = $scope.newProduct.TradeRateColl;
         var MRPRateColl = $scope.newProduct.MRPRateColl;
@@ -994,13 +769,6 @@
                     cr.RateOf = 1;
 
                 $scope.newProduct.SellingRateColl.push(cr);
-            }
-        });
-
-        $scope.newProduct.SlabSellingRateColl = [];
-        angular.forEach(SlabSellingRateColl, function (cr) {
-            if (cr.FromQty>0 && cr.ToQty>0) {                
-                $scope.newProduct.SlabSellingRateColl.push(cr);
             }
         });
 
@@ -1228,32 +996,6 @@
         }
     };
 
-
-    $scope.AddSlabSellingRate = function (det, ind) {
-        if (det.FromQty>0 && det.ToQty > 0) {
-            if ($scope.newProduct.SlabSellingRateColl) {
-                if ($scope.newProduct.SlabSellingRateColl.length > ind + 1) {
-                    $scope.newProduct.SlabSellingRateColl.splice(ind + 1, 0, {
-                        Rate: 0
-                    })
-                } else {
-                    $scope.newProduct.SlabSellingRateColl.push({
-                        Rate:0
-                    });
-                }
-            }
-        }
-
-    };
-    $scope.delSlabSellingRate = function (ind) {
-        if ($scope.newProduct.SlabSellingRateColl) {
-            if ($scope.newProduct.SlabSellingRateColl.length > 1) {
-                $scope.newProduct.SlabSellingRateColl.splice(ind, 1);
-            }
-        }
-    };
-
-
     $scope.AddTradeRate = function (det, ind) {
         if (det.ApplicableFromDet && det.Rate > 0) {
             if ($scope.newProduct.TradeRateColl) {
@@ -1408,13 +1150,7 @@
                 RateOf: 1
             });
         }
-
-        if (!$scope.newProduct.SlabSellingRateColl || $scope.newProduct.SlabSellingRateColl.length == 0) {
-            $scope.newProduct.SlabSellingRateColl = [];
-            $scope.newProduct.SlabSellingRateColl.push({
-                Rate: 0
-            });
-        }
+            
 
         if (!$scope.newProduct.OpeningColl || $scope.newProduct.OpeningColl.length == 0) {
             $scope.newProduct.OpeningColl = [];
@@ -1481,11 +1217,10 @@
                     $timeout(function () {
                         var resData = res.data.Data;
                        
+
                         $scope.newProduct = resData;
                         $scope.newProduct.Mode = 'Modify';
-
-                        $scope.ChangeProductType(resData.ProductTypeId);
-
+                         
                         $timeout(function () {
                             $scope.$apply(function () {
                                 $scope.newProduct.SankuchanCostCenterId = resData.SankuchanCostCenterId;
@@ -1567,9 +1302,6 @@
                          
                         if ($scope.newProduct.UDFColl.length == 0)
                             $scope.newProduct.UDFColl.push({ ColWidth: 3 });
-
-                        if ($scope.InvConfig.AllowSubGroupSequence==true)
-                            $scope.ChangeGroup(1, $scope.newProduct.ProductGroupId, true);
 
                         $('#searVoucherRightBtn').modal('hide');
                     });
@@ -1841,19 +1573,8 @@
 
     }
     $scope.ChangeTaxable = function () {
-        if ($scope.newProduct.IsTaxable == true) {
-
-            var rate = 13;
-            if ($scope.EPDet && $scope.EPDet.VatRate && $scope.EPDet.VatRate.DefaultValue) {
-                rate = isEmptyAmt($scope.EPDet.VatRate.DefaultValue);
-
-                if (rate == 0)
-                    rate = 13;
-            }
-                
-
-            $scope.newProduct.VatRate = rate;
-        }            
+        if ($scope.newProduct.IsTaxable == true)
+            $scope.newProduct.VatRate = 13;
         else
             $scope.newProduct.VatRate = 0;
     }

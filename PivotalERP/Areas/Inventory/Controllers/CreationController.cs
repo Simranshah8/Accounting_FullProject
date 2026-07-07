@@ -23,6 +23,8 @@ namespace PivotalERP.Areas.Inventory.Controllers
         [PermissionsAttribute(Dynamic.BusinessEntity.Global.Actions.Save, (int)FormsEntity.Product)]
         public JsonNetResult SaveProduct()
         {
+
+
             ResponeValues resVal = new ResponeValues();
             try
             {
@@ -1282,82 +1284,82 @@ namespace PivotalERP.Areas.Inventory.Controllers
         }
         //Rikesh Code
         #region "DeliveryThrough"
-        [HttpPost]
-        //[PermissionsAttribute(Actions.Save, (int)ENTITIES.ClassSetup, false)]
-        public JsonNetResult SaveDeliveryThrough()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                var beData = DeserializeObject<PivotalERP.BE.DeliveryThrough>(Request["jsonData"]);
-                if (beData != null)
-                {
-                    beData.CUserId = User.UserId;
-                    if (!beData.DeliveryThroughId.HasValue)
-                        beData.DeliveryThroughId = 0;
+        //[HttpPost]
+        ////[PermissionsAttribute(Actions.Save, (int)ENTITIES.ClassSetup, false)]
+        //public JsonNetResult SaveDeliveryThrough()
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    try
+        //    {
+        //        var beData = DeserializeObject<Dynamic.BusinessEntity.Inventory.DeliveryThrough>(Request["jsonData"]);
+        //        if (beData != null)
+        //        {
+        //            beData.CUserId = User.UserId;
+        //            if (!beData.DeliveryThroughId.HasValue)
+        //                beData.DeliveryThroughId = 0;
 
-                    resVal = new PivotalERP.BL.DeliveryThrough(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+        //            resVal = new DeliveryThrough(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
 
-                }
-                else
-                {
-                    resVal.ResponseMSG = "Blank Data Can't be Accept";
-                }
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
-        [HttpGet]
-        public JsonNetResult GetAllDeliveryThrough()
-        {
-            PivotalERP.BE.DeliveryThroughCollections dataColl = new PivotalERP.BE.DeliveryThroughCollections();
-            try
-            {
-                dataColl = new PivotalERP.BL.DeliveryThrough(User.UserId, User.HostName, User.DBName).GetAllDeliveryThrough(0);
-                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-            }
-            catch (Exception ee)
-            {
-                dataColl.IsSuccess = false;
-                dataColl.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
-        [HttpPost]
-        public JsonNetResult GetDeliveryThroughById(int DeliveryThroughId)
-        {
-            BE.DeliveryThrough resVal = new BE.DeliveryThrough();
-            try
-            {
-                resVal = new PivotalERP.BL.DeliveryThrough(User.UserId, User.HostName, User.DBName).GetDeliveryThroughById(0, DeliveryThroughId);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
-        [HttpPost]
-        //[PermissionsAttribute(Actions.Delete, (int)ENTITIES.ClassSetup, false)]
-        public JsonNetResult DelDeliveryThrough(int DeliveryThroughId)
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new PivotalERP.BL.DeliveryThrough(User.UserId, User.HostName, User.DBName).DeleteById(0, DeliveryThroughId);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
+        //        }
+        //        else
+        //        {
+        //            resVal.ResponseMSG = "Blank Data Can't be Accept";
+        //        }
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
+        //[HttpGet]
+        //public JsonNetResult GetAllDeliveryThrough()
+        //{
+        //    Dynamic.BusinessEntity.Inventory.DeliveryThroughCollections dataColl = new Dynamic.BusinessEntity.Inventory.DeliveryThroughCollections();
+        //    try
+        //    {
+        //        dataColl = new DeliveryThrough(User.UserId, User.HostName, User.DBName).GetAllDeliveryThrough(0);
+        //        return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        dataColl.IsSuccess = false;
+        //        dataColl.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
+        //[HttpPost]
+        //public JsonNetResult GetDeliveryThroughById(int DeliveryThroughId)
+        //{
+        //    Dynamic.BusinessEntity.Inventory.DeliveryThrough resVal = new Dynamic.BusinessEntity.Inventory.DeliveryThrough();
+        //    try
+        //    {
+        //        resVal = new DeliveryThrough(User.UserId, User.HostName, User.DBName).GetDeliveryThroughById(0, DeliveryThroughId);
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
+        //[HttpPost]
+        ////[PermissionsAttribute(Actions.Delete, (int)ENTITIES.ClassSetup, false)]
+        //public JsonNetResult DelDeliveryThrough(int DeliveryThroughId)
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    try
+        //    {
+        //        resVal = new DeliveryThrough(User.UserId, User.HostName, User.DBName).DeleteById(0, DeliveryThroughId);
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
         #endregion
         //Rikesh
 
@@ -1450,65 +1452,63 @@ namespace PivotalERP.Areas.Inventory.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonNetResult SaveUpdateProductInOutType()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                var beData = DeserializeObject<BE.ProductInOutType>(Request["jsonData"]);
-                Console.WriteLine();
-                if (beData != null)
-                {
-                    beData.CUserId = User.UserId;
-                    beData.BDId = User.BranchId;
-                    if (!beData.TranId.HasValue)
-                        beData.TranId = 0;
+        //[HttpPost]
+        //public JsonNetResult SaveUpdateProductInOutType()
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    try
+        //    {
+        //        var beData = DeserializeObject<Dynamic.BusinessEntity.Inventory.ProductInOutType>(Request["jsonData"]);
+        //        Console.WriteLine();
+        //        if (beData != null)
+        //        {
+        //            beData.CUserId = User.UserId;
+        //            beData.BDId = User.BranchId;
 
-                    resVal = new BL.ProductInOutType(User.UserId, User.HostName, User.DBName).SaveUpdateProductInOutType(beData);
+        //            resVal = new ProductInOutType(User.UserId, User.HostName, User.DBName).SaveUpdateProductInOutType(beData);
 
-                }
-                else
-                {
-                    resVal.ResponseMSG = "Blank Data Can't be Accept";
-                }
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
-        [HttpPost]
-        public JsonNetResult GetAllProductInOutType()
-        {
-            var dataColl = new BL.ProductInOutType(User.UserId, User.HostName, User.DBName).GetAllProductInOutType(0);
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //        }
+        //        else
+        //        {
+        //            resVal.ResponseMSG = "Blank Data Can't be Accept";
+        //        }
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
+        //[HttpPost]
+        //public JsonNetResult GetAllProductInOutType()
+        //{
+        //    var dataColl = new Dynamic.BusinessLogic.Inventory.ProductInOutType(User.UserId, User.HostName, User.DBName).GetAllProductInOutType(0);
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
-        [HttpPost]
-        public JsonNetResult GetProductInOutTypeById(int TranId)
-        {
-            var dataColl = new BL.ProductInOutType(User.UserId, User.HostName, User.DBName).GetProductInOutTypeById(0, TranId);
-            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //[HttpPost]
+        //public JsonNetResult GetProductInOutTypeById(int TranId)
+        //{
+        //    var dataColl = new Dynamic.BusinessLogic.Inventory.ProductInOutType(User.UserId, User.HostName, User.DBName).GetProductInOutTypeById(0, TranId);
+        //    return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
-        [HttpPost]
-        public JsonNetResult DeleteProductInOutType(int TranId)
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                resVal = new BL.ProductInOutType(User.UserId, User.HostName, User.DBName).DeleteProductInOutType(0, TranId);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
+        //[HttpPost]
+        //public JsonNetResult DeleteProductInOutType(int TranId)
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    try
+        //    {
+        //        resVal = new BL.ProductInOutType(User.UserId, User.HostName, User.DBName).DeleteProductInOutType(0, TranId);
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
 
         #endregion
 

@@ -309,7 +309,6 @@ app.controller("dayBookCntrl", ['$scope', '$http', '$filter', '$timeout', 'Globa
                         '<li><a data-toggle="tooltip" data-placement="top" title="Print" ng-click="PrintVoucher(' + params.data.TranId + ',' + params.data.VoucherType + ',' + params.data.VoucherId + ',false)"><i class="fas fa-print text-info"></i> Print</a></li>' +
                         '<li ng-hide="this.data.VoucherType==14 && ButtonED.IRD == true"><a data-toggle="tooltip" data-placement="top" title="Post" ng-click="PostModal(this)"><i class="fas fa-sticky-note"></i> Post</a> </li>' +
                         '<li ng-hide="this.data.VoucherType==14 && ButtonED.IRD == true"><a data-toggle="tooltip" data-placement="top" title="Un Post" ng-click="UnPostModal(this)"><i class="fas fa-sticky-note"></i> Un Post</a> </li>' +
-
                         '<li ng-hide="this.data.VoucherType==14 && ButtonED.IRD == true"><a data-toggle="tooltip" data-placement="top" title="Cancel" ng-click="CancelModal(this)"><i class="fa fa-times text-danger"></i> Cancel</a> </li>' +
                         '<li ng-hide="this.data.VoucherType==14 && ButtonED.IRD == true"><a data-toggle="tooltip" data-placement="top" title="Verify Voucher" ng-click="VerifyModal(this)"><i class="fa fa-times text-info"></i> Verify</a> </li>' +
                         '<li ng-hide="this.data.VoucherType==14 && ButtonED.IRD == true"><a data-toggle="tooltip" data-placement="top" title="Reject Voucher" ng-click="RejectModal(this)"><i class="fa fa-times text-danger"></i> Reject</a> </li>' +
@@ -492,6 +491,253 @@ app.controller("dayBookCntrl", ['$scope', '$http', '$filter', '$timeout', 'Globa
         $timeout(function () {
             GlobalServices.getListState(EntityId, $scope.gridOptions);
         });
+
+        $scope.comDet = {};
+        GlobalServices.getCompanyDet().then(function (res) {
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.comDet = res.data.Data;
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+        //$scope.ProjectColl = [];
+        //GlobalServices.getProject().then(function (res) {
+        //    if (res.data.IsSuccess && res.data.Data) {
+        //        $scope.ProjectColl = res.data.Data;
+        //    }
+        //}, function (reason) {
+        //    Swal.fire('Failed' + reason);
+        //});
+
+        $scope.confirmMSG = GlobalServices.getConfirmMSG();
+        //$scope.VoucherSearchOptions = [{ text: 'ToGodown', value: 'G1.Name', searchType: 'text' }, { text: 'FromGodown', value: 'G.Name', searchType: 'text' }, { text: 'Transfer No.', value: 'TS.AutoManualNo', searchType: 'text' }, { text: 'RefNo', value: 'TS.[No]', searchType: 'text' }, { text: 'VoucherDate', value: 'TS.VoucherDate', searchType: 'date' }, { text: 'Voucher', value: 'V.VoucherName', searchType: 'text' }, { text: 'CostClass', value: 'CC.Name', searchType: 'text' }];
+        //$scope.paginationOptions = {
+        //    pageNumber: 1,
+        //    pageSize: GlobalServices.getPerPageRow(),
+        //    sort: null,
+        //    SearchType: 'text',
+        //    SearchCol: '',
+        //    SearchVal: '',
+        //    SearchColDet: $scope.VoucherSearchOptions[4],
+        //    pagearray: [],
+        //    pageOptions: [5, 10, 20, 30, 40, 50]
+        //};
+
+
+        //$scope.mandetoryFields = {};
+        /*$scope.PaymentTermList = [];*/
+        //$scope.PaymentTermList.push('CASH');
+        //$scope.PaymentTermList.push('BANK');
+        //$scope.PaymentTermList.push('CREDIT');
+        $scope.VoucherTypeColl = [];
+        $scope.CostClassColl = [];
+        //$scope.NarrationList = [];
+        $scope.SelectedVoucher = null;
+        $scope.SelectedCostClass = null;
+        //$scope.SalesFeatures = {};
+        //$scope.Config = {};
+        $scope.RefItemAllocationColl = [];
+        $scope.GodownColl = [];
+
+        $scope.HideShow = {
+            Godown: true,
+            VoucherType: true,
+            CostClass: true,
+            AutoVoucherNo: true,
+            PartyCostCenter: true,
+            TranCostCenter: true,
+            Agent: true,
+            Currency: true,
+            RefNo: true,
+            SalesLedger: true,
+            BilledQty: true,
+            Discount: true,
+            DiscountAmt: true,
+            DiscountPer: true,
+            CurrentBalance: true,
+            FreeQty: true,
+            Scheme: true,
+            SchemeAmt: true,
+            SchemePer: true,
+            ProductDescript: true,
+            ProductPoint: true,
+            ProductLedger: true,
+            ShowProductWiseLedger: true,
+            AlternetUnit: true,
+            AlternetUnit1: true,
+            AlternetUnit2: true,
+            EntryDate: true,
+            Batch: true,
+            EachNarration: true,
+            ExciseDuty: true,
+            Vat: true,
+            Amount: false,
+            Rate: false,
+            NotEffectQty: true,
+            ActiveBarCode: true,
+            MRP: true,
+            SalesRate: true,
+            TradeRate: true,
+        }
+
+        $scope.beData =
+        {
+            UniqueId: GlobalServices.getUniqueId(),
+            VoucherId: 0,
+            TranId: 0,
+            ProductBrandId: 0,
+            AutoManualNo: '',
+            AutoVoucherNo: 0,
+
+            partySideBarData: null,
+            SalesMan: null,
+            salesmanSideBarData: null,
+            CurRate: 1,
+            SourceItemDetailsColl: [],
+            TargetItemDetailsColl: [],
+            SourceItemColl: [],
+            TargetItemColl: [],
+            AttechFiles: [],
+            SubTotal: 0,
+            Total: 0,
+            SourceGodownId: 0,
+            TargetGodownId: 0,
+            Narration: '',
+            VoucherDate: new Date(),
+            SalesQuotationDetail: {},
+            RefTranIdColl: [],
+            UDFFeildsColl: [],
+            DocumentColl: [],
+        };
+
+        $scope.beData.SourceItemDetailsColl.push(
+            {
+                RowType: 'P',
+                ProductId: 0,
+                productDetail: null,
+                ActualQty: 0,
+                BilledQty: 0,
+                FreeQty: 0,
+                Rate: 0,
+                DiscountPer: 0,
+                DiscountAmt: 0,
+                SchameAmt: 0,
+                SchamePer: 0,
+                Amount: 0,
+                Description: '',
+                QtyPoint: 0,
+                UnitId: null,
+                CanEditRate: false,
+                ALValue1: 0,
+                ALValue2: 0,
+                ALUnitId1: null,
+                ALUnitId2: null,
+                SchemeAmt: 0,
+                SchemeAmt: 0,
+                QtyDecimal: 2,
+                RateDecimal: 2,
+                AmountDecimal: 2,
+                UDFFeildsColl: [],
+            });
+        $('.hideSideBar').on('focus', function (e) {
+            $('#sidebarzz').removeClass();
+            $('#sidebarzz').addClass('order-last float-right active');
+        })
+
+        $scope.ProductBrandColl = []; //declare an empty array 
+        $http({
+            method: 'GET',
+            url: base_url + "Inventory/Creation/GetAllProductBrand",
+            dataType: "json"
+            //data:JSON.stringify(para)
+        }).then(function (res) {
+            $scope.ProductBrandColl = res.data.Data;
+        }, function (reason) {
+            alert('Failed' + reason);
+        });
+        $scope.UnitColl = [];
+        $http({
+            method: 'GET',
+            url: base_url + "Inventory/Creation/GetAllUnit",
+            dataType: "json"
+            //data:JSON.stringify(para)
+        }).then(function (res) {
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.UnitColl = mx(res.data.Data);
+            }
+        }, function (reason) {
+            alert('Failed' + reason);
+        });
+
+        $scope.CurrencyColl = [];
+        $http({
+            method: 'GET',
+            url: base_url + "Account/Creation/GetAllCurrency",
+            dataType: "json"
+        }).then(function (res) {
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.CurrencyColl = res.data.Data;
+            }
+        }, function (reason) {
+            alert('Failed' + reason);
+        });
+
+
+        $scope.EPDet = {};
+        $scope.EPColl = [];
+        $scope.ItemFormula = {};
+        GlobalServices.getEntityProperties(EntityId).then(function (res) {
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.EPColl = res.data.Data;
+                angular.forEach($scope.EPColl, function (ep) {
+                    $scope.EPDet[ep.Name] = ep;
+                    //$scope.newProduct[ep.Name] = ep.DefaultValue;
+                });
+
+                if ($scope.EPDet) {
+                    for (key in $scope.EPDet) {
+                        if (key.startsWith("ItemAllocationColl") == true) {
+                            var proName = key.replace("ItemAllocationColl.", "");
+
+                            if ($scope.EPDet[key].Formula && $scope.EPDet[key].Formula.length > 0)
+                                $scope.ItemFormula[proName] = $scope.EPDet[key].Formula;
+                        }
+                    }
+                }
+            }
+        }, function (reason) {
+            Swal.fire('Failed' + reason);
+        });
+
+       
+        $scope.RefVoucherNoColl = [];
+        $('#cboRefVoucherNo').select2();
+        $('#cboRefVoucherNo').on("change", function (e) {
+            var selectedData = $('#cboRefVoucherNo').select2('data');
+            if (selectedData && selectedData.length > 0) {
+                $scope.beData.RefTranIdColl = [];
+                $scope.beData.RefAllotationIdColl = [];
+
+                angular.forEach(selectedData, function (sd) {
+                    $scope.beData.RefTranIdColl.push(parseInt(sd.id));
+                });
+                var refTranIdColl = mx($scope.beData.RefTranIdColl);
+                var lstSelectedItem = null;
+                angular.forEach($scope.RefItemAllocationColl, function (ri) {
+                    if (refTranIdColl.contains(ri.TranId)) {
+                        ri.IsSelected = true;
+                        lstSelectedItem = ri;
+                        $scope.beData.RefAllotationIdColl.push(ri.ItemAllocationId);
+                    } else
+                        ri.IsSelected = false;
+                });
+            }
+
+        });
+
+        $scope.TableIdColl = [{ id: 'main-table', text: 'Table', visible: false }];
+
     }
 
     function GetCustomRptColumns() {
@@ -1230,6 +1476,7 @@ app.controller("dayBookCntrl", ['$scope', '$http', '$filter', '$timeout', 'Globa
 
     };
 
+
     $scope.VerifyModal = function (e) {
 
 
@@ -1239,7 +1486,7 @@ app.controller("dayBookCntrl", ['$scope', '$http', '$filter', '$timeout', 'Globa
             return;
 
         $scope.SelectedVoucher = obj;
-
+        $scope.GetTransactionById(obj);
         $('#modal-verifyv').modal('show');
 
     }
@@ -2412,6 +2659,1281 @@ app.controller("dayBookCntrl", ['$scope', '$http', '$filter', '$timeout', 'Globa
 
     $scope.ShowTranVoucher = function (voucherType, tranId) {
         GlobalServices.ShowVoucher(voucherType, tranId);
+    }
+
+
+  
+
+    $scope.CurItemAllocation = null;
+    $scope.ProductSelectionChange = function (itemDet, ind) {
+        $scope.sideBarData = itemDet.sideBarData;
+        $scope.CurItemAllocation = itemDet;
+        var isModify = $scope.beData.TranId > 0 ? true : false;
+
+        if (itemDet.ProductId > 0 && (itemDet.productDetail == null || itemDet.productDetail === undefined)) {
+
+            $scope.loadingstatus = 'running';
+            showPleaseWait();
+            $http({
+                method: 'GET',
+                url: base_url + "Global/GetProductDetail?ProductId=" + itemDet.ProductId + " & VoucherType=" + $scope.SelectedVoucher.VoucherType + "&VoucherId=" + $scope.SelectedVoucher.VoucherId,
+                dataType: "json"
+            }).then(function (resLD) {
+
+                $scope.loadingstatus = 'stop';
+                hidePleaseWait();
+                if (resLD.data.IsSuccess && resLD.data.Data) {
+                    itemDet.productDetail = resLD.data.Data;
+                    $scope.ProductSelectionChange(itemDet, ind);
+                }
+            }, function (reason) {
+                alert('Failed' + reason);
+            });
+
+        }
+
+        if (itemDet.ProductId == null || itemDet.ProductId == 0) {
+            itemDet.ActualQty = 0;
+            itemDet.BilledQty = 0;
+            itemDet.Rate = 0;
+            itemDet.ClosingQty = '';
+            itemDet.UnitId = null;
+            itemDet.UnitName = '';
+            itemDet.DiscountAmt = 0;
+            itemDet.DiscountPer = 0;
+            itemDet.SchameAmt = 0;
+            itemDet.SchamePer = 0;
+            itemDet.ProductLedgerId = null;
+            itemDet.LossRate = 0;
+            itemDet.Makeing = 0;
+            itemDet.Stone = 0;
+            itemDet.NetWeight = 0;
+            itemDet.LossWeight = 0;
+            itemDet.BatchBalQty = 0;
+            itemDet.TranUnitId = null;
+
+            itemDet.FineRate = 0;
+            itemDet.FineWeight = 0;
+            itemDet.ProcessingRate = 0;
+            itemDet.ProcessingWeight = 0;
+
+            $scope.ChangeItemRowValue(itemDet, 'product');
+        } else if (itemDet.productDetail) {
+
+            itemDet.TranUnitId = itemDet.productDetail.SalesUnitId;
+            itemDet.CanEditRate = itemDet.productDetail.CanEditRate;
+
+            var refStockItem = false;
+            if (itemDet.DeliveryNoteItemAllocationId > 0 || itemDet.OrderItemAllocationId > 0 || itemDet.DispatchSectionItemAllocationId > 0
+                || itemDet.ReceivedNoteItemAllocationId > 0 || itemDet.ItemAllocationId > 0 || itemDet.DispatchSectionItemAllocationId > 0 || itemDet.ReceivedNoteItemAllocationId > 0 || itemDet.QuotationItemAllocationId > 0) {
+                refStockItem = true;
+            }
+
+            if (isModify == false && refStockItem == false) {
+                itemDet.Rate = itemDet.productDetail.SalesRate;
+                itemDet.ProductLedgerId = itemDet.productDetail.SalesLedgerId;
+                itemDet.LedgerId = itemDet.productDetail.SalesLedgerId;
+            } else {
+
+                if (!itemDet.ProductLedgerId || itemDet.ProductLedgerId == 0)
+                    itemDet.ProductLedgerId = itemDet.productDetail.SalesLedgerId;
+
+                if (!itemDet.LedgerId || itemDet.LedgerId == 0)
+                    itemDet.LedgerId = itemDet.productDetail.SalesLedgerId;
+            }
+
+            itemDet.ClosingQty = $filter('formatNumber')((itemDet.productDetail.ClosingQty + (itemDet.RefQty > 0 ? itemDet.RefQty : 0))) + ' ' + itemDet.productDetail.BaseUnit;
+            itemDet.UnitId = itemDet.productDetail.BaseUnitId;
+            itemDet.UnitName = itemDet.productDetail.BaseUnit;
+            itemDet.RateOf = itemDet.productDetail.RateOf;
+            itemDet.LossRate = itemDet.productDetail.LossRate;
+            itemDet.Makeing = 0;
+            itemDet.Stone = 0;
+            itemDet.BatchBalQty = 0;
+            itemDet.FineRate = 0;
+            itemDet.FineWeight = 0;
+            itemDet.ProcessingRate = 0;
+            itemDet.ProcessingWeight = 0;
+            //itemDet.ActualQty = 0;
+            //itemDet.BilledQty = 0;
+            //itemDet.DiscountAmt = 0;
+            //itemDet.DiscountPer = 0;
+
+            if ($scope.SelectedVoucher.IsAbbInvoice == true && itemDet.productDetail.IsTaxable == true) {
+                itemDet.Rate = itemDet.Rate + (itemDet.Rate * 13 / 100);
+            }
+
+            if ($scope.SelectedVoucher.Product && $scope.SelectedVoucher.Product.VoucherWiseDecimalPlaces == true) {
+                itemDet.QtyDecimal = $scope.SelectedVoucher.Product.QtyNoOfDecimalPlaces;
+                itemDet.RateDecimal = $scope.SelectedVoucher.Product.RateNoOfDecimalPlaces;
+                itemDet.AmountDecimal = $scope.SelectedVoucher.Product.AmountNoOfDecimalPlaces;
+            } else {
+                var findUnit = $scope.UnitColl.firstOrDefault(p1 => p1.UnitId == itemDet.productDetail.BaseUnitId);
+                if (findUnit) {
+                    itemDet.QtyDecimal = findUnit.NoOfDecimalPlaces;
+                    itemDet.RateDecimal = findUnit.RateNoOfDecimalPlaces;
+                    itemDet.AmountDecimal = findUnit.AmountNoOfDecimalPlaces;
+                }
+            }
+
+
+            if (isEmptyObj(itemDet.QtyDecimal))
+                itemDet.QtyDecimal = 0;
+
+            if (isEmptyObj(itemDet.RateDecimal))
+                itemDet.RateDecimal = 2;
+
+            if (isEmptyObj(itemDet.AmountDecimal))
+                itemDet.AmountDecimal = 2;
+
+
+            var clQty = ($filter('number')(itemDet.productDetail.ClosingQty, itemDet.QtyDecimal)).parseDBL();
+            itemDet.productDetail.ClosingQty = clQty;
+            itemDet.ClosingQty = clQty + ' ' + itemDet.productDetail.BaseUnit;
+
+            if (itemDet.productDetail.IsFixedProduct == true) {
+                $http({
+                    method: 'GET',
+                    url: base_url + "Inventory/Transaction/getDueFixedProductList?productId=" + itemDet.productDetail.ProductId + "&GodownId=" + $scope.beData.SourceGodownId,
+                    dataType: "json"
+                }).then(function (res) {
+                    if (res.data.IsSuccess && res.data.Data) {
+                        itemDet.productDetail.FixedProductColl = res.data.Data;
+                        itemDet.FixedProductColl = res.data.Data;
+
+                        if (isModify) {
+                            itemDet.productDetail.FixedProductColl.push({
+                                EngineNo: itemDet.EngineNo,
+                                ChassissNo: itemDet.ChassissNo,
+                                RegdNo: itemDet.RegdNo,
+                                Model: itemDet.Model,
+                                Type: itemDet.Type,
+                                Color: itemDet.Color,
+                                KeyNo: itemDet.KeyNo,
+                                CodeNo: itemDet.CodeNo,
+                                MFGYear: itemDet.MFGYear,
+                            });
+                        }
+
+                        angular.forEach(itemDet.FixedProductColl, function (fp) {
+                            fp.Amount = itemDet.Rate;
+                        });
+
+                        $('#mdlFixedProduct').modal('show');
+                    }
+                }, function (reason) {
+                    Swal.fire('Failed' + reason);
+                });
+            }
+
+            if (isModify == true) {
+                var findB = mx(itemDet.productDetail.BatchWiseColl).firstOrDefault(p1 => p1.BatchNo == itemDet.Batch);
+                if (findB) {
+                    findB.BalQty = findB.BalQty + itemDet.ActualQty;
+                    findB.BatchBalQty = findB.BalQty;
+                    itemDet.BatchBalQty = itemDet.BatchBalQty + itemDet.ActualQty;
+                    itemDet.productDetail.ClosingQty = itemDet.productDetail.ClosingQty + itemDet.ActualQty;
+                } else {
+                    itemDet.productDetail.ClosingQty = itemDet.productDetail.ClosingQty + itemDet.ActualQty;
+
+                    itemDet.productDetail.BatchWiseColl.push({
+                        Batch: itemDet.Batch,
+                        BatchNo: itemDet.Batch,
+                        EXPDate: itemDet.EXPDate,
+                        MFGDate: itemDet.MFGDate,
+                        BalQty: itemDet.ActualQty,
+                        EngineNo: itemDet.EngineNo,
+                        SalesRate: itemDet.SalesRate,
+                        PurchaseRate: itemDet.PurchaseRate,
+                        TradeRate: itemDet.TradeRate,
+                        MRP: itemDet.MRP,
+                        ClosingQty: itemDet.ActualQty,
+                    });
+                    itemDet.BatchBalQty = itemDet.BatchBalQty + itemDet.ActualQty;
+                }
+            }
+
+            $scope.ChangeItemRowValue(itemDet, 'product');
+
+            if (itemDet.productDetail.BatchWiseColl && itemDet.productDetail.BatchWiseColl.length > 0) {
+
+                if (isModify == false)
+                    itemDet.Batch = itemDet.productDetail.BatchWiseColl[0].BatchNo;
+                else
+                    itemDet.Batch = itemDet.Batch;
+
+                $scope.ChangeBatch(itemDet);
+            }
+
+            if ($scope.SelectedVoucher.Product.ActiveRack == true) {
+
+                if (itemDet.ModifyDetailsColl && itemDet.ModifyDetailsColl.length > 0 && (!itemDet.RackList || itemDet.RackList.length == 0)) {
+                    itemDet.RackList = [];
+                    itemDet.ModifyDetailsColl.forEach(function (idet) {
+                        var findB = mx(itemDet.productDetail.RackWiseColl).firstOrDefault(p1 => p1.RackId == idet.RackId);
+                        if (findB) {
+                            findB.BalQty = findB ? findB.BalQty + idet.ActualQty : idet.ActualQty;
+                            findB.IsSelected = true;
+                            itemDet.RackList.push(findB);
+                        } else {
+                            var newBatch = {
+                                RackId: idet.RackId,
+                                Name: 'RName',
+                                Description: '',
+                                BalQty: findB ? findB.BalQty + idet.ActualQty : idet.ActualQty,
+                                IsSelected: true
+                            };
+                            itemDet.RackList.push(newBatch);
+                        }
+
+                    });
+                }
+                else if ((!itemDet.RackList || itemDet.RackList.length == 0)) {
+                    itemDet.RackList = [];
+                    itemDet.RackList = angular.copy(itemDet.productDetail.RackWiseColl);
+                }
+            }
+
+            var itemC = mx($scope.beData.ItemDetailsColl).where(p1 => p1.RowType == 'P').count();
+            if (ind == (itemC - 1))
+                $scope.AddRowInTable(ind);
+
+        }
+
+    }
+
+    $scope.ChangeEngineNo = function (itemDet) {
+        if (itemDet.EngineNo && itemDet.EngineNo.length > 0 && itemDet.productDetail) {
+
+            var findB = mx(itemDet.productDetail.FixedProductColl).firstOrDefault(p1 => p1.EngineNo == itemDet.EngineNo);
+            if (findB) {
+                itemDet.ChassisNo = findB.ChassisNo;
+                itemDet.RegdNo = findB.RegdNo;
+                itemDet.Model = findB.Model;
+                itemDet.Color = findB.Color;
+                itemDet.KeyNo = findB.KeyNo;
+                itemDet.CodeNo = findB.CodeNo;
+                itemDet.MFGYear = findB.MFGYear;
+                itemDet.Type = findB.Type;
+                itemDet.ActualQty = 1;
+                itemDet.BilledQty = 1;
+                if (findB.Rate || findB.Rate > 0)
+                    itemDet.Rate = findB.Rate;
+            }
+
+        } else {
+            itemDet.ChassisNo = '';
+            itemDet.RegdNo = '';
+            itemDet.Model = '';
+            itemDet.Color = '';
+            itemDet.KeyNo = '';
+            itemDet.CodeNo = '';
+            itemDet.MFGYear = 0;
+            itemDet.Type = '';
+            itemDet.ActualQty = 0;
+            itemDet.BilledQty = 0;
+        }
+
+        $scope.ChangeItemRowValue(itemDet, 'product');
+
+        $scope.CalculateTotalAndSubTotal();
+    }
+
+    $scope.ChangeBatch = function (itemDet) {
+        if (itemDet.Batch && itemDet.Batch.length > 0 && itemDet.productDetail) {
+
+            var findB = mx(itemDet.productDetail.BatchWiseColl).firstOrDefault(p1 => p1.BatchNo == itemDet.Batch);
+            if (findB) {
+                itemDet.EXPDate = findB.EXPDate;
+                itemDet.MFGDate = findB.MFGDate;
+                itemDet.BatchBalQty = findB.BalQty;
+                itemDet.EngineNo = findB.EngineNo;
+
+                itemDet.SalesRate = findB.SalesRate;
+                itemDet.TradeRate = findB.TradeRate;
+                itemDet.MRP = findB.MRP;
+
+                if ($scope.SelectedVoucher.Product.ProductRateAs == 1) {
+                    if (findB.PurchaseRate > 0)
+                        itemDet.Rate = findB.PurchaseRate;
+
+                } else if ($scope.SelectedVoucher.Product.ProductRateAs == 2) {
+                    if (findB.SalesRate > 0)
+                        itemDet.Rate = findB.SalesRate;
+                }
+                else if ($scope.SelectedVoucher.Product.ProductRateAs == 3) {
+                    if (findB.TradeRate > 0)
+                        itemDet.Rate = findB.TradeRate;
+                }
+                else if ($scope.SelectedVoucher.Product.ProductRateAs == 4) {
+                    if (findB.MRP > 0)
+                        itemDet.Rate = findB.MRP;
+                } else {
+
+                    if (findB.SalesRate > 0)
+                        itemDet.Rate = findB.SalesRate;
+                }
+
+            }
+
+        } else {
+            itemDet.EXPDate = null;
+            itemDet.MFGDate = null;
+            itemDet.BatchBalQty = 0;
+            itemDet.EngineNo = '';
+
+            itemDet.SalesRate = 0;
+            itemDet.TradeRate = 0;
+            itemDet.MRP = 0;
+        }
+
+        $scope.CalculateTotalAndSubTotal();
+    }
+
+  
+  
+    $scope.RefVoucherChange = function (refVType) {
+
+        $scope.RefVoucherNoColl = [];
+        $scope.RefItemAllocationColl = [];
+
+        if ($scope.beData.SourceGodownId > 0 && $scope.beData.TargetGodownId > 0) {
+            var funName = "getPendingDemand";
+
+
+            var para = "fromGodownId=" + $scope.beData.TargetGodownId + "&ToGodownId=" + $scope.beData.SourceGodownId;
+
+            $http({
+                method: 'GET',
+                url: base_url + "Inventory/Transaction/" + funName + "?" + para,
+                dataType: "json"
+            }).then(function (res1) {
+                if (res1.data.IsSuccess && res1.data.Data) {
+                    $scope.RefItemAllocationColl = res1.data.Data;
+
+                    var refTranIdColl = mx($scope.beData.RefTranIdColl);
+                    var refAllocationIdCol = mx($scope.beData.RefAllotationIdColl);
+
+                    angular.forEach($scope.RefItemAllocationColl, function (ri) {
+                        if (refTranIdColl.contains(ri.TranId)) {
+                            ri.IsSelected = true;
+                        } else {
+
+                            ri.IsSelected = false;
+
+                            if (refAllocationIdCol.contains(ri.ItemAllocationId)) {
+                                ri.IsSelected = true;
+                            } else
+                                ri.IsSelected = false;
+                        }
+
+                    });
+
+                    var grp = mx($scope.RefItemAllocationColl)
+                        .groupBy(t => ({ id: t.TranId, text: t.AutoManualNo }))   // group `key`
+                        .select(t => t.key)
+                        .toArray();
+
+                    angular.forEach(grp, function (v) {
+                        $scope.RefVoucherNoColl.push({
+                            id: v.id,
+                            text: v.text.toString().trim()
+                        });
+                    });
+
+                    $('#newfrmDemandDetailsModel').modal('show');
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+        }
+
+
+    };
+
+    $scope.CalculateTotalAndSubTotal = function () {
+
+        if ($scope.SelectedVoucher) {
+            var subTotal = 0;
+            var totalQty = 0;
+            angular.forEach($scope.beData.SourceItemDetailsColl, function (item) {
+                subTotal += item.Amount ? item.Amount : 0;
+                totalQty += item.ActualQty ? item.ActualQty : 0;
+            });
+
+            $scope.beData.SubTotal = ($filter('number')(subTotal, $scope.SelectedVoucher.NoOfDecimalPlaces)).parseDBL();
+            $scope.beData.TotalAmount = ($filter('number')(subTotal, $scope.SelectedVoucher.NoOfDecimalPlaces)).parseDBL();
+        }
+
+    };
+
+    $scope.ChangeItemRowValue = function (itemDet, col) {
+
+        var amt = 0, qty = 0, rate = 0, disAmt = 0, disPer = 0, schAmt = 0, schPer = 0;
+
+        var aQty = 0;
+        if (itemDet.ActualQty)
+            aQty = itemDet.ActualQty;
+
+        if ($scope.HideShow.BilledQty == true) {
+            if (itemDet.ActualQty)
+                qty = itemDet.ActualQty;
+        } else {
+            if (itemDet.BilledQty)
+                qty = itemDet.BilledQty;
+        }
+
+
+        if (itemDet.productDetail) {
+            if (itemDet.Batch && itemDet.Batch.length > 0) {
+                var bBal = itemDet.BatchBalQty || itemDet.BatchBalQty > 0 ? itemDet.BatchBalQty : 0;
+                if (itemDet.ActualQty > bBal) {
+
+                    if (itemDet.productDetail.IgnoreNegativeBalance == false) {
+                        itemDet.ActualQty = 0;
+                        itemDet.BilledQty = 0;
+                        Swal.fire('Please ! Enter Qty Less Then Equal ' + bBal);
+                    }
+                }
+            }
+            else {
+
+                var bBal = (itemDet.productDetail.ClosingQty + (itemDet.RefQty > 0 ? itemDet.RefQty : 0));
+                if (itemDet.QtyDecimal == undefined || itemDet.QtyDecimal == null)
+                    itemDet.QtyDecimal = 2;
+
+                bBal = ($filter('number')(bBal, itemDet.QtyDecimal)).parseDBL();
+                var outQty = mx($scope.beData.SourceItemDetailsColl).where(p1 => p1.ProductId == itemDet.ProductId).sum(p1 => p1.ActualQty);
+
+                if (bBal < outQty) {
+
+                    if (itemDet.productDetail.IgnoreNegativeBalance == false) {
+                        itemDet.ActualQty = 0;
+                        itemDet.BilledQty = 0;
+                        Swal.fire('Please ! Enter Qty Less Then Equal ' + itemDet.productDetail.ClosingQty);
+                    }
+
+                }
+
+                if (itemDet.productDetail.ClosingQty < itemDet.ActualQty) {
+
+                    if (itemDet.productDetail.IgnoreNegativeBalance == false) {
+                        itemDet.ActualQty = 0;
+                        itemDet.BilledQty = 0;
+                        Swal.fire('Please ! Enter Qty Less Then Equal ' + itemDet.productDetail.ClosingQty);
+                    }
+
+                }
+            }
+        }
+
+
+        if (itemDet.Rate)
+            rate = itemDet.Rate;
+
+        if (itemDet.productDetail) {
+            if (itemDet.productDetail.ClosingQty < qty)
+                itemDet.IsNegativeQty = true;
+            else if (itemDet.RefQty && itemDet.RefQty < qty)
+                itemDet.IsNegativeQty = true;
+            else
+                itemDet.IsNegativeQty = false;
+
+
+        }
+        if (itemDet.Amount && col == "amt") {
+
+        }
+
+        amt = qty * rate;
+
+        if (itemDet.DiscountAmt)
+            disAmt = itemDet.DiscountAmt;
+
+        if (itemDet.DiscountPer)
+            disPer = itemDet.DiscountPer;
+
+        if (col == "disAmt") {
+
+            if (disAmt > 0) {
+                disPer = (disAmt / amt) * 100;
+            } else
+                disPer = 0;
+
+        }
+        else if (col == "disPer" || col == "product") {
+
+            if (disPer > 0) {
+                disAmt = amt * disPer / 100;
+            } else
+                disAmt = 0;
+        }
+
+
+        itemDet.Amount = amt - disAmt;
+
+        if (col == "disAmt")
+            itemDet.DiscountPer = disPer;
+        else if (col == "disPer" || col == "product")
+            itemDet.DiscountAmt = disAmt;
+
+
+        if ($scope.HideShow.BilledQty == true) {
+            itemDet.BilledQty = aQty;
+        }
+
+        if (itemDet.productDetail) {
+            if (itemDet.productDetail.AlternetUnitColl) {
+                if (col == 'aQty' || col == 'bQty' || col == 'product') {
+                    var alterUnit_Qry = mx(itemDet.productDetail.AlternetUnitColl);
+
+                    var alternetUnit1 = null, alternetUnit2 = null;
+
+                    if (itemDet.productDetail.AlternetUnitColl.length > 0) {
+
+                        alternetUnit1 = alterUnit_Qry.firstOrDefault(p1 => p1.SNo == 1);
+                        if (alternetUnit1) {
+                            itemDet.ALValue1 = parseFloat(parseFloat((alternetUnit1.AlternetUnitValue * aQty) / alternetUnit1.BaseUnitValue).toFixed(alternetUnit1.NoOfDecimalPlaces));
+                            itemDet.ALUnitId1 = alternetUnit1.UnitId;
+                            itemDet.UnitName1 = alternetUnit1.UnitName;
+                        }
+                    }
+
+                    if (itemDet.productDetail.AlternetUnitColl.length > 1) {
+                        alternetUnit2 = alterUnit_Qry.firstOrDefault(p1 => p1.SNo == 2);
+                        if (alternetUnit2) {
+                            itemDet.ALValue2 = parseFloat(parseFloat((alternetUnit2.AlternetUnitValue * aQty) / alternetUnit2.BaseUnitValue).toFixed(alternetUnit2.NoOfDecimalPlaces));
+                            itemDet.ALUnitId2 = alternetUnit2.UnitId;
+                            itemDet.UnitName2 = alternetUnit2.UnitName;
+                        }
+                    }
+                }
+            }
+
+            var exciseAbleQty = 0;
+            var excisAbleAmt = itemDet.ActualQty * itemDet.Rate;
+
+            if (itemDet.ExDutyUnitId && itemDet.ExDutyUnitId > 0) {
+                if (itemDet.UnitId == itemDet.ExDutyUnitId)
+                    exciseAbleQty = itemDet.ActualQty;
+                else if (itemDet.ALUnitId1 && itemDet.ALUnitId1 == itemDet.ExDutyUnitId)
+                    exciseAbleQty = itemDet.ALValue1;
+                else if (itemDet.ALUnitId2 && itemDet.ALUnitId2 == itemDet.ExDutyUnitId)
+                    exciseAbleQty = itemDet.ALValue1;
+            }
+            else
+                exciseAbleQty += itemDet.ActualQty;
+
+            itemDet.ExciseAbleQty = exciseAbleQty;
+            itemDet.ExciseAbtAmt = excisAbleAmt;
+            itemDet.VatAbleAmt = 0;
+
+            if (itemDet.productDetail.IsTaxable == true) {
+                itemDet.VatAbleAmt = itemDet.Amount;
+                itemDet.TaxableAmt = itemDet.Amount;
+
+                if ($scope.SelectedVoucher.Product.ProductWiseVat == false) {
+                    itemDet.VatRate = 0;
+                    itemDet.VatAmount = 0;
+                }
+                else if ($scope.SelectedVoucher.Product.ProductWiseVat == true) {
+                    itemDet.VatRate = itemDet.productDetail.VatRate;
+                    itemDet.VatAmount = itemDet.Amount * itemDet.productDetail.VatRate / 100;
+                }
+            }
+
+            if ($scope.SelectedVoucher.Product.ProductWiseExciseDuty == false) {
+                itemDet.ExDutyRate = 0;
+                itemDet.ExDutyAmount = 0;
+            }
+            else if ($scope.SelectedVoucher.Product.ProductWiseVat == true) {
+                itemDet.ExDutyRate = itemDet.productDetail.EXDutyRate;
+                itemDet.ExDutyAmount = exciseAbleQty * itemDet.productDetail.EXDutyRate / 100;
+            }
+
+        }
+
+        itemDet.Formula = ($scope.ItemFormula ? angular.copy($scope.ItemFormula) : null);
+
+
+        $scope.CalculateTotalAndSubTotal();
+    }
+
+
+    $scope.ChangeItemAlternetQty = function (itemDet, col) {
+
+        if (col == 'unit1') {
+            if ($scope.SelectedVoucher.Product.ActiveRateUOM == true && itemDet.productDetail.AlternetUnitColl) {
+                var alColl = mx(itemDet.productDetail.AlternetUnitColl);
+                itemDet.RateUOMColl = [];
+                itemDet.RateUOMColl.push({
+                    UnitId: itemDet.UnitId,
+                    Name: itemDet.UnitName
+                });
+                if (itemDet.ALUnitId1 > 0 && ($scope.HideShow.AlternetUnit1 == false || $scope.HideShow.AlternetUnitMultiple == false)) {
+                    if (itemDet.ALUnitId1 != itemDet.UnitId) {
+                        var findU = alColl.firstOrDefault(p1 => p1.UnitId == itemDet.ALUnitId1);
+                        if (findU) {
+                            itemDet.RateUOMColl.push({
+                                UnitId: findU.UnitId,
+                                Name: findU.UnitName
+                            });
+                        }
+                    }
+                }
+                if (itemDet.ALUnitId2 > 0 && $scope.HideShow.AlternetUnit2 == false) {
+                    if (itemDet.ALUnitId2 != itemDet.UnitId && itemDet.ALUnitId2 != itemDet.ALUnitId1) {
+                        var findU = alColl.firstOrDefault(p1 => p1.UnitId == itemDet.ALUnitId2);
+                        if (findU) {
+                            itemDet.RateUOMColl.push({
+                                UnitId: findU.UnitId,
+                                Name: findU.UnitName
+                            });
+                        }
+                    }
+                }
+                if (itemDet.RateUnitId > 0) {
+
+                } else {
+                    itemDet.RateUnitId = itemDet.UnitId;
+                }
+            }
+        }
+
+        var aQty = 0;
+
+        if (col == 'aQty') {
+            itemDet.BilledQty = itemDet.ActualQty;
+        } else if (col == 'bQty') {
+            if (itemDet.ActualQty == 0 || itemDet.ActualQty < itemDet.BilledQty)
+                itemDet.ActualQty = itemDet.BilledQty;
+        }
+
+        if (itemDet.ActualQty)
+            aQty = itemDet.ActualQty;
+
+
+        if (itemDet.productDetail) {
+            if (itemDet.productDetail.AlternetUnitColl) {
+                var alterUnit_Qry = mx(itemDet.productDetail.AlternetUnitColl);
+
+                var alternetUnit1 = null, alternetUnit2 = null;
+
+                alternetUnit1 = alterUnit_Qry.firstOrDefault(p1 => p1.UnitId == itemDet.ALUnitId1);
+                alternetUnit2 = alterUnit_Qry.firstOrDefault(p1 => p1.UnitId == itemDet.ALUnitId2);
+
+                if (!alternetUnit1)
+                    alternetUnit1 = alterUnit_Qry.firstOrDefault(p1 => p1.SNo == 1);
+
+                if (!alternetUnit2)
+                    alternetUnit2 = alterUnit_Qry.firstOrDefault(p1 => p1.SNo == 2);
+
+                var baseQty = 0;
+                var findUnit = $scope.UnitColl.firstOrDefault(p1 => p1.UnitId == itemDet.productDetail.BaseUnitId);
+                if (alternetUnit1 && col == 'unit1') {
+
+                    if (findUnit) {
+                        //baseQty = parseFloat(parseFloat((alternetUnit1.BaseUnitValue * itemDet.ALValue1) / alternetUnit1.AlternetUnitValue).toFixed(alternetUnit1.NoOfDecimalPlaces));
+                        baseQty = parseFloat(parseFloat((alternetUnit1.BaseUnitValue * itemDet.ALValue1) / alternetUnit1.AlternetUnitValue));//.toFixed(itemDet.QtyDecimal));
+                        if ($scope.SelectedVoucher.Product.NotEffectInBaseUnit == false)
+                            itemDet.ActualQty = baseQty;
+
+                        if (alternetUnit2)
+                            itemDet.ALValue2 = parseFloat(parseFloat((alternetUnit2.AlternetUnitValue * baseQty) / alternetUnit2.BaseUnitValue));//.toFixed(alternetUnit2.NoOfDecimalPlaces));
+                    }
+
+                } else if (alternetUnit2 && col == "unit2") {
+
+                    if (findUnit) {
+                        //  baseQty = parseFloat(parseFloat(itemDet.ALValue2 * alternetUnit2.AlternetUnitValue).toFixed(findUnit.NoOfDecimalPlaces));
+                        baseQty = parseFloat(parseFloat((alternetUnit2.BaseUnitValue * itemDet.ALValue2) / alternetUnit2.AlternetUnitValue));//.toFixed(itemDet.QtyDecimal));
+
+                        if ($scope.SelectedVoucher.Product.NotEffectInBaseUnit == false)
+                            itemDet.ActualQty = baseQty;
+
+                        if (alternetUnit1)
+                            itemDet.ALValue1 = parseFloat(parseFloat((alternetUnit1.AlternetUnitValue * baseQty) / alternetUnit1.BaseUnitValue));//.toFixed(alternetUnit1.NoOfDecimalPlaces));
+                    }
+
+                }
+            }
+        }
+
+        $scope.ChangeItemRowValue(itemDet, 'rate');
+
+    }
+
+    $scope.getVoucherNoOnly = function (dateStyle) {
+
+        $timeout(function () {
+            if ($scope.SelectedVoucher.DateStyle == 3 || $scope.SelectedVoucher.DateStyle == 4) {
+                if (dateStyle == 1) //AD
+                {
+                    if ($scope.beData.VoucherDateADDet && $scope.beData.VoucherDateADDet.dateAD != $scope.beData.VoucherDate_TMP) {
+                        $scope.beData.VoucherDate_TMP = new Date($scope.beData.VoucherDateADDet.dateAD);
+                    }
+                }
+                else if (dateStyle == 2) //BS
+                {
+                    if ($scope.beData.VoucherDateDet && $scope.beData.VoucherDateAD_TMP != $scope.beData.VoucherDateDet.dateAD) {
+                        $scope.beData.VoucherDateAD_TMP = new Date($scope.beData.VoucherDateDet.dateAD);
+                    }
+                }
+            }
+        });
+
+        var isModify = ($scope.beData.TranId > 0 ? true : false);
+
+        if ($scope.SelectedVoucher && isModify == false) {
+
+            if ($scope.beData.VoucherId && $scope.beData.VoucherId > 0) {
+                if ($scope.beData.CostClassId && $scope.beData.CostClassId > 0) {
+                    var para = {
+                        voucherId: $scope.beData.VoucherId,
+                        costClassId: $scope.beData.CostClassId,
+                        voucherDate: $scope.beData.VoucherDateDet ? ($filter('date')(new Date($scope.beData.VoucherDateDet.dateAD), 'yyyy-MM-dd')) : ($filter('date')(new Date(), 'yyyy-MM-dd'))
+                    };
+
+                    $http({
+                        method: 'POST',
+                        url: base_url + "Account/Creation/GetVoucherNo",
+                        dataType: "json",
+                        data: JSON.stringify(para)
+                    }).then(function (res) {
+                        if (res.data.IsSuccess && res.data.Data) {
+                            var vDet = res.data.Data;
+                            $scope.beData.AutoManualNo = vDet.AutoManualNo;
+                            $scope.beData.AutoVoucherNo = vDet.AutoVoucherNo;
+
+                        } else {
+                            Swal.fire(res.data.ResponseMSG);
+                        }
+                    }, function (reason) {
+                        Swal.fire('Failed' + reason);
+                    });
+                }
+            } else {
+                $scope.beData.AutoManualNo = '';
+                $scope.beData.AutoVoucherNo = 0;
+            }
+
+        }
+    }
+
+    $scope.reloadVoucherDate = function () {
+
+        const container = angular.element(document.getElementById('dvDTVoucher'));
+        container.empty(); // Clear the container
+
+
+        if ($scope.SelectedVoucher.VoucherDate) {
+            var forDate = new Date($scope.SelectedVoucher.VoucherDate);
+
+            if (forDate != $scope.beData.VoucherDateAD_TMP)
+                $scope.beData.VoucherDateAD_TMP = new Date(forDate);
+
+            if (forDate != $scope.beData.VoucherDate_TMP)
+                $scope.beData.VoucherDate_TMP = new Date(forDate);
+        }
+        else {
+            if ($scope.beData.VoucherDateDet && $scope.beData.VoucherDateDet.dateAD && $scope.beData.VoucherDateDet.dateAD != $scope.beData.VoucherDateAD_TMP)
+                $scope.beData.VoucherDateAD_TMP = new Date($scope.beData.VoucherDateDet.dateAD);
+            else if ($scope.beData.VoucherDate && $scope.beData.VoucherDateAD_TMP != $scope.beData.VoucherDate)
+                $scope.beData.VoucherDateAD_TMP = new Date($scope.beData.VoucherDate);
+        }
+
+        $timeout(function () {
+            var dtPicker = `<label for="inputEmail3" style="min-width: 100px;">{{SelectedVoucher.VoucherDateLabel ? SelectedVoucher.VoucherDateLabel : ' Date'}}<span style="color:red">*</span></label>`;
+            if ($scope.SelectedVoucher.DateStyle == 2) //BS
+            {
+                dtPicker = dtPicker + '<div class="nepalidate-wrapper-uiux"><input type="text"  class="form-control form-control-sm nepalidate-uiux" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly(2)" title ="{{beData.VoucherDateDet.dateAD |dateFormat}}" date-style="2" id ="dtVoucherDateBS" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate"></div>';
+            }
+            else if ($scope.SelectedVoucher.DateStyle == 1) //AD
+            {
+                dtPicker = dtPicker + '<input type="text"  class="form-control form-control-sm" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly(1)" title ="{{ beData.VoucherDateDet.dateBS }}" date-style="1" id ="dtVoucherDateAD" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate">';
+            }
+            else if ($scope.SelectedVoucher.DateStyle == 3) //BS & AD
+            {
+
+                dtPicker = dtPicker + `<div class="d-inline-block">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">BS:</span>
+                        </div>                        
+                        <div class="nepalidate-wrapper-uiux"><input type="text"  class="form-control form-control-sm nepalidate-uiux" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly(2)" title ="{{beData.VoucherDateDet.dateAD |dateFormat}}" date-style="2" id ="dtVoucherDateBS" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate" ></div>
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">AD:</span>
+                        </div>                        
+                        <input type="text"  class="form-control form-control-sm" date-picker ng-model="beData.VoucherDateAD_TMP" date-detail="beData.VoucherDateADDet" confirm-action="getVoucherNoOnly(1)" title ="{{ beData.VoucherDateADDet.dateBS }}" date-style="1" id ="dtVoucherDateAD" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate" >
+                    </div>
+                </div>`;
+            }
+            else if ($scope.SelectedVoucher.DateStyle == 4) //AD & BS
+            {
+                dtPicker = dtPicker + `<div class="d-inline-block">
+                    <div class="input-group input-group-sm">                       
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">AD:</span>
+                        </div>                        
+                        <input type="text"  class="form-control form-control-sm" date-picker ng-model="beData.VoucherDateAD_TMP" date-detail="beData.VoucherDateADDet" confirm-action="getVoucherNoOnly(1)" title ="{{ beData.VoucherDateADDet.dateBS }}" date-style="1" id ="dtVoucherDateAD" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate" >
+ <div class="input-group-prepend">
+                            <span class="input-group-text">BS:</span>
+                        </div>
+                       <div class="nepalidate-wrapper-uiux"> <input type="text"  class="form-control form-control-sm nepalidate-uiux" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly(2)" title ="{{beData.VoucherDateDet.dateAD |dateFormat}}" date-style="2" id ="dtVoucherDateBS" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate" ></div>
+                    </div>
+                </div>`;
+            }
+            else  //BOTH
+            {
+                dtPicker = dtPicker + '<input type="text"  class="form-control form-control-sm" date-picker ng-model="beData.VoucherDate_TMP" date-detail="beData.VoucherDateDet" confirm-action="getVoucherNoOnly(2)" title ="{{beData.VoucherDateDet.dateAD |dateFormat}}" date-style="2" id ="dtVoucherDateBS" voucherid ="SelectedVoucher.VoucherId"  model-name="beData.VoucherDate" >';
+            }
+            const newElement = angular.element(dtPicker);
+            //container.append($compile(newElement)($scope));
+
+            container.append(newElement);
+            $compile(newElement)($scope);
+            //Added  by UIUX
+            //$timeout(function () {
+            //    container.find('.nepalidate-uiux').nepaliDatePicker({
+            //        container: '.nepalidate-wrapper-uiux'
+            //    });
+            //}, 0);
+            //Ends
+        });
+    };
+
+    $scope.getVoucherNo = function () {
+        $scope.beData.AditionalCostColl = [];
+
+        if ($scope.beData.VoucherId > 0)
+            $scope.SelectedVoucher = mx($scope.VoucherTypeColl).firstOrDefault(p1 => p1.VoucherId == $scope.beData.VoucherId);
+
+        if ($scope.beData.CostClassId > 0)
+            $scope.SelectedCostClass = mx($scope.CostClassColl).firstOrDefault(p1 => p1.CostClassId == $scope.beData.CostClassId);
+
+        if ($scope.SelectedVoucher) {
+            $http({
+                method: 'GET',
+                url: base_url + "Account/Creation/GetVoucherModeById?voucherId=" + $scope.SelectedVoucher.VoucherId,
+                dataType: "json"
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    $scope.SelectedVoucher = res.data.Data;
+
+                    if ($scope.SelectedVoucher.VoucherDate) {
+                        $scope.beData.VoucherDateDet = null;
+                        var forDate = new Date($scope.SelectedVoucher.VoucherDate);
+                        $scope.beData.VoucherDate = forDate;
+                        $scope.beData.VoucherDate_TMP = forDate;
+                        $scope.beData.VoucherDateAD_TMP = forDate;
+                    }
+
+                    $timeout(function () {
+                        //$scope.$broadcast('date.refresh');
+                        $scope.reloadVoucherDate();
+                    });
+
+                    $timeout(function () {
+                        $scope.$apply(function () {
+                            if ($scope.SelectedVoucher) {
+
+                                $scope.SelectedVoucher.ActiveUDF = false;
+
+                                if ($scope.SelectedVoucher.VoucherUDFColl && $scope.SelectedVoucher.VoucherUDFColl.length > 0) {
+                                    $scope.beData.UDFFeildsColl = [];
+                                    $scope.SelectedVoucher.ActiveUDF = true;
+                                    angular.forEach($scope.SelectedVoucher.VoucherUDFColl, function (udf) {
+                                        var ud = {
+                                            SNo: udf.SNo,
+                                            Name: udf.Label,
+                                            Value: udf.DefaultValue,
+                                            FieldNo: udf.SNo,
+                                            DisplayName: udf.Label,
+                                            FieldType: udf.FieldType,
+                                            IsMandatory: udf.IsMandatory,
+                                            Length: 100,
+                                            SelectOptions: udf.DropDownList,
+                                            FieldAfter: udf.FieldAfter,
+                                            NameId: udf.Name,
+                                            Source: udf.Source,
+                                            Formula: udf.Formula,
+                                            ColWidth: udf.ColWidth,
+                                            UDFValue: udf.DefaultValue,
+                                            RefTable: udf.RefTable,
+                                            RefColumn: udf.RefColumn,
+                                            TextColumn: udf.TextColumn,
+                                        };
+                                        $scope.beData.UDFFeildsColl.push(ud);
+                                    });
+                                }
+
+
+                                if ($scope.SelectedVoucher.NumberingMethod == 1)
+                                    $scope.HideShow.AutoVoucherNo = false;
+                                else
+                                    $scope.HideShow.AutoVoucherNo = true;
+
+                                if ($scope.SelectedVoucher.UsePartyCostCenter == true)
+                                    $scope.HideShow.PartyCostCenter = false;
+                                else
+                                    $scope.HideShow.PartyCostCenter = true;
+
+                                if ($scope.SelectedVoucher.UseTranCostCenter == true)
+                                    $scope.HideShow.TranCostCenter = false;
+                                else
+                                    $scope.HideShow.TranCostCenter = true;
+
+                                if ($scope.SelectedVoucher.UseRefNo == true)
+                                    $scope.HideShow.RefNo = false;
+                                else
+                                    $scope.HideShow.RefNo = true;
+
+
+                                if ($scope.SelectedVoucher.CanChangeLedgerAndAgent == true)
+                                    $scope.HideShow.Agent = false;
+                                else
+                                    $scope.HideShow.Agent = true;
+
+                                if ($scope.SelectedVoucher.AllowMultipleCurrency == true)
+                                    $scope.HideShow.Currency = false;
+                                else
+                                    $scope.HideShow.Currency = true;
+
+                                if ($scope.SelectedVoucher.Product.ProductWiseLedger == true) {
+                                    $scope.HideShow.SalesLedger = true;
+
+                                    if ($scope.SelectedVoucher.Product.ShowProductWiseLedger == true)
+                                        $scope.HideShow.ProductLedger = false;
+                                    else
+                                        $scope.HideShow.ProductLedger = true;
+                                }
+                                else {
+                                    $scope.HideShow.SalesLedger = false;
+                                    $scope.HideShow.ProductLedger = true;
+                                }
+
+
+                                if ($scope.SelectedVoucher.Product.ActiveActualAndBillQty == true)
+                                    $scope.HideShow.BilledQty = false;
+                                else
+                                    $scope.HideShow.BilledQty = true;
+
+                                if ($scope.SelectedVoucher.Product.AllowDiscount == true) {
+
+                                    $scope.HideShow.Discount = false;
+                                    if ($scope.SelectedVoucher.Product.ShowDiscountAmt)
+                                        $scope.HideShow.DiscountAmt = false;
+                                    else
+                                        $scope.HideShow.DiscountAmt = true;
+
+                                    if ($scope.SelectedVoucher.Product.ShowDiscountAmt)
+                                        $scope.HideShow.DiscountPer = false;
+                                    else
+                                        $scope.HideShow.DiscountPer = true;
+                                }
+                                else {
+                                    $scope.HideShow.Discount = true;
+                                    $scope.HideShow.DiscountPer = true;
+                                    $scope.HideShow.DiscountAmt = true;
+                                }
+
+
+                                if ($scope.SelectedVoucher.Product.ShowCurrentStock == true)
+                                    $scope.HideShow.CurrentBalance = false;
+                                else
+                                    $scope.HideShow.CurrentBalance = true;
+
+                                if ($scope.SelectedVoucher.Product.AllowFreeQty == true)
+                                    $scope.HideShow.FreeQty = false;
+                                else
+                                    $scope.HideShow.FreeQty = true;
+
+                                if ($scope.SelectedVoucher.Product.AllowScheme == true) {
+                                    $scope.HideShow.Scheme = false;
+
+                                    if ($scope.SelectedVoucher.Product.ShowSchemeAmt == true)
+                                        $scope.HideShow.SchemeAmt = false;
+                                    else
+                                        $scope.HideShow.SchemeAmt = true;
+
+                                    if ($scope.SelectedVoucher.Product.ShowSchemePer == true)
+                                        $scope.HideShow.SchemePer = false;
+                                    else
+                                        $scope.HideShow.SchemePer = true;
+
+                                } else {
+                                    $scope.HideShow.Scheme = true;
+                                    $scope.HideShow.SchemeAmt = true;
+                                    $scope.HideShow.SchemePer = true;
+                                }
+
+                                if ($scope.SelectedVoucher.Product.ShowProductDescription == true)
+                                    $scope.HideShow.ProductDescription = false;
+                                else
+                                    $scope.HideShow.ProductDescription = true;
+
+                                if ($scope.SelectedVoucher.Product.ShowProductQuantityPoint == true)
+                                    $scope.HideShow.ProductPoint = false;
+                                else
+                                    $scope.HideShow.ProductPoint = true;
+
+                                if ($scope.SelectedVoucher.Product.UseMRP == true)
+                                    $scope.HideShow.MRP = false;
+                                else
+                                    $scope.HideShow.MRP = true;
+
+                                if ($scope.SelectedVoucher.Product.UsePurchaseSalesRate == true)
+                                    $scope.HideShow.SalesRate = false;
+                                else
+                                    $scope.HideShow.SalesRate = true;
+
+                                if ($scope.SelectedVoucher.Product.UseTradeRate == true)
+                                    $scope.HideShow.TradeRate = false;
+                                else
+                                    $scope.HideShow.TradeRate = true;
+
+                                //if ($scope.SelectedVoucher.Product.ProductWiseLedger == true) {
+                                //    $scope.HideShow.ProductLedger = false;
+
+                                //    if ($scope.SelectedVoucher.Product.ShowProductWiseLedger == true)
+                                //        $scope.HideShow.ShowProductWiseLedger = false;
+                                //    else
+                                //        $scope.HideShow.ShowProductWiseLedger = true;
+                                //}
+                                //else {
+                                //    $scope.HideShow.ProductLedger = true;
+                                //    $scope.HideShow.ShowProductWiseLedger = true;
+                                //}
+
+
+                                if ($scope.SelectedVoucher.Product.ShowAlternateUnit == true) {
+                                    $scope.HideShow.AlternetUnit = false;
+
+                                    if ($scope.SelectedVoucher.Product.ActiveAlternateUnitColumn1 == true)
+                                        $scope.HideShow.AlternetUnit1 = false;
+                                    else
+                                        $scope.HideShow.AlternetUnit1 = true;
+
+                                    if ($scope.SelectedVoucher.Product.ActiveAlternateUnitColumn1 == true)
+                                        $scope.HideShow.AlternetUnit2 = false;
+                                    else
+                                        $scope.HideShow.AlternetUnit2 = true;
+
+                                }
+                                else {
+                                    $scope.HideShow.AlternetUnit = true;
+                                    $scope.HideShow.AlternetUnit1 = true;
+                                    $scope.HideShow.AlternetUnit2 = true;
+                                }
+
+
+                                if ($scope.SelectedVoucher.UseEffectiveDate == true)
+                                    $scope.HideShow.EntryDate = false;
+                                else
+                                    $scope.HideShow.EntryDate = true;
+
+                                if ($scope.SelectedVoucher.Product.BatchNo == true)
+                                    $scope.HideShow.Batch = false;
+                                else
+                                    $scope.HideShow.Batch = true;
+
+                                if ($scope.SelectedVoucher.Product.UseEXP == true)
+                                    $scope.HideShow.EXPDate = false;
+                                else
+                                    $scope.HideShow.EXPDate = true;
+
+                                if ($scope.SelectedVoucher.Product.UseMFG == true)
+                                    $scope.HideShow.MFGDate = false;
+                                else
+                                    $scope.HideShow.MFGDate = true;
+
+                                if ($scope.SelectedVoucher.EachNarrationEntry == true)
+                                    $scope.HideShow.EachNarration = false;
+                                else
+                                    $scope.HideShow.EachNarration = true;
+
+                                if ($scope.SelectedVoucher.Product.ProductWiseExciseDuty == true)
+                                    $scope.HideShow.ExciseDuty = false;
+                                else
+                                    $scope.HideShow.ExciseDuty = true;
+
+                                if ($scope.SelectedVoucher.Product.ProductWiseVat == true)
+                                    $scope.HideShow.Vat = false;
+                                else
+                                    $scope.HideShow.Vat = true;
+
+                                if (!$scope.SelectedVoucher.VoucherDateLabel || $scope.SelectedVoucher.VoucherDateLabel.length == 0)
+                                    $scope.SelectedVoucher.VoucherDateLabel = "Invoice Date";
+
+                                if (!$scope.SelectedVoucher.EntryDateLabel || $scope.SelectedVoucher.EntryDateLabel.length == 0)
+                                    $scope.SelectedVoucher.EntryDateLabel = "Entry Date";
+
+                                if (!$scope.SelectedVoucher.RefNoName || $scope.SelectedVoucher.RefNoName.length == 0)
+                                    $scope.SelectedVoucher.RefNoName = 'Ref. No.';
+
+                                if ($scope.SelectedVoucher.Product.ShowRate == true)
+                                    $scope.HideShow.Rate = false;
+                                else
+                                    $scope.HideShow.Rate = true;
+
+                                if ($scope.SelectedVoucher.Product.ShowAmount == true)
+                                    $scope.HideShow.Amount = false;
+                                else
+                                    $scope.HideShow.Amount = true;
+
+
+                                if ($scope.SelectedVoucher.VoucherProductUDFColl && $scope.SelectedVoucher.VoucherProductUDFColl.length > 0) {
+                                    angular.forEach($scope.beData.ItemDetailsColl, function (det) {
+                                        det.UDFFeildsColl = [];
+                                        angular.forEach($scope.SelectedVoucher.VoucherProductUDFColl, function (udf) {
+
+                                            var ud = {
+                                                SNo: udf.SNo,
+                                                Name: udf.Label,
+                                                Value: udf.DefaultValue,
+                                                FieldNo: udf.SNo,
+                                                DisplayName: udf.Label,
+                                                FieldType: udf.FieldType,
+                                                IsMandatory: udf.IsMandatory,
+                                                Length: 100,
+                                                SelectOptions: udf.DropDownList,
+                                                FieldAfter: udf.FieldAfter,
+                                                NameId: udf.Name,
+                                                Source: udf.Source,
+                                                Formula: udf.Formula,
+                                                ColWidth: udf.ColWidth,
+                                                UDFValue: udf.DefaultValue,
+                                                RefTable: udf.RefTable,
+                                                RefColumn: udf.RefColumn,
+                                                TextColumn: udf.TextColumn,
+                                            };
+
+                                            det.UDFFeildsColl.push(ud);
+                                        });
+                                    });
+                                } else {
+                                    angular.forEach($scope.beData.ItemDetailsColl, function (det) {
+                                        det.UDFFeildsColl = [];
+                                    });
+                                }
+
+                                if ($scope.SelectedVoucher.GodownColl && $scope.SelectedVoucher.GodownColl.length > 0) {
+                                    var tmpGodownColl = [];
+                                    var godown_Qry = mx($scope.SelectedVoucher.GodownColl);
+                                    angular.forEach($scope.GodownColl, function (gd) {
+                                        if (godown_Qry.contains(gd.GodownId)) {
+                                            tmpGodownColl.push(gd);
+                                        }
+                                    });
+
+                                    if (tmpGodownColl.length == 1) {
+                                        $scope.beData.GodownId = tmpGodownColl[0].GodownId;
+                                        $scope.HideShow.Godown = true;
+                                    }
+                                    else if (tmpGodownColl.length > 1) {
+                                        $scope.HideShow.Godown = false;
+                                        $scope.beData.GodownId = tmpGodownColl[0].GodownId;
+                                    }
+                                    else {
+                                        $scope.HideShow.Godown = false;
+                                        $scope.beData.GodownId = null;
+                                    }
+
+                                    if ($scope.beData.GodownId && $scope.beData.GodownId > 0) {
+                                        if (angular.forEach($scope.beData.ItemDetailsColl, function (idet) {
+                                            if (idet.RowType == 'P') {
+                                                if (!idet.GodownId || idet.GodownId == 0)
+                                                    idet.GodownId = $scope.beData.GodownId;
+                                            }
+                                        }));
+                                    }
+                                } else
+                                    $scope.SelectedVoucher.VoucherWiseGodownColl = $scope.GodownColl;
+
+
+                                $timeout(function () {
+                                    if (TranId && TranId > 0) {
+                                        var newEdit = {
+                                            TranId: TranId,
+                                        };
+                                        $scope.GetTransactionById(newEdit);
+                                        TranId = null;
+                                    }
+                                });
+
+                            }
+
+
+                        });
+                    });
+
+                }
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+        }
+
+        if ($scope.beData.VoucherId && $scope.beData.VoucherId > 0) {
+            if ($scope.beData.CostClassId && $scope.beData.CostClassId > 0) {
+                var para = {
+                    voucherId: $scope.beData.VoucherId,
+                    costClassId: $scope.beData.CostClassId,
+                    voucherDate: $scope.beData.VoucherDateDet ? ($filter('date')(new Date($scope.beData.VoucherDateDet.dateAD), 'yyyy-MM-dd')) : ($filter('date')(new Date(), 'yyyy-MM-dd'))
+                };
+
+                $http({
+                    method: 'POST',
+                    url: base_url + "Account/Creation/GetVoucherNo",
+                    dataType: "json",
+                    data: JSON.stringify(para)
+                }).then(function (res) {
+                    if (res.data.IsSuccess && res.data.Data) {
+                        var vDet = res.data.Data;
+                        $scope.beData.AutoManualNo = vDet.AutoManualNo;
+                        $scope.beData.AutoVoucherNo = vDet.AutoVoucherNo;
+                    } else {
+                        Swal.fire(res.data.ResponseMSG);
+                    }
+                }, function (reason) {
+                    Swal.fire('Failed' + reason);
+                });
+            }
+        } else {
+            $scope.beData.AutoManualNo = '';
+            $scope.beData.AutoVoucherNo = 0;
+        }
+
+    }
+
+    $scope.GetTransactionById = function (tran) {
+        $timeout(function () {
+
+            if (tran.TranId && tran.TranId > 0) {
+                var para = {
+                    tranId: tran.TranId
+                };
+                $http({
+                    method: 'POST',
+                    url: base_url + "Inventory/Transaction/GetStockTransforById",
+                    dataType: "json",
+                    data: JSON.stringify(para)
+                }).then(function (res) {
+                    $timeout(function () {
+                        if (res.data.IsSuccess && res.data.Data) {
+                            var tran = res.data.Data;
+                            $scope.SetData(tran);
+                            $('#searVoucherRightBtn').modal('hide');
+                        } else {
+                            hidePleaseWait();
+                            $scope.loadingstatus = "stop";
+                            Swal.fire(res.data.ResponseMSG);
+                        }
+                    });
+                }, function (reason) {
+                    Swal.fire('Failed' + reason);
+                });
+            }
+        });
     }
 
 }]);
