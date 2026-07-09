@@ -2153,5 +2153,90 @@ namespace PivotalERP.Areas.AppCMS.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
         #endregion
+
+        public ActionResult ProductDocuments()
+        {
+            return View();
+        }
+        [ValidateInput(false)]
+        [HttpPost]
+        public JsonNetResult SaveProductDocuments()
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                var beData = DeserializeObject<Dynamic.BE.AppCMS.ProductDocuments>(Request["jsonData"]);
+                if (beData != null)
+                {
+                    if (Request.Files.Count > 0)
+                    {
+                        var allFiles = Request.Files;
+                        int find = 0;
+                        foreach (var doc in beData.DocumentColl)
+                        {
+                            HttpPostedFileBase file = allFiles["file" + find];
+                            if (file != null)
+                            {
+                                var newDoc = GetAttachmentDocuments(photoLocation, file);
+                                if (newDoc != null)
+                                {
+                                    doc.Name = newDoc.Name;
+                                    doc.Extension = newDoc.Extension;
+                                    doc.DocPath = newDoc.DocPath;
+                                    doc.DocFullPath = newDoc.DocFullPath;
+                                    doc.ParaName = newDoc.ParaName;
+                                }
+                            }
+                            find++;
+                        }
+                    }
+                    beData.CUserId = User.UserId;
+                    if (!beData.ProductId.HasValue)
+                        beData.ProductId = 0;
+
+                    resVal = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+
+                }
+                else
+                {
+                    resVal.ResponseMSG = "Blank Data Can't be Accept";
+                }
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult GetAllProductDoc()
+        {
+            var dataColl = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).GetAllProductDoc(0);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+        [HttpPost]
+        public JsonNetResult GetProductDocById(int ProductId)
+        {
+            var dataColl = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).GetProductDocById(0, ProductId);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        //[HttpPost]
+        //public JsonNetResult DeleteProductDoc(int ProductId)
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    try
+        //    {
+        //        resVal = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).DeleteProductDoc(0, ProductId);
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
     }
 }
