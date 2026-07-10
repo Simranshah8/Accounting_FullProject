@@ -7,13 +7,13 @@ using Dynamic.DataAccess.Global;
 
 namespace Dynamic.DA.AppCMS
 {
-    public class HerbsDB
-    {
-        DataAccessLayer1 dal = null;
-        public HerbsDB(string hostName, string dbName)
-        {
-            dal = new DataAccessLayer1(hostName, dbName);
-        }
+	public class HerbsDB
+	{
+		DataAccessLayer1 dal = null;
+		public HerbsDB(string hostName, string dbName)
+		{
+			dal = new DataAccessLayer1(hostName, dbName);
+		}
 		public ResponeValues SaveUpdate(BE.AppCMS.Herbs beData, bool isModify)
 		{
 			ResponeValues resVal = new ResponeValues();
@@ -184,9 +184,10 @@ namespace Dynamic.DA.AppCMS
 			return dataColl;
 
 		}
-		public BE.AppCMS.Herbs getHerbsById(int UserId, int EntityId, int HerbsId)
+
+		public BE.AppCMS.HerbsDetails getHerbsById(int UserId, int EntityId, int HerbsId)
 		{
-			BE.AppCMS.Herbs beData = new BE.AppCMS.Herbs();
+			BE.AppCMS.HerbsDetails beData = new BE.AppCMS.HerbsDetails();
 			dal.OpenConnection();
 			System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
 			cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -199,7 +200,7 @@ namespace Dynamic.DA.AppCMS
 				System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
 				if (reader.Read())
 				{
-					beData = new BE.AppCMS.Herbs();
+					beData = new BE.AppCMS.HerbsDetails();
 					if (!(reader[0] is DBNull)) beData.HerbsId = reader.GetInt32(0);
 					if (!(reader[1] is DBNull)) beData.Name = reader.GetString(1);
 					if (!(reader[2] is DBNull)) beData.ScientificName = reader.GetString(2);
@@ -212,6 +213,35 @@ namespace Dynamic.DA.AppCMS
 					if (!(reader[9] is DBNull)) beData.Banner = reader.GetString(9);
 					if (!(reader[10] is DBNull)) beData.Photo = reader.GetString(10);
 					if (!(reader[11] is DBNull)) beData.Tag = reader.GetString(11);
+				}
+				if (reader.NextResult())
+				{
+					beData.ProductDetails = new List<BE.AppCMS.ProductDet>();
+					while (reader.Read())
+					{
+						BE.AppCMS.ProductDet dataColl = new BE.AppCMS.ProductDet();
+						if (!(reader[0] is DBNull)) dataColl.ProductId = reader.GetInt32(0);
+						if (!(reader[1] is DBNull)) dataColl.ProductName = reader.GetString(1);
+						if (!(reader[2] is DBNull)) dataColl.Alias = reader.GetString(2);
+						if (!(reader[3] is DBNull)) dataColl.PhotoPath = reader.GetString(3);
+						if (!(reader[4] is DBNull)) dataColl.ProductCategories = reader.GetString(4);
+						if (!(reader[5] is DBNull)) dataColl.SalesRate = Convert.ToDouble(reader[5]);
+						beData.ProductDetails.Add(dataColl);
+					}
+				}
+				if (reader.NextResult())
+				{
+					beData.WelnessGoalsDetails = new List<BE.AppCMS.WelnessGoalsDet>();
+					while (reader.Read())
+					{
+						BE.AppCMS.WelnessGoalsDet dataColl = new BE.AppCMS.WelnessGoalsDet();
+						if (!(reader[0] is DBNull)) dataColl.WelnessId = reader.GetInt32(0);
+						if (!(reader[1] is DBNull)) dataColl.WelnessGoals = reader.GetString(1);
+						if (!(reader[2] is DBNull)) dataColl.Description = reader.GetString(2);
+						if (!(reader[3] is DBNull)) dataColl.WG_Image = reader.GetString(3);
+						if (!(reader[4] is DBNull)) dataColl.WG_Banner = reader.GetString(4);
+						beData.WelnessGoalsDetails.Add(dataColl);
+					}
 				}
 				reader.Close();
 				beData.IsSuccess = true;
@@ -226,9 +256,8 @@ namespace Dynamic.DA.AppCMS
 			{
 				dal.CloseConnection();
 			}
-
 			return beData;
-
 		}
+
 	}
 }

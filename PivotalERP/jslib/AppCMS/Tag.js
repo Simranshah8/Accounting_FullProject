@@ -22,19 +22,6 @@
 
         };
 
-        $scope.ProductList = [];
-        $http({
-            method: 'GET',
-            url: base_url + "Inventory/Reporting/GetAllProduct",
-            dataType: "json",
-        }).then(function (res) {
-            if (res.data.IsSuccess && res.data.Data) {
-                $scope.ProductList = res.data.Data;
-            }
-        }, function (reason) {
-            Swal.fire('Failed' + reason);
-        });
-
         $scope.beData =
         {
             TagId: 0,
@@ -224,8 +211,6 @@
             }
 
         });
-
-
-
     }
+
 });

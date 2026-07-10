@@ -47,6 +47,7 @@
             });
 
         });
+        $('#imgEmp').attr('src', '');
         $('#imgPhoto1').attr('src', '');
     };
 

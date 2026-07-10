@@ -59,6 +59,24 @@
         }, function (reason) {
             Swal.fire('Failed' + reason);
         });
+
+        $scope.WelnessGoalsList = [];
+        $http({
+            method: 'POST',
+            url: base_url + "AppCMS/Creation/GetAllWelnessGoals",
+            dataType: "json"
+        }).then(function (res) {
+            hidePleaseWait();
+            $scope.loadingstatus = "stop";
+            if (res.data.IsSuccess && res.data.Data) {
+                $scope.WelnessGoalsList = res.data.Data;
+            } else {
+                Swal.fire(res.data.ResponseMSG);
+            }
+        }, function (reason) {
+            hidePleaseWait();
+            Swal.fire('Failed' + reason);
+        });
         //End
         $scope.newProduct = {
 
@@ -156,6 +174,7 @@
             //Added by Simran
             VideoLink:'', 
             HerbsId: null,
+            WellnessGoalId: null,
             //End
         }
 
@@ -652,6 +671,7 @@
                 //Added by Simran
                 VideoLink: '',
                 HerbsId: null,
+                WellnessGoalId: null,
                 //End
             };
 

@@ -1,0 +1,210 @@
+﻿@{
+
+    ViewBag.Title = "";
+    Layout = null;
+}
+@RenderPage("~/Views/Global/_GlobalLayout.cshtml")
+
+
+<script src="~/jslib/appcms/WelnessGoals.js"></script>
+<div class="hold-transition  layout-navbar-fixed" ng-app="myApp" ng-controller="WelnessController" ng-init="LoadData()">
+    <section class="content">
+        <div class="container-fluid">
+            <section class="iframe-content-starts-here">
+
+                <div class="card my-1 card-primary card-outline card-outline-tabs">
+                    <div class="card-header p-0 border-bottom-0">
+                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="custom-tabs-four-home-tab" data-toggle="pill" href="#custom-tabs-four-home" role="tab" aria-controls="custom-tabs-four-home" aria-selected="true"> List</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="custom-tabs-four-profile-tab" data-toggle="pill" href="#custom-tabs-four-profile" role="tab" ng-click="ClearWelnessGoals()" aria-controls="custom-tabs-four-profile" aria-selected="false">Welness Goals</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                            <div class="tab-pane fade show active" id="custom-tabs-four-home" role="tabpanel" aria-labelledby="custom-tabs-four-home-tab">
+                                <div class="mt-2">
+                                    <header class="row ">
+                                        <div class="col-md-7">
+                                            <div class="clearfix">
+                                                <form class="form-inline">
+                                                    <div class="input-group input-group-sm mr-sm-2">
+                                                        <div class="input-group-prepend">
+                                                            <span class="input-group-text cstm">Show</span>
+                                                        </div>
+                                                        <select class="form-control border-left-0 border-right-0 pr-0" ng-model="perPage.WelnessGoals">
+                                                            <option ng-value="pp.value" ng-repeat="pp in perPageColl" ng-selected="pp.value==perPage.WelnessGoals">{{pp.text}}</option>
+                                                        </select>
+                                                        <div class="input-group-append">
+                                                            <span class="input-group-text bg-white"><small>entries</small></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="input-group input-group-sm table-search-filed">
+                                                        <input class="form-control form-control-navbar"
+                                                               type="search" placeholder="Search"
+                                                               aria-label="Search" ng-model="searchData.WelnessGoals">
+                                                        <div class="input-group-append">
+                                                            <button class="btn btn-default border-left-0"
+                                                                    type="submit">
+                                                                <i class="fas fa-search"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        @*<div class="col-md-5 text-right">
+
+                                                <div class="dropdown dnld-file" data-toggle="tooltip"
+                                                     data-placement="top" title="Download File">
+                                                    <button class="btn btn-secondary btn-light btn-sm dropdown-toggle" type="button"
+                                                            id="dropdownMenuButton" data-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right"
+                                                         aria-labelledby="dropdownMenuButton">
+                                                        <span class="dropdown-item">Choose an option:</span>
+                                                        <a class="dropdown-item wait" export-excel table-id="'#main-table'" sheet-name="'ClassWiseSubject'"><img src="~/wwwroot/dynamic-erp/images/flaticons/excel.png" class="img-fluid exports-icon" alt="Excel image"> Excel</a>
+                                                        <a class="dropdown-item wait" onClick="$('#main-table').tableExport({type:'csv',escape:'false'});"><img src="~/wwwroot/dynamic-erp/images/flaticons/csv.png" class="img-fluid exports-icon" alt="Excel image"> CSV</a>
+
+                                                    </div>
+                                                    <a print-tbl table-id="'#main-table'" class="btn btn-secondary btn-light btn-sm wait"
+                                                       data-toggle="tooltip" data-placement="bottom"
+                                                       title="Print">
+                                                        <i class="fas fa-print"></i>
+                                                    </a>
+
+                                                </div>
+
+                                            </div>*@
+                                    </header>
+                                    <div>
+                                        <div class="table-scroll-x-y table-scroll" style="height:auto!important">
+                                            <table id="main-table"
+                                                   class="main-table table table-sm table-bordered bg-white">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 70px">ID</th>
+                                                        <th style="width: 250px">Name</th>
+                                                        <th style="width: 350px">Description</th>
+                                                        <th style="width: 250px">Badge</th>
+                                                        <th style="width: 70px">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr dir-paginate="cl in WelnessGoalsList | filter:searchData.WelnessGoals | itemsPerPage: perPage.WelnessGoals" current-page="currentPages.WelnessGoals" pagination-id="WelnessGoalsPagination">
+                                                        <td>{{cl.WelnessId}}</td>
+                                                        <td>{{cl.Name}}</td>
+                                                        <td>{{cl.Description}}</td>
+                                                        <td>{{cl.Badge}}</td>
+
+                                                        <td>
+                                                            <a class="p-1" href="#" ng-click="GetWelnessGoalsById(cl)">
+                                                                <i class="fas fa-edit text-info"></i>
+                                                            </a>
+                                                            <a class="p-1" href="#" ng-click="DelWelnessGoalsById(cl)">
+                                                                <i class="fas fa-trash-alt text-danger"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <footer class="row align-items-center">
+                                        <div class="col-md-12">
+                                            <dir-pagination-controls pagination-id="WelnessGoalsPagination" boundary-links="true" on-page-change="pageChangeHandler(newPageNumber)" template-url="/Scripts/dirPagination.tpl.html">
+                                            </dir-pagination-controls>
+                                        </div>
+                                    </footer>
+                                </div>
+
+
+                            </div>
+                            <div class="tab-pane fade" id="custom-tabs-four-profile" role="tabpanel" aria-labelledby="custom-tabs-four-profile-tab">
+                                <div id="notice-form">
+                                    <div class="timeline-item">
+                                        <div class="row">
+                                            <div class="col-md-9 mb-5">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Name</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newDet.Name">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label for="">Badge</label>
+                                                        <input type="text" class="form-control form-control-sm" ng-model="newDet.Badge">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <label>Herb Id <span style="color:red">*</span></label>
+                                                        <select class="form-control form-control-sm select2" style="width: 100%;" ng-model="newDet.HerbId">
+                                                            <option ng-repeat="h in HerbsList" ng-value="h.id" ng-selected="h.id==newDet.HerbId">{{h.text}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="textarea" placeholder="Place some text here"
+                                                                  style="width: 100%; height: 200px; font-size: 14px; line-height: 18px; border: 1px solid #dddddd; padding: 10px;" ng-model="newDet.Description" html-editor></textarea>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            </div>
+                                            <div class="col-md-3 mt-3">
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Image</label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{newDet.ImageData || newDet.Image}}" style="height:130px; width:165px; border:1px solid #ccc" class="img-fluid" alt="" id="imgPhoto1">
+                                                    </div>
+                                                    <label for="choose-image" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Upload Image</label>
+                                                    <input id="choose-image" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newDet.Image_TMP" fileread="newDet.ImageData" />
+                                                    <canvas id="Imagecanvas" width="320" height="240" style="display:none"></canvas>
+
+                                                </div>
+
+                                                <div class="person-photo-attachment-wrap text-center">
+                                                    <label style=" font-weight: 600;">Banner</label>
+                                                    <div class="img-wrap mx-auto">
+                                                        <img ng-src="{{newDet.BannerData || newDet.Banner}}" style="height:130px; width:265px; border:1px solid #ccc" class="img-fluid" alt="" id="imgBanner1">
+                                                    </div>
+                                                    <label for="choose-banner" type="button" class="btn btn-default mt-1 mb-0"><i class="fa fa-image"></i>Upload Banner</label>
+                                                    <input id="choose-banner" type="file" accept=".jpg,.jpeg,.pdf,doc,docx,application/msword,.png" style="display: none;" file-model ng-model="newDet.Banner_TMP" fileread="newDet.BannerData" />
+                                                    <canvas id="Bannercanvas" width="320" height="240" style="display:none"></canvas>
+
+                                                </div>
+
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <footer class="main-footer">
+                                        <div class="text-right control-btns">
+
+                                            <button type="button" class="btn load btn-default" style="min-width: 90px;" ng-click="ClearWelnessGoals()">Clear</button>
+                                            <button type="button" class="btn load btn-primary" style="min-width: 90px;" ng-click="SaveUpdateWelnessGoals()">{{newDet.Mode}}</button>
+                                        </div>
+                                    </footer>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </section>
+</div>

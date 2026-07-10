@@ -32,21 +32,21 @@ namespace PivotalERP.Areas.Fraction.Controllers
             }
             return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
-        [HttpPost]
-        public JsonNetResult GetDeliveryThroughById(int DeliveryThroughId)
-        {
-            BE.DeliveryThrough resVal = new BE.DeliveryThrough();
-            try
-            {
-                resVal = new PivotalERP.BL.DeliveryThrough(User.UserId, User.HostName, User.DBName).GetDeliveryThroughById(0, DeliveryThroughId);
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
+        //[HttpPost]
+        //public JsonNetResult GetDeliveryThroughById(int DeliveryThroughId)
+        //{
+        //    BE.DeliveryThrough resVal = new BE.DeliveryThrough();
+        //    try
+        //    {
+        //        resVal = new PivotalERP.BL.DeliveryThrough(User.UserId, User.HostName, User.DBName).GetDeliveryThroughById(0, DeliveryThroughId);
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
 
         [HttpPost]
         public JsonNetResult GetBillDetailbyId(int TranId, string TranType)

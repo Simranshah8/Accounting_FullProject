@@ -33,7 +33,7 @@ namespace Dynamic.BL.AppCMS
 		{
 			return db.getAllHerbs(_UserId, EntityId);
 		}
-		public BE.AppCMS.Herbs GetHerbsById(int EntityId, int HerbsId)
+		public BE.AppCMS.HerbsDetails GetHerbsById(int EntityId, int HerbsId)
 		{
 			return db.getHerbsById(_UserId, EntityId, HerbsId);
 		}

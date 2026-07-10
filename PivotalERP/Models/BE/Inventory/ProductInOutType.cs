@@ -1,21 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace PivotalERP.BE
+namespace Dynamic.BusinessEntity.Inventory
 {
-    public class ProductInOutType: ResponeValues
+    public class ProductInOutType : Account.MasterClass, LogDataForCreate
     {
-        public int? TranId { get; set; }
-        public string Name { get; set; } = "";
-        public string Code { get; set; } = "";
-        public bool IsActive { get; set; }
-        public int? BDId { get; set; }
+        public ProductInOutType()
+        { 
+        }
+        public int SNo { get; set; }
+        public int InOutTypeId { get; set; }
+        public int AutoNumber { get; set; }
+        
+
+        public int id
+        {
+            get
+            {
+                return InOutTypeId;
+            }
+        }
+         
     }
-    public class ProductInOutTypeCollection: System.Collections.Generic.List<ProductInOutType>
+
+    public class ProductInOutTypeCollections : System.Collections.Generic.List<ProductInOutType>
     {
+        public string ResponseMSG { get; set; }
         public bool IsSuccess { get; set; }
-        public string ResponseMSG { get; set; } = "";
     }
+     
 }

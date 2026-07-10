@@ -270,11 +270,9 @@ namespace Dynamic.DataAccess.Inventory
             cmd.Parameters.AddWithValue("@SubGroup4", IsDBNull(beData.SubGroup4));
             cmd.Parameters.AddWithValue("@SubGroup5", IsDBNull(beData.SubGroup5));
             cmd.Parameters.AddWithValue("@DebtorTypeId", IsDBNull(beData.DebtorTypeId));
-            //Added by Simran
             cmd.Parameters.AddWithValue("@VideoLink", IsDBNull(beData.VideoLink));
             cmd.Parameters.AddWithValue("@HerbsId", IsDBNull(beData.HerbsId));
-            //End
-
+            cmd.Parameters.AddWithValue("@WellnessGoalId", IsDBNull(beData.WellnessGoalId));
             //SubGroup1,SubGroup2,SubGroup3,SubGroup4,SubGroup5,
 
             if (isModify)
@@ -318,7 +316,7 @@ namespace Dynamic.DataAccess.Inventory
                         cmd.CommandText = "EXEC sp_set_session_context @key=N'UserId', @value=" + UserId.ToString() + ";delete PSSR from tbl_ProductSlabSellingRate PSSR where PSSR.ProductId=@ProductId;  delete PWR from tbl_ProductWiseRack PWR inner join TBL_GODOWN(nolock) G on G.GodownId=PWR.GodownId where PWR.ProductId=@ProductId and G.BDId=@BranchId;   delete from tbl_ProductWiseUDF where ProductId=@ProductId;  delete T1 from tbl_ProductWisePreferedSupplier(nolock) T1 where ProductId=@ProductId ; delete T2 from tbl_ProductCategoryDetails(nolock) T2 where ProductId=@ProductId; delete T3 from tbl_BranchWiseBaseUnit(nolock) T3 where ProductId=@ProductId; delete T4 from tbl_ProductCode(nolock) T4 where ProductId=@ProductId;delete T5 from tbl_UDFProduct(nolock) T5 where TranId=@ProductId; delete T6 from tbl_ProductAlternetUnit(nolock) T6 where ProductId=@ProductId ;  delete T7 from tbl_ProductCostRate(nolock) T7 where ProductId=@ProductId and T7.ItemAllocationId is null ; delete T8 from tbl_ProductSellingRate(nolock) T8 where ProductId=@ProductId and T8.ItemAllocationId is null  ; delete T9 from tbl_ProductOpeningDetails(nolock) T9 where ProductId=@ProductId ; delete T10 from tbl_ProductTradeRate(nolock) T10 where ProductId=@ProductId ; delete T11 from tbl_ProductMRPRate(nolock) T11 where ProductId=@ProductId ;";
                         cmd.ExecuteNonQuery();
 
-                        cmd.CommandText = "EXEC sp_set_session_context @key=N'UserId', @value=" + UserId.ToString() + "; update top(1) tbl_Product set HerbsId=@HerbsId,VideoLink=@VideoLink, DebtorTypeId=@DebtorTypeId, SubGroup1=@SubGroup1,SubGroup2=@SubGroup2,SubGroup3=@SubGroup3,SubGroup4=@SubGroup4,SubGroup5=@SubGroup5, Title=@Title,SubTitle=@SubTitle,EcommerceDescription=@EcommerceDescription,  PurchaseReturnLedgerId=@PurchaseReturnLedgerId,SalesReturnLedgerId=@SalesReturnLedgerId, Attributes=@Attributes,UDFKeyVal=@UDFKeyVal, BR_PurchaseLedgerId=@BR_PurchaseLedgerId,BR_SalesLedgerId=@BR_SalesLedgerId,Pur_MinRate=@Pur_MinRate,Pur_MaxRate=@Pur_MaxRate,Sal_MinRate=@Sal_MinRate,Sal_MaxRate=@Sal_MaxRate, ActiveSerialNo=@ActiveSerialNo, IncomeLedgerId=@IncomeLedgerId,ExpensesLedgerId=@ExpensesLedgerId,ValidateFixedProduct=@ValidateFixedProduct,AllowManualInputFixedProduct=@AllowManualInputFixedProduct, WeightConv=@WeightConv,WeightUnitId=@WeightUnitId,VolumConv=@VolumConv,VolumUnitId=@VolumUnitId, ActiveMultipleBatch=@ActiveMultipleBatch, ProfitMarginRate=@ProfitMarginRate, HSCode=@HSCode, AllowSalesPoint=@AllowSalesPoint,SalesPointPerQty=@SalesPointPerQty, PurchaseCostUnitId=@PurchaseCostUnitId,SalesCostUnitId=@SalesCostUnitId,PurchaseRateFormula=@PurchaseRateFormula,SalesRateFormula=@SalesRateFormula, DiscountOn=@DiscountOn, ExciseOn=@ExciseOn, IsActive=@IsActive, PurchaseUnitId=@PurchaseUnitId,SalesUnitId=@SalesUnitId, DealerCommissionRate=@DealerCommissionRate, SankuchanLoss=@SankuchanLoss,ActivitiesLoss=@ActivitiesLoss,SankuchanCostCenterId=@SankuchanCostCenterId,ActivitiesCostCenterId=@ActivitiesCostCenterId, RateOf=@RateOf,LossRate=@LossRate,CanEditRatePurchase=@CanEditRatePurchase, TermCondition=@TermCondition, PhotoPath=@PhotoPath,IsTaxable=@IsTaxable,ModifyBy=@UserId, TSCRate=@TSCRate,SNo=@SNo,ExDutyUnitId=@ExDutyUnitId,PurchaseCCRate=@PurchaseCCRate,SalesCCRate=@SalesCCRate,ProductBrandId=@ProductBrandId,ProductColorId=@ProductColorId,ProductShapeId=@ProductShapeId,ProductFlavourId=@ProductFlavourId,ProductDivisionId=@ProductDivisionId,PurchaseLedgerId=@PurchaseLedgerId,SalesLedgerId=@SalesLedgerId, WarrantyMonth=@WarrantyMonth,IncludingVat=@IncludingVat,OpeningForBranchId=@OpeningForBranchId,IsFixedProduct=@IsFixedProduct, CanEditRate=@CanEditRate,Name=@Name,Alias=@Alias,Code=@Code,Description=@Description,ProductGroupId=@ProductGroupId,ProductCategoriesId=@ProductCategoriesId,ProductTypeId=@ProductTypeId,ProductCompanyId=@ProductCompanyId,BaseUnitId=@BaseUnitId,ActiveAlternativeUnit=@ActiveAlternativeUnit,PartNo=@PartNo,PartNoAlias=@PartNoAlias,Remarks=@Remarks,CostingMethod=@CostingMethod,MarketValuationMethod=@MarketValuationMethod,VatRate=@VatRate,EXDutyRate=@EXDutyRate,IgnoreNegativeBalance=@IgnoreNegativeBalance,SetStandardRate=@SetStandardRate,SetGodownWiseOpening=@SetGodownWiseOpening,MaintainBatchWise=@MaintainBatchWise,UseMfgDate=@UseMfgDate,UseExpDate=@UseExpDate,OpeningQty=@OpeningQty,OpeningRate=@OpeningRate,OpeningAmount=@OpeningAmount,TreatAllSalesAsNewManufacture=@TreatAllSalesAsNewManufacture,TreatAllPurchaseAsConsumed=@TreatAllPurchaseAsConsumed,TreatllRejectionInwardAsScraped=@TreatllRejectionInwardAsScraped where ProductId=@ProductId ";
+                        cmd.CommandText = "EXEC sp_set_session_context @key=N'UserId', @value=" + UserId.ToString() + "; update top(1) tbl_Product set WellnessGoalId=@WellnessGoalId, HerbsId=@HerbsId,VideoLink=@VideoLink, DebtorTypeId=@DebtorTypeId, SubGroup1=@SubGroup1,SubGroup2=@SubGroup2,SubGroup3=@SubGroup3,SubGroup4=@SubGroup4,SubGroup5=@SubGroup5, Title=@Title,SubTitle=@SubTitle,EcommerceDescription=@EcommerceDescription,  PurchaseReturnLedgerId=@PurchaseReturnLedgerId,SalesReturnLedgerId=@SalesReturnLedgerId, Attributes=@Attributes,UDFKeyVal=@UDFKeyVal, BR_PurchaseLedgerId=@BR_PurchaseLedgerId,BR_SalesLedgerId=@BR_SalesLedgerId,Pur_MinRate=@Pur_MinRate,Pur_MaxRate=@Pur_MaxRate,Sal_MinRate=@Sal_MinRate,Sal_MaxRate=@Sal_MaxRate, ActiveSerialNo=@ActiveSerialNo, IncomeLedgerId=@IncomeLedgerId,ExpensesLedgerId=@ExpensesLedgerId,ValidateFixedProduct=@ValidateFixedProduct,AllowManualInputFixedProduct=@AllowManualInputFixedProduct, WeightConv=@WeightConv,WeightUnitId=@WeightUnitId,VolumConv=@VolumConv,VolumUnitId=@VolumUnitId, ActiveMultipleBatch=@ActiveMultipleBatch, ProfitMarginRate=@ProfitMarginRate, HSCode=@HSCode, AllowSalesPoint=@AllowSalesPoint,SalesPointPerQty=@SalesPointPerQty, PurchaseCostUnitId=@PurchaseCostUnitId,SalesCostUnitId=@SalesCostUnitId,PurchaseRateFormula=@PurchaseRateFormula,SalesRateFormula=@SalesRateFormula, DiscountOn=@DiscountOn, ExciseOn=@ExciseOn, IsActive=@IsActive, PurchaseUnitId=@PurchaseUnitId,SalesUnitId=@SalesUnitId, DealerCommissionRate=@DealerCommissionRate, SankuchanLoss=@SankuchanLoss,ActivitiesLoss=@ActivitiesLoss,SankuchanCostCenterId=@SankuchanCostCenterId,ActivitiesCostCenterId=@ActivitiesCostCenterId, RateOf=@RateOf,LossRate=@LossRate,CanEditRatePurchase=@CanEditRatePurchase, TermCondition=@TermCondition, PhotoPath=@PhotoPath,IsTaxable=@IsTaxable,ModifyBy=@UserId, TSCRate=@TSCRate,SNo=@SNo,ExDutyUnitId=@ExDutyUnitId,PurchaseCCRate=@PurchaseCCRate,SalesCCRate=@SalesCCRate,ProductBrandId=@ProductBrandId,ProductColorId=@ProductColorId,ProductShapeId=@ProductShapeId,ProductFlavourId=@ProductFlavourId,ProductDivisionId=@ProductDivisionId,PurchaseLedgerId=@PurchaseLedgerId,SalesLedgerId=@SalesLedgerId, WarrantyMonth=@WarrantyMonth,IncludingVat=@IncludingVat,OpeningForBranchId=@OpeningForBranchId,IsFixedProduct=@IsFixedProduct, CanEditRate=@CanEditRate,Name=@Name,Alias=@Alias,Code=@Code,Description=@Description,ProductGroupId=@ProductGroupId,ProductCategoriesId=@ProductCategoriesId,ProductTypeId=@ProductTypeId,ProductCompanyId=@ProductCompanyId,BaseUnitId=@BaseUnitId,ActiveAlternativeUnit=@ActiveAlternativeUnit,PartNo=@PartNo,PartNoAlias=@PartNoAlias,Remarks=@Remarks,CostingMethod=@CostingMethod,MarketValuationMethod=@MarketValuationMethod,VatRate=@VatRate,EXDutyRate=@EXDutyRate,IgnoreNegativeBalance=@IgnoreNegativeBalance,SetStandardRate=@SetStandardRate,SetGodownWiseOpening=@SetGodownWiseOpening,MaintainBatchWise=@MaintainBatchWise,UseMfgDate=@UseMfgDate,UseExpDate=@UseExpDate,OpeningQty=@OpeningQty,OpeningRate=@OpeningRate,OpeningAmount=@OpeningAmount,TreatAllSalesAsNewManufacture=@TreatAllSalesAsNewManufacture,TreatAllPurchaseAsConsumed=@TreatAllPurchaseAsConsumed,TreatllRejectionInwardAsScraped=@TreatllRejectionInwardAsScraped where ProductId=@ProductId ";
                     }
                     else
                     {
@@ -333,7 +331,7 @@ namespace Dynamic.DataAccess.Inventory
             }
             else
             {
-                cmd.CommandText = "EXEC sp_set_session_context @key=N'UserId', @value=" + UserId.ToString() + "; insert into tbl_Product(HerbsId,VideoLink,DebtorTypeId,SubGroup1,SubGroup2,SubGroup3,SubGroup4,SubGroup5,Title,SubTitle,EcommerceDescription,PurchaseReturnLedgerId,SalesReturnLedgerId,Attributes,UDFKeyVal,BR_PurchaseLedgerId,BR_SalesLedgerId,Pur_MinRate,Pur_MaxRate,Sal_MinRate,Sal_MaxRate,ActiveSerialNo,IncomeLedgerId,ExpensesLedgerId,ValidateFixedProduct,AllowManualInputFixedProduct,WeightConv,WeightUnitId,VolumConv,VolumUnitId,ProfitMarginRate,ActiveMultipleBatch,HSCode,GroupAutoNumber,AllowSalesPoint,SalesPointPerQty,PurchaseCostUnitId,SalesCostUnitId,PurchaseRateFormula,SalesRateFormula,DiscountOn,ExciseOn,PurchaseUnitId,SalesUnitId,DealerCommissionRate,SankuchanLoss,ActivitiesLoss,SankuchanCostCenterId,ActivitiesCostCenterId,RateOf,LossRate,CanEditRatePurchase,TermCondition,PhotoPath,IsTaxable,TSCRate,SNo,ExDutyUnitId,PurchaseCCRate,SalesCCRate,ProductBrandId,ProductColorId,ProductShapeId,ProductFlavourId,ProductDivisionId,PurchaseLedgerId,SalesLedgerId,WarrantyMonth,IncludingVat,BDId,OpeningForBranchId,IsFixedProduct,CanEditRate,AutoNumber,Name,Alias,Code,Description,ProductGroupId,ProductCategoriesId,ProductTypeId,ProductCompanyId,BaseUnitId,ActiveAlternativeUnit,PartNo,PartNoAlias,Remarks,CostingMethod,MarketValuationMethod,VatRate,EXDutyRate,IgnoreNegativeBalance,SetStandardRate,SetGodownWiseOpening,MaintainBatchWise,UseMfgDate,UseExpDate,OpeningQty,OpeningRate,OpeningAmount,TreatAllSalesAsNewManufacture,TreatAllPurchaseAsConsumed,TreatllRejectionInwardAsScraped,CreateBy) values(@HerbsId,@VideoLink,@DebtorTypeId,@SubGroup1,@SubGroup2,@SubGroup3,@SubGroup4,@SubGroup5,@Title,@SubTitle,@EcommerceDescription,@PurchaseReturnLedgerId,@SalesReturnLedgerId,@Attributes,@UDFKeyVal,@BR_PurchaseLedgerId,@BR_SalesLedgerId,@Pur_MinRate,@Pur_MaxRate,@Sal_MinRate,@Sal_MaxRate,@ActiveSerialNo,@IncomeLedgerId,@ExpensesLedgerId,@ValidateFixedProduct,@AllowManualInputFixedProduct,@WeightConv,@WeightUnitId,@VolumConv,@VolumUnitId,@ProfitMarginRate,@ActiveMultipleBatch,@HSCode,@GroupAutoNumber,@AllowSalesPoint,@SalesPointPerQty,@PurchaseCostUnitId,@SalesCostUnitId,@PurchaseRateFormula,@SalesRateFormula,@DiscountOn,@ExciseOn,@PurchaseUnitId,@SalesUnitId,@DealerCommissionRate,@SankuchanLoss,@ActivitiesLoss,@SankuchanCostCenterId,@ActivitiesCostCenterId,@RateOf,@LossRate,@CanEditRatePurchase,@TermCondition,@PhotoPath,@IsTaxable,@TSCRate,@SNo,@ExDutyUnitId,@PurchaseCCRate,@SalesCCRate,@ProductBrandId,@ProductColorId,@ProductShapeId,@ProductFlavourId,@ProductDivisionId,@PurchaseLedgerId,@SalesLedgerId,@WarrantyMonth,@IncludingVat,@BDId,@OpeningForBranchId,@IsFixedProduct,@CanEditRate,@AutoNumber,@Name,@Alias,@Code,@Description,@ProductGroupId,@ProductCategoriesId,@ProductTypeId,@ProductCompanyId,@BaseUnitId,@ActiveAlternativeUnit,@PartNo,@PartNoAlias,@Remarks,@CostingMethod,@MarketValuationMethod,@VatRate,@EXDutyRate,@IgnoreNegativeBalance,@SetStandardRate,@SetGodownWiseOpening,@MaintainBatchWise,@UseMfgDate,@UseExpDate,@OpeningQty,@OpeningRate,@OpeningAmount,@TreatAllSalesAsNewManufacture,@TreatAllPurchaseAsConsumed,@TreatllRejectionInwardAsScraped,@UserId) ";
+                cmd.CommandText = "EXEC sp_set_session_context @key=N'UserId', @value=" + UserId.ToString() + "; insert into tbl_Product(WellnessGoalId,HerbsId,VideoLink,DebtorTypeId,SubGroup1,SubGroup2,SubGroup3,SubGroup4,SubGroup5,Title,SubTitle,EcommerceDescription,PurchaseReturnLedgerId,SalesReturnLedgerId,Attributes,UDFKeyVal,BR_PurchaseLedgerId,BR_SalesLedgerId,Pur_MinRate,Pur_MaxRate,Sal_MinRate,Sal_MaxRate,ActiveSerialNo,IncomeLedgerId,ExpensesLedgerId,ValidateFixedProduct,AllowManualInputFixedProduct,WeightConv,WeightUnitId,VolumConv,VolumUnitId,ProfitMarginRate,ActiveMultipleBatch,HSCode,GroupAutoNumber,AllowSalesPoint,SalesPointPerQty,PurchaseCostUnitId,SalesCostUnitId,PurchaseRateFormula,SalesRateFormula,DiscountOn,ExciseOn,PurchaseUnitId,SalesUnitId,DealerCommissionRate,SankuchanLoss,ActivitiesLoss,SankuchanCostCenterId,ActivitiesCostCenterId,RateOf,LossRate,CanEditRatePurchase,TermCondition,PhotoPath,IsTaxable,TSCRate,SNo,ExDutyUnitId,PurchaseCCRate,SalesCCRate,ProductBrandId,ProductColorId,ProductShapeId,ProductFlavourId,ProductDivisionId,PurchaseLedgerId,SalesLedgerId,WarrantyMonth,IncludingVat,BDId,OpeningForBranchId,IsFixedProduct,CanEditRate,AutoNumber,Name,Alias,Code,Description,ProductGroupId,ProductCategoriesId,ProductTypeId,ProductCompanyId,BaseUnitId,ActiveAlternativeUnit,PartNo,PartNoAlias,Remarks,CostingMethod,MarketValuationMethod,VatRate,EXDutyRate,IgnoreNegativeBalance,SetStandardRate,SetGodownWiseOpening,MaintainBatchWise,UseMfgDate,UseExpDate,OpeningQty,OpeningRate,OpeningAmount,TreatAllSalesAsNewManufacture,TreatAllPurchaseAsConsumed,TreatllRejectionInwardAsScraped,CreateBy) values(@WellnessGoalId,@HerbsId,@VideoLink,@DebtorTypeId,@SubGroup1,@SubGroup2,@SubGroup3,@SubGroup4,@SubGroup5,@Title,@SubTitle,@EcommerceDescription,@PurchaseReturnLedgerId,@SalesReturnLedgerId,@Attributes,@UDFKeyVal,@BR_PurchaseLedgerId,@BR_SalesLedgerId,@Pur_MinRate,@Pur_MaxRate,@Sal_MinRate,@Sal_MaxRate,@ActiveSerialNo,@IncomeLedgerId,@ExpensesLedgerId,@ValidateFixedProduct,@AllowManualInputFixedProduct,@WeightConv,@WeightUnitId,@VolumConv,@VolumUnitId,@ProfitMarginRate,@ActiveMultipleBatch,@HSCode,@GroupAutoNumber,@AllowSalesPoint,@SalesPointPerQty,@PurchaseCostUnitId,@SalesCostUnitId,@PurchaseRateFormula,@SalesRateFormula,@DiscountOn,@ExciseOn,@PurchaseUnitId,@SalesUnitId,@DealerCommissionRate,@SankuchanLoss,@ActivitiesLoss,@SankuchanCostCenterId,@ActivitiesCostCenterId,@RateOf,@LossRate,@CanEditRatePurchase,@TermCondition,@PhotoPath,@IsTaxable,@TSCRate,@SNo,@ExDutyUnitId,@PurchaseCCRate,@SalesCCRate,@ProductBrandId,@ProductColorId,@ProductShapeId,@ProductFlavourId,@ProductDivisionId,@PurchaseLedgerId,@SalesLedgerId,@WarrantyMonth,@IncludingVat,@BDId,@OpeningForBranchId,@IsFixedProduct,@CanEditRate,@AutoNumber,@Name,@Alias,@Code,@Description,@ProductGroupId,@ProductCategoriesId,@ProductTypeId,@ProductCompanyId,@BaseUnitId,@ActiveAlternativeUnit,@PartNo,@PartNoAlias,@Remarks,@CostingMethod,@MarketValuationMethod,@VatRate,@EXDutyRate,@IgnoreNegativeBalance,@SetStandardRate,@SetGodownWiseOpening,@MaintainBatchWise,@UseMfgDate,@UseExpDate,@OpeningQty,@OpeningRate,@OpeningAmount,@TreatAllSalesAsNewManufacture,@TreatAllPurchaseAsConsumed,@TreatllRejectionInwardAsScraped,@UserId) ";
                 cmd.CommandText = cmd.CommandText + " ; SELECT Scope_Identity(); ";
             }
                 
@@ -1855,6 +1853,7 @@ namespace Dynamic.DataAccess.Inventory
                     //Added by Simran
                     if (!(reader[42] is System.DBNull)) beData.VideoLink = reader.GetString(42).Trim();
                     if (!(reader[43] is System.DBNull)) beData.HerbsId = reader.GetInt32(43);
+                    if (!(reader[44] is System.DBNull)) beData.WellnessGoalId = reader.GetInt32(44);
                     //End
                     try
                     {
@@ -4060,7 +4059,8 @@ select ProductId,PurchaseRate,SellRate,ApplicableFrom from tblProductRate where 
                     if (!(reader[49] is System.DBNull)) beData.ActiveSerialNo = Convert.ToBoolean(reader[49]);
                     //Added by Simran
                     if (!(reader[50] is System.DBNull)) beData.VideoLink = reader.GetString(50);
-                    if (!(reader[52] is System.DBNull)) beData.HerbsId = reader.GetInt32(51);
+                    if (!(reader[51] is System.DBNull)) beData.HerbsId = reader.GetInt32(51);
+                    if (!(reader[52] is System.DBNull)) beData.WellnessGoalId = reader.GetInt32(52);
                     //End
 
                     beData.IsSuccess = true;
@@ -4639,7 +4639,7 @@ select ProductId,PurchaseRate,SellRate,ApplicableFrom from tblProductRate where 
             return dataColl;
         }
 
-        public Dynamic.BusinessEntity.Inventory.ProductReviewQACollections GetProductReviewQA(int UserId)
+        public Dynamic.BusinessEntity.Inventory.ProductReviewQACollections GetProductReviewQA(int UserId, bool? ForApi = true)
         {
             Dynamic.BusinessEntity.Inventory.ProductReviewQACollections dataColl = new BusinessEntity.Inventory.ProductReviewQACollections();
             dal.OpenConnection();
@@ -4648,7 +4648,10 @@ select ProductId,PurchaseRate,SellRate,ApplicableFrom from tblProductRate where 
                 System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@UserId", UserId);
-                cmd.CommandText = "usp_GetProductReviewQA";
+                if (ForApi == true)
+                    cmd.CommandText = "usp_GetProductReviewQA";
+                else
+                    cmd.CommandText = "usp_GetAllProductQuestion";
                 System.Data.SqlClient.SqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
@@ -4661,6 +4664,7 @@ select ProductId,PurchaseRate,SellRate,ApplicableFrom from tblProductRate where 
                     if (!(reader[5] is System.DBNull)) beData.Answer = reader.GetString(5);
                     if (!(reader[6] is System.DBNull)) beData.AnswerBy = reader.GetString(6);
                     if (!(reader[7] is System.DBNull)) beData.AnswerDate = Convert.ToDateTime(reader[7]);
+                    if (!(reader[8] is System.DBNull)) beData.TranId = reader.GetInt32(8);
                     dataColl.Add(beData);
                 }
                 reader.Close();
@@ -4677,6 +4681,74 @@ select ProductId,PurchaseRate,SellRate,ApplicableFrom from tblProductRate where 
                 dal.CloseConnection();
             }
             return dataColl;
+        }
+
+        public ResponeValue UpdateQAnswer(int UserId, int TranId, string Answer)
+        {
+            ResponeValue resVal = new ResponeValue();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+
+            try
+            {
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@TranId", TranId);
+                cmd.Parameters.AddWithValue("@Answer", Answer);
+                cmd.CommandText = "update tbl_ProductReviewQA Set Answer=@Answer,AnswerBy=@UserId,AnswerDT=Getdate() where TranId=@TranId;";
+                cmd.ExecuteNonQuery();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "Product Question Updated Successfully";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
+        }
+        public ResponeValue DelQAnswer(int UserId, int TranId)
+        {
+            ResponeValue resVal = new ResponeValue();
+            dal.OpenConnection();
+            System.Data.SqlClient.SqlCommand cmd = dal.GetCommand();
+
+            try
+            {
+                cmd.Parameters.Clear();
+                cmd.Parameters.AddWithValue("@UserId", UserId);
+                cmd.Parameters.AddWithValue("@TranId", TranId);
+                cmd.CommandText = "Delete tbl_ProductReviewQA where TranId=@TranId;";
+                cmd.ExecuteNonQuery();
+                resVal.IsSuccess = true;
+                resVal.ResponseMSG = "Product Question Updated Successfully";
+            }
+            catch (System.Data.SqlClient.SqlException ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            catch (Exception ee)
+            {
+
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            finally
+            {
+                dal.CloseConnection();
+            }
+            return resVal;
         }
 
     }

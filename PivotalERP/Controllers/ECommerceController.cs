@@ -1,20 +1,269 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PivotalERP.Models;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http;
+
+using PivotalERP.Models;
+using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json;
 using System.Web.Http.Description;
+using System.Web.UI.WebControls;
+using System.Diagnostics;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace PivotalERP.Controllers
 {
-    public class ECommerceController : PivotalERP.Controllers.APIBaseController
+    public class EcommerceController : APIBaseController
     {
-        // GET: ECommerce
-        //Hero Section Starts
+        // POST v1/GetProductGroup
+        /// <summary>
+        /// Get Product Groupr
+        /// </summary>        
+        /// <returns></returns>
+        [HttpGet]
+        [ResponseType(typeof(ResponeValue))]
+        public async Task<IHttpActionResult> GetProductGroup()
+        {
+            var dataColl = new Dynamic.BusinessLogic.Inventory.ProductGroup(hostName, dbName).getProductGroupEC(UserId);
+
+            var retVal = new
+            {
+                DataColl = dataColl,
+                ResponseMSG = dataColl.ResponseMSG,
+                IsSuccess = dataColl.IsSuccess
+            };
+
+            return Json(retVal, new JsonSerializerSettings
+            {
+                ContractResolver = new JsonContractResolver()
+                {
+                    IsInclude = false,
+                    ExcludeProperties = new List<string>
+                                 {
+                                    "ExpireDateTime","RId","CUserId","CUserId","ResponseId","EntityId","ErrorNumber","CUserName","DropDownList","FieldAfter","Formula","Source","ColWidth","JsonStr","SelectOptions"
+                                 }
+                }
+            });
+        }
+
+        // POST v1/GetProductCategory
+        /// <summary>
+        /// Get Product Category
+        /// </summary>        
+        /// <returns></returns>
+        [HttpGet]
+        [ResponseType(typeof(ResponeValue))]
+        public async Task<IHttpActionResult> GetProductCategory()
+        {
+            var dataColl = new Dynamic.BusinessLogic.Inventory.ProductCategories(hostName, dbName).getProductCategoriesForEC(UserId);
+
+            var retVal = new
+            {
+                DataColl = dataColl,
+                ResponseMSG = dataColl.ResponseMSG,
+                IsSuccess = dataColl.IsSuccess
+            };
+
+            return Json(retVal, new JsonSerializerSettings
+            {
+                ContractResolver = new JsonContractResolver()
+                {
+                    IsInclude = false,
+                    ExcludeProperties = new List<string>
+                                 {
+                                    "ExpireDateTime","RId","CUserId","CUserId","ResponseId","EntityId","ErrorNumber","CUserName","DropDownList","FieldAfter","Formula","Source","ColWidth","JsonStr","SelectOptions"
+                                 }
+                }
+            });
+        }
+
+        // POST v1/GetProductBrand
+        /// <summary>
+        /// Get Product Brand
+        /// </summary>        
+        /// <returns></returns>
+        [HttpGet]
+        [ResponseType(typeof(ResponeValue))]
+        public async Task<IHttpActionResult> GetProductBrand()
+        {
+            var dataColl = new Dynamic.BusinessLogic.Inventory.ProductBrand(hostName, dbName).getProductBrandForEC(UserId);
+
+            var retVal = new
+            {
+                DataColl = dataColl,
+                ResponseMSG = dataColl.ResponseMSG,
+                IsSuccess = dataColl.IsSuccess
+            };
+
+            return Json(retVal, new JsonSerializerSettings
+            {
+                ContractResolver = new JsonContractResolver()
+                {
+                    IsInclude = false,
+                    ExcludeProperties = new List<string>
+                                 {
+                                    "ExpireDateTime","RId","CUserId","CUserId","ResponseId","EntityId","ErrorNumber","CUserName","DropDownList","FieldAfter","Formula","Source","ColWidth","JsonStr","SelectOptions"
+                                 }
+                }
+            });
+        }
+
+
+        // POST v1/GetProducts
+        /// <summary>
+        /// Get Product 
+        /// </summary>        
+        /// <returns></returns>
+        [HttpPost]
+        [ResponseType(typeof(ResponeValue))]
+        public async Task<IHttpActionResult> GetProducts([FromBody] TableFilter filter)
+        {
+            filter.UserId = UserId;
+            var dataColl = new Dynamic.DataAccess.Common.ProductDB(hostName, dbName).getProductSearchList(filter);
+            filter.TotalRows = dataColl.TotalRows;
+            //return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.TotalRows, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+            var retVal = new
+            {
+                Filter = filter,
+                DataColl = dataColl,
+                ResponseMSG = dataColl.ResponseMSG,
+                IsSuccess = dataColl.IsSuccess
+            };
+
+            return Json(retVal, new JsonSerializerSettings
+            {
+            });
+        }
+
+
+
+
+
+        // POST v1/ProductReview
+        /// <summary>
+        /// Add Product Review   
+        /// </summary>        
+        /// <returns></returns>
+        //[HttpPost]
+        //[ResponseType(typeof(ResponeValue))]
+        //public async Task<IHttpActionResult> ProductReview([FromBody] JObject para)
+        //{
+        //    int ProductId;
+        //    int Rating;
+        //    string Remarks = "";
+        //    ProductId = ConvertValue<int>(para, "ProductId");
+        //    Rating = ConvertValue<int>(para, "Rating");
+        //    Remarks = ConvertValue<string>(para, "Remarks");
+
+        //    var retVal = new Dynamic.BusinessLogic.Inventory.Product(hostName, dbName).ProductRatingView(UserId, ProductId, Rating, Remarks);
+        //    return Json(retVal, new JsonSerializerSettings
+        //    {
+        //    });
+        //}
+
+        // POST v1/ProductReview
+        /// <summary>
+        /// Add Product Review   
+        /// </summary>        
+        /// <returns></returns>
+        //[HttpPost]
+        //[ResponseType(typeof(ResponeValue))]
+        //public async Task<IHttpActionResult> ProductQA([FromBody] JObject para)
+        //{
+        //    int? ProductId;
+        //    string Question = "", QueName = "";
+        //    ProductId = ConvertValue<int>(para, "ProductId", 0);
+
+        //    if (ProductId == 0)
+        //        ProductId = null;
+
+        //    Question = ConvertValue<string>(para, "Question");
+
+        //    QueName = ConvertValue<string>(para, "QueName");
+
+        //    var retVal = new Dynamic.BusinessLogic.Inventory.Product(hostName, dbName).ProductQA(UserId, ProductId, Question, QueName);
+        //    return Json(retVal, new JsonSerializerSettings
+        //    {
+        //    });
+        //}
+
+        //[HttpPost]
+        //[System.Web.Mvc.AllowAnonymous]
+        //[ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
+        //public IHttpActionResult GetProductReview([FromBody] JObject para)
+        //{
+        //    Dynamic.BusinessEntity.Inventory.ProductReviewCollections DataColl = new Dynamic.BusinessEntity.Inventory.ProductReviewCollections();
+        //    try
+        //    {
+        //        int? ProductId;
+        //        ProductId = ConvertValue<int>(para, "ProductId", 0);
+        //        DataColl = new Dynamic.BusinessLogic.Inventory.Product(hostName, dbName).GetProductReview(UserId, ProductId);
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        DataColl.IsSuccess = false;
+        //        DataColl.ResponseMSG = ee.Message;
+        //    }
+        //    var retVal = new
+        //    {
+        //        ResponseMSG = DataColl.ResponseMSG,
+        //        IsSuccess = DataColl.IsSuccess,
+        //        DataColl = DataColl
+        //    };
+        //    return Json(retVal, new JsonSerializerSettings
+        //    {
+        //        ContractResolver = new JsonContractResolver()
+        //        {
+        //            IsInclude = true,
+        //            IncludeProperties = new List<string>
+        //            {
+        //                "DataColl","IsSuccess","ResponseMSG","ProductId","Rating","ProductName","Remarks","RatedBy","ReviewDate"
+        //            }
+        //        }
+        //    });
+        //}
+
+        [HttpPost]
+        [System.Web.Mvc.AllowAnonymous]
+        [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
+        public IHttpActionResult GetProductReviewQA()
+        {
+            Dynamic.BusinessEntity.Inventory.ProductReviewQACollections DataColl = new Dynamic.BusinessEntity.Inventory.ProductReviewQACollections();
+            try
+            {
+                DataColl = new Dynamic.BusinessLogic.Inventory.Product(hostName, dbName).GetProductReviewQA(UserId);
+            }
+            catch (Exception ee)
+            {
+                DataColl.IsSuccess = false;
+                DataColl.ResponseMSG = ee.Message;
+            }
+            var retVal = new
+            {
+                ResponseMSG = DataColl.ResponseMSG,
+                IsSuccess = DataColl.IsSuccess,
+                DataColl = DataColl
+            };
+            return Json(retVal, new JsonSerializerSettings
+            {
+                ContractResolver = new JsonContractResolver()
+                {
+                    IsInclude = true,
+                    IncludeProperties = new List<string>
+                    {
+                        "DataColl","IsSuccess","ResponseMSG","ProductId","ProductName","Question","QuestionBy","QuestionDate","Answer","AnswerBy","AnswerDate"
+                    }
+                }
+            });
+        }
+
+
+
+        #region Hero Section
         [HttpPost]
         [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
         public async Task<IHttpActionResult> SaveHeroSection()
@@ -182,9 +431,9 @@ namespace PivotalERP.Controllers
             });
         }
 
-        //Hero Section Ends
+        #endregion
 
-        //Tag Section Strats
+        #region Tag Section Strats
         [HttpPost]
         [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
         public async Task<IHttpActionResult> SaveTagSection()
@@ -246,13 +495,14 @@ namespace PivotalERP.Controllers
         }
 
         [HttpPost]
+        [System.Web.Mvc.AllowAnonymous]
         [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
         public IHttpActionResult GetAllTagSection()
         {
             Dynamic.BE.AppCMS.TagSectionCollections dataColl = new Dynamic.BE.AppCMS.TagSectionCollections();
             try
             {
-                dataColl = new Dynamic.BL.AppCMS.TagSection(1, hostName, dbName).GetAllTagSection(0);
+                dataColl = new Dynamic.BL.AppCMS.TagSection(UserId, hostName, dbName).GetAllTagSection(0);
             }
             catch (Exception ee)
             {
@@ -352,9 +602,9 @@ namespace PivotalERP.Controllers
                 }
             });
         }
-        //Tag Section Ends
+        #endregion
 
-        //Store Locator Section Starts
+        #region Store Locator Section Strats
         [HttpPost]
         [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
         public async Task<IHttpActionResult> SaveStoreLocator()
@@ -522,80 +772,20 @@ namespace PivotalERP.Controllers
                 }
             });
         }
-        //Store Locator Section Ends\
+        #endregion
 
-        //Herbs section Starts
-        [HttpPost]
-        [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
-        public async Task<IHttpActionResult> SaveHerbs()
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                if (!Request.Content.IsMimeMultipartContent())
-                {
-                    resVal.IsSuccess = false;
-                    resVal.ResponseMSG = HttpStatusCode.UnsupportedMediaType.ToString();
-                }
-                else
-                {
-                    var provider = new FormDataStreamProvider(GetPath("~/Attachments/appcms"), UserId, 0);
-                    await Request.Content.ReadAsMultipartAsync(provider);
 
-                    string jsonData = provider.FormData["paraData"];
-                    if (string.IsNullOrEmpty(jsonData))
-                        return BadRequest("No data found");
-                    Dynamic.BE.AppCMS.Herbs para = DeserializeObject<Dynamic.BE.AppCMS.Herbs>(jsonData);
-                    if (para == null)
-                    {
-                        return BadRequest("No form data found");
-                    }
-                    else
-                    {
-                        if (provider.FileData.Count > 0)
-                        {
-                            Dynamic.BusinessEntity.GeneralDocumentCollections data = GetAttachmentDocuments(provider.FileData);
-                            foreach (var docV in data)
-                            {
-                                if (docV.ParaName == "Photo")
-                                    para.Photo = docV.DocPath;
-
-                                if (docV.ParaName == "BannerPhoto")
-                                    para.Banner = docV.DocPath;
-                            }
-                        }
-
-                        if (!para.HerbsId.HasValue)
-                            para.HerbsId = 0;
-                        Dynamic.BL.AppCMS.Herbs jrn = new Dynamic.BL.AppCMS.Herbs(UserId, hostName, dbName);
-                        para.CUserId = UserId;
-                        resVal = jrn.SaveFormData(para);
-                    }
-                }
-                var retVal = new
-                {
-                    ResponseMSG = resVal.ResponseMSG,
-                    IsSuccess = resVal.IsSuccess
-                };
-                return Json(retVal, new JsonSerializerSettings
-                {
-                });
-
-            }
-            catch (Exception ee)
-            {
-                return BadRequest(ee.Message);
-            }
-        }
+        #region"Herbs"
 
         [HttpPost]
+        [System.Web.Mvc.AllowAnonymous]
         [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
         public IHttpActionResult GetAllHerbs()
         {
             Dynamic.BE.AppCMS.HerbsCollections dataColl = new Dynamic.BE.AppCMS.HerbsCollections();
             try
             {
-                dataColl = new Dynamic.BL.AppCMS.Herbs(1, hostName, dbName).GetAllHerbs(0);
+                dataColl = new Dynamic.BL.AppCMS.Herbs(UserId, hostName, dbName).GetAllHerbs(0);
             }
             catch (Exception ee)
             {
@@ -624,33 +814,71 @@ namespace PivotalERP.Controllers
             });
         }
 
+        //[HttpPost]
+        //[System.Web.Mvc.AllowAnonymous]
+        //[ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
+        //public IHttpActionResult GetHerbsById([FromBody] JObject para)
+        //{
+        //    Dynamic.BE.AppCMS.HerbsDetails beData = new Dynamic.BE.AppCMS.HerbsDetails();
+        //    try
+        //    {
+        //        int HerbsId;
+        //        HerbsId = ConvertValue<int>(para, "HerbsId", 0);
+
+        //        beData = new Dynamic.BL.AppCMS.Herbs(UserId, hostName, dbName).GetHerbsById(0, HerbsId);
+
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        beData.IsSuccess = false;
+        //        beData.ResponseMSG = ee.Message;
+        //    }
+        //    var retVal = new
+        //    {
+        //        ResponseMSG = beData.ResponseMSG,
+        //        IsSuccess = beData.IsSuccess,
+        //        DataColl = beData
+        //    };
+        //    return Json(retVal, new JsonSerializerSettings
+        //    {
+        //        //ContractResolver = new JsonContractResolver()
+        //        //{
+        //        //    IsInclude = true,
+        //        //    IncludeProperties = new List<string>
+        //        //    {
+        //        //        "DataColl","IsSuccess","ResponseMSG","HerbsId","Name","ScientificName","Badge","HsubTitle","SEOTitle","SEODescription","Description","AboutPara","Banner","Photo","Tag"
+        //        //    }
+        //        //}
+        //    });
+        //}
+
+        #endregion
+
+        #region "WelnessGoals"
 
         [HttpPost]
         [System.Web.Mvc.AllowAnonymous]
         [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
-        public IHttpActionResult GetHerbsById([FromBody] JObject para)
+        public IHttpActionResult GetAllWelnessGoals()
         {
-            Dynamic.BE.AppCMS.Herbs beData = new Dynamic.BE.AppCMS.Herbs();
+            Dynamic.BE.AppCMS.WelnessGoalsCollections dataColl = new Dynamic.BE.AppCMS.WelnessGoalsCollections();
             try
             {
-                int HerbsId = 0;
-                if (para.ContainsKey("HerbsId"))
-                    HerbsId = Convert.ToInt32(para["HerbsId"]);
-
-                beData = new Dynamic.BL.AppCMS.Herbs(UserId, hostName, dbName).GetHerbsById(0, HerbsId);
-
+                dataColl = new Dynamic.BL.AppCMS.WelnessGoals(UserId, hostName, dbName).GetAllWelnessGoals(0);
             }
             catch (Exception ee)
             {
-                beData.IsSuccess = false;
-                beData.ResponseMSG = ee.Message;
+                dataColl.IsSuccess = false;
+                dataColl.ResponseMSG = ee.Message;
             }
+
             var retVal = new
             {
-                ResponseMSG = beData.ResponseMSG,
-                IsSuccess = beData.IsSuccess,
-                DataColl = beData
+                ResponseMSG = dataColl.ResponseMSG,
+                IsSuccess = dataColl.IsSuccess,
+                DataColl = dataColl
             };
+
             return Json(retVal, new JsonSerializerSettings
             {
                 ContractResolver = new JsonContractResolver()
@@ -658,46 +886,13 @@ namespace PivotalERP.Controllers
                     IsInclude = true,
                     IncludeProperties = new List<string>
                     {
-                        "DataColl","IsSuccess","ResponseMSG","HerbsId","Name","ScientificName","Badge","HsubTitle","SEOTitle","SEODescription","Description","AboutPara","Banner","Photo","Tag"
+                        "DataColl","IsSuccess","ResponseMSG","id","text","WelnessId","Name","Banner","Image","Description","Badge","HerbId"
                     }
                 }
             });
         }
 
-        [HttpPost]
-        [System.Web.Mvc.AllowAnonymous]
-        [ResponseType(typeof(List<Dynamic.APIEnitity.Common>))]
-        public IHttpActionResult DeleteHerbsById([FromBody] JObject para)
-        {
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                int HerbsId = 0;
-                if (para.ContainsKey("HerbsId"))
-                    HerbsId = Convert.ToInt32(para["HerbsId"]);
-
-                resVal = new Dynamic.BL.AppCMS.Herbs(UserId, hostName, dbName).DeleteById(0, HerbsId);
-
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
-            }
-            return Json(resVal, new JsonSerializerSettings
-            {
-                ContractResolver = new JsonContractResolver()
-                {
-                    IsInclude = true,
-                    IncludeProperties = new List<string>
-                        {
-                            "IsSuccess","ResponseMSG"
-                        }
-                }
-            });
-        }
-
-        //Herbs section Ends
+        #endregion
 
     }
 }

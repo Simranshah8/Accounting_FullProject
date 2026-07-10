@@ -645,6 +645,7 @@ namespace Dynamic.BusinessEntity.Inventory
         public string VolumUnit { get; set; }
         public string VideoLink { get; set; }   //Added by Simran
         public int? HerbsId { get; set; }   //Added by Simran
+        public int? WellnessGoalId { get; set; }   //Added by Simran
 
         public Dictionary<string, object> LastRateList { get; set; } = new Dictionary<string, object>();
 
@@ -1170,6 +1171,7 @@ namespace Dynamic.BusinessEntity.Inventory
     }
     public class ProductReviewQA
     {
+        public int? TranId { get; set; }
         public int? ProductId { get; set; }
         public string ProductName { get; set; } = "";
         public string Question { get; set; } = "";

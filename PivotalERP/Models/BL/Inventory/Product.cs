@@ -154,9 +154,17 @@ namespace Dynamic.BusinessLogic.Inventory
         {
             return db.GetProductReview(UserId, ProductId);
         }
-        public Dynamic.BusinessEntity.Inventory.ProductReviewQACollections GetProductReviewQA(int UserId)
+        public Dynamic.BusinessEntity.Inventory.ProductReviewQACollections GetProductReviewQA(int UserId, bool? ForApi = true)
         {
-            return db.GetProductReviewQA(UserId);
+            return db.GetProductReviewQA(UserId, ForApi);
+        }
+        public ResponeValue UpdateQAnswer(int UserId, int TranId, string Answer)
+        {
+            return db.UpdateQAnswer(UserId, TranId, Answer);
+        }
+        public ResponeValue DelQAnswer(int UserId, int TranId)
+        {
+            return db.DelQAnswer(UserId, TranId);
         }
 
         public ResponeValues IsValidData(ref Dynamic.BusinessEntity.Inventory.Product beData, bool IsModify)

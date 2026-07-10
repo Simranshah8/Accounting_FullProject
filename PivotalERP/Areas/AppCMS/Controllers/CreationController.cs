@@ -1562,7 +1562,7 @@ namespace PivotalERP.Areas.AppCMS.Controllers
                 var beData = DeserializeObject<Dynamic.BE.AppCMS.Creation.WeekendCollections>(Request["jsonData"]);
                 if (beData != null)
                 {
-                    
+
                     foreach (var v in beData)
                     {
                         v.CUserId = User.UserId;
@@ -1857,11 +1857,11 @@ namespace PivotalERP.Areas.AppCMS.Controllers
             return new JsonNetResult() { Data = null, TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
 
+        #region "HeroSection"
         public ActionResult HeroSection()
         {
             return View();
         }
-        #region "HeroSection"
         [HttpPost]
         public JsonNetResult SaveHeroSection()
         {
@@ -2073,11 +2073,14 @@ namespace PivotalERP.Areas.AppCMS.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
         #endregion
+
+        #region "Herbs"
+
         public ActionResult Herbs()
         {
             return View();
         }
-        #region "Herbs"
+
         [ValidateInput(false)]
         [HttpPost]
         public JsonNetResult SaveHerbs()
@@ -2098,7 +2101,7 @@ namespace PivotalERP.Areas.AppCMS.Controllers
                             var photoDoc = GetAttachmentDocuments(photoLocation, HPhoto, true);
                             beData.PhotoB = photoDoc.Data;
                             beData.Photo = photoDoc.DocPath;
-                        } 
+                        }
                         if (BPhoto != null)
                         {
                             var photoDoc = GetAttachmentDocuments(photoLocation, BPhoto, true);
@@ -2154,47 +2157,44 @@ namespace PivotalERP.Areas.AppCMS.Controllers
         }
         #endregion
 
-        public ActionResult ProductDocuments()
+        #region "WelnessGoals"
+        public ActionResult WelnessGoals()
         {
             return View();
         }
-        [ValidateInput(false)]
-        [HttpPost]
-        public JsonNetResult SaveProductDocuments()
+
+        [HttpPost, ValidateInput(false)]
+        public JsonNetResult SaveWelnessGoals()
         {
             ResponeValues resVal = new ResponeValues();
             try
             {
-                var beData = DeserializeObject<Dynamic.BE.AppCMS.ProductDocuments>(Request["jsonData"]);
+                var beData = DeserializeObject<Dynamic.BE.AppCMS.WelnessGoals>(Request["jsonData"]);
                 if (beData != null)
                 {
                     if (Request.Files.Count > 0)
                     {
-                        var allFiles = Request.Files;
-                        int find = 0;
-                        foreach (var doc in beData.DocumentColl)
+                        var filesColl = Request.Files;
+                        var Image = filesColl["image"];
+                        var BPhoto = filesColl["Bannerphoto"];
+                        if (Image != null)
                         {
-                            HttpPostedFileBase file = allFiles["file" + find];
-                            if (file != null)
-                            {
-                                var newDoc = GetAttachmentDocuments(photoLocation, file);
-                                if (newDoc != null)
-                                {
-                                    doc.Name = newDoc.Name;
-                                    doc.Extension = newDoc.Extension;
-                                    doc.DocPath = newDoc.DocPath;
-                                    doc.DocFullPath = newDoc.DocFullPath;
-                                    doc.ParaName = newDoc.ParaName;
-                                }
-                            }
-                            find++;
+                            var photoDoc = GetAttachmentDocuments(photoLocation, Image, true);
+                            beData.ImageB = photoDoc.Data;
+                            beData.Image = photoDoc.DocPath;
+                        }
+                        if (BPhoto != null)
+                        {
+                            var photoDoc = GetAttachmentDocuments(photoLocation, BPhoto, true);
+                            beData.ImageB = photoDoc.Data;
+                            beData.Banner = photoDoc.DocPath;
                         }
                     }
                     beData.CUserId = User.UserId;
-                    if (!beData.ProductId.HasValue)
-                        beData.ProductId = 0;
+                    if (!beData.WelnessId.HasValue)
+                        beData.WelnessId = 0;
 
-                    resVal = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
+                    resVal = new Dynamic.BL.AppCMS.WelnessGoals(User.UserId, User.HostName, User.DBName).SaveFormData(beData);
 
                 }
                 else
@@ -2209,34 +2209,79 @@ namespace PivotalERP.Areas.AppCMS.Controllers
             }
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
-
         [HttpPost]
-        public JsonNetResult GetAllProductDoc()
+        public JsonNetResult GetAllWelnessGoals()
         {
-            var dataColl = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).GetAllProductDoc(0);
+            var dataColl = new Dynamic.BL.AppCMS.WelnessGoals(User.UserId, User.HostName, User.DBName).GetAllWelnessGoals(0);
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
         [HttpPost]
-        public JsonNetResult GetProductDocById(int ProductId)
+        public JsonNetResult GetWelnessGoalsById(int WelnessId)
         {
-            var dataColl = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).GetProductDocById(0, ProductId);
+            var dataColl = new Dynamic.BL.AppCMS.WelnessGoals(User.UserId, User.HostName, User.DBName).GetWelnessGoalsById(0, WelnessId);
             return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.IsSuccess ? 1 : 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
         }
+        [HttpPost]
+        public JsonNetResult DelWelnessGoals(int WelnessId)
+        {
+            ResponeValues resVal = new ResponeValues();
+            try
+            {
+                resVal = new Dynamic.BL.AppCMS.WelnessGoals(User.UserId, User.HostName, User.DBName).DeleteById(0, WelnessId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        #endregion
 
-        //[HttpPost]
-        //public JsonNetResult DeleteProductDoc(int ProductId)
-        //{
-        //    ResponeValues resVal = new ResponeValues();
-        //    try
-        //    {
-        //        resVal = new Dynamic.BL.AppCMS.ProductDocuments(User.UserId, User.HostName, User.DBName).DeleteProductDoc(0, ProductId);
-        //    }
-        //    catch (Exception ee)
-        //    {
-        //        resVal.IsSuccess = false;
-        //        resVal.ResponseMSG = ee.Message;
-        //    }
-        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        //}
+        #region "QuestionAnswer"
+        public ActionResult QuestionAnswer()
+        {
+            return View();
+        }
+        [HttpPost]
+        public JsonNetResult GetProductReviewQA()
+        {
+            var dataColl = new Dynamic.BusinessLogic.Inventory.Product(User.HostName, User.DBName).GetProductReviewQA(User.UserId,false);
+            return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult UpdateQAnswer(int TranId,string Answer)
+        {
+            ResponeValue resVal = new ResponeValue();
+            try
+            {
+                resVal = new Dynamic.BusinessLogic.Inventory.Product(User.HostName, User.DBName).UpdateQAnswer(User.UserId, TranId, Answer);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+
+        [HttpPost]
+        public JsonNetResult DelQAnswer(int TranId)
+        {
+            ResponeValue resVal = new ResponeValue();
+            try
+            {
+                resVal = new Dynamic.BusinessLogic.Inventory.Product(User.HostName, User.DBName).DelQAnswer(User.UserId, TranId);
+            }
+            catch (Exception ee)
+            {
+                resVal.IsSuccess = false;
+                resVal.ResponseMSG = ee.Message;
+            }
+            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        }
+        #endregion
+
     }
 }

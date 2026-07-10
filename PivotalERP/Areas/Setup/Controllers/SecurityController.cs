@@ -209,25 +209,25 @@ namespace PivotalERP.Areas.Setup.Controllers
             return View();
         }
 
-        [HttpPost]
-        public JsonNetResult GetSAPApiLog(DateTime dateFrom, DateTime dateTo)
-        {
+        //[HttpPost]
+        //public JsonNetResult GetSAPApiLog(DateTime dateFrom, DateTime dateTo)
+        //{
 
-            PivotalOtherLib.SAP_BE.SAPTranApiLogCollections dataColl = new PivotalOtherLib.SAP_BE.SAPTranApiLogCollections();
-            try
-            {
-                dataColl = new PivotalOtherLib.Global.SAPConnection(User.HostName, User.DBName).getTranApiLog(User.UserId, dateFrom, dateTo);
+        //    PivotalOtherLib.SAP_BE.SAPTranApiLogCollections dataColl = new PivotalOtherLib.SAP_BE.SAPTranApiLogCollections();
+        //    try
+        //    {
+        //        dataColl = new PivotalOtherLib.Global.SAPConnection(User.HostName, User.DBName).getTranApiLog(User.UserId, dateFrom, dateTo);
 
-                return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-            }
-            catch (Exception ee)
-            {
-                dataColl.IsSuccess = false;
-                dataColl.ResponseMSG = ee.Message;
+        //        return new JsonNetResult() { Data = dataColl, TotalCount = dataColl.Count, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        dataColl.IsSuccess = false;
+        //        dataColl.ResponseMSG = ee.Message;
 
-            }
-            return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
-        }
+        //    }
+        //    return new JsonNetResult() { Data = "", TotalCount = 0, IsSuccess = dataColl.IsSuccess, ResponseMSG = dataColl.ResponseMSG };
+        //}
 
         [HttpPost]
         public JsonNetResult PushTranToSAP_H(int voucherType, int? BranchId)
@@ -250,149 +250,149 @@ namespace PivotalERP.Areas.Setup.Controllers
             return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
         }
 
-        [HttpPost]
-        public JsonNetResult PushTranToSAP(int TranId, int voucherType)
-        {
+        //[HttpPost]
+        //public JsonNetResult PushTranToSAP(int TranId, int voucherType)
+        //{
 
-            ResponeValues resVal = new ResponeValues();
-            try
-            {
-                Dynamic.BusinessEntity.Account.VoucherTypes vt = (Dynamic.BusinessEntity.Account.VoucherTypes)voucherType;
-                resVal = pushToSAP(TranId, vt);
+        //    ResponeValues resVal = new ResponeValues();
+        //    try
+        //    {
+        //        Dynamic.BusinessEntity.Account.VoucherTypes vt = (Dynamic.BusinessEntity.Account.VoucherTypes)voucherType;
+        //        resVal = pushToSAP(TranId, vt);
 
-                return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-            }
-            catch (Exception ee)
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = ee.Message;
+        //        return new JsonNetResult() { Data = resVal, TotalCount = 1, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //    }
+        //    catch (Exception ee)
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = ee.Message;
 
-            }
-            return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
-        private ResponeValues pushToSAP(int tranId, Dynamic.BusinessEntity.Account.VoucherTypes vt)
-        {
-            ResponeValues resVal = new ResponeValues();
-            var tranBL = new PivotalOtherLib.Global.SAPConnection(User.UserId, hostName, dbName);
-            switch (vt)
-            {
-                case Dynamic.BusinessEntity.Account.VoucherTypes.Receipt:
-                    resVal = tranBL.SaveReceiptByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdAcc(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Receipt);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailAcc(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Receipt);
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.Payment:
-                    resVal = tranBL.SavePaymentByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdAcc(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Payment);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailAcc(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Payment);
+        //    }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
+        //private ResponeValues pushToSAP(int tranId, Dynamic.BusinessEntity.Account.VoucherTypes vt)
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    var tranBL = new PivotalOtherLib.Global.SAPConnection(User.UserId, hostName, dbName);
+        //    switch (vt)
+        //    {
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.Receipt:
+        //            resVal = tranBL.SaveReceiptByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdAcc(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Receipt);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailAcc(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Receipt);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.Payment:
+        //            resVal = tranBL.SavePaymentByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdAcc(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Payment);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailAcc(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Payment);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.Journal:
-                case Dynamic.BusinessEntity.Account.VoucherTypes.ReceiptNoteAdditionalInvoice:
-                    resVal = tranBL.SaveGRNLandedCostByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdAcc(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Journal);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailAcc(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Journal);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.Journal:
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.ReceiptNoteAdditionalInvoice:
+        //            resVal = tranBL.SaveGRNLandedCostByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdAcc(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Journal);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailAcc(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Account.Transaction.TranTypes.Journal);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.ReceiptNote:
-                    resVal = tranBL.SaveReceiptNoteByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.ReceiptNote);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.ReceiptNote);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.ReceiptNote:
+        //            resVal = tranBL.SaveReceiptNoteByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.ReceiptNote);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.ReceiptNote);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.DeliveryNote:
-                    resVal = tranBL.SaveDeliveryNoteByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.DeliveryNote);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.DeliveryNote);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.DeliveryNote:
+        //            resVal = tranBL.SaveDeliveryNoteByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.DeliveryNote);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.DeliveryNote);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseOrder:
-                    resVal = tranBL.SavePurchaseOrderByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseOrder);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseOrder);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseOrder:
+        //            resVal = tranBL.SavePurchaseOrderByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseOrder);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseOrder);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseInvoice:
-                    resVal = tranBL.SavePurchaseInvoiceByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseInvoice);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseInvoice);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseInvoice:
+        //            resVal = tranBL.SavePurchaseInvoiceByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseInvoice);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseInvoice);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseReturn:
-                    resVal = tranBL.SavePurchaseReturnByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseReturn);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseReturn);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.PurchaseReturn:
+        //            resVal = tranBL.SavePurchaseReturnByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseReturn);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.PurchaseReturn);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.IndentForm:
-                    resVal = tranBL.SaveIndentByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.IndentForm);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.IndentForm);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.IndentForm:
+        //            resVal = tranBL.SaveIndentByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.IndentForm);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.IndentForm);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.SalesInvoice:
-                    resVal = tranBL.SaveSalesInvoiceByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesInvoice);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesInvoice);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.SalesInvoice:
+        //            resVal = tranBL.SaveSalesInvoiceByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesInvoice);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesInvoice);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.SalesDebitNote:
-                    resVal = tranBL.SaveSalesDebitNoteByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesDebitNote);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesDebitNote);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.SalesDebitNote:
+        //            resVal = tranBL.SaveSalesDebitNoteByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesDebitNote);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesDebitNote);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.SalesReturn:
-                    resVal = tranBL.SaveSalesReturnByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesReturn);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesReturn);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.SalesReturn:
+        //            resVal = tranBL.SaveSalesReturnByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesReturn);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.SalesReturn);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.StockJournal:
-                    resVal = tranBL.SaveGoodsReceiptByTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.StockJournal:
+        //            resVal = tranBL.SaveGoodsReceiptByTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
 
-                    resVal = tranBL.SaveGoodsIssueyTranId(tranId);
-                    if (resVal.IsSuccess)
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
-                    else
-                        resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
+        //            resVal = tranBL.SaveGoodsIssueyTranId(tranId);
+        //            if (resVal.IsSuccess)
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPiIdInv(tranId, 0, resVal.ResponseId, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
+        //            else
+        //                resVal = new PivotalOtherLib.Global.SAPConnection(hostName, dbName).updateAPIFailInv(tranId, resVal.ResponseMSG, Dynamic.BusinessEntity.Inventory.Transaction.TranTypes.StockJournal);
 
-                    break;
-                case Dynamic.BusinessEntity.Account.VoucherTypes.ProductionAditionalCost:
-                    resVal = tranBL.PushCustomer(tranId)[0];
-                    break;
-            }
+        //            break;
+        //        case Dynamic.BusinessEntity.Account.VoucherTypes.ProductionAditionalCost:
+        //            resVal = tranBL.PushCustomer(tranId)[0];
+        //            break;
+        //    }
 
-            return resVal;
-        }
+        //    return resVal;
+        //}
 
 
 
@@ -3502,32 +3502,32 @@ namespace PivotalERP.Areas.Setup.Controllers
             return View();
         }
         [HttpPost]
-        public JsonResult UpdatePwd(string oldPwd, string newPwd, int? rd)
-        {
-            ResponeValues resVal = new ResponeValues();
-            bool isStrong = Global.GlobalFunction.IsStrongPassword(newPwd);
+        //public JsonResult UpdatePwd(string oldPwd, string newPwd, int? rd)
+        //{
+        //    ResponeValues resVal = new ResponeValues();
+        //    bool isStrong = Global.GlobalFunction.IsStrongPassword(newPwd);
 
-            string uname = User.UserName.Trim().ToLower();
-            string pwd = newPwd.Trim().ToLower();
+        //    string uname = User.UserName.Trim().ToLower();
+        //    string pwd = newPwd.Trim().ToLower();
 
-            if (pwd.Contains(uname))
-            {
-                resVal.IsSuccess = false;
-                resVal.ResponseMSG = "Password must be different from your username.";
-            }
-            else
-            {
-                if (isStrong)
-                    resVal = new Dynamic.DataAccess.Security.UserDB(User.HostName, User.DBName).UpdatePassword(User.UserId, newPwd, oldPwd);
-                else
-                {
-                    resVal.IsSuccess = false;
-                    resVal.ResponseMSG = "VeryWeak Password";
-                }
-            }
+        //    if (pwd.Contains(uname))
+        //    {
+        //        resVal.IsSuccess = false;
+        //        resVal.ResponseMSG = "Password must be different from your username.";
+        //    }
+        //    else
+        //    {
+        //        if (isStrong)
+        //            resVal = new Dynamic.DataAccess.Security.UserDB(User.HostName, User.DBName).UpdatePassword(User.UserId, newPwd, oldPwd);
+        //        else
+        //        {
+        //            resVal.IsSuccess = false;
+        //            resVal.ResponseMSG = "VeryWeak Password";
+        //        }
+        //    }
 
-            return new JsonNetResult() { Data = resVal, TotalCount = resVal.IsSuccess ? 1 : 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
-        }
+        //    return new JsonNetResult() { Data = resVal, TotalCount = resVal.IsSuccess ? 1 : 0, IsSuccess = resVal.IsSuccess, ResponseMSG = resVal.ResponseMSG };
+        //}
 
         [PermissionsAttribute(Actions.View, (int)FormsEntity.PasswordReset, false)]
         public ActionResult ResetPassword()

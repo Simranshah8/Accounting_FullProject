@@ -3,24 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Dynamic.DataAccess.Global;
 
-namespace PivotalERP.BL
+namespace Dynamic.BusinessLogic.Inventory
 {
-
-	public class DeliveryThrough
+    public class DeliveryThrough
 	{
 
-		DA.DeliveryThroughDB db = null;
+		Dynamic.DataAccess.Inventory.DeliveryThroughDB db = null;
 
 		int _UserId = 0;
 
 		public DeliveryThrough(int UserId, string hostName, string dbName)
 		{
 			this._UserId = UserId;
-			db = new DA.DeliveryThroughDB(hostName, dbName);
+			db = new Dynamic.DataAccess.Inventory.DeliveryThroughDB(hostName, dbName);
 		}
-		public ResponeValues SaveFormData(BE.DeliveryThrough beData)
+		public ResponeValues SaveFormData(Dynamic.BusinessEntity.Inventory.DeliveryThrough beData)
 		{
 			bool isModify = beData.DeliveryThroughId > 0;
 			ResponeValues isValid = IsValidData(ref beData, isModify);
@@ -29,11 +27,11 @@ namespace PivotalERP.BL
 			else
 				return isValid;
 		}
-		public BE.DeliveryThroughCollections GetAllDeliveryThrough(int EntityId)
+		public Dynamic.BusinessEntity.Inventory.DeliveryThroughCollections GetAllDeliveryThrough(int EntityId)
 		{
 			return db.getAllDeliveryThrough(_UserId, EntityId);
 		}
-		public BE.DeliveryThrough GetDeliveryThroughById(int EntityId, int DeliveryThroughId)
+		public Dynamic.BusinessEntity.Inventory.DeliveryThrough GetDeliveryThroughById(int EntityId, int DeliveryThroughId)
 		{
 			return db.getDeliveryThroughById(_UserId, EntityId, DeliveryThroughId);
 		}
@@ -41,7 +39,7 @@ namespace PivotalERP.BL
 		{
 			return db.DeleteById(_UserId, EntityId, DeliveryThroughId);
 		}
-		public ResponeValues IsValidData(ref BE.DeliveryThrough beData, bool IsModify)
+		public ResponeValues IsValidData(ref Dynamic.BusinessEntity.Inventory.DeliveryThrough beData, bool IsModify)
 		{
 			ResponeValues resVal = new ResponeValues();
 			try
