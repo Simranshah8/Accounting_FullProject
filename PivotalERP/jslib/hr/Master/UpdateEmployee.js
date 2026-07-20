@@ -256,46 +256,55 @@
     }
 
     $scope.GetEmployeeForUpdate = function () {
-        $scope.UpdateEmployeeList = [];
-        var para = {
-            BranchId: $scope.newDet.BranchId || null,
-            CompanyRelationshipId: $scope.newDet.CompanyRelationshipId || null,
-            PageNumber: $scope.paginationOptions.pageNumber,
-            RowsOfPage: $scope.paginationOptions.pageSize,
-            SearchBy: $scope.searchData.UpdateEmployee
-        };
-
         $scope.loadingstatus = "running";
-        //showPleaseWait();
-        $http({
-            method: 'POST',
-            url: base_url + "HR/Master/GetEmployeeForUpdate",
-            dataType: "json",
-            data: JSON.stringify(para)
-        }).then(function (res) {
-            hidePleaseWait();
-            $scope.loadingstatus = "stop";
-            if (res.data.IsSuccess && res.data.Data) {
-                $scope.UpdateEmployeeList = res.data.Data;
-                $scope.paginationOptions.TotalRows = res.data.TotalCount;
-                $timeout(function () {
-                    angular.forEach($scope.UpdateEmployeeList, function (st) {
-                        if (st.DateOfJoining)
-                            st.DateOfJoining_TMP = new Date(st.DateOfJoining);
-                        if (st.DOB_AD)
-                            st.DOB_AD_TMP = new Date(st.DOB_AD);
-                        if (st.LeaveApplicableDate)
-                            st.LeaveApplicableDate_TMP = new Date(st.LeaveApplicableDate);
-                    });
-                });
-            } else {
-                Swal.fire(res.data.ResponseMSG);
-            }
+        showPleaseWait();
+        $timeout(function () {
+            var para = {
+                BranchId: $scope.newDet.BranchId || null,
+                CompanyRelationId: $scope.newDet.CompanyRelationshipId || null,
+                PageNumber: $scope.paginationOptions.pageNumber,
+                RowsOfPage: $scope.paginationOptions.pageSize,
+                SearchBy: $scope.searchData.UpdateEmployee
+            };
 
-        }, function (reason) {
-            Swal.fire('Failed' + reason);
+            $scope.UpdateEmployeeList = [];
+            $http({
+                method: 'POST',
+                url: base_url + "HR/Master/GetEmployeeForUpdate",
+                dataType: "json",
+                data: JSON.stringify(para)
+            }).then(function (res) {
+                if (res.data.IsSuccess && res.data.Data) {
+                    var beDet = res.data;
+                    $scope.UpdateEmployeeList = beDet.Data;
+                    $scope.paginationOptions.TotalRows = beDet.TotalCount;
+                    hidePleaseWait();
+                    $scope.loadingstatus = "stop";
+                    $scope.ConvertDate($scope.UpdateEmployeeList);
+                } else {
+                    Swal.fire(res.data.ResponseMSG);
+                }
+                hidePleaseWait();
+                $scope.loadingstatus = "stop";
+            }, function (reason) {
+                Swal.fire('Failed' + reason);
+            });
+        }, 200);
+    }
+
+    $scope.ConvertDate = function (dataColl) {
+        $scope.loadingstatus = "running";
+        showPleaseWait();
+        angular.forEach(dataColl, function (st) {
+            if (st.DOB_AD)
+                st.DOB_AD_TMP = new Date(st.DOB_AD);
+            if (st.DateOfJoining)
+                st.DateOfJoining_TMP = new Date(st.DateOfJoining);
+            if (st.LeaveApplicableDate)
+                st.LeaveApplicableDate_TMP = new Date(st.LeaveApplicableDate);
         });
-
+        hidePleaseWait();
+        $scope.loadingstatus = "stop";
     }
    
     $scope.SaveUpdateEmployeeWise = function (employee) {
@@ -405,24 +414,37 @@
                         employee.DOB_AD = null;
                 });
 
-                var para = {
-                    employeeColl: $scope.UpdateEmployeeList
-                };
+         
+
                 $http({
                     method: 'POST',
                     url: base_url + "HR/Master/UpdateEmployeeData",
-                    dataType: "json",
-                    data: angular.toJson(para)
+                    headers: { 'Content-Type': undefined },
+
+                    transformRequest: function (data) {
+
+                        var formData = new FormData();
+                        formData.append("jsonData", angular.toJson($scope.UpdateEmployeeList));
+
+                        return formData;
+                    },
+                    data: { jsonData: $scope.newUpdateStudent }
                 }).then(function (res) {
-                    hidePleaseWait();
+
                     $scope.loadingstatus = "stop";
+                    hidePleaseWait();
                     if (res.data.IsSuccess)
                         Swal.fire('Success', res.data.ResponseMSG, 'success');
                     else
                         Swal.fire('Failed', res.data.ResponseMSG, 'error');
-                }, function (reason) {
-                    Swal.fire('Failed' + reason);
+
+                }, function (errormessage) {
+                    hidePleaseWait();
+                    $scope.loadingstatus = "stop";
+                    Swal.fire('Failed' + errormessage);
+
                 });
+                 
             }
         });
     };

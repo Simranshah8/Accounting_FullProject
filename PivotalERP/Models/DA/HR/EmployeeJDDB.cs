@@ -254,6 +254,7 @@ namespace Dynamic.DA.HR
 				cmd.Parameters.AddWithValue("@Responsibility", beData.Responsibility);
 				cmd.Parameters.AddWithValue("@IsActive", beData.IsActive);
 				cmd.Parameters.AddWithValue("@UserId", UserId);
+				cmd.Parameters.AddWithValue("@ResponsibilityId", beData.ResponsibilityId);
 				cmd.CommandType = System.Data.CommandType.StoredProcedure;
 				cmd.CommandText = "usp_AddEmpJDResponsibilityDetails";
 				cmd.ExecuteNonQuery();
@@ -334,6 +335,7 @@ namespace Dynamic.DA.HR
 					if (!(reader[0] is DBNull)) det4.EmpJDId = reader.GetInt32(0);
 					if (!(reader[1] is DBNull)) det4.Responsibility = reader.GetString(1);
 					if (!(reader[2] is DBNull)) det4.IsActive = reader.GetBoolean(2);
+					if (!(reader[3] is DBNull)) det4.ResponsibilityId = reader.GetInt32(3);
 					beData.EmpJDResponsibilityColl.Add(det4);
 				}
 				reader.Close();

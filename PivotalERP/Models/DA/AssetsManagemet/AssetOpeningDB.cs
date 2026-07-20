@@ -7,7 +7,6 @@ using Dynamic.DataAccess.Global;
 
 namespace Dynamic.DA.AssetManagement
 {
-
 	internal class AssetOpeningDB
 	{
 		DataAccessLayer1 dal = null;

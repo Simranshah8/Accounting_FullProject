@@ -104,7 +104,8 @@ namespace Dynamic.BE.HR
 
 		public int EmpJDId { get; set; }
 		public string Responsibility { get; set; } = "";
-		public bool ? IsActive { get; set; } 
+		public bool? IsActive { get; set; }
+		public int ResponsibilityId { get; set; }
 	}
 
 	public class EmpJDResponsibilityCollections : System.Collections.Generic.List<EmpJDResponsibility>

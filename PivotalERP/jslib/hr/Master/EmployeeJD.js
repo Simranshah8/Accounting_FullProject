@@ -7,8 +7,8 @@ app.controller("EmployeeJDController", function ($scope, $window, $filter, $http
 
 	$scope.onBtExportCSV = function () {
 		var params = {
-			fileName: 'container.csv',
-			sheetName: 'container'
+			fileName: 'EmployeeJD.csv',
+			sheetName: 'Employee Job Description'
 		};
 		$scope.gridOptions.api.exportDataAsCsv(params);
 	}
@@ -213,7 +213,7 @@ app.controller("EmployeeJDController", function ($scope, $window, $filter, $http
 			$scope.loadingstatus = "stop";
 			hidePleaseWait();
 			if (res.data.IsSuccess && res.data.Data) {
-				down_file(base_url + "//" + res.data.Data.ResponseId, "VendorWiseAsset.xlsx");
+				down_file(base_url + "//" + res.data.Data.ResponseId, "EmployeeJD.xlsx");
 			}
 		}, function (errormessage) {
 			hidePleaseWait();
@@ -377,7 +377,6 @@ app.controller("EmployeeJDController", function ($scope, $window, $filter, $http
 			}
 		}
 	};
-
 
 	$scope.delResponsibility = function (index) {
 		if ($scope.newEmployeeJD.EmpJDResponsibilityColl) {
